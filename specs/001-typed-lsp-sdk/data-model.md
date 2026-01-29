@@ -14,7 +14,7 @@ This SDK's data model centers around LSP protocol messages, connection lifecycle
 
 ### 1. Message (Union Type)
 
-Base JSON-RPC 2.0 message types as defined by vscode-jsonrpc.
+Base JSON-RPC 2.0 message types following MCP SDK patterns with custom implementation.
 
 **Properties**:
 - `jsonrpc`: "2.0" (literal)
@@ -83,7 +83,7 @@ interface CancellationToken {
 ```
 
 **Source**:
-- Provided by vscode-jsonrpc's CancellationTokenSource
+- Implemented following MCP SDK patterns (custom CancellationTokenSource)
 - Passed to all request handlers
 
 **Validation**: N/A (behavior interface)
@@ -120,7 +120,7 @@ Main server class managing connection, capabilities, and request routing.
 **Properties**:
 ```typescript
 class LSPServer {
-  private connection: Connection;              // vscode-jsonrpc connection
+  private connection: Connection;              // Custom JSON-RPC connection (MCP SDK pattern)
   private transport: Transport;                // Pluggable transport
   private capabilities: ServerCapabilities;    // Advertised capabilities
   private handlers: Map<string, Handler>;      // Request handlers

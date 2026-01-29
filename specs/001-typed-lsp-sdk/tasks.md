@@ -36,25 +36,25 @@
 
 ### JSON-RPC 2.0 Implementation (Custom, MCP SDK Pattern)
 
-- [ ] T010 [P] Define JSON-RPC 2.0 message types in packages/core/src/jsonrpc/messages.ts (Message, RequestMessage, ResponseMessage, NotificationMessage)
-- [ ] T011 [P] Implement JSON-RPC message framing (Content-Length headers) in packages/core/src/jsonrpc/framing.ts
-- [ ] T012 Implement MessageReader class for parsing JSON-RPC messages with framing in packages/core/src/jsonrpc/reader.ts
-- [ ] T013 Implement MessageWriter class for serializing JSON-RPC messages with framing in packages/core/src/jsonrpc/writer.ts
-- [ ] T014 [P] Create Zod schemas for JSON-RPC message validation in packages/core/src/jsonrpc/schemas.ts
+- [ ] T010 [P] Define JSON-RPC 2.0 message types in packages/core/src/jsonrpc/messages.ts (Message, RequestMessage, ResponseMessage, NotificationMessage) - Reference: @modelcontextprotocol/sdk/types.js Message types
+- [ ] T011 [P] Implement JSON-RPC message framing (Content-Length headers) in packages/core/src/jsonrpc/framing.ts - Pattern: MCP SDK's parseMessage with header parsing
+- [ ] T012 Implement MessageReader class for parsing JSON-RPC messages with framing in packages/core/src/jsonrpc/reader.ts - Pattern: MCP SDK's JSONRPCMessage handling
+- [ ] T013 Implement MessageWriter class for serializing JSON-RPC messages with framing in packages/core/src/jsonrpc/writer.ts - Pattern: MCP SDK's message serialization
+- [ ] T014 [P] Create Zod schemas for JSON-RPC message validation in packages/core/src/jsonrpc/schemas.ts - Pattern: MCP SDK's z.discriminatedUnion for message types
 
 ### Transport Layer
 
 - [ ] T015 Define Transport interface in packages/core/src/transport/transport.ts (send, onMessage, onError, close, isConnected)
 - [ ] T016 Implement StdioTransport in packages/core/src/transport/stdio.ts (reads from stdin, writes to stdout)
 - [ ] T017 Add Disposable interface and DisposableStore utility in packages/core/src/utils/disposable.ts
-- [ ] T018 [P] Implement connection lifecycle event emitter in packages/core/src/transport/events.ts
+- [ ] T018 [P] Implement connection lifecycle event emitter in packages/core/src/transport/events.ts (Events: 'connect', 'disconnect', 'error', 'message')
 
 ### Protocol Types Re-export
 
-- [ ] T019 [P] Create hierarchical namespace structure (LSPRequest.*, LSPNotification.*) in packages/core/src/protocol/namespaces.ts
-- [ ] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts
-- [ ] T021 [P] Define InferRequestParams, InferRequestResult, InferNotificationParams type utilities in packages/core/src/protocol/infer.ts
-- [ ] T022 [P] Generate Zod schemas for LSP types (Position, Range, Location, etc.) in packages/core/src/protocol/schemas.ts
+- [ ] T019 [P] Create hierarchical namespace structure (LSPRequest.*, LSPNotification.*) in packages/core/src/protocol/namespaces.ts - Use type-only imports: import type { HoverParams, Hover } from 'vscode-languageserver-protocol'
+- [ ] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts - Pattern: export type { Position, Range, Location, ... } from 'vscode-languageserver-protocol'
+- [ ] T021 [P] Define InferRequestParams, InferRequestResult, InferNotificationParams type utilities in packages/core/src/protocol/infer.ts - Use conditional types to extract types from namespace structure
+- [ ] T022 [P] Generate Zod schemas for LSP types (Position, Range, Location, etc.) in packages/core/src/protocol/schemas.ts - Runtime validators matching TypeScript types from vscode-languageserver-protocol
 
 ### Utilities
 
@@ -255,6 +255,9 @@
 - [ ] T118 [P] Setup GitHub Actions workflow for integration tests in .github/workflows/integration.yml
 - [ ] T119 [P] Setup GitHub Actions workflow for bundle size checks (size-limit) in .github/workflows/size.yml
 - [ ] T120 Add test coverage reporting with minimum 80% threshold
+- [ ] T121 [P] Create performance benchmark suite for load testing (SC-005: 1000 concurrent requests, <100ms p95 latency) in packages/core/tests/benchmark/load.bench.ts
+- [ ] T122 [P] Conduct API similarity audit against MCP SDK patterns (SC-006: document ergonomic differences in docs/MCP_SDK_COMPARISON.md, ensure <10 conceptual differences)
+- [ ] T123 [P] Plan user testing session with 3-5 developers (SC-007: setup test project, define tasks, collect feedback on quickstart experience)
 
 ---
 
@@ -311,15 +314,15 @@ Phase 7 (Polish)
 
 ## Task Summary
 
-- **Total Tasks**: 120
+- **Total Tasks**: 123
 - **Setup Tasks**: 9 (T001-T009)
 - **Foundational Tasks**: 20 (T010-T029)
 - **US1 Tasks**: 22 (T030-T051) - MVP
 - **US2 Tasks**: 22 (T052-T073)
 - **US3 Tasks**: 14 (T074-T087)
 - **US4 Tasks**: 12 (T088-T099)
-- **Polish Tasks**: 21 (T100-T120)
+- **Polish Tasks**: 24 (T100-T123)
 
-**Parallelizable Tasks**: 68 tasks marked `[P]` (56%)
+**Parallelizable Tasks**: 71 tasks marked `[P]` (58%)
 
 **Suggested MVP**: Phase 1-3 (51 tasks) delivers working LSP server SDK

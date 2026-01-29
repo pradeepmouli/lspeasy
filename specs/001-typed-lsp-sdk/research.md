@@ -172,8 +172,8 @@
 
 | Topic | Decision | Impact |
 |-------|----------|--------|
-| JSON-RPC Implementation | Use vscode-jsonrpc v8.x | Add dependency, proven reliability |
-| LSP Type Definitions | Use vscode-languageserver-protocol v3.17.x | Add dependency, authoritative types |
+| JSON-RPC Implementation | Custom JSON-RPC 2.0 (MCP SDK pattern) | Zero runtime deps, full control, matches MCP ergonomics |
+| LSP Type Definitions | Use vscode-languageserver-protocol v3.17.x (type-only) | DevDependency only, authoritative types, zero runtime cost |
 | Browser Support | Node.js only for v1.0, browser in v1.1+ | Focus MVP, design portable |
 | Performance Benchmarks | <1ms parse, <0.1ms dispatch, <100ms cancellation | CI-monitored, realistic targets |
 | Bundle Size Limits | Core <100KB, Server/Client <50KB (gzipped) | size-limit enforcement in CI |

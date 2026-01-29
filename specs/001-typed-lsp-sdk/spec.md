@@ -41,7 +41,7 @@ A developer wants to create a language server for their custom language by imple
 
 **Acceptance Scenarios**:
 
-1. **Given** a new TypeScript project, **When** developer imports `@lspy/server` and defines request handlers, **Then** they can start a server with stdio transport in under 20 lines of code
+1. **Given** a new TypeScript project, **When** developer imports `@lspy/server` and defines request handlers, **Then** they can start a server with stdio transport in <30 lines of code
 2. **Given** an LSP server implementation, **When** client sends initialize request, **Then** server responds with declared capabilities without manual JSON-RPC handling
 3. **Given** a server with registered handlers, **When** client sends textDocument/hover request, **Then** handler receives typed parameters and returns typed response
 
