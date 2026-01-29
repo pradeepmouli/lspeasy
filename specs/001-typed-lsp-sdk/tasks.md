@@ -16,15 +16,15 @@
 
 **Purpose**: Initialize monorepo structure and tooling before any implementation
 
-- [ ] T001 Create monorepo structure: packages/core/, packages/server/, packages/client/, examples/, e2e/, docs/
-- [ ] T002 Initialize package.json for @lspy/core with TypeScript 5.x, Vitest, oxlint, oxfmt dependencies
-- [ ] T003 [P] Initialize package.json for @lspy/server with workspace dependency on @lspy/core
-- [ ] T004 [P] Initialize package.json for @lspy/client with workspace dependency on @lspy/core
-- [ ] T005 Configure TypeScript with strict mode, composite project references for monorepo
-- [ ] T006 [P] Setup oxlint and oxfmt with .oxlintrc.json and .oxfmtrc.json (2 spaces, single quotes, semicolons)
-- [ ] T007 [P] Configure simple-git-hooks and lint-staged for pre-commit checks
-- [ ] T008 Add size-limit configuration for bundle size enforcement (<100KB core, <50KB server/client gzipped)
-- [ ] T009 Create root tsconfig.json and per-package tsconfig.json with composite references
+- [x] T001 Create monorepo structure: packages/core/, packages/server/, packages/client/, examples/, e2e/, docs/
+- [x] T002 Initialize package.json for @lspy/core with TypeScript 5.x, Vitest, oxlint, oxfmt dependencies
+- [x] T003 [P] Initialize package.json for @lspy/server with workspace dependency on @lspy/core
+- [x] T004 [P] Initialize package.json for @lspy/client with workspace dependency on @lspy/core
+- [x] T005 Configure TypeScript with strict mode, composite project references for monorepo
+- [x] T006 [P] Setup oxlint and oxfmt with .oxlintrc.json and .oxfmtrc.json (2 spaces, single quotes, semicolons)
+- [x] T007 [P] Configure simple-git-hooks and lint-staged for pre-commit checks
+- [x] T008 Add size-limit configuration for bundle size enforcement (<100KB core, <50KB server/client gzipped)
+- [x] T009 Create root tsconfig.json and per-package tsconfig.json with composite references
 
 ---
 
@@ -36,35 +36,35 @@
 
 ### JSON-RPC 2.0 Implementation (Custom, MCP SDK Pattern)
 
-- [ ] T010 [P] Define JSON-RPC 2.0 message types in packages/core/src/jsonrpc/messages.ts (Message, RequestMessage, ResponseMessage, NotificationMessage) - Reference: @modelcontextprotocol/sdk/types.js Message types
-- [ ] T011 [P] Implement JSON-RPC message framing (Content-Length headers) in packages/core/src/jsonrpc/framing.ts - Pattern: MCP SDK's parseMessage with header parsing
-- [ ] T012 Implement MessageReader class for parsing JSON-RPC messages with framing in packages/core/src/jsonrpc/reader.ts - Pattern: MCP SDK's JSONRPCMessage handling
-- [ ] T013 Implement MessageWriter class for serializing JSON-RPC messages with framing in packages/core/src/jsonrpc/writer.ts - Pattern: MCP SDK's message serialization
-- [ ] T014 [P] Create Zod schemas for JSON-RPC message validation in packages/core/src/jsonrpc/schemas.ts - Pattern: MCP SDK's z.discriminatedUnion for message types
+- [x] T010 [P] Define JSON-RPC 2.0 message types in packages/core/src/jsonrpc/messages.ts (Message, RequestMessage, ResponseMessage, NotificationMessage) - Reference: @modelcontextprotocol/sdk/types.js Message types
+- [x] T011 [P] Implement JSON-RPC message framing (Content-Length headers) in packages/core/src/jsonrpc/framing.ts - Pattern: MCP SDK's parseMessage with header parsing
+- [x] T012 Implement MessageReader class for parsing JSON-RPC messages with framing in packages/core/src/jsonrpc/reader.ts - Pattern: MCP SDK's JSONRPCMessage handling
+- [x] T013 Implement MessageWriter class for serializing JSON-RPC messages with framing in packages/core/src/jsonrpc/writer.ts - Pattern: MCP SDK's message serialization
+- [x] T014 [P] Create Zod schemas for JSON-RPC message validation in packages/core/src/jsonrpc/schemas.ts - Pattern: MCP SDK's z.discriminatedUnion for message types
 
 ### Transport Layer
 
-- [ ] T015 Define Transport interface in packages/core/src/transport/transport.ts (send, onMessage, onError, close, isConnected)
-- [ ] T016 Implement StdioTransport in packages/core/src/transport/stdio.ts (reads from stdin, writes to stdout)
-- [ ] T017 Add Disposable interface and DisposableStore utility in packages/core/src/utils/disposable.ts
-- [ ] T018 [P] Implement connection lifecycle event emitter in packages/core/src/transport/events.ts (Events: 'connect', 'disconnect', 'error', 'message')
+- [x] T015 Define Transport interface in packages/core/src/transport/transport.ts (send, onMessage, onError, close, isConnected)
+- [x] T016 Implement StdioTransport in packages/core/src/transport/stdio.ts (reads from stdin, writes to stdout)
+- [x] T017 Add Disposable interface and DisposableStore utility in packages/core/src/utils/disposable.ts
+- [x] T018 [P] Implement connection lifecycle event emitter in packages/core/src/transport/events.ts (Events: 'connect', 'disconnect', 'error', 'message')
 
 ### Protocol Types Re-export
 
 - [ ] T019 [P] Create hierarchical namespace structure (LSPRequest.*, LSPNotification.*) in packages/core/src/protocol/namespaces.ts - Use type-only imports: import type { HoverParams, Hover } from 'vscode-languageserver-protocol'
-- [ ] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts - Pattern: export type { Position, Range, Location, ... } from 'vscode-languageserver-protocol'
+- [x] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts - Pattern: export type { Position, Range, Location, ... } from 'vscode-languageserver-protocol'
 - [ ] T021 [P] Define InferRequestParams, InferRequestResult, InferNotificationParams type utilities in packages/core/src/protocol/infer.ts - Use conditional types to extract types from namespace structure
 - [ ] T022 [P] Generate Zod schemas for LSP types (Position, Range, Location, etc.) in packages/core/src/protocol/schemas.ts - Runtime validators matching TypeScript types from vscode-languageserver-protocol
 
 ### Utilities
 
-- [ ] T023 [P] Implement CancellationToken and CancellationTokenSource in packages/core/src/utils/cancellation.ts
-- [ ] T024 [P] Create Logger interface and ConsoleLogger implementation (MCP SDK pattern) in packages/core/src/utils/logger.ts
-- [ ] T025 [P] Implement error code constants (LSP error codes: -32002, -32602, -32700, etc.) in packages/core/src/utils/errors.ts
+- [x] T023 [P] Implement CancellationToken and CancellationTokenSource in packages/core/src/utils/cancellation.ts
+- [x] T024 [P] Create Logger interface and ConsoleLogger implementation (MCP SDK pattern) in packages/core/src/utils/logger.ts
+- [x] T025 [P] Implement error code constants (LSP error codes: -32002, -32602, -32700, etc.) in packages/core/src/utils/errors.ts
 
 ### Core Package Export
 
-- [ ] T026 Create packages/core/src/index.ts exporting all public APIs (Transport, Message types, Protocol types, utilities)
+- [x] T026 Create packages/core/src/index.ts exporting all public APIs (Transport, Message types, Protocol types, utilities)
 - [ ] T027 Write unit tests for JSON-RPC message framing in packages/core/tests/unit/jsonrpc-framing.test.ts
 - [ ] T028 [P] Write unit tests for StdioTransport in packages/core/tests/unit/stdio-transport.test.ts
 - [ ] T029 [P] Write unit tests for CancellationToken in packages/core/tests/unit/cancellation.test.ts
