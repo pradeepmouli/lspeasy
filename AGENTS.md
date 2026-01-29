@@ -3,7 +3,8 @@
 This repository is designed for multi-agent collaboration (Copilot, Claude, Gemini, Codex). Use this guide to stay consistent when automating tasks.
 
 ## Project Metadata
-- Name: @company/ts-template
+- Name: lspy
+- Description: TypeScript SDK for building Language Server Protocol clients and servers
 - Language: TypeScript (pnpm workspaces)
 - Tooling: pnpm, oxlint, oxfmt, Vitest, simple-git-hooks, lint-staged
 

@@ -1,26 +1,26 @@
 {
-  "name": "@company/ts-template",
+  "name": "lspy",
   "version": "1.0.0",
   "private": true,
-  "description": "TypeScript monorepo template with pnpm, oxlint, oxfmt, and Vitest",
+  "description": "TypeScript SDK for building Language Server Protocol clients and servers",
   "keywords": [
-    "monorepo",
-    "oxfmt",
-    "oxlint",
-    "pnpm",
-    "template",
+    "lsp",
+    "language-server-protocol",
     "typescript",
-    "vitest"
+    "sdk",
+    "language-server",
+    "lsp-client",
+    "lsp-server"
   ],
-  "homepage": "https://github.com/your-org/ts-template#readme",
+  "homepage": "https://github.com/pradeepmouli/lspy#readme",
   "bugs": {
-    "url": "https://github.com/your-org/ts-template/issues"
+    "url": "https://github.com/pradeepmouli/lspy/issues"
   },
   "license": "MIT",
-  "author": "Your Name <your.email@example.com>",
+  "author": "Pradeep Mouli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/ts-template.git"
+    "url": "https://github.com/pradeepmouli/lspy.git"
   },
   "workspaces": [
     "packages/*"
