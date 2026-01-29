@@ -6,7 +6,6 @@
 import { EventEmitter } from 'node:events';
 import type { Readable } from 'node:stream';
 import { parseMessage } from './framing.js';
-import type { Message } from './messages.js';
 
 /**
  * MessageReader reads JSON-RPC messages from a stream

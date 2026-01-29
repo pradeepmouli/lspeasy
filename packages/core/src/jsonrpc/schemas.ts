@@ -57,7 +57,7 @@ export const errorResponseMessageSchema = baseMessageSchema.extend({
 /**
  * Schema for JSON-RPC 2.0 Response Message (success or error)
  */
-export const responseMessageSchema = z.discriminatedUnion('id', [
+export const responseMessageSchema = z.union([
   successResponseMessageSchema,
   errorResponseMessageSchema
 ]);

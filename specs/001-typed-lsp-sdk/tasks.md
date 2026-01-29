@@ -81,34 +81,34 @@
 
 ### Implementation for US1
 
-- [ ] T030 [P] [US1] Create LSPServer class skeleton in packages/server/src/server.ts with constructor(options: ServerOptions)
-- [ ] T031 [P] [US1] Define ServerOptions interface (name, version, logger, logLevel, onValidationError) in packages/server/src/types.ts
-- [ ] T032 [P] [US1] Define RequestHandler<Params, Result> and NotificationHandler<Params> types in packages/server/src/types.ts
-- [ ] T033 [US1] Implement handler registration: onRequest<M extends LSPRequestMethod>(method, handler) in packages/server/src/server.ts
-- [ ] T034 [US1] Implement handler registration: onNotification<M extends LSPNotificationMethod>(method, handler) in packages/server/src/server.ts
-- [ ] T035 [US1] Implement setCapabilities(capabilities: ServerCapabilities) method in packages/server/src/server.ts
-- [ ] T036 [US1] Implement listen(transport: Transport) to start server and accept connections in packages/server/src/server.ts
-- [ ] T037 [US1] Create message dispatcher: route incoming requests to registered handlers in packages/server/src/dispatcher.ts
-- [ ] T038 [US1] Implement automatic initialize/initialized handshake handling in packages/server/src/lifecycle.ts
-- [ ] T039 [US1] Add request parameter validation via Zod before calling handlers in packages/server/src/validation.ts
-- [ ] T040 [US1] Implement error response generation (LSP error codes, validation errors) in packages/server/src/errors.ts
-- [ ] T041 [US1] Add cancellation token support: handle $/cancelRequest notifications in packages/server/src/cancellation.ts
-- [ ] T042 [US1] Implement shutdown() and close() methods for graceful/forced shutdown in packages/server/src/server.ts
-- [ ] T043 [US1] Create packages/server/src/index.ts exporting LSPServer, ServerOptions, RequestHandler, NotificationHandler
+- [x] T030 [P] [US1] Create LSPServer class skeleton in packages/server/src/server.ts with constructor(options: ServerOptions)
+- [x] T031 [P] [US1] Define ServerOptions interface (name, version, logger, logLevel, onValidationError) in packages/server/src/types.ts
+- [x] T032 [P] [US1] Define RequestHandler<Params, Result> and NotificationHandler<Params> types in packages/server/src/types.ts
+- [x] T033 [US1] Implement handler registration: onRequest<M extends LSPRequestMethod>(method, handler) in packages/server/src/server.ts
+- [x] T034 [US1] Implement handler registration: onNotification<M extends LSPNotificationMethod>(method, handler) in packages/server/src/server.ts
+- [x] T035 [US1] Implement setCapabilities(capabilities: ServerCapabilities) method in packages/server/src/server.ts
+- [x] T036 [US1] Implement listen(transport: Transport) to start server and accept connections in packages/server/src/server.ts
+- [x] T037 [US1] Create message dispatcher: route incoming requests to registered handlers in packages/server/src/dispatcher.ts
+- [x] T038 [US1] Implement automatic initialize/initialized handshake handling in packages/server/src/lifecycle.ts
+- [x] T039 [US1] Add request parameter validation via Zod before calling handlers in packages/server/src/validation.ts
+- [x] T040 [US1] Implement error response generation (LSP error codes, validation errors) in packages/server/src/errors.ts
+- [x] T041 [US1] Add cancellation token support: handle $/cancelRequest notifications in packages/server/src/cancellation.ts
+- [x] T042 [US1] Implement shutdown() and close() methods for graceful/forced shutdown in packages/server/src/server.ts
+- [x] T043 [US1] Create packages/server/src/index.ts exporting LSPServer, ServerOptions, RequestHandler, NotificationHandler
 
 ### Examples for US1
 
-- [ ] T044 [P] [US1] Create minimal hover server example (<30 lines) in examples/server/minimal-server.ts
-- [ ] T045 [P] [US1] Create hover + completion server example in examples/server/hover-server.ts
+- [x] T044 [P] [US1] Create minimal hover server example (<30 lines) in examples/server/minimal-server.ts
+- [x] T045 [P] [US1] Create hover + completion server example in examples/server/hover-server.ts
 
 ### Tests for US1
 
-- [ ] T046 [P] [US1] Unit test: LSPServer constructor and setCapabilities in packages/server/tests/unit/server.test.ts
-- [ ] T047 [P] [US1] Unit test: Handler registration (onRequest, onNotification) in packages/server/tests/unit/handlers.test.ts
-- [ ] T048 [P] [US1] Unit test: Message dispatcher routing in packages/server/tests/unit/dispatcher.test.ts
-- [ ] T049 [P] [US1] Integration test: Initialize handshake with test client in packages/server/tests/integration/initialize.test.ts
-- [ ] T050 [P] [US1] Integration test: textDocument/hover request/response in packages/server/tests/integration/hover.test.ts
-- [ ] T051 [US1] Integration test: Parameter validation rejection (malformed request) in packages/server/tests/integration/validation.test.ts
+- [x] T046 [P] [US1] Unit test: LSPServer constructor and setCapabilities in packages/server/tests/unit/server.test.ts
+- [x] T047 [P] [US1] Unit test: Handler registration (onRequest, onNotification) in packages/server/tests/unit/handlers.test.ts
+- [x] T048 [P] [US1] Unit test: Message dispatcher routing in packages/server/tests/unit/dispatcher.test.ts
+- [x] T049 [P] [US1] Integration test: Initialize handshake with test client in packages/server/tests/integration/initialize.test.ts
+- [x] T050 [P] [US1] Integration test: textDocument/hover request/response in packages/server/tests/integration/hover.test.ts
+- [x] T051 [US1] Integration test: Parameter validation rejection (malformed request) in packages/server/tests/integration/validation.test.ts
 
 **Checkpoint**: User Story 1 complete - Developers can build working LSP servers with typed handlers
 
