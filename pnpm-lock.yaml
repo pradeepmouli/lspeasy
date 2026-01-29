@@ -54,6 +54,50 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.0.10)(@vitest/ui@4.0.18)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
 
+  packages/client:
+    dependencies:
+      '@lspy/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vscode-languageserver-protocol:
+        specifier: ^3.17.5
+        version: 3.17.5
+      zod:
+        specifier: ^3.25.2
+        version: 3.25.76
+
+  packages/core:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vscode-languageserver-protocol:
+        specifier: ^3.17.5
+        version: 3.17.5
+      zod:
+        specifier: ^3.25.2
+        version: 3.25.76
+
+  packages/server:
+    dependencies:
+      '@lspy/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vscode-languageserver-protocol:
+        specifier: ^3.17.5
+        version: 3.17.5
+      zod:
+        specifier: ^3.25.2
+        version: 3.25.76
+
 packages:
 
   '@babel/helper-string-parser@7.27.1':
@@ -1337,6 +1381,16 @@ packages:
       jsdom:
         optional: true
 
+  vscode-jsonrpc@8.2.0:
+    resolution: {integrity: sha512-C+r0eKJUIfiDIfwJhria30+TYWPtuHJXHtI7J0YlOmKAo7ogxP20T0zxB7HZQIFhIyvoBPwWskjxrvAtfjyZfA==}
+    engines: {node: '>=14.0.0'}
+
+  vscode-languageserver-protocol@3.17.5:
+    resolution: {integrity: sha512-mb1bvRJN8SVznADSGWM9u/b07H7Ecg0I3OgXDuLdn307rl/J3A9YD6/eYOssqhecL27hK1IPZAsaqh00i/Jljg==}
+
+  vscode-languageserver-types@3.17.5:
+    resolution: {integrity: sha512-Ld1VelNuX9pdF39h2Hgaeb5hEZM2Z3jUrrMgWQAu82jMtZp7p3vJT3BzToKtZI7NgQssZje5o0zryOrhQvzQAg==}
+
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
     engines: {node: '>= 8'}
@@ -1355,6 +1409,9 @@ packages:
     resolution: {integrity: sha512-mplynKqc1C2hTVYxd0PU2xQAc22TI1vShAYGksCCfxbn/dFwnHTNi1bvYsBTkhdUNtGIf5xNOg938rrSSYvS9A==}
     engines: {node: '>= 14.6'}
     hasBin: true
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
 
@@ -2527,6 +2584,15 @@ snapshots:
       - tsx
       - yaml
 
+  vscode-jsonrpc@8.2.0: {}
+
+  vscode-languageserver-protocol@3.17.5:
+    dependencies:
+      vscode-jsonrpc: 8.2.0
+      vscode-languageserver-types: 3.17.5
+
+  vscode-languageserver-types@3.17.5: {}
+
   which@2.0.2:
     dependencies:
       isexe: 2.0.0
@@ -2543,3 +2609,5 @@ snapshots:
       strip-ansi: 7.1.2
 
   yaml@2.8.2: {}
+
+  zod@3.25.76: {}

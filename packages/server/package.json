@@ -1,0 +1,55 @@
+{
+  "name": "@lspy/server",
+  "version": "1.0.0",
+  "description": "Build LSP servers with simple, typed API",
+  "keywords": [
+    "lsp",
+    "language-server-protocol",
+    "lsp-server",
+    "language-server"
+  ],
+  "homepage": "https://github.com/pradeepmouli/lspy#readme",
+  "bugs": {
+    "url": "https://github.com/pradeepmouli/lspy/issues"
+  },
+  "license": "MIT",
+  "author": "Pradeep Mouli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeepmouli/lspy.git",
+    "directory": "packages/server"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "dev": "tsc --build --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lspy/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vscode-languageserver-protocol": "^3.17.5",
+    "zod": "^3.25.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
