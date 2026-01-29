@@ -23,7 +23,7 @@
 
 **Decision**:
 - **Implement custom JSON-RPC 2.0 following MCP SDK architecture**
-- **Rationale**: 
+- **Rationale**:
   - Aligns with project goal of "MCP SDK-like ergonomics"
   - Eliminates all runtime dependencies on vscode-* packages
   - Gives full control over transport layer for future browser support
@@ -58,7 +58,7 @@
 - **Use vscode-languageserver-protocol v3.17.x as type-only dependency** (devDependency in `@lspy/core`)
 - **Re-export types** through our hierarchical namespace structure (LSPRequest.*, LSPNotification.*)
 - **No runtime imports** from vscode-languageserver-protocol - types only at compile time
-- **Rationale**: 
+- **Rationale**:
   - Microsoft's types are authoritative and well-tested
   - Type-only dependency has zero runtime cost
   - Our value-add is ergonomics (namespace structure, type inference) and runtime validation (Zod schemas)

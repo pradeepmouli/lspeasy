@@ -656,7 +656,7 @@ if (result.success) {
 **Type-only (devDependencies)**:
 - `vscode-languageserver-protocol`: ^3.17.0 (LSP type definitions only, no runtime usage)
 
-**Note**: 
+**Note**:
 - **JSON-RPC 2.0 implementation**: Custom implementation following MCP SDK architecture (no vscode-jsonrpc dependency)
 - **LSP types**: Re-exported from `vscode-languageserver-protocol` for spec compliance, but all runtime logic implemented independently
 - **Transport layer**: Custom implementations (StdioTransport, WebSocketTransport) following MCP SDK patterns

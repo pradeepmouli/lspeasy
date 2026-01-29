@@ -272,7 +272,7 @@ Ship with **User Story 1** complete:
 
 ### Incremental Delivery
 - **Phase 4**: Add client support (US2) → full bidirectional communication
-- **Phase 5**: Add WebSocket transport (US3) → production deployment flexibility  
+- **Phase 5**: Add WebSocket transport (US3) → production deployment flexibility
 - **Phase 6**: Add advanced features (US4) → feature parity with major language servers
 - **Phase 7**: Polish → production-ready SDK
 
