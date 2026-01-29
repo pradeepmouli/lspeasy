@@ -1,0 +1,169 @@
+name: Auto-approve Dependency Updates
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-approve:
+    name: Auto-approve trusted dependency updates
+    runs-on: ubuntu-latest
+    # Only run for dependency PRs from trusted bots
+    if: |
+      (github.actor == 'dependabot[bot]' ||
+       github.actor == 'renovate[bot]' ||
+       github.actor == 'github-actions[bot]') &&
+      contains(github.event.pull_request.labels.*.name, 'dependencies')
+
+    steps:
+      - name: Check PR details
+        id: pr-details
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const title = pr.title.toLowerCase();
+            const labels = pr.labels.map(l => l.name);
+
+            // Determine if this is a minor/patch update
+            const isMinorOrPatch =
+              labels.includes('minor') ||
+              labels.includes('patch') ||
+              title.includes('patch') ||
+              title.includes('minor') ||
+              (!title.includes('major') && !labels.includes('major'));
+
+            // Check if it's not a major update or security vulnerability
+            const isMajorUpdate = labels.includes('major') || title.includes('major');
+            const isSecurityUpdate = labels.includes('security');
+
+            core.setOutput('is_minor_or_patch', isMinorOrPatch);
+            core.setOutput('is_major_update', isMajorUpdate);
+            core.setOutput('is_security_update', isSecurityUpdate);
+
+            console.log(`PR Title: ${title}`);
+            console.log(`Labels: ${labels.join(', ')}`);
+            console.log(`Is minor/patch: ${isMinorOrPatch}`);
+            console.log(`Is major: ${isMajorUpdate}`);
+
+      - name: Auto-approve minor and patch updates
+        if: |
+          steps.pr-details.outputs.is_minor_or_patch == 'true' &&
+          steps.pr-details.outputs.is_major_update == 'false'
+        uses: hmarr/auto-approve-action@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          review-message: |
+            Auto-approving this minor/patch dependency update from a trusted bot.
+
+            Please ensure CI passes before merging.
+
+      - name: Comment on major updates
+        if: steps.pr-details.outputs.is_major_update == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ **Major Update Detected**\n\n' +
+                    'This PR contains a major version update which may include breaking changes.\n\n' +
+                    'Please review the changelog and test thoroughly before merging.'
+            });
+
+      - name: Enable auto-merge for approved updates
+        if: |
+          steps.pr-details.outputs.is_minor_or_patch == 'true' &&
+          steps.pr-details.outputs.is_major_update == 'false' &&
+          steps.pr-details.outputs.is_security_update == 'false'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Enable auto-merge for this PR
+            await github.graphql(`
+              mutation($pullRequestId: ID!) {
+                enablePullRequestAutoMerge(input: {
+                  pullRequestId: $pullRequestId,
+                  mergeMethod: SQUASH
+                }) {
+                  pullRequest {
+                    autoMergeRequest {
+                      enabledAt
+                    }
+                  }
+                }
+              }
+            `, {
+              pullRequestId: context.payload.pull_request.node_id
+            });
+
+            console.log('Auto-merge enabled for this PR');
+
+  report:
+    name: Report dependency update
+    runs-on: ubuntu-latest
+    if: |
+      (github.actor == 'dependabot[bot]' ||
+       github.actor == 'renovate[bot]') &&
+      contains(github.event.pull_request.labels.*.name, 'dependencies')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Generate dependency diff
+        id: diff
+        run: |
+          git diff HEAD^1 HEAD -- package.json packages/*/package.json > deps.diff
+
+          if [ -s deps.diff ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment with dependency changes
+        if: steps.diff.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const diff = fs.readFileSync('deps.diff', 'utf8');
+
+            const comment = `## 📦 Dependency Changes
+
+            <details>
+            <summary>View dependency diff</summary>
+
+            \`\`\`diff
+            ${diff}
+            \`\`\`
+
+            </details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

@@ -1,0 +1,93 @@
+# Release Workflow with Changesets
+#
+# This workflow uses Changesets to automate versioning and publishing to npm.
+# It supports npm Trusted Publishers (OIDC) for secure, token-free publishing.
+#
+# How it works:
+# 1. When you push to main, Changesets creates a "Version Packages" PR
+# 2. When that PR is merged, packages are automatically published to npm
+# 3. GitHub releases are created automatically
+#
+# Setup Instructions for npm Trusted Publishers (OIDC):
+# 1. Go to https://www.npmjs.com/settings/{your-username}/packages/{package-name}/access
+# 2. Enable "Trusted Publishers" under Publishing Access
+# 3. Add GitHub Actions as a trusted publisher:
+#    - Provider: GitHub Actions
+#    - Repository: your-org/your-repo
+#    - Workflow: release.yml
+#    - Environment: (leave empty)
+#
+# With trusted publishers, no NPM_TOKEN secret is needed!
+# For token-based auth fallback, set NPM_TOKEN in repository secrets.
+
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Create releases and tags
+      pull-requests: write # Create version PRs
+      id-token: write # Required for trusted publishers (OIDC)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm changeset:version
+          publish: pnpm changeset:publish
+          commit: 'chore: version packages'
+          title: 'chore: version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NPM_TOKEN is optional when using trusted publishers
+          # If not using trusted publishers, set NPM_TOKEN in repository secrets
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: steps.changesets.outputs.published == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
+          release_name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
+          body: |
+            Release ${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
+
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+          draft: false
+          prerelease: ${{ contains(fromJson(steps.changesets.outputs.publishedPackages)[0].version, '-') }}

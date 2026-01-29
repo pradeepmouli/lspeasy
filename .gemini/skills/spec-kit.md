@@ -1,0 +1,1 @@
+../../.agent/skills/spec-kit.md

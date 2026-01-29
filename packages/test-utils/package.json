@@ -1,0 +1,42 @@
+{
+  "name": "@company/test-utils",
+  "version": "0.1.0",
+  "description": "Shared testing utilities for the monorepo",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./mocks": {
+      "types": "./dist/mocks.d.ts",
+      "default": "./dist/mocks.js"
+    },
+    "./fixtures": {
+      "types": "./dist/fixtures.d.ts",
+      "default": "./dist/fixtures.js"
+    }
+  },
+  "scripts": {
+    "build": "tsgo -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "type-check": "tsgo --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "peerDependencies": {
+    "vitest": "^4.0.0"
+  },
+  "keywords": [
+    "test",
+    "testing",
+    "utilities",
+    "vitest"
+  ],
+  "license": "MIT"
+}

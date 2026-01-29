@@ -1,0 +1,86 @@
+{
+  "name": "@company/ts-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TypeScript monorepo template with pnpm, oxlint, oxfmt, and Vitest",
+  "keywords": [
+    "monorepo",
+    "oxfmt",
+    "oxlint",
+    "pnpm",
+    "template",
+    "typescript",
+    "vitest"
+  ],
+  "homepage": "https://github.com/your-org/ts-template#readme",
+  "bugs": {
+    "url": "https://github.com/your-org/ts-template/issues"
+  },
+  "license": "MIT",
+  "author": "Your Name <your.email@example.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/ts-template.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "type-check": "pnpm -r run type-check",
+    "typecheck:watch": "pnpm -r --parallel run type-check -- --watch",
+    "clean": "pnpm -r run clean && rm -rf node_modules/.cache",
+    "clean:all": "pnpm -r exec rm -rf dist node_modules && rm -rf node_modules",
+    "fresh": "pnpm clean:all && pnpm install",
+    "dev": "pnpm -r --parallel run dev",
+    "audit": "pnpm audit --audit-level moderate",
+    "outdated": "pnpm outdated -r",
+    "update:deps": "pnpm update -r --latest",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "pnpm run build && changeset publish",
+    "prepare": "simple-git-hooks"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.8",
+    "@size-limit/preset-small-lib": "^12.0.0",
+    "@types/node": "^25.0.10",
+    "@typescript/native-preview": "7.0.0-dev.20260126.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/ui": "^4.0.18",
+    "lint-staged": "^16.2.7",
+    "oxfmt": "^0.27.0",
+    "oxlint": "^1.42.0",
+    "simple-git-hooks": "^2.13.1",
+    "size-limit": "^12.0.0",
+    "type-fest": "^5.4.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged && pnpm run type-check"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md}": [
+      "oxfmt . --no-error-on-unmatched-pattern"
+    ],
+    "*.{ts,tsx,js,jsx}": [
+      "oxlint --fix"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@10.27.0"
+}
