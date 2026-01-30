@@ -122,19 +122,19 @@
 
 ### Implementation for US2
 
-- [ ] T052 [P] [US2] Create LSPClient class skeleton in packages/client/src/client.ts with constructor(options: ClientOptions)
-- [ ] T053 [P] [US2] Define ClientOptions interface (name, version, capabilities, logger, logLevel, onValidationError) in packages/client/src/types.ts
-- [ ] T054 [US2] Implement connect(transport: Transport): Promise<InitializeResult> with automatic initialization in packages/client/src/client.ts
-- [ ] T055 [US2] Implement disconnect(): Promise<void> with shutdown + exit sequence in packages/client/src/client.ts
-- [ ] T056 [US2] Implement low-level sendRequest<M extends LSPRequestMethod>(method, params) in packages/client/src/client.ts
-- [ ] T057 [US2] Implement low-level sendNotification<M extends LSPNotificationMethod>(method, params) in packages/client/src/client.ts
-- [ ] T058 [US2] Implement sendCancellableRequest<M>(method, params) returning { promise, cancel } in packages/client/src/client.ts
-- [ ] T059 [P] [US2] Create high-level textDocument.* method builders (hover, completion, definition, references, documentSymbol) in packages/client/src/requests/text-document.ts
-- [ ] T060 [P] [US2] Create high-level workspace.* method builders (symbol, didChangeWorkspaceFolders) in packages/client/src/requests/workspace.ts
+- [x] T052 [P] [US2] Create LSPClient class skeleton in packages/client/src/client.ts with constructor(options: ClientOptions)
+- [x] T053 [P] [US2] Define ClientOptions interface (name, version, capabilities, logger, logLevel, onValidationError) in packages/client/src/types.ts
+- [x] T054 [US2] Implement connect(transport: Transport): Promise<InitializeResult> with automatic initialization in packages/client/src/client.ts
+- [x] T055 [US2] Implement disconnect(): Promise<void> with shutdown + exit sequence in packages/client/src/client.ts
+- [x] T056 [US2] Implement low-level sendRequest<M extends LSPRequestMethod>(method, params) in packages/client/src/client.ts
+- [x] T057 [US2] Implement low-level sendNotification<M extends LSPNotificationMethod>(method, params) in packages/client/src/client.ts
+- [x] T058 [US2] Implement sendCancellableRequest<M>(method, params) returning { promise, cancel } in packages/client/src/client.ts
+- [x] T059 [P] [US2] Create high-level textDocument.* method builders (hover, completion, definition, references, documentSymbol) in packages/client/src/requests/text-document.ts
+- [x] T060 [P] [US2] Create high-level workspace.* method builders (symbol, didChangeWorkspaceFolders) in packages/client/src/requests/workspace.ts
 - [ ] T061 [US2] Implement response validation via Zod schemas in packages/client/src/validation.ts
-- [ ] T062 [US2] Implement server-to-client request handling: onRequest<M>(method, handler) in packages/client/src/client.ts
-- [ ] T063 [US2] Add isConnected() method and connection state tracking in packages/client/src/client.ts
-- [ ] T064 [US2] Create packages/client/src/index.ts exporting LSPClient, ClientOptions, high-level methods
+- [x] T062 [US2] Implement server-to-client request handling: onRequest<M>(method, handler) in packages/client/src/client.ts
+- [x] T063 [US2] Add isConnected() method and connection state tracking in packages/client/src/client.ts
+- [x] T064 [US2] Create packages/client/src/index.ts exporting LSPClient, ClientOptions, high-level methods
 
 ### Examples for US2
 
