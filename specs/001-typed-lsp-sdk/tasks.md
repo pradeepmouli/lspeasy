@@ -196,24 +196,24 @@
 
 ### Implementation for US4
 
-- [ ] T088 [P] [US4] Add workspace folder support: WorkspaceFoldersChangeEvent types in packages/core/src/protocol/workspace.ts
-- [ ] T089 [P] [US4] Implement file watching types: DidChangeWatchedFilesParams in packages/core/src/protocol/watching.ts
-- [ ] T090 [P] [US4] Add progress reporting: WorkDoneProgress types (begin, report, end) in packages/core/src/protocol/progress.ts
-- [ ] T091 [P] [US4] Implement partial result streaming: PartialResultParams in packages/core/src/protocol/partial.ts
-- [ ] T092 [US4] Add server method createProgressToken() for progress reporting in packages/server/src/progress.ts
-- [ ] T093 [US4] Add client method onProgress(handler) for receiving progress in packages/client/src/progress.ts
-- [ ] T094 [P] [US4] Add capability-aware type filtering: MethodsForCapabilities<Caps> utility type in packages/core/src/protocol/capabilities.ts
+- [x] T088 [P] [US4] Add workspace folder support: WorkspaceFoldersChangeEvent types in packages/core/src/protocol/workspace.ts
+- [x] T089 [P] [US4] Implement file watching types: DidChangeWatchedFilesParams in packages/core/src/protocol/watching.ts
+- [x] T090 [P] [US4] Add progress reporting: WorkDoneProgress types (begin, report, end) in packages/core/src/protocol/progress.ts
+- [x] T091 [P] [US4] Implement partial result streaming: PartialResultParams in packages/core/src/protocol/partial.ts
+- [x] T092 [US4] Add server method createProgressToken() for progress reporting in packages/server/src/progress.ts
+- [x] T093 [US4] Add client method onProgress(handler) for receiving progress in packages/client/src/progress.ts
+- [x] T094 [P] [US4] Add capability-aware type filtering: MethodsForCapabilities<Caps> utility type in packages/core/src/protocol/capabilities.ts
 
 ### Examples for US4
 
-- [ ] T095 [P] [US4] Create advanced server example with workspace folders + progress in examples/server/advanced-server.ts
-- [ ] T096 [P] [US4] Create client example handling progress notifications in examples/client/progress-client.ts
+- [x] T095 [P] [US4] Create advanced server example with workspace folders + progress in examples/server/advanced-server.ts
+- [x] T096 [P] [US4] Create client example handling progress notifications in examples/client/progress-client.ts
 
 ### Tests for US4
 
-- [ ] T097 [P] [US4] Integration test: workspace/didChangeWorkspaceFolders notification in e2e/workspace-folders.spec.ts
-- [ ] T098 [P] [US4] Integration test: Progress reporting (begin → report → end) in e2e/progress-reporting.spec.ts
-- [ ] T099 [P] [US4] Integration test: Partial result streaming for large completion in e2e/partial-results.spec.ts
+- [x] T097 [P] [US4] Integration test: workspace/didChangeWorkspaceFolders notification in e2e/workspace-folders.spec.ts
+- [x] T098 [P] [US4] Integration test: Progress reporting (begin → report → end) in e2e/progress-reporting.spec.ts
+- [x] T099 [P] [US4] Integration test: Partial result streaming for large completion in e2e/partial-results.spec.ts
 
 **Checkpoint**: User Story 4 complete - Advanced LSP features supported
 

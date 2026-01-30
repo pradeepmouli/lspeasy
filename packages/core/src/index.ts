@@ -97,3 +97,79 @@ export {
   LSPSchemas,
   getSchemaForMethod
 } from './protocol/schemas.js';
+
+// Advanced protocol features
+export type {
+  WorkspaceFolder,
+  WorkspaceFoldersChangeEvent,
+  WorkspaceEdit,
+  ApplyWorkspaceEditParams,
+  ApplyWorkspaceEditResult,
+  DidChangeWorkspaceFoldersParams
+} from './protocol/workspace.js';
+export {
+  createWorkspaceFolder,
+  createWorkspaceFoldersChangeEvent,
+  FileChangeTypes as WorkspaceFileChangeTypes
+} from './protocol/workspace.js';
+
+export type {
+  DidChangeWatchedFilesParams,
+  FileEvent,
+  FileChangeType,
+  FileSystemWatcher,
+  WatchKind
+} from './protocol/watching.js';
+export {
+  FileChangeTypes,
+  WatchKinds,
+  createFileEvent,
+  createFileSystemWatcher,
+  createDidChangeWatchedFilesParams
+} from './protocol/watching.js';
+
+export type {
+  ProgressToken,
+  WorkDoneProgressBegin,
+  WorkDoneProgressReport,
+  WorkDoneProgressEnd,
+  WorkDoneProgressParams,
+  WorkDoneProgressOptions,
+  WorkDoneProgressCreateParams,
+  WorkDoneProgressValue
+} from './protocol/progress.js';
+export {
+  createProgressBegin,
+  createProgressReport,
+  createProgressEnd,
+  createProgressCreateParams
+} from './protocol/progress.js';
+
+export type { PartialResultParams } from './protocol/partial.js';
+export {
+  createPartialResultParams,
+  hasPartialResultToken,
+  getPartialResultToken
+} from './protocol/partial.js';
+
+export type {
+  ServerCapabilities,
+  ClientCapabilities,
+  MethodsForCapabilities,
+  CapabilityForMethod,
+  MethodToCapability
+} from './protocol/capabilities.js';
+export {
+  hasCapability,
+  getCapabilityForMethod,
+  supportsMethod,
+  supportsHover,
+  supportsCompletion,
+  supportsDefinition,
+  supportsReferences,
+  supportsDocumentSymbol,
+  supportsWorkspaceFolders,
+  supportsFileWatching,
+  supportsWorkDoneProgress,
+  TextDocumentSyncKinds
+} from './protocol/capabilities.js';
