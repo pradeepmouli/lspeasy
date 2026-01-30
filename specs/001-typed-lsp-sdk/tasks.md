@@ -242,9 +242,9 @@
 - [x] T108 [P] Write docs/ARCHITECTURE.md explaining package design, JSON-RPC implementation, transport layer
 - [x] T109 [P] Write docs/API.md with complete API reference for all three packages
 - [x] T110 [P] Update root README.md with quickstart, installation, examples
-- [ ] T111 [P] Update packages/core/README.md with Transport interface guide
-- [ ] T112 [P] Update packages/server/README.md with server building guide
-- [ ] T113 [P] Update packages/client/README.md with client connection guide
+- [X] T111 [P] Update packages/core/README.md with Transport interface guide
+- [X] T112 [P] Update packages/server/README.md with server building guide
+- [X] T113 [P] Update packages/client/README.md with client connection guide
 - [ ] T114 Add JSDoc comments to all public APIs (LSPServer, LSPClient, Transport)
 
 ### CI/CD & Quality
