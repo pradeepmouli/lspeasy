@@ -56,7 +56,6 @@ export class LSPClient {
   public readonly workspace: WorkspaceRequests;
 
   constructor(options: ClientOptions = {}) {
-    this.transport = undefined;
     this.connected = false;
     this.initialized = false;
     this.nextRequestId = 1;
@@ -75,8 +74,12 @@ export class LSPClient {
     };
 
     this.logger = this.options.logger;
-    this.capabilities = options.capabilities;
-    this.onValidationError = options.onValidationError;
+    if (options.capabilities) {
+      this.capabilities = options.capabilities;
+    }
+    if (options.onValidationError) {
+      this.onValidationError = options.onValidationError;
+    }
 
     // Initialize high-level methods
     this.textDocument = new TextDocumentRequests(this);
@@ -121,7 +124,9 @@ export class LSPClient {
       >('initialize', initializeParams);
 
       this.serverCapabilities = result.capabilities;
-      this.serverInfo = result.serverInfo;
+      if (result.serverInfo) {
+        this.serverInfo = result.serverInfo;
+      }
       this.initialized = true;
 
       // Send initialized notification
@@ -531,7 +536,7 @@ export class LSPClient {
 
     this.connected = false;
     this.initialized = false;
-    this.transport = undefined;
+    delete this.transport;
 
     // Dispose transport event handlers
     for (const disposable of this.transportDisposables) {

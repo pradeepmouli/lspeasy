@@ -143,13 +143,13 @@
 
 ### Tests for US2
 
-- [ ] T067 [P] [US2] Unit test: LSPClient constructor and connect/disconnect in packages/client/tests/unit/client.test.ts
-- [ ] T068 [P] [US2] Unit test: sendRequest and sendNotification type inference in packages/client/tests/unit/requests.test.ts
-- [ ] T069 [P] [US2] Unit test: High-level method builders (textDocument.hover, etc.) in packages/client/tests/unit/builders.test.ts
-- [ ] T070 [US2] Integration test: Connect to typescript-language-server and send initialize in packages/client/tests/integration/connect.test.ts
-- [ ] T071 [US2] Integration test: Send textDocument/definition request to real server in packages/client/tests/integration/definition.test.ts
-- [ ] T072 [US2] Integration test: Response validation rejection (malformed server response) in packages/client/tests/integration/validation.test.ts
-- [ ] T073 [US2] Integration test: Graceful shutdown sequence (shutdown → exit) in packages/client/tests/integration/shutdown.test.ts
+- [x] T067 [P] [US2] Unit test: LSPClient constructor and connect/disconnect in packages/client/test/unit/client.test.ts
+- [x] T068 [P] [US2] Unit test: sendRequest and sendNotification type inference in packages/client/test/unit/requests.test.ts
+- [x] T069 [P] [US2] Unit test: High-level method builders (textDocument.hover, etc.) in packages/client/test/unit/builders.test.ts
+- [ ] T070 [US2] Integration test: Connect to typescript-language-server and send initialize in packages/client/test/integration/connect.test.ts
+- [ ] T071 [US2] Integration test: Send textDocument/definition request to real server in packages/client/test/integration/definition.test.ts
+- [ ] T072 [US2] Integration test: Response validation rejection (malformed server response) in packages/client/test/integration/validation.test.ts
+- [ ] T073 [US2] Integration test: Graceful shutdown sequence (shutdown → exit) in packages/client/test/integration/shutdown.test.ts
 
 **Checkpoint**: User Story 2 complete - Clients can connect to and interact with real LSP servers
 
