@@ -81,12 +81,6 @@ export class LifecycleManager {
   async handleShutdown(transport: Transport, id: number | string): Promise<void> {
     this.logger.info('Shutting down server...');
 
-    await transport.send({
-      jsonrpc: '2.0',
-      id,
-      result: null
-    });
-
     this.logger.info('Server shutdown complete');
   }
 
