@@ -75,7 +75,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
    *   return { contents: 'Hover text' };
    * });
    */
-  onRequest<Method extends LSPRequestMethod>(
+  onRequest<Method extends LSPRequestMethod & string>(
     method: Method,
     handler: RequestHandler<InferRequestParams<Method>, InferRequestResult<Method>>
   ): this;
@@ -120,7 +120,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
    *   // params is automatically typed as DidOpenTextDocumentParams
    * });
    */
-  onNotification<Method extends LSPNotificationMethod>(
+  onNotification<Method extends LSPNotificationMethod & string>(
     method: Method,
     handler: NotificationHandler<InferNotificationParams<Method>>
   ): this;

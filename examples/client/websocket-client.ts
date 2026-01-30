@@ -85,7 +85,7 @@ async function main() {
       textDocument: { uri: 'file:///example.txt' },
       position: { line: 0, character: 6 }
     });
-    
+
     if (hover) {
       console.log('Hover response:');
       if (typeof hover.contents === 'string') {
@@ -101,7 +101,7 @@ async function main() {
       textDocument: { uri: 'file:///example.txt' },
       position: { line: 0, character: 10 }
     });
-    
+
     if (completion && Array.isArray(completion)) {
       console.log('Completion items:');
       completion.forEach((item) => {
@@ -117,7 +117,6 @@ async function main() {
     console.log('\nDisconnecting...');
     await client.disconnect();
     console.log('✓ Client disconnected successfully');
-
   } catch (error) {
     console.error('Error:', error);
     process.exit(1);

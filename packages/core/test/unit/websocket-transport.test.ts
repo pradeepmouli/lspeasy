@@ -61,10 +61,7 @@ describe('WebSocketTransport', () => {
 
       await transport.send(message);
 
-      expect(mockSocket.send).toHaveBeenCalledWith(
-        JSON.stringify(message),
-        expect.any(Function)
-      );
+      expect(mockSocket.send).toHaveBeenCalledWith(JSON.stringify(message), expect.any(Function));
     });
 
     it('should receive messages from WebSocket', async () => {
@@ -143,11 +140,7 @@ describe('WebSocketTransport', () => {
         id: 1
       };
 
-      const handlers = [
-        vi.fn(),
-        vi.fn(),
-        vi.fn()
-      ];
+      const handlers = [vi.fn(), vi.fn(), vi.fn()];
 
       handlers.forEach((handler) => {
         transport.onMessage(handler);

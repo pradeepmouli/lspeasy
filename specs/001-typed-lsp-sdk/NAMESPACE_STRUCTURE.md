@@ -1,7 +1,7 @@
 # LSP Namespace Structure - Design Documentation
 
-**Date**: 2026-01-29  
-**Status**: Implemented  
+**Date**: 2026-01-29
+**Status**: Implemented
 **Location**: `packages/core/src/protocol/namespaces.ts`
 
 ## Overview
@@ -44,15 +44,15 @@ export namespace LSPRequest {
       // Method name (type and runtime)
       export type Method = 'textDocument/hover';
       export const Method = 'textDocument/hover';
-      
+
       // Request/Response types
       export type Params = HoverParams;
       export type Result = Hover | null;
-      
+
       // Capabilities
       export type ClientCapability = HoverClientCapabilities;
       export type ServerCapability = 'hoverProvider';
-      
+
       // Registration
       export type Options = HoverOptions;
       export type RegistrationOptions = HoverRegistrationOptions;
@@ -175,12 +175,12 @@ To add a new LSP method to the namespace structure:
      M extends LSPRequest.TextDocument.NewMethod.Method ? LSPRequest.TextDocument.NewMethod.Params :
      // ... rest of conditionals
      never;
-   
+
    export type InferRequestResult<M extends string> =
      M extends LSPRequest.TextDocument.NewMethod.Method ? LSPRequest.TextDocument.NewMethod.Result :
      // ... rest of conditionals
      never;
-   
+
    export type LSPRequestMethod =
      | LSPRequest.TextDocument.NewMethod.Method
      | // ... rest of methods

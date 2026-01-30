@@ -4,7 +4,12 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "declarationMap": true
+    "declarationMap": true,
+    "verbatimModuleSyntax": false,
+    "isolatedModules": false,
+    "noUncheckedSideEffectImports": false,
+    "strict": false,
+    "strictNullChecks": true
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"]

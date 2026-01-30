@@ -64,8 +64,9 @@ export { JSONRPCErrorCode, ErrorMessage, ResponseError } from './utils/errors.js
 // Protocol types (re-exported from vscode-languageserver-protocol)
 export * from './protocol/types.js';
 
-// LSP protocol namespaces and type inference
-export type { LSPRequest, LSPNotification } from './protocol/namespaces.js';
+// LSP protocol types and constants (overloaded with same name - type and const)
+// Note: Single export statement exports both the type and const with same name
+export { LSPRequest, LSPNotification } from './protocol/namespaces.js';
 export type {
   LSPRequestMethod,
   LSPNotificationMethod,

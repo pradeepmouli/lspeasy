@@ -43,7 +43,7 @@ wss.on('connection', (socket, request) => {
   // Register hover handler
   server.onRequest('textDocument/hover', (params) => {
     console.log('Hover request:', params.position);
-    
+
     const hover: Hover = {
       contents: {
         kind: 'markdown',
@@ -54,14 +54,14 @@ wss.on('connection', (socket, request) => {
         end: { line: params.position.line, character: params.position.character + 1 }
       }
     };
-    
+
     return hover;
   });
 
   // Register completion handler
   server.onRequest('textDocument/completion', (params) => {
     console.log('Completion request:', params.position);
-    
+
     const items: CompletionItem[] = [
       {
         label: 'websocket',
@@ -76,7 +76,7 @@ wss.on('connection', (socket, request) => {
         documentation: 'Abstraction for communication channels'
       }
     ];
-    
+
     return items;
   });
 

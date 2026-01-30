@@ -122,7 +122,7 @@ describe('WebSocketTransport Reconnection', () => {
       const maxDelay = 5000;
 
       let delay = baseDelay;
-      
+
       for (let i = 0; i < 10; i++) {
         delay = Math.min(delay * multiplier, maxDelay);
         expect(delay).toBeLessThanOrEqual(maxDelay);
@@ -262,7 +262,7 @@ describe('WebSocketTransport Reconnection', () => {
 
       // Close handler should have been called once
       expect(closeHandler).toHaveBeenCalledTimes(1);
-      
+
       // After close, new events should not trigger handlers (they're cleaned up)
       mockSocket.emit('message', '{"jsonrpc":"2.0"}');
       mockSocket.emit('error', new Error('test'));

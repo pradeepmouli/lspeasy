@@ -14,7 +14,7 @@ import http from 'http';
 
 /**
  * Custom HTTP Transport using long polling
- * 
+ *
  * This is a simplified example to demonstrate the Transport interface.
  * In production, consider using WebSocket instead of long polling.
  */
@@ -110,7 +110,7 @@ class HTTPTransport implements Transport {
     } else {
       // Client mode: POST message to server
       const data = JSON.stringify(message);
-      
+
       await new Promise<void>((resolve, reject) => {
         const req = http.request(
           {
@@ -197,7 +197,7 @@ async function main() {
   console.log('  - close(): Clean up resources\n');
 
   const transport = new HTTPTransport(3001, 'server');
-  
+
   transport.onMessage((message) => {
     console.log('Received message:', message);
   });
