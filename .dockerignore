@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build artifacts
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+.pnpm-debug.log*
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Test files
+*.test.ts
+*.spec.ts
+__tests__/
+tests/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.changeset/
+
+# Misc
+.dockerignore
+Dockerfile*
+*.tsbuildinfo

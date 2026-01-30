@@ -16,15 +16,15 @@
 
 **Purpose**: Initialize monorepo structure and tooling before any implementation
 
-- [ ] T001 Create monorepo structure: packages/core/, packages/server/, packages/client/, examples/, e2e/, docs/
-- [ ] T002 Initialize package.json for @lspy/core with TypeScript 5.x, Vitest, oxlint, oxfmt dependencies
-- [ ] T003 [P] Initialize package.json for @lspy/server with workspace dependency on @lspy/core
-- [ ] T004 [P] Initialize package.json for @lspy/client with workspace dependency on @lspy/core
-- [ ] T005 Configure TypeScript with strict mode, composite project references for monorepo
-- [ ] T006 [P] Setup oxlint and oxfmt with .oxlintrc.json and .oxfmtrc.json (2 spaces, single quotes, semicolons)
-- [ ] T007 [P] Configure simple-git-hooks and lint-staged for pre-commit checks
-- [ ] T008 Add size-limit configuration for bundle size enforcement (<100KB core, <50KB server/client gzipped)
-- [ ] T009 Create root tsconfig.json and per-package tsconfig.json with composite references
+- [x] T001 Create monorepo structure: packages/core/, packages/server/, packages/client/, examples/, e2e/, docs/
+- [x] T002 Initialize package.json for @lspy/core with TypeScript 5.x, Vitest, oxlint, oxfmt dependencies
+- [x] T003 [P] Initialize package.json for @lspy/server with workspace dependency on @lspy/core
+- [x] T004 [P] Initialize package.json for @lspy/client with workspace dependency on @lspy/core
+- [x] T005 Configure TypeScript with strict mode, composite project references for monorepo
+- [x] T006 [P] Setup oxlint and oxfmt with .oxlintrc.json and .oxfmtrc.json (2 spaces, single quotes, semicolons)
+- [x] T007 [P] Configure simple-git-hooks and lint-staged for pre-commit checks
+- [x] T008 Add size-limit configuration for bundle size enforcement (<100KB core, <50KB server/client gzipped)
+- [x] T009 Create root tsconfig.json and per-package tsconfig.json with composite references
 
 ---
 
@@ -36,35 +36,35 @@
 
 ### JSON-RPC 2.0 Implementation (Custom, MCP SDK Pattern)
 
-- [ ] T010 [P] Define JSON-RPC 2.0 message types in packages/core/src/jsonrpc/messages.ts (Message, RequestMessage, ResponseMessage, NotificationMessage) - Reference: @modelcontextprotocol/sdk/types.js Message types
-- [ ] T011 [P] Implement JSON-RPC message framing (Content-Length headers) in packages/core/src/jsonrpc/framing.ts - Pattern: MCP SDK's parseMessage with header parsing
-- [ ] T012 Implement MessageReader class for parsing JSON-RPC messages with framing in packages/core/src/jsonrpc/reader.ts - Pattern: MCP SDK's JSONRPCMessage handling
-- [ ] T013 Implement MessageWriter class for serializing JSON-RPC messages with framing in packages/core/src/jsonrpc/writer.ts - Pattern: MCP SDK's message serialization
-- [ ] T014 [P] Create Zod schemas for JSON-RPC message validation in packages/core/src/jsonrpc/schemas.ts - Pattern: MCP SDK's z.discriminatedUnion for message types
+- [x] T010 [P] Define JSON-RPC 2.0 message types in packages/core/src/jsonrpc/messages.ts (Message, RequestMessage, ResponseMessage, NotificationMessage) - Reference: @modelcontextprotocol/sdk/types.js Message types
+- [x] T011 [P] Implement JSON-RPC message framing (Content-Length headers) in packages/core/src/jsonrpc/framing.ts - Pattern: MCP SDK's parseMessage with header parsing
+- [x] T012 Implement MessageReader class for parsing JSON-RPC messages with framing in packages/core/src/jsonrpc/reader.ts - Pattern: MCP SDK's JSONRPCMessage handling
+- [x] T013 Implement MessageWriter class for serializing JSON-RPC messages with framing in packages/core/src/jsonrpc/writer.ts - Pattern: MCP SDK's message serialization
+- [x] T014 [P] Create Zod schemas for JSON-RPC message validation in packages/core/src/jsonrpc/schemas.ts - Pattern: MCP SDK's z.discriminatedUnion for message types
 
 ### Transport Layer
 
-- [ ] T015 Define Transport interface in packages/core/src/transport/transport.ts (send, onMessage, onError, close, isConnected)
-- [ ] T016 Implement StdioTransport in packages/core/src/transport/stdio.ts (reads from stdin, writes to stdout)
-- [ ] T017 Add Disposable interface and DisposableStore utility in packages/core/src/utils/disposable.ts
-- [ ] T018 [P] Implement connection lifecycle event emitter in packages/core/src/transport/events.ts (Events: 'connect', 'disconnect', 'error', 'message')
+- [x] T015 Define Transport interface in packages/core/src/transport/transport.ts (send, onMessage, onError, close, isConnected)
+- [x] T016 Implement StdioTransport in packages/core/src/transport/stdio.ts (reads from stdin, writes to stdout)
+- [x] T017 Add Disposable interface and DisposableStore utility in packages/core/src/utils/disposable.ts
+- [x] T018 [P] Implement connection lifecycle event emitter in packages/core/src/transport/events.ts (Events: 'connect', 'disconnect', 'error', 'message')
 
 ### Protocol Types Re-export
 
 - [ ] T019 [P] Create hierarchical namespace structure (LSPRequest.*, LSPNotification.*) in packages/core/src/protocol/namespaces.ts - Use type-only imports: import type { HoverParams, Hover } from 'vscode-languageserver-protocol'
-- [ ] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts - Pattern: export type { Position, Range, Location, ... } from 'vscode-languageserver-protocol'
+- [x] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts - Pattern: export type { Position, Range, Location, ... } from 'vscode-languageserver-protocol'
 - [ ] T021 [P] Define InferRequestParams, InferRequestResult, InferNotificationParams type utilities in packages/core/src/protocol/infer.ts - Use conditional types to extract types from namespace structure
 - [ ] T022 [P] Generate Zod schemas for LSP types (Position, Range, Location, etc.) in packages/core/src/protocol/schemas.ts - Runtime validators matching TypeScript types from vscode-languageserver-protocol
 
 ### Utilities
 
-- [ ] T023 [P] Implement CancellationToken and CancellationTokenSource in packages/core/src/utils/cancellation.ts
-- [ ] T024 [P] Create Logger interface and ConsoleLogger implementation (MCP SDK pattern) in packages/core/src/utils/logger.ts
-- [ ] T025 [P] Implement error code constants (LSP error codes: -32002, -32602, -32700, etc.) in packages/core/src/utils/errors.ts
+- [x] T023 [P] Implement CancellationToken and CancellationTokenSource in packages/core/src/utils/cancellation.ts
+- [x] T024 [P] Create Logger interface and ConsoleLogger implementation (MCP SDK pattern) in packages/core/src/utils/logger.ts
+- [x] T025 [P] Implement error code constants (LSP error codes: -32002, -32602, -32700, etc.) in packages/core/src/utils/errors.ts
 
 ### Core Package Export
 
-- [ ] T026 Create packages/core/src/index.ts exporting all public APIs (Transport, Message types, Protocol types, utilities)
+- [x] T026 Create packages/core/src/index.ts exporting all public APIs (Transport, Message types, Protocol types, utilities)
 - [ ] T027 Write unit tests for JSON-RPC message framing in packages/core/tests/unit/jsonrpc-framing.test.ts
 - [ ] T028 [P] Write unit tests for StdioTransport in packages/core/tests/unit/stdio-transport.test.ts
 - [ ] T029 [P] Write unit tests for CancellationToken in packages/core/tests/unit/cancellation.test.ts
@@ -81,34 +81,34 @@
 
 ### Implementation for US1
 
-- [ ] T030 [P] [US1] Create LSPServer class skeleton in packages/server/src/server.ts with constructor(options: ServerOptions)
-- [ ] T031 [P] [US1] Define ServerOptions interface (name, version, logger, logLevel, onValidationError) in packages/server/src/types.ts
-- [ ] T032 [P] [US1] Define RequestHandler<Params, Result> and NotificationHandler<Params> types in packages/server/src/types.ts
-- [ ] T033 [US1] Implement handler registration: onRequest<M extends LSPRequestMethod>(method, handler) in packages/server/src/server.ts
-- [ ] T034 [US1] Implement handler registration: onNotification<M extends LSPNotificationMethod>(method, handler) in packages/server/src/server.ts
-- [ ] T035 [US1] Implement setCapabilities(capabilities: ServerCapabilities) method in packages/server/src/server.ts
-- [ ] T036 [US1] Implement listen(transport: Transport) to start server and accept connections in packages/server/src/server.ts
-- [ ] T037 [US1] Create message dispatcher: route incoming requests to registered handlers in packages/server/src/dispatcher.ts
-- [ ] T038 [US1] Implement automatic initialize/initialized handshake handling in packages/server/src/lifecycle.ts
-- [ ] T039 [US1] Add request parameter validation via Zod before calling handlers in packages/server/src/validation.ts
-- [ ] T040 [US1] Implement error response generation (LSP error codes, validation errors) in packages/server/src/errors.ts
-- [ ] T041 [US1] Add cancellation token support: handle $/cancelRequest notifications in packages/server/src/cancellation.ts
-- [ ] T042 [US1] Implement shutdown() and close() methods for graceful/forced shutdown in packages/server/src/server.ts
-- [ ] T043 [US1] Create packages/server/src/index.ts exporting LSPServer, ServerOptions, RequestHandler, NotificationHandler
+- [x] T030 [P] [US1] Create LSPServer class skeleton in packages/server/src/server.ts with constructor(options: ServerOptions)
+- [x] T031 [P] [US1] Define ServerOptions interface (name, version, logger, logLevel, onValidationError) in packages/server/src/types.ts
+- [x] T032 [P] [US1] Define RequestHandler<Params, Result> and NotificationHandler<Params> types in packages/server/src/types.ts
+- [x] T033 [US1] Implement handler registration: onRequest<M extends LSPRequestMethod>(method, handler) in packages/server/src/server.ts
+- [x] T034 [US1] Implement handler registration: onNotification<M extends LSPNotificationMethod>(method, handler) in packages/server/src/server.ts
+- [x] T035 [US1] Implement setCapabilities(capabilities: ServerCapabilities) method in packages/server/src/server.ts
+- [x] T036 [US1] Implement listen(transport: Transport) to start server and accept connections in packages/server/src/server.ts
+- [x] T037 [US1] Create message dispatcher: route incoming requests to registered handlers in packages/server/src/dispatcher.ts
+- [x] T038 [US1] Implement automatic initialize/initialized handshake handling in packages/server/src/lifecycle.ts
+- [x] T039 [US1] Add request parameter validation via Zod before calling handlers in packages/server/src/validation.ts
+- [x] T040 [US1] Implement error response generation (LSP error codes, validation errors) in packages/server/src/errors.ts
+- [x] T041 [US1] Add cancellation token support: handle $/cancelRequest notifications in packages/server/src/cancellation.ts
+- [x] T042 [US1] Implement shutdown() and close() methods for graceful/forced shutdown in packages/server/src/server.ts
+- [x] T043 [US1] Create packages/server/src/index.ts exporting LSPServer, ServerOptions, RequestHandler, NotificationHandler
 
 ### Examples for US1
 
-- [ ] T044 [P] [US1] Create minimal hover server example (<30 lines) in examples/server/minimal-server.ts
-- [ ] T045 [P] [US1] Create hover + completion server example in examples/server/hover-server.ts
+- [x] T044 [P] [US1] Create minimal hover server example (<30 lines) in examples/server/minimal-server.ts
+- [x] T045 [P] [US1] Create hover + completion server example in examples/server/hover-server.ts
 
 ### Tests for US1
 
-- [ ] T046 [P] [US1] Unit test: LSPServer constructor and setCapabilities in packages/server/tests/unit/server.test.ts
-- [ ] T047 [P] [US1] Unit test: Handler registration (onRequest, onNotification) in packages/server/tests/unit/handlers.test.ts
-- [ ] T048 [P] [US1] Unit test: Message dispatcher routing in packages/server/tests/unit/dispatcher.test.ts
-- [ ] T049 [P] [US1] Integration test: Initialize handshake with test client in packages/server/tests/integration/initialize.test.ts
-- [ ] T050 [P] [US1] Integration test: textDocument/hover request/response in packages/server/tests/integration/hover.test.ts
-- [ ] T051 [US1] Integration test: Parameter validation rejection (malformed request) in packages/server/tests/integration/validation.test.ts
+- [x] T046 [P] [US1] Unit test: LSPServer constructor and setCapabilities in packages/server/tests/unit/server.test.ts
+- [x] T047 [P] [US1] Unit test: Handler registration (onRequest, onNotification) in packages/server/tests/unit/handlers.test.ts
+- [x] T048 [P] [US1] Unit test: Message dispatcher routing in packages/server/tests/unit/dispatcher.test.ts
+- [x] T049 [P] [US1] Integration test: Initialize handshake with test client in packages/server/tests/integration/initialize.test.ts
+- [x] T050 [P] [US1] Integration test: textDocument/hover request/response in packages/server/tests/integration/hover.test.ts
+- [x] T051 [US1] Integration test: Parameter validation rejection (malformed request) in packages/server/tests/integration/validation.test.ts
 
 **Checkpoint**: User Story 1 complete - Developers can build working LSP servers with typed handlers
 
