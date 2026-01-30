@@ -8,8 +8,10 @@
  *   # Start typescript-language-server in stdio mode
  *   npx typescript-language-server --stdio
  *
- *   # Then run this client
- *   node examples/client/basic-client.js
+ *   # Then run this client with a TypeScript runner (e.g. tsx or ts-node)
+ *   npx tsx examples/client/basic-client.ts
+ *   # or:
+ *   # npx ts-node examples/client/basic-client.ts
  */
 
 import { LSPClient } from '@lspy/client';
