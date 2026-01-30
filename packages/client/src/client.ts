@@ -97,39 +97,53 @@ export class LSPClient {
     transport.onError((error) => this.handleError(error));
     transport.onClose(() => this.handleClose());
 
-    // Send initialize request
-    this.logger.debug('Sending initialize request');
+    try {
+      // Send initialize request
+      this.logger.debug('Sending initialize request');
 
-    const initializeParams: import('vscode-languageserver-protocol').InitializeParams = {
-      processId: process.pid,
-      clientInfo: {
-        name: this.options.name,
-        version: this.options.version
-      },
-      capabilities: this.capabilities ?? {},
-      rootUri: null
-    };
+      const initializeParams: import('vscode-languageserver-protocol').InitializeParams = {
+        processId: process.pid,
+        clientInfo: {
+          name: this.options.name,
+          version: this.options.version
+        },
+        capabilities: this.capabilities ?? {},
+        rootUri: null
+      };
 
-    const result = await this.sendRequest<
-      import('vscode-languageserver-protocol').InitializeParams,
-      InitializeResult
-    >('initialize', initializeParams);
+      const result = await this.sendRequest<
+        import('vscode-languageserver-protocol').InitializeParams,
+        InitializeResult
+      >('initialize', initializeParams);
 
-    this.serverCapabilities = result.capabilities;
-    this.serverInfo = result.serverInfo;
-    this.initialized = true;
+      this.serverCapabilities = result.capabilities;
+      this.serverInfo = result.serverInfo;
+      this.initialized = true;
 
-    // Send initialized notification
-    await this.sendNotification('initialized', {});
+      // Send initialized notification
+      await this.sendNotification('initialized', {});
 
-    this.logger.info('Client initialized', {
-      serverName: this.serverInfo?.name,
-      serverVersion: this.serverInfo?.version
-    });
+      this.logger.info('Client initialized', {
+        serverName: this.serverInfo?.name,
+        serverVersion: this.serverInfo?.version
+      });
 
-    this.events.emit('connected');
+      this.events.emit('connected');
 
-    return result;
+      return result;
+    } catch (error) {
+      // Ensure we clean up state and transport on initialization failure
+      try {
+        if (this.transport) {
+          await this.transport.close();
+        }
+      } catch (closeError) {
+        this.logger.error('Error closing transport after failed initialize', closeError as Error);
+      }
+      // Reset client state and detach listeners via common close handler
+      this.handleClose();
+      throw error;
+    }
   }
 
   /**
