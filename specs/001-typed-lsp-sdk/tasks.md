@@ -138,8 +138,8 @@
 
 ### Examples for US2
 
-- [ ] T065 [P] [US2] Create basic client example connecting to typescript-language-server in examples/client/basic-client.ts
-- [ ] T066 [P] [US2] Create test client harness for automated testing in examples/client/test-client.ts
+- [x] T065 [P] [US2] Create basic client example connecting to typescript-language-server in examples/client/basic-client.ts
+- [x] T066 [P] [US2] Create test client harness for automated testing in examples/client/test-client.ts
 
 ### Tests for US2
 
