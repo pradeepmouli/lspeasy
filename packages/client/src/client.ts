@@ -43,6 +43,7 @@ export class LSPClient {
   private serverCapabilities?: import('vscode-languageserver-protocol').ServerCapabilities;
   private serverInfo?: { name: string; version?: string };
   private readonly onValidationError?: ClientOptions['onValidationError'];
+  private transportDisposables: Disposable[];
 
   /**
    * High-level textDocument.* methods
@@ -63,6 +64,7 @@ export class LSPClient {
     this.requestHandlers = new Map();
     this.notificationHandlers = new Map();
     this.events = new EventEmitter();
+    this.transportDisposables = [];
 
     // Set up options with defaults
     this.options = {
@@ -92,10 +94,12 @@ export class LSPClient {
     this.transport = transport;
     this.connected = true;
 
-    // Set up transport handlers
-    transport.onMessage((message) => this.handleMessage(message));
-    transport.onError((error) => this.handleError(error));
-    transport.onClose(() => this.handleClose());
+    // Set up transport handlers and store disposables
+    this.transportDisposables.push(
+      transport.onMessage((message) => this.handleMessage(message)),
+      transport.onError((error) => this.handleError(error)),
+      transport.onClose(() => this.handleClose())
+    );
 
     try {
       // Send initialize request
@@ -194,6 +198,11 @@ export class LSPClient {
       throw new Error('Client is not connected');
     }
 
+    // Check if already cancelled before doing anything
+    if (token?.isCancellationRequested) {
+      return Promise.reject(new Error('Request was cancelled'));
+    }
+
     const id = this.nextRequestId++;
 
     const request: RequestMessage = {
@@ -206,30 +215,42 @@ export class LSPClient {
     this.logger.debug(`Sending request ${method}`, { id, params });
 
     return new Promise<Result>((resolve, reject) => {
+      let cancellationDisposable: Disposable | undefined;
+
+      // Store pending request first before setting up cancellation
+      this.pendingRequests.set(id, {
+        resolve: (value: any) => {
+          // Dispose cancellation listener on success
+          cancellationDisposable?.dispose();
+          resolve(value);
+        },
+        reject: (error: Error) => {
+          // Dispose cancellation listener on failure
+          cancellationDisposable?.dispose();
+          reject(error);
+        },
+        method
+      });
+
       // Set up cancellation if token provided
       if (token) {
-        token.onCancellationRequested(() => {
+        cancellationDisposable = token.onCancellationRequested(() => {
           // Send cancellation notification
           this.sendNotification('$/cancelRequest', { id }).catch((err) => {
             this.logger.error('Failed to send cancellation', err);
           });
 
-          // Reject the promise
+          // Reject the promise and clean up
           this.pendingRequests.delete(id);
+          cancellationDisposable?.dispose();
           reject(new Error('Request was cancelled'));
         });
       }
 
-      // Store pending request
-      this.pendingRequests.set(id, {
-        resolve,
-        reject,
-        method
-      });
-
       // Send request
       this.transport!.send(request).catch((error) => {
         this.pendingRequests.delete(id);
+        cancellationDisposable?.dispose();
         reject(error);
       });
     });
@@ -362,7 +383,10 @@ export class LSPClient {
 
     // Request message
     if ('id' in message && 'method' in message) {
-      this.handleRequest(message as RequestMessage);
+      // Fire and forget with error handling
+      void this.handleRequest(message as RequestMessage).catch((error) => {
+        this.logger.error('Error handling server request', error);
+      });
       return;
     }
 
@@ -420,7 +444,13 @@ export class LSPClient {
         }
       };
 
-      await this.transport!.send(response);
+      try {
+        if (this.transport) {
+          await this.transport.send(response);
+        }
+      } catch (error) {
+        this.logger.error('Failed to send error response', error);
+      }
       return;
     }
 
@@ -433,7 +463,13 @@ export class LSPClient {
         result
       };
 
-      await this.transport!.send(response);
+      try {
+        if (this.transport) {
+          await this.transport.send(response);
+        }
+      } catch (error) {
+        this.logger.error('Failed to send success response', error);
+      }
     } catch (error) {
       this.logger.error(`Handler for ${method} threw error`, error);
 
@@ -446,7 +482,13 @@ export class LSPClient {
         }
       };
 
-      await this.transport!.send(response);
+      try {
+        if (this.transport) {
+          await this.transport.send(response);
+        }
+      } catch (sendError) {
+        this.logger.error('Failed to send error response', sendError);
+      }
     }
   }
 
@@ -490,6 +532,12 @@ export class LSPClient {
     this.connected = false;
     this.initialized = false;
     this.transport = undefined;
+
+    // Dispose transport event handlers
+    for (const disposable of this.transportDisposables) {
+      disposable.dispose();
+    }
+    this.transportDisposables = [];
 
     // Reject all pending requests
     for (const [, pending] of this.pendingRequests.entries()) {
