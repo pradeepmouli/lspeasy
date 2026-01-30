@@ -85,7 +85,9 @@ export class MessageDispatcher {
       cancellationTokens.set(id, abortController);
 
       const cancellationToken: CancellationToken = {
-        isCancellationRequested: abortController.signal.aborted,
+        get isCancellationRequested() {
+          return abortController.signal.aborted;
+        },
         onCancellationRequested: (listener) => {
           abortController.signal.addEventListener('abort', listener);
           return { dispose: () => abortController.signal.removeEventListener('abort', listener) };
