@@ -134,7 +134,6 @@ export class StdioTransport implements Transport {
       return;
     }
 
-    this.connected = false;
     this.reader.close();
     this.writer.close();
 

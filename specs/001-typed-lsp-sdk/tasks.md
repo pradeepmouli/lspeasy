@@ -65,9 +65,9 @@
 ### Core Package Export
 
 - [x] T026 Create packages/core/src/index.ts exporting all public APIs (Transport, Message types, Protocol types, utilities)
-- [ ] T027 Write unit tests for JSON-RPC message framing in packages/core/tests/unit/jsonrpc-framing.test.ts
-- [ ] T028 [P] Write unit tests for StdioTransport in packages/core/tests/unit/stdio-transport.test.ts
-- [ ] T029 [P] Write unit tests for CancellationToken in packages/core/tests/unit/cancellation.test.ts
+- [x] T027 Write unit tests for JSON-RPC message framing in packages/core/tests/unit/jsonrpc-framing.test.ts
+- [x] T028 [P] Write unit tests for StdioTransport in packages/core/tests/unit/stdio-transport.test.ts
+- [x] T029 [P] Write unit tests for CancellationToken in packages/core/tests/unit/cancellation.test.ts
 
 **Checkpoint**: Foundation complete - User story implementation can begin in parallel
 
