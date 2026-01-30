@@ -1,2 +1,9 @@
-// @lspy/client - Connect to LSP servers with typed client API
-export {};
+/**
+ * @lspy/client - LSP Client for connecting to language servers
+ */
+
+export { LSPClient } from './client.js';
+export type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
+
+// Re-export commonly used types from core
+export type { Transport, Logger, LogLevel, Disposable } from '@lspy/core';

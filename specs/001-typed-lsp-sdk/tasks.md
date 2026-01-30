@@ -65,9 +65,9 @@
 ### Core Package Export
 
 - [x] T026 Create packages/core/src/index.ts exporting all public APIs (Transport, Message types, Protocol types, utilities)
-- [ ] T027 Write unit tests for JSON-RPC message framing in packages/core/tests/unit/jsonrpc-framing.test.ts
-- [ ] T028 [P] Write unit tests for StdioTransport in packages/core/tests/unit/stdio-transport.test.ts
-- [ ] T029 [P] Write unit tests for CancellationToken in packages/core/tests/unit/cancellation.test.ts
+- [x] T027 Write unit tests for JSON-RPC message framing in packages/core/tests/unit/jsonrpc-framing.test.ts
+- [x] T028 [P] Write unit tests for StdioTransport in packages/core/tests/unit/stdio-transport.test.ts
+- [x] T029 [P] Write unit tests for CancellationToken in packages/core/tests/unit/cancellation.test.ts
 
 **Checkpoint**: Foundation complete - User story implementation can begin in parallel
 
@@ -122,34 +122,34 @@
 
 ### Implementation for US2
 
-- [ ] T052 [P] [US2] Create LSPClient class skeleton in packages/client/src/client.ts with constructor(options: ClientOptions)
-- [ ] T053 [P] [US2] Define ClientOptions interface (name, version, capabilities, logger, logLevel, onValidationError) in packages/client/src/types.ts
-- [ ] T054 [US2] Implement connect(transport: Transport): Promise<InitializeResult> with automatic initialization in packages/client/src/client.ts
-- [ ] T055 [US2] Implement disconnect(): Promise<void> with shutdown + exit sequence in packages/client/src/client.ts
-- [ ] T056 [US2] Implement low-level sendRequest<M extends LSPRequestMethod>(method, params) in packages/client/src/client.ts
-- [ ] T057 [US2] Implement low-level sendNotification<M extends LSPNotificationMethod>(method, params) in packages/client/src/client.ts
-- [ ] T058 [US2] Implement sendCancellableRequest<M>(method, params) returning { promise, cancel } in packages/client/src/client.ts
-- [ ] T059 [P] [US2] Create high-level textDocument.* method builders (hover, completion, definition, references, documentSymbol) in packages/client/src/requests/text-document.ts
-- [ ] T060 [P] [US2] Create high-level workspace.* method builders (symbol, didChangeWorkspaceFolders) in packages/client/src/requests/workspace.ts
+- [x] T052 [P] [US2] Create LSPClient class skeleton in packages/client/src/client.ts with constructor(options: ClientOptions)
+- [x] T053 [P] [US2] Define ClientOptions interface (name, version, capabilities, logger, logLevel, onValidationError) in packages/client/src/types.ts
+- [x] T054 [US2] Implement connect(transport: Transport): Promise<InitializeResult> with automatic initialization in packages/client/src/client.ts
+- [x] T055 [US2] Implement disconnect(): Promise<void> with shutdown + exit sequence in packages/client/src/client.ts
+- [x] T056 [US2] Implement low-level sendRequest<M extends LSPRequestMethod>(method, params) in packages/client/src/client.ts
+- [x] T057 [US2] Implement low-level sendNotification<M extends LSPNotificationMethod>(method, params) in packages/client/src/client.ts
+- [x] T058 [US2] Implement sendCancellableRequest<M>(method, params) returning { promise, cancel } in packages/client/src/client.ts
+- [x] T059 [P] [US2] Create high-level textDocument.* method builders (hover, completion, definition, references, documentSymbol) in packages/client/src/requests/text-document.ts
+- [x] T060 [P] [US2] Create high-level workspace.* method builders (symbol, didChangeWorkspaceFolders) in packages/client/src/requests/workspace.ts
 - [ ] T061 [US2] Implement response validation via Zod schemas in packages/client/src/validation.ts
-- [ ] T062 [US2] Implement server-to-client request handling: onRequest<M>(method, handler) in packages/client/src/client.ts
-- [ ] T063 [US2] Add isConnected() method and connection state tracking in packages/client/src/client.ts
-- [ ] T064 [US2] Create packages/client/src/index.ts exporting LSPClient, ClientOptions, high-level methods
+- [x] T062 [US2] Implement server-to-client request handling: onRequest<M>(method, handler) in packages/client/src/client.ts
+- [x] T063 [US2] Add isConnected() method and connection state tracking in packages/client/src/client.ts
+- [x] T064 [US2] Create packages/client/src/index.ts exporting LSPClient, ClientOptions, high-level methods
 
 ### Examples for US2
 
-- [ ] T065 [P] [US2] Create basic client example connecting to typescript-language-server in examples/client/basic-client.ts
-- [ ] T066 [P] [US2] Create test client harness for automated testing in examples/client/test-client.ts
+- [x] T065 [P] [US2] Create basic client example connecting to typescript-language-server in examples/client/basic-client.ts
+- [x] T066 [P] [US2] Create test client harness for automated testing in examples/client/test-client.ts
 
 ### Tests for US2
 
-- [ ] T067 [P] [US2] Unit test: LSPClient constructor and connect/disconnect in packages/client/tests/unit/client.test.ts
-- [ ] T068 [P] [US2] Unit test: sendRequest and sendNotification type inference in packages/client/tests/unit/requests.test.ts
-- [ ] T069 [P] [US2] Unit test: High-level method builders (textDocument.hover, etc.) in packages/client/tests/unit/builders.test.ts
-- [ ] T070 [US2] Integration test: Connect to typescript-language-server and send initialize in packages/client/tests/integration/connect.test.ts
-- [ ] T071 [US2] Integration test: Send textDocument/definition request to real server in packages/client/tests/integration/definition.test.ts
-- [ ] T072 [US2] Integration test: Response validation rejection (malformed server response) in packages/client/tests/integration/validation.test.ts
-- [ ] T073 [US2] Integration test: Graceful shutdown sequence (shutdown → exit) in packages/client/tests/integration/shutdown.test.ts
+- [x] T067 [P] [US2] Unit test: LSPClient constructor and connect/disconnect in packages/client/test/unit/client.test.ts
+- [x] T068 [P] [US2] Unit test: sendRequest and sendNotification type inference in packages/client/test/unit/requests.test.ts
+- [x] T069 [P] [US2] Unit test: High-level method builders (textDocument.hover, etc.) in packages/client/test/unit/builders.test.ts
+- [ ] T070 [US2] Integration test: Connect to typescript-language-server and send initialize in packages/client/test/integration/connect.test.ts
+- [ ] T071 [US2] Integration test: Send textDocument/definition request to real server in packages/client/test/integration/definition.test.ts
+- [ ] T072 [US2] Integration test: Response validation rejection (malformed server response) in packages/client/test/integration/validation.test.ts
+- [ ] T073 [US2] Integration test: Graceful shutdown sequence (shutdown → exit) in packages/client/test/integration/shutdown.test.ts
 
 **Checkpoint**: User Story 2 complete - Clients can connect to and interact with real LSP servers
 
@@ -163,12 +163,12 @@
 
 ### Implementation for US3
 
-- [ ] T074 [P] [US3] Implement WebSocketTransport in packages/core/src/transport/websocket.ts (client + server modes)
-- [ ] T075 [P] [US3] Add WebSocketTransportOptions (url for client, socket for server, reconnect options) in packages/core/src/transport/websocket.ts
-- [ ] T076 [US3] Add reconnection logic for WebSocketTransport (maxReconnectAttempts, reconnectDelay) in packages/core/src/transport/websocket.ts
+- [x] T074 [P] [US3] Implement WebSocketTransport in packages/core/src/transport/websocket.ts (client + server modes)
+- [x] T075 [P] [US3] Add WebSocketTransportOptions (url for client, socket for server, reconnect options) in packages/core/src/transport/websocket.ts
+- [x] T076 [US3] Add reconnection logic for WebSocketTransport (maxReconnectAttempts, reconnectDelay) in packages/core/src/transport/websocket.ts
 - [ ] T077 [US3] Implement transport error handling and resource cleanup in packages/core/src/transport/error-handling.ts
-- [ ] T078 [P] [US3] Update LSPServer.listen() to accept any Transport implementation in packages/server/src/server.ts
-- [ ] T079 [P] [US3] Update LSPClient.connect() to accept any Transport implementation in packages/client/src/client.ts
+- [x] T078 [P] [US3] Update LSPServer.listen() to accept any Transport implementation in packages/server/src/server.ts
+- [x] T079 [P] [US3] Update LSPClient.connect() to accept any Transport implementation in packages/client/src/client.ts
 
 ### Examples for US3
 
@@ -239,12 +239,12 @@
 
 ### Documentation
 
-- [ ] T108 [P] Write docs/ARCHITECTURE.md explaining package design, JSON-RPC implementation, transport layer
-- [ ] T109 [P] Write docs/API.md with complete API reference for all three packages
-- [ ] T110 [P] Update root README.md with quickstart, installation, examples
-- [ ] T111 [P] Update packages/core/README.md with Transport interface guide
-- [ ] T112 [P] Update packages/server/README.md with server building guide
-- [ ] T113 [P] Update packages/client/README.md with client connection guide
+- [x] T108 [P] Write docs/ARCHITECTURE.md explaining package design, JSON-RPC implementation, transport layer
+- [x] T109 [P] Write docs/API.md with complete API reference for all three packages
+- [x] T110 [P] Update root README.md with quickstart, installation, examples
+- [X] T111 [P] Update packages/core/README.md with Transport interface guide
+- [X] T112 [P] Update packages/server/README.md with server building guide
+- [X] T113 [P] Update packages/client/README.md with client connection guide
 - [ ] T114 Add JSDoc comments to all public APIs (LSPServer, LSPClient, Transport)
 
 ### CI/CD & Quality
