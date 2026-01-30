@@ -9,7 +9,8 @@
  */
 
 import { WebSocketServer } from 'ws';
-import { LSPServer, WebSocketTransport } from '@lspy/server';
+import { LSPServer } from '@lspy/server';
+import { WebSocketTransport } from '@lspy/core';
 import type { CompletionItem, Hover } from 'vscode-languageserver-protocol';
 
 const PORT = 3000;
