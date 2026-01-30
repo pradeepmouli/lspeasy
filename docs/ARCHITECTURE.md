@@ -78,7 +78,7 @@ interface Transport {
 
 **Available Transports:**
 - `StdioTransport`: Communicate via stdin/stdout (for CLI tools)
-- `WebSocketTransport`: *(planned)* Communicate via WebSocket
+- `WebSocketTransport`: Communicate via WebSocket; supports persistent connections and optional automatic reconnection when the socket closes unexpectedly
 
 **Design principles:**
 - **Bidirectional**: Both client and server use the same interface
