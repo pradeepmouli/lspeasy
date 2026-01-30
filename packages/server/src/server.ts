@@ -73,6 +73,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
       const validatedParams = validateParams(
         method,
         params,
+        context,
         this.options.onValidationError
       ) as Params;
 
@@ -97,6 +98,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
       const validatedParams = validateParams(
         method,
         params,
+        context,
         this.options.onValidationError
       ) as Params;
 

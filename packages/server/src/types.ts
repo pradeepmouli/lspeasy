@@ -33,7 +33,10 @@ export interface ServerOptions {
   /**
    * Custom validation error handler
    */
-  onValidationError?: (error: ZodError, request: RequestContext) => ResponseErrorInterface;
+  onValidationError?: (
+    error: ZodError,
+    context: RequestContext | NotificationContext
+  ) => ResponseErrorInterface;
 }
 
 /**

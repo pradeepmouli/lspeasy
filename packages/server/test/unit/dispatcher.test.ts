@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MessageDispatcher } from '@lspy/server';
-import { ConsoleLogger, ResponseError } from '@lspy/core';
+import { ConsoleLogger, LogLevel, ResponseError } from '@lspy/core';
 import type { Transport, RequestMessage, NotificationMessage } from '@lspy/core';
 
 // Mock transport
@@ -12,6 +12,7 @@ class MockTransport implements Transport {
   sentMessages: any[] = [];
   messageHandler?: (message: any) => void;
   errorHandler?: (error: Error) => void;
+  closeHandler?: () => void;
 
   async send(message: any): Promise<void> {
     this.sentMessages.push(message);
@@ -24,6 +25,11 @@ class MockTransport implements Transport {
 
   onError(handler: (error: Error) => void) {
     this.errorHandler = handler;
+    return { dispose: () => {} };
+  }
+
+  onClose(handler: () => void) {
+    this.closeHandler = handler;
     return { dispose: () => {} };
   }
 
@@ -40,7 +46,7 @@ describe('MessageDispatcher', () => {
   let mockTransport: MockTransport;
 
   beforeEach(() => {
-    logger = new ConsoleLogger('error');
+    logger = new ConsoleLogger(LogLevel.Error);
     dispatcher = new MessageDispatcher(logger);
     mockTransport = new MockTransport();
   });

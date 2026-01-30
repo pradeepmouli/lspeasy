@@ -4,6 +4,7 @@
  */
 
 import { EventEmitter } from 'node:events';
+import type { Disposable } from './disposable.js';
 
 /**
  * Token that can be used to signal cancellation
@@ -16,8 +17,9 @@ export interface CancellationToken {
 
   /**
    * Register callback to be called when cancellation is requested
+   * @returns Disposable to unregister the callback
    */
-  onCancellationRequested(callback: () => void): void;
+  onCancellationRequested(callback: () => void): Disposable;
 }
 
 /**
@@ -39,12 +41,18 @@ export class CancellationTokenSource {
         return self.cancelled;
       },
 
-      onCancellationRequested: (callback: () => void) => {
+      onCancellationRequested: (callback: () => void): Disposable => {
         if (self.cancelled) {
           // Already cancelled, call immediately
           callback();
+          return { dispose: () => {} };
         } else {
           self.emitter.once('cancelled', callback);
+          return {
+            dispose: () => {
+              self.emitter.off('cancelled', callback);
+            }
+          };
         }
       }
     };
@@ -83,8 +91,9 @@ export class CancellationTokenSource {
 export const CancellationToken = {
   None: {
     isCancellationRequested: false,
-    onCancellationRequested: () => {
-      // No-op
+    onCancellationRequested: (): Disposable => {
+      // No-op, never cancels
+      return { dispose: () => {} };
     }
   } as CancellationToken
 };

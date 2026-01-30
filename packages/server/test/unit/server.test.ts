@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { LSPServer } from '@lspy/server';
-import { ConsoleLogger } from '@lspy/core';
+import { ConsoleLogger, LogLevel } from '@lspy/core';
 
 describe('LSPServer', () => {
   describe('constructor', () => {
@@ -15,7 +15,7 @@ describe('LSPServer', () => {
     });
 
     it('should create server with custom options', () => {
-      const logger = new ConsoleLogger('debug');
+      const logger = new ConsoleLogger(LogLevel.Debug);
       const server = new LSPServer({
         name: 'test-server',
         version: '2.0.0',

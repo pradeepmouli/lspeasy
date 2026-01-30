@@ -10,6 +10,7 @@ import type { Transport } from '@lspy/core';
 class TestTransport implements Transport {
   private messageHandlers: Array<(message: any) => void> = [];
   private errorHandlers: Array<(error: Error) => void> = [];
+  private closeHandlers: Array<() => void> = [];
   public sentMessages: any[] = [];
   private _connected = true;
 
@@ -27,8 +28,16 @@ class TestTransport implements Transport {
     return { dispose: () => {} };
   }
 
+  onClose(handler: () => void) {
+    this.closeHandlers.push(handler);
+    return { dispose: () => {} };
+  }
+
   async close(): Promise<void> {
     this._connected = false;
+    for (const handler of this.closeHandlers) {
+      handler();
+    }
   }
 
   isConnected(): boolean {

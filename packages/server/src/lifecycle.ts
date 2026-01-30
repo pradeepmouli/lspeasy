@@ -56,13 +56,6 @@ export class LifecycleManager {
       }
     };
 
-    // Send response
-    await transport.send({
-      jsonrpc: '2.0',
-      id,
-      result
-    });
-
     this.logger.info('Server initialized');
     return result;
   }
@@ -80,7 +73,6 @@ export class LifecycleManager {
    */
   async handleShutdown(transport: Transport, id: number | string): Promise<void> {
     this.logger.info('Shutting down server...');
-
     this.logger.info('Server shutdown complete');
   }
 

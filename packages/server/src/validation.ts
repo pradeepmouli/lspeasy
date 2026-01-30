@@ -4,7 +4,7 @@
 
 import { z, ZodError } from 'zod';
 import { ResponseError } from '@lspy/core';
-import type { RequestContext } from './types.js';
+import type { RequestContext, NotificationContext } from './types.js';
 
 /**
  * Basic Zod schemas for LSP types (minimal validation)
@@ -121,10 +121,20 @@ export const methodSchemas: Record<string, z.ZodSchema | undefined> = {
 /**
  * Validate request parameters
  */
+/**
+ * Validate request/notification parameters
+ * @param method - The LSP method name
+ * @param params - The parameters to validate
+ * @param context - The request/notification context (optional for validation-only calls)
+ * @param onValidationError - Optional custom validation error handler
+ * @returns Validated parameters
+ * @throws ResponseError if validation fails
+ */
 export function validateParams(
   method: string,
   params: unknown,
-  onValidationError?: (error: ZodError, context: RequestContext) => any
+  context?: RequestContext | NotificationContext,
+  onValidationError?: (error: ZodError, context: RequestContext | NotificationContext) => any
 ): unknown {
   const schema = methodSchemas[method];
 
@@ -137,12 +147,8 @@ export function validateParams(
     return schema.parse(params);
   } catch (error) {
     if (error instanceof ZodError) {
-      if (onValidationError) {
-        const errorObj = onValidationError(error, {
-          id: -1,
-          method,
-          clientCapabilities: undefined
-        });
+      if (onValidationError && context) {
+        const errorObj = onValidationError(error, context);
         throw new ResponseError(errorObj.code, errorObj.message, errorObj.data);
       }
 
