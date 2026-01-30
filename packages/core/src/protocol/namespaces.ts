@@ -1,311 +1,242 @@
 /**
- * Hierarchical namespace structure for LSP methods
+ * Hierarchical type structure for LSP methods using nested types and const overloads
  * Mirrors LSP specification organization (textDocument/*, workspace/*, etc.)
- *
- * Type-only imports from vscode-languageserver-protocol
  */
 
-/* eslint-disable no-unused-vars */
 import type {
-  // Hover
   HoverParams,
   Hover,
   HoverOptions,
   HoverRegistrationOptions,
-  // Completion
+  HoverClientCapabilities,
   CompletionParams,
   CompletionItem,
   CompletionList,
   CompletionOptions,
   CompletionRegistrationOptions,
-  // Definition
+  CompletionClientCapabilities,
   DefinitionParams,
   Definition,
   DefinitionOptions,
   DefinitionRegistrationOptions,
-  // References
+  DefinitionClientCapabilities,
   ReferenceParams,
   Location,
   ReferenceOptions,
   ReferenceRegistrationOptions,
-  // Document Symbol
+  ReferenceClientCapabilities,
   DocumentSymbolParams,
   DocumentSymbol,
   SymbolInformation,
   DocumentSymbolOptions,
   DocumentSymbolRegistrationOptions,
-  // Workspace Symbol
+  DocumentSymbolClientCapabilities,
   WorkspaceSymbolParams,
   WorkspaceSymbol,
   WorkspaceSymbolOptions,
   WorkspaceSymbolRegistrationOptions,
-  // Code Action
+  WorkspaceSymbolClientCapabilities,
   CodeActionParams,
   CodeAction,
   Command,
   CodeActionOptions,
   CodeActionRegistrationOptions,
-  // Formatting
+  CodeActionClientCapabilities,
   DocumentFormattingParams,
   TextEdit,
   DocumentFormattingOptions,
   DocumentFormattingRegistrationOptions,
-  // Rename
+  DocumentFormattingClientCapabilities,
   RenameParams,
   RenameOptions,
   RenameRegistrationOptions,
   WorkspaceEdit,
-  // Initialization
+  RenameClientCapabilities,
   InitializeParams,
   InitializeResult,
   InitializedParams,
-  // Text Document Sync
   DidOpenTextDocumentParams,
   DidChangeTextDocumentParams,
   DidCloseTextDocumentParams,
   DidSaveTextDocumentParams,
-  // Workspace
   DidChangeConfigurationParams,
   DidChangeWatchedFilesParams,
   DidChangeWorkspaceFoldersParams,
   ExecuteCommandParams,
-  ClientCapabilities,
-  HoverClientCapabilities,
-  CompletionClientCapabilities,
-  DefinitionClientCapabilities,
-  ReferenceClientCapabilities,
-  DocumentSymbolClientCapabilities,
-  CodeActionClientCapabilities,
-  DocumentFormattingClientCapabilities,
-  RenameClientCapabilities,
-  WorkspaceSymbolClientCapabilities,
   ExecuteCommandOptions,
   ExecuteCommandRegistrationOptions,
   ExecuteCommandClientCapabilities
 } from 'vscode-languageserver-protocol';
-/* eslint-enable no-unused-vars */
 
-/**
- * Request method namespaces (hierarchically organized)
- */
-export namespace LSPRequest {
-  /**
-   * Text Document methods
-   */
-  export namespace TextDocument {
-    export type Path = 'textDocument';
+export type LSPRequest = {
+  TextDocument: {
+    Hover: {
+      Method: 'textDocument/hover';
+      Params: HoverParams;
+      Result: Hover | null;
+      ClientCapability: HoverClientCapabilities;
+      ServerCapability: 'hoverProvider';
+      Options: HoverOptions;
+      RegistrationOptions: HoverRegistrationOptions;
+    };
+    Completion: {
+      Method: 'textDocument/completion';
+      Params: CompletionParams;
+      Result: CompletionList | CompletionItem[] | null;
+      ClientCapability: CompletionClientCapabilities;
+      ServerCapability: 'completionProvider';
+      Options: CompletionOptions;
+      RegistrationOptions: CompletionRegistrationOptions;
+    };
+    Definition: {
+      Method: 'textDocument/definition';
+      Params: DefinitionParams;
+      Result: Definition | null;
+      ClientCapability: DefinitionClientCapabilities;
+      ServerCapability: 'definitionProvider';
+      Options: DefinitionOptions;
+      RegistrationOptions: DefinitionRegistrationOptions;
+    };
+    References: {
+      Method: 'textDocument/references';
+      Params: ReferenceParams;
+      Result: Location[] | null;
+      ClientCapability: ReferenceClientCapabilities;
+      ServerCapability: 'referencesProvider';
+      Options: ReferenceOptions;
+      RegistrationOptions: ReferenceRegistrationOptions;
+    };
+    DocumentSymbol: {
+      Method: 'textDocument/documentSymbol';
+      Params: DocumentSymbolParams;
+      Result: DocumentSymbol[] | SymbolInformation[] | null;
+      ClientCapability: DocumentSymbolClientCapabilities;
+      ServerCapability: 'documentSymbolProvider';
+      Options: DocumentSymbolOptions;
+      RegistrationOptions: DocumentSymbolRegistrationOptions;
+    };
+    CodeAction: {
+      Method: 'textDocument/codeAction';
+      Params: CodeActionParams;
+      Result: (Command | CodeAction)[] | null;
+      ClientCapability: CodeActionClientCapabilities;
+      ServerCapability: 'codeActionProvider';
+      Options: CodeActionOptions;
+      RegistrationOptions: CodeActionRegistrationOptions;
+    };
+    Formatting: {
+      Method: 'textDocument/formatting';
+      Params: DocumentFormattingParams;
+      Result: TextEdit[] | null;
+      ClientCapability: DocumentFormattingClientCapabilities;
+      ServerCapability: 'documentFormattingProvider';
+      Options: DocumentFormattingOptions;
+      RegistrationOptions: DocumentFormattingRegistrationOptions;
+    };
+    Rename: {
+      Method: 'textDocument/rename';
+      Params: RenameParams;
+      Result: WorkspaceEdit | null;
+      ClientCapability: RenameClientCapabilities;
+      ServerCapability: 'renameProvider';
+      Options: RenameOptions;
+      RegistrationOptions: RenameRegistrationOptions;
+    };
+  };
+  Workspace: {
+    Symbol: {
+      Method: 'workspace/symbol';
+      Params: WorkspaceSymbolParams;
+      Result: SymbolInformation[] | WorkspaceSymbol[] | null;
+      ClientCapability: WorkspaceSymbolClientCapabilities;
+      ServerCapability: 'workspaceSymbolProvider';
+      Options: WorkspaceSymbolOptions;
+      RegistrationOptions: WorkspaceSymbolRegistrationOptions;
+    };
+    ExecuteCommand: {
+      Method: 'workspace/executeCommand';
+      Params: ExecuteCommandParams;
+      Result: any | null;
+      ClientCapability: ExecuteCommandClientCapabilities;
+      ServerCapability: 'executeCommandProvider';
+      Options: ExecuteCommandOptions;
+      RegistrationOptions: ExecuteCommandRegistrationOptions;
+    };
+  };
+  Initialize: {
+    Method: 'initialize';
+    Params: InitializeParams;
+    Result: InitializeResult;
+    ClientCapability: never;
+    ServerCapability: never;
+  };
+  Shutdown: {
+    Method: 'shutdown';
+    Params: void;
+    Result: null;
+    ClientCapability: never;
+    ServerCapability: never;
+  };
+};
 
-    export namespace Hover {
-      export type Method = 'textDocument/hover';
-      export const Method = 'textDocument/hover';
-      export type Params = HoverParams;
-      export type Result = Hover | null;
-      export type ClientCapability = HoverClientCapabilities;
-      export type ServerCapability = 'hoverProvider';
-      export type Options = HoverOptions;
-      export type RegistrationOptions = HoverRegistrationOptions;
-    }
+export type LSPNotification = {
+  TextDocument: {
+    DidOpen: { Method: 'textDocument/didOpen'; Params: DidOpenTextDocumentParams };
+    DidChange: { Method: 'textDocument/didChange'; Params: DidChangeTextDocumentParams };
+    DidClose: { Method: 'textDocument/didClose'; Params: DidCloseTextDocumentParams };
+    DidSave: { Method: 'textDocument/didSave'; Params: DidSaveTextDocumentParams };
+  };
+  Workspace: {
+    DidChangeConfiguration: {
+      Method: 'workspace/didChangeConfiguration';
+      Params: DidChangeConfigurationParams;
+    };
+    DidChangeWatchedFiles: {
+      Method: 'workspace/didChangeWatchedFiles';
+      Params: DidChangeWatchedFilesParams;
+    };
+    DidChangeWorkspaceFolders: {
+      Method: 'workspace/didChangeWorkspaceFolders';
+      Params: DidChangeWorkspaceFoldersParams;
+    };
+  };
+  Initialized: { Method: 'initialized'; Params: InitializedParams };
+  Exit: { Method: 'exit'; Params: void };
+  CancelRequest: { Method: '$/cancelRequest'; Params: { id: number | string } };
+};
 
-    export namespace Completion {
-      export type Method = 'textDocument/completion';
-      export const Method = 'textDocument/completion';
-      export type Params = CompletionParams;
-      export type Result = CompletionList | CompletionItem[] | null;
-      export type ClientCapability = CompletionClientCapabilities;
-      export type ServerCapability = 'completionProvider';
-      export type Options = CompletionOptions;
-      export type RegistrationOptions = CompletionRegistrationOptions;
-    }
+export const LSPRequest = {
+  TextDocument: {
+    Hover: { Method: 'textDocument/hover' as const },
+    Completion: { Method: 'textDocument/completion' as const },
+    Definition: { Method: 'textDocument/definition' as const },
+    References: { Method: 'textDocument/references' as const },
+    DocumentSymbol: { Method: 'textDocument/documentSymbol' as const },
+    CodeAction: { Method: 'textDocument/codeAction' as const },
+    Formatting: { Method: 'textDocument/formatting' as const },
+    Rename: { Method: 'textDocument/rename' as const }
+  },
+  Workspace: {
+    Symbol: { Method: 'workspace/symbol' as const },
+    ExecuteCommand: { Method: 'workspace/executeCommand' as const }
+  },
+  Initialize: { Method: 'initialize' as const },
+  Shutdown: { Method: 'shutdown' as const }
+} as const;
 
-    export namespace Definition {
-      export type Method = 'textDocument/definition';
-      export const Method = 'textDocument/definition';
-      export type Params = DefinitionParams;
-      export type Result = Definition | null;
-      export type ClientCapability = DefinitionClientCapabilities;
-      export type ServerCapability = 'definitionProvider';
-      export type Options = DefinitionOptions;
-      export type RegistrationOptions = DefinitionRegistrationOptions;
-    }
-
-    export namespace References {
-      export type Method = 'textDocument/references';
-      export const Method = 'textDocument/references';
-      export type Params = ReferenceParams;
-      export type Result = Location[] | null;
-      export type ClientCapability = ReferenceClientCapabilities;
-      export type ServerCapability = 'referencesProvider';
-      export type Options = ReferenceOptions;
-      export type RegistrationOptions = ReferenceRegistrationOptions;
-    }
-
-    export namespace DocumentSymbol {
-      export type Method = 'textDocument/documentSymbol';
-      export const Method = 'textDocument/documentSymbol';
-      export type Params = DocumentSymbolParams;
-      export type Result = DocumentSymbol[] | SymbolInformation[] | null;
-      export type ClientCapability = DocumentSymbolClientCapabilities;
-      export type ServerCapability = 'documentSymbolProvider';
-      export type Options = DocumentSymbolOptions;
-      export type RegistrationOptions = DocumentSymbolRegistrationOptions;
-    }
-
-    export namespace CodeAction {
-      export type Method = 'textDocument/codeAction';
-      export const Method = 'textDocument/codeAction';
-      export type Params = CodeActionParams;
-      export type Result = (Command | CodeAction)[] | null;
-      export type ClientCapability = CodeActionClientCapabilities;
-      export type ServerCapability = 'codeActionProvider';
-      export type Options = CodeActionOptions;
-      export type RegistrationOptions = CodeActionRegistrationOptions;
-    }
-
-    export namespace Formatting {
-      export type Method = 'textDocument/formatting';
-      export const Method = 'textDocument/formatting';
-      export type Params = DocumentFormattingParams;
-      export type Result = TextEdit[] | null;
-      export type ClientCapability = DocumentFormattingClientCapabilities;
-      export type ServerCapability = 'documentFormattingProvider';
-      export type Options = DocumentFormattingOptions;
-      export type RegistrationOptions = DocumentFormattingRegistrationOptions;
-    }
-
-    export namespace Rename {
-      export type Method = 'textDocument/rename';
-      export const Method = 'textDocument/rename';
-      export type Params = RenameParams;
-      export type Result = WorkspaceEdit | null;
-      export type ClientCapability = RenameClientCapabilities;
-      export type ServerCapability = 'renameProvider';
-      export type Options = RenameOptions;
-      export type RegistrationOptions = RenameRegistrationOptions;
-    }
-  }
-
-  /**
-   * Workspace methods
-   */
-  export namespace Workspace {
-    export type Path = 'workspace';
-
-    export namespace Symbol {
-      export type Method = 'workspace/symbol';
-      export const Method = 'workspace/symbol';
-      export type Params = WorkspaceSymbolParams;
-      export type Result = SymbolInformation[] | WorkspaceSymbol[] | null;
-      export type ClientCapability = WorkspaceSymbolClientCapabilities;
-      export type ServerCapability = 'workspaceSymbolProvider';
-      export type Options = WorkspaceSymbolOptions;
-      export type RegistrationOptions = WorkspaceSymbolRegistrationOptions;
-    }
-
-    export namespace ExecuteCommand {
-      export type Method = 'workspace/executeCommand';
-      export const Method = 'workspace/executeCommand';
-      export type Params = ExecuteCommandParams;
-      export type Result = any | null;
-      export type ClientCapability = ExecuteCommandClientCapabilities;
-      export type ServerCapability = 'executeCommandProvider';
-      export type Options = ExecuteCommandOptions;
-      export type RegistrationOptions = ExecuteCommandRegistrationOptions;
-    }
-  }
-
-  /**
-   * Lifecycle methods (top-level, no namespace grouping)
-   */
-  export namespace Initialize {
-    export type Method = 'initialize';
-    export const Method = 'initialize';
-    export type Params = InitializeParams;
-    export type Result = InitializeResult;
-    export type ClientCapability = never; // Always available
-    export type ServerCapability = never; // Always available
-  }
-
-  export namespace Shutdown {
-    export type Method = 'shutdown';
-    export const Method = 'shutdown';
-    export type Params = void;
-    export type Result = null;
-    export type ClientCapability = never; // Always available
-    export type ServerCapability = never; // Always available
-  }
-}
-
-/**
- * Notification method namespaces (hierarchically organized)
- */
-export namespace LSPNotification {
-  /**
-   * Text Document notifications
-   */
-  export namespace TextDocument {
-    export type Path = 'textDocument';
-
-    export namespace DidOpen {
-      export type Method = 'textDocument/didOpen';
-      export type Params = DidOpenTextDocumentParams;
-    }
-
-    export namespace DidChange {
-      export type Method = 'textDocument/didChange';
-      export type Params = DidChangeTextDocumentParams;
-    }
-
-    export namespace DidClose {
-      export type Method = 'textDocument/didClose';
-      export type Params = DidCloseTextDocumentParams;
-    }
-
-    export namespace DidSave {
-      export type Method = 'textDocument/didSave';
-      export type Params = DidSaveTextDocumentParams;
-    }
-  }
-
-  /**
-   * Workspace notifications
-   */
-  export namespace Workspace {
-    export type Path = 'workspace';
-
-    export namespace DidChangeConfiguration {
-      export type Method = 'workspace/didChangeConfiguration';
-      export type Params = DidChangeConfigurationParams;
-    }
-
-    export namespace DidChangeWatchedFiles {
-      export type Method = 'workspace/didChangeWatchedFiles';
-      export type Params = DidChangeWatchedFilesParams;
-    }
-
-    export namespace DidChangeWorkspaceFolders {
-      export type Method = 'workspace/didChangeWorkspaceFolders';
-      export type Params = DidChangeWorkspaceFoldersParams;
-    }
-  }
-
-  /**
-   * Lifecycle notifications
-   */
-  export namespace Initialized {
-    export type Method = 'initialized';
-    export type Params = InitializedParams;
-  }
-
-  export namespace Exit {
-    export type Method = 'exit';
-    export type Params = void;
-  }
-
-  /**
-   * Cancellation notification
-   */
-  export namespace CancelRequest {
-    export type Method = '$/cancelRequest';
-    export type Params = { id: number | string };
-  }
-}
+export const LSPNotification = {
+  TextDocument: {
+    DidOpen: { Method: 'textDocument/didOpen' as const },
+    DidChange: { Method: 'textDocument/didChange' as const },
+    DidClose: { Method: 'textDocument/didClose' as const },
+    DidSave: { Method: 'textDocument/didSave' as const }
+  },
+  Workspace: {
+    DidChangeConfiguration: { Method: 'workspace/didChangeConfiguration' as const },
+    DidChangeWatchedFiles: { Method: 'workspace/didChangeWatchedFiles' as const },
+    DidChangeWorkspaceFolders: { Method: 'workspace/didChangeWorkspaceFolders' as const }
+  },
+  Initialized: { Method: 'initialized' as const },
+  Exit: { Method: 'exit' as const },
+  CancelRequest: { Method: '$/cancelRequest' as const }
+} as const;
