@@ -50,7 +50,8 @@ async function main() {
   // Subscribe to connection events
   client.onConnected(() => {
     console.log('✓ Connected to WebSocket server');
-    console.log(`  Server: ${client.serverInfo?.name} ${client.serverInfo?.version}`);
+    const serverInfo = client.getServerInfo();
+    console.log(`  Server: ${serverInfo?.name} ${serverInfo?.version}`);
   });
 
   client.onDisconnected(() => {
