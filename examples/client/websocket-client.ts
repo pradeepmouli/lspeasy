@@ -63,7 +63,7 @@ async function main() {
 
   try {
     // Connect and initialize
-    const initResult = await client.connect();
+    const initResult = await client.connect(transport);
     console.log('\nServer capabilities:', JSON.stringify(initResult.capabilities, null, 2));
 
     // Send didOpen notification
