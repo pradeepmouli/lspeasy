@@ -2,7 +2,7 @@
  * Unit tests for LSPClient constructor and connect/disconnect
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { LSPClient } from '../../src/client.js';
 import { StdioTransport } from '@lspy/core';
 import { PassThrough } from 'node:stream';
