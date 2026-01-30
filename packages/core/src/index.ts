@@ -42,6 +42,8 @@ export {
 export type { Transport } from './transport/transport.js';
 export { StdioTransport } from './transport/stdio.js';
 export type { StdioTransportOptions } from './transport/stdio.js';
+export { WebSocketTransport } from './transport/websocket.js';
+export type { WebSocketTransportOptions } from './transport/websocket.js';
 export { TransportEventEmitter } from './transport/events.js';
 
 // Utilities

@@ -163,12 +163,12 @@
 
 ### Implementation for US3
 
-- [ ] T074 [P] [US3] Implement WebSocketTransport in packages/core/src/transport/websocket.ts (client + server modes)
-- [ ] T075 [P] [US3] Add WebSocketTransportOptions (url for client, socket for server, reconnect options) in packages/core/src/transport/websocket.ts
-- [ ] T076 [US3] Add reconnection logic for WebSocketTransport (maxReconnectAttempts, reconnectDelay) in packages/core/src/transport/websocket.ts
+- [x] T074 [P] [US3] Implement WebSocketTransport in packages/core/src/transport/websocket.ts (client + server modes)
+- [x] T075 [P] [US3] Add WebSocketTransportOptions (url for client, socket for server, reconnect options) in packages/core/src/transport/websocket.ts
+- [x] T076 [US3] Add reconnection logic for WebSocketTransport (maxReconnectAttempts, reconnectDelay) in packages/core/src/transport/websocket.ts
 - [ ] T077 [US3] Implement transport error handling and resource cleanup in packages/core/src/transport/error-handling.ts
-- [ ] T078 [P] [US3] Update LSPServer.listen() to accept any Transport implementation in packages/server/src/server.ts
-- [ ] T079 [P] [US3] Update LSPClient.connect() to accept any Transport implementation in packages/client/src/client.ts
+- [x] T078 [P] [US3] Update LSPServer.listen() to accept any Transport implementation in packages/server/src/server.ts
+- [x] T079 [P] [US3] Update LSPClient.connect() to accept any Transport implementation in packages/client/src/client.ts
 
 ### Examples for US3
 
