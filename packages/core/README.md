@@ -219,24 +219,38 @@ const output = serializeMessage(messages[0]);
 ### Creating Messages
 
 ```typescript
-import { 
-  createRequest, 
-  createNotification, 
-  createResponse, 
-  createErrorResponse 
-} from '@lspy/core';
+// JSON-RPC 2.0 request message
+const request = {
+  jsonrpc: '2.0',
+  id: 1,
+  method: 'textDocument/hover',
+  params: { /* params */ },
+};
 
-// Request
-const request = createRequest('textDocument/hover', { /* params */ }, 1);
+// JSON-RPC 2.0 notification message (no id)
+const notification = {
+  jsonrpc: '2.0',
+  method: 'textDocument/didChange',
+  params: { /* params */ },
+};
 
-// Notification
-const notification = createNotification('textDocument/didChange', { /* params */ });
+// Successful response message
+const response = {
+  jsonrpc: '2.0',
+  id: 1,
+  result: { /* result */ },
+};
 
-// Success response
-const response = createResponse(1, { /* result */ });
-
-// Error response
-const errorResponse = createErrorResponse(1, -32601, 'Method not found');
+// Error response message
+const errorResponse = {
+  jsonrpc: '2.0',
+  id: 1,
+  error: {
+    code: -32601,
+    message: 'Method not found',
+    // optional: data: { ... },
+  },
+};
 ```
 
 ## Cancellation
