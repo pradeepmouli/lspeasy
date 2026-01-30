@@ -50,7 +50,7 @@ const client = new LSPClient({
 });
 
 // Connect to server (sends initialize + initialized)
-await client.connect();
+await client.connect(transport);
 
 // Use high-level API
 const hover = await client.textDocument.hover({
