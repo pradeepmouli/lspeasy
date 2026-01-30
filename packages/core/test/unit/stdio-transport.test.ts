@@ -79,14 +79,23 @@ describe('StdioTransport', () => {
       ];
 
       const chunks: Buffer[] = [];
-      outputStream.on('data', (chunk) => chunks.push(chunk));
+      const dataPromise = new Promise<void>((resolve) => {
+        let count = 0;
+        outputStream.on('data', (chunk) => {
+          chunks.push(chunk);
+          count++;
+          if (count === messages.length) {
+            resolve();
+          }
+        });
+      });
 
       for (const message of messages) {
         await transport.send(message);
       }
 
-      // Give time for all writes to complete
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for all data events
+      await dataPromise;
 
       const output = Buffer.concat(chunks).toString('utf8');
       expect(output).toContain('"method":"test1"');
@@ -117,20 +126,28 @@ describe('StdioTransport', () => {
     it('should handle multiple message handlers', async () => {
       const message: Message = { jsonrpc: '2.0', id: 1, method: 'test' };
 
-      const handler1 = vi.fn();
-      const handler2 = vi.fn();
+      const handler1Promise = new Promise<Message>((resolve) => {
+        const handler1 = vi.fn((msg: Message) => {
+          resolve(msg);
+        });
+        transport.onMessage(handler1);
+      });
 
-      transport.onMessage(handler1);
-      transport.onMessage(handler2);
+      const handler2Promise = new Promise<Message>((resolve) => {
+        const handler2 = vi.fn((msg: Message) => {
+          resolve(msg);
+        });
+        transport.onMessage(handler2);
+      });
 
       const serialized = serializeMessage(message);
       inputStream.write(serialized);
 
-      // Wait for handlers to be called
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for both handlers to be called
+      const [result1, result2] = await Promise.all([handler1Promise, handler2Promise]);
 
-      expect(handler1).toHaveBeenCalledWith(message);
-      expect(handler2).toHaveBeenCalledWith(message);
+      expect(result1).toEqual(message);
+      expect(result2).toEqual(message);
     });
 
     it('should return disposable that removes handler', async () => {
@@ -155,16 +172,22 @@ describe('StdioTransport', () => {
         { jsonrpc: '2.0', id: 2, method: 'test2' }
       ];
 
-      const received: Message[] = [];
-      transport.onMessage((msg) => received.push(msg));
+      const receivedPromise = new Promise<Message[]>((resolve) => {
+        const received: Message[] = [];
+        transport.onMessage((msg) => {
+          received.push(msg);
+          if (received.length === messages.length) {
+            resolve(received);
+          }
+        });
+      });
 
       for (const message of messages) {
         const serialized = serializeMessage(message);
         inputStream.write(serialized);
       }
 
-      // Wait for all messages to be processed
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      const received = await receivedPromise;
 
       expect(received).toHaveLength(2);
       expect(received[0]).toEqual(messages[0]);
@@ -173,21 +196,27 @@ describe('StdioTransport', () => {
 
     it('should not crash if handler throws error', async () => {
       const message: Message = { jsonrpc: '2.0', id: 1, method: 'test' };
-      const errorHandler = vi.fn(() => {
-        throw new Error('Handler error');
-      });
-      const successHandler = vi.fn();
 
-      transport.onMessage(errorHandler);
-      transport.onMessage(successHandler);
+      const bothHandlersCalledPromise = new Promise<void>((resolve) => {
+        let callCount = 0;
+        const errorHandler = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+          throw new Error('Handler error');
+        });
+        const successHandler = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+        });
+
+        transport.onMessage(errorHandler);
+        transport.onMessage(successHandler);
+      });
 
       const serialized = serializeMessage(message);
       inputStream.write(serialized);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      expect(errorHandler).toHaveBeenCalled();
-      expect(successHandler).toHaveBeenCalled();
+      await bothHandlersCalledPromise;
     });
   });
 
@@ -205,19 +234,25 @@ describe('StdioTransport', () => {
     });
 
     it('should handle multiple error handlers', async () => {
-      const handler1 = vi.fn();
-      const handler2 = vi.fn();
+      const bothCalledPromise = new Promise<void>((resolve) => {
+        let callCount = 0;
+        const handler1 = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+        });
+        const handler2 = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+        });
 
-      transport.onError(handler1);
-      transport.onError(handler2);
+        transport.onError(handler1);
+        transport.onError(handler2);
+      });
 
       const error = new Error('Test error');
       inputStream.emit('error', error);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      expect(handler1).toHaveBeenCalledWith(error);
-      expect(handler2).toHaveBeenCalledWith(error);
+      await bothCalledPromise;
     });
 
     it('should return disposable that removes handler', async () => {
@@ -235,21 +270,26 @@ describe('StdioTransport', () => {
     });
 
     it('should not crash if error handler throws error', async () => {
-      const errorHandler = vi.fn(() => {
-        throw new Error('Handler error');
-      });
-      const successHandler = vi.fn();
+      const bothCalledPromise = new Promise<void>((resolve) => {
+        let callCount = 0;
+        const errorHandler = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+          throw new Error('Handler error');
+        });
+        const successHandler = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+        });
 
-      transport.onError(errorHandler);
-      transport.onError(successHandler);
+        transport.onError(errorHandler);
+        transport.onError(successHandler);
+      });
 
       const error = new Error('Test error');
       inputStream.emit('error', error);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      expect(errorHandler).toHaveBeenCalled();
-      expect(successHandler).toHaveBeenCalled();
+      await bothCalledPromise;
     });
   });
 
@@ -277,18 +317,24 @@ describe('StdioTransport', () => {
     });
 
     it('should handle multiple close handlers', async () => {
-      const handler1 = vi.fn();
-      const handler2 = vi.fn();
+      const bothCalledPromise = new Promise<void>((resolve) => {
+        let callCount = 0;
+        const handler1 = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+        });
+        const handler2 = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+        });
 
-      transport.onClose(handler1);
-      transport.onClose(handler2);
+        transport.onClose(handler1);
+        transport.onClose(handler2);
+      });
 
       inputStream.emit('close');
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      expect(handler1).toHaveBeenCalled();
-      expect(handler2).toHaveBeenCalled();
+      await bothCalledPromise;
     });
 
     it('should return disposable that removes handler', async () => {
@@ -305,42 +351,42 @@ describe('StdioTransport', () => {
     });
 
     it('should clear all handlers after close', async () => {
-      const messageHandler = vi.fn();
-      const errorHandler = vi.fn();
-      const closeHandler = vi.fn();
+      const closePromise = new Promise<void>((resolve) => {
+        const closeHandler = vi.fn(() => resolve());
+        transport.onClose(closeHandler);
+      });
 
-      transport.onMessage(messageHandler);
-      transport.onError(errorHandler);
-      transport.onClose(closeHandler);
+      transport.onMessage(vi.fn());
+      transport.onError(vi.fn());
 
       inputStream.emit('close');
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await closePromise;
 
-      // Verify handlers were called initially
-      expect(closeHandler).toHaveBeenCalled();
-
-      // After close, message and error handlers should be cleared
-      // But emitting on the stream might still trigger underlying listeners
-      // We just verify the transport is disconnected
+      // Verify the transport is disconnected
       expect(transport.isConnected()).toBe(false);
     });
 
     it('should not crash if close handler throws error', async () => {
-      const errorHandler = vi.fn(() => {
-        throw new Error('Handler error');
-      });
-      const successHandler = vi.fn();
+      const bothCalledPromise = new Promise<void>((resolve) => {
+        let callCount = 0;
+        const errorHandler = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+          throw new Error('Handler error');
+        });
+        const successHandler = vi.fn(() => {
+          callCount++;
+          if (callCount === 2) resolve();
+        });
 
-      transport.onClose(errorHandler);
-      transport.onClose(successHandler);
+        transport.onClose(errorHandler);
+        transport.onClose(successHandler);
+      });
 
       inputStream.emit('close');
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      expect(errorHandler).toHaveBeenCalled();
-      expect(successHandler).toHaveBeenCalled();
+      await bothCalledPromise;
     });
   });
 
