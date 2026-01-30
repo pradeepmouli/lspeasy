@@ -303,7 +303,7 @@ disposable.dispose();
 - [x] LSP server implementation
 - [x] LSP client implementation  
 - [x] Unit tests and documentation
-- [ ] WebSocket transport
+- [x] WebSocket transport
 - [ ] Progress reporting
 - [ ] Partial results
 - [ ] Multi-root workspace support
