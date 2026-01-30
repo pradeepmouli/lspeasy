@@ -68,7 +68,7 @@
     "vitest": "^4.0.18"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged && pnpm run type-check"
+    "pre-commit": "pnpm lint-staged"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,md}": [

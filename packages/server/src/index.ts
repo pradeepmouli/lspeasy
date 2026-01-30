@@ -34,7 +34,19 @@ export type {
   CompletionList,
   CompletionItem,
   DefinitionParams,
-  Definition
+  Definition,
+  // Type inference utilities
+  LSPRequestMethod,
+  LSPNotificationMethod,
+  InferRequestParams,
+  InferRequestResult,
+  InferNotificationParams
 } from '@lspy/core';
 
-export { ResponseError, JSONRPCErrorCode, StdioTransport, ConsoleLogger } from '@lspy/core';
+export {
+  ResponseError,
+  JSONRPCErrorCode,
+  StdioTransport,
+  ConsoleLogger,
+  LogLevel
+} from '@lspy/core';

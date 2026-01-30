@@ -10,7 +10,12 @@ import type {
   ServerCapabilities,
   ClientCapabilities,
   InitializeParams,
-  InitializedParams
+  InitializedParams,
+  LSPRequestMethod,
+  LSPNotificationMethod,
+  InferRequestParams,
+  InferRequestResult,
+  InferNotificationParams
 } from '@lspy/core';
 import { ConsoleLogger, LogLevel, ResponseError, isRequestMessage } from '@lspy/core';
 import type { ServerOptions, RequestHandler, NotificationHandler } from './types.js';
@@ -61,8 +66,29 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   }
 
   /**
-   * Register a request handler
+   * Register a request handler with automatic type inference
+   *
+   * @example
+   * // Type parameters are automatically inferred from method name
+   * server.onRequest('textDocument/hover', async (params) => {
+   *   // params is automatically typed as HoverParams
+   *   return { contents: 'Hover text' };
+   * });
    */
+  onRequest<Method extends LSPRequestMethod>(
+    method: Method,
+    handler: RequestHandler<InferRequestParams<Method>, InferRequestResult<Method>>
+  ): this;
+
+  /**
+   * Register a request handler with explicit type parameters (backwards compatible)
+   */
+  onRequest<Method extends string, Params = unknown, Result = unknown>(
+    method: Method,
+    handler: RequestHandler<Params, Result>
+  ): this;
+
+  // Implementation
   onRequest<Method extends string, Params = unknown, Result = unknown>(
     method: Method,
     handler: RequestHandler<Params, Result>
@@ -86,8 +112,28 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   }
 
   /**
-   * Register a notification handler
+   * Register a notification handler with automatic type inference
+   *
+   * @example
+   * // Type parameters are automatically inferred from method name
+   * server.onNotification('textDocument/didOpen', (params) => {
+   *   // params is automatically typed as DidOpenTextDocumentParams
+   * });
    */
+  onNotification<Method extends LSPNotificationMethod>(
+    method: Method,
+    handler: NotificationHandler<InferNotificationParams<Method>>
+  ): this;
+
+  /**
+   * Register a notification handler with explicit type parameters (backwards compatible)
+   */
+  onNotification<Method extends string, Params = unknown>(
+    method: Method,
+    handler: NotificationHandler<Params>
+  ): this;
+
+  // Implementation
   onNotification<Method extends string, Params = unknown>(
     method: Method,
     handler: NotificationHandler<Params>

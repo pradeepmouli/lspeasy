@@ -171,6 +171,11 @@ All Phase 1 artifacts completed:
    - Protocol type exports (50+ LSP types from vscode-languageserver-protocol)
    - JSON-RPC 2.0 primitives (Message, Request, Response, Notification)
    - Utility types (Logger, CancellationToken, Disposable)
+   - **Hierarchical namespace structure with comprehensive metadata**:
+     - LSPRequest.* and LSPNotification.* namespaces mirroring LSP spec
+     - Each method namespace includes: Method (type & const), Params, Result, ClientCapability, ServerCapability, Options, RegistrationOptions
+     - Type inference utilities (InferRequestParams, InferRequestResult, InferNotificationParams)
+     - Enables automatic type inference for handler registration
    - Custom transport creation examples
 
 5. **[quickstart.md](quickstart.md)** - Getting started guide

@@ -61,3 +61,36 @@ export { JSONRPCErrorCode, ErrorMessage, ResponseError } from './utils/errors.js
 
 // Protocol types (re-exported from vscode-languageserver-protocol)
 export * from './protocol/types.js';
+
+// LSP protocol namespaces and type inference
+export type { LSPRequest, LSPNotification } from './protocol/namespaces.js';
+export type {
+  LSPRequestMethod,
+  LSPNotificationMethod,
+  InferRequestParams,
+  InferRequestResult,
+  InferNotificationParams
+} from './protocol/infer.js';
+
+// LSP protocol schemas
+export {
+  PositionSchema,
+  RangeSchema,
+  TextDocumentIdentifierSchema,
+  HoverParamsSchema,
+  HoverSchema,
+  CompletionParamsSchema,
+  CompletionItemSchema,
+  CompletionListSchema,
+  DefinitionParamsSchema,
+  ReferenceParamsSchema,
+  DocumentSymbolParamsSchema,
+  DocumentSymbolSchema,
+  InitializeParamsSchema,
+  DidOpenTextDocumentParamsSchema,
+  DidChangeTextDocumentParamsSchema,
+  DidCloseTextDocumentParamsSchema,
+  DidSaveTextDocumentParamsSchema,
+  LSPSchemas,
+  getSchemaForMethod
+} from './protocol/schemas.js';

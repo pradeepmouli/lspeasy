@@ -41,10 +41,10 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsgo --build",
     "clean": "rm -rf dist *.tsbuildinfo",
-    "dev": "tsc --build --watch",
-    "type-check": "tsc --noEmit"
+    "dev": "tsgo --build --watch",
+    "type-check": "tsgo --noEmit"
   },
   "peerDependencies": {
     "zod": "^3.25.0"

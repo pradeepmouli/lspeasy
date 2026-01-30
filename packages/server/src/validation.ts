@@ -3,108 +3,31 @@
  */
 
 import { z, ZodError } from 'zod';
-import { ResponseError } from '@lspy/core';
+import { ResponseError, getSchemaForMethod } from '@lspy/core';
 import type { RequestContext, NotificationContext } from './types.js';
 
 /**
- * Basic Zod schemas for LSP types (minimal validation)
- * Full validation can be added as needed
+ * Zod schemas imported from @lspy/core
+ * These are comprehensive LSP protocol schemas
  */
-
-// Position schema
-export const positionSchema = z.object({
-  line: z.number().int().min(0),
-  character: z.number().int().min(0)
-});
-
-// Range schema
-export const rangeSchema = z.object({
-  start: positionSchema,
-  end: positionSchema
-});
-
-// TextDocumentIdentifier schema
-export const textDocumentIdentifierSchema = z.object({
-  uri: z.string()
-});
-
-// TextDocumentPositionParams schema
-export const textDocumentPositionParamsSchema = z.object({
-  textDocument: textDocumentIdentifierSchema,
-  position: positionSchema
-});
-
-// HoverParams = TextDocumentPositionParams
-export const hoverParamsSchema = textDocumentPositionParamsSchema;
-
-// CompletionParams schema
-export const completionParamsSchema = textDocumentPositionParamsSchema.extend({
-  context: z
-    .object({
-      triggerKind: z.number(),
-      triggerCharacter: z.string().optional()
-    })
-    .optional()
-});
-
-// DefinitionParams = TextDocumentPositionParams
-export const definitionParamsSchema = textDocumentPositionParamsSchema;
-
-// ReferenceParams schema
-export const referenceParamsSchema = textDocumentPositionParamsSchema.extend({
-  context: z.object({
-    includeDeclaration: z.boolean()
-  })
-});
-
-// DocumentSymbolParams schema
-export const documentSymbolParamsSchema = z.object({
-  textDocument: textDocumentIdentifierSchema
-});
-
-// InitializeParams schema
-export const initializeParamsSchema = z.object({
-  processId: z.number().nullable(),
-  clientInfo: z
-    .object({
-      name: z.string(),
-      version: z.string().optional()
-    })
-    .optional(),
-  locale: z.string().optional(),
-  rootPath: z.string().nullable().optional(),
-  rootUri: z.string().nullable(),
-  capabilities: z.any(),
-  trace: z.enum(['off', 'messages', 'verbose']).optional(),
-  workspaceFolders: z.array(z.any()).nullable().optional()
-});
-
-// DidOpenTextDocumentParams schema
-export const didOpenTextDocumentParamsSchema = z.object({
-  textDocument: z.object({
-    uri: z.string(),
-    languageId: z.string(),
-    version: z.number(),
-    text: z.string()
-  })
-});
-
-// DidChangeTextDocumentParams schema
-export const didChangeTextDocumentParamsSchema = z.object({
-  textDocument: z.object({
-    uri: z.string(),
-    version: z.number()
-  }),
-  contentChanges: z.array(z.any())
-});
-
-// DidCloseTextDocumentParams schema
-export const didCloseTextDocumentParamsSchema = z.object({
-  textDocument: textDocumentIdentifierSchema
-});
+import {
+  PositionSchema as positionSchema,
+  RangeSchema as rangeSchema,
+  TextDocumentIdentifierSchema as textDocumentIdentifierSchema,
+  HoverParamsSchema as hoverParamsSchema,
+  CompletionParamsSchema as completionParamsSchema,
+  DefinitionParamsSchema as definitionParamsSchema,
+  ReferenceParamsSchema as referenceParamsSchema,
+  DocumentSymbolParamsSchema as documentSymbolParamsSchema,
+  InitializeParamsSchema as initializeParamsSchema,
+  DidOpenTextDocumentParamsSchema as didOpenTextDocumentParamsSchema,
+  DidChangeTextDocumentParamsSchema as didChangeTextDocumentParamsSchema,
+  DidCloseTextDocumentParamsSchema as didCloseTextDocumentParamsSchema
+} from '@lspy/core';
 
 /**
  * Schema registry for LSP methods
+ * Now using schemas from @lspy/core
  */
 export const methodSchemas: Record<string, z.ZodSchema | undefined> = {
   initialize: initializeParamsSchema,
@@ -155,7 +78,7 @@ export function validateParams(
       // Default validation error handling
       throw ResponseError.invalidParams(
         `Invalid params for ${method}: ${error.message}`,
-        error.errors
+        error.issues
       );
     }
     throw error;

@@ -1,10 +1,9 @@
 /**
  * Minimal LSP Server Example (<30 lines)
- * Demonstrates a basic hover server
+ * Demonstrates a basic hover server with automatic type inference
  */
 
 import { LSPServer, StdioTransport } from '@lspy/server';
-import type { HoverParams, Hover } from '@lspy/server';
 
 // Create server
 const server = new LSPServer({
@@ -17,18 +16,17 @@ server.setCapabilities({
   hoverProvider: true
 });
 
-// Register hover handler
-server.onRequest<'textDocument/hover', HoverParams, Hover | null>(
-  'textDocument/hover',
-  async (params) => {
-    return {
-      contents: {
-        kind: 'markdown',
-        value: `# Hover Information\n\nPosition: Line ${params.position.line}, Character ${params.position.character}`
-      }
-    };
-  }
-);
+// Register hover handler - types are automatically inferred!
+server.onRequest('textDocument/hover', async (params) => {
+  // params is automatically typed as HoverParams
+  // return type is automatically Hover | null
+  return {
+    contents: {
+      kind: 'markdown',
+      value: `# Hover Information\n\nPosition: Line ${params.position.line}, Character ${params.position.character}`
+    }
+  };
+});
 
 // Start server on stdio
 const transport = new StdioTransport();

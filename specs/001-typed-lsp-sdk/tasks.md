@@ -51,10 +51,10 @@
 
 ### Protocol Types Re-export
 
-- [ ] T019 [P] Create hierarchical namespace structure (LSPRequest.*, LSPNotification.*) in packages/core/src/protocol/namespaces.ts - Use type-only imports: import type { HoverParams, Hover } from 'vscode-languageserver-protocol'
+- [x] T019 [P] Create hierarchical namespace structure (LSPRequest.*, LSPNotification.*) in packages/core/src/protocol/namespaces.ts - Use type-only imports: import type { HoverParams, Hover } from 'vscode-languageserver-protocol' - ENHANCED: Added Method const, Options, RegistrationOptions, ClientCapability, ServerCapability to all request namespaces for comprehensive metadata
 - [x] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts - Pattern: export type { Position, Range, Location, ... } from 'vscode-languageserver-protocol'
-- [ ] T021 [P] Define InferRequestParams, InferRequestResult, InferNotificationParams type utilities in packages/core/src/protocol/infer.ts - Use conditional types to extract types from namespace structure
-- [ ] T022 [P] Generate Zod schemas for LSP types (Position, Range, Location, etc.) in packages/core/src/protocol/schemas.ts - Runtime validators matching TypeScript types from vscode-languageserver-protocol
+- [x] T021 [P] Define InferRequestParams, InferRequestResult, InferNotificationParams type utilities in packages/core/src/protocol/infer.ts - Use conditional types to extract types from namespace structure
+- [x] T022 [P] Generate Zod schemas for LSP types (Position, Range, Location, etc.) in packages/core/src/protocol/schemas.ts - Runtime validators matching TypeScript types from vscode-languageserver-protocol
 
 ### Utilities
 
