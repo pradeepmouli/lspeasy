@@ -12,12 +12,13 @@ import type {
   DidOpenTextDocumentParams,
   DidChangeTextDocumentParams
 } from '@lspy/server';
+import { LogLevel } from '@lspy/core';
 
 // Create server with logging
 const server = new LSPServer({
   name: 'hover-completion-server',
   version: '1.0.0',
-  logger: new ConsoleLogger('info')
+  logger: new ConsoleLogger(LogLevel.Info)
 });
 
 // Set capabilities
