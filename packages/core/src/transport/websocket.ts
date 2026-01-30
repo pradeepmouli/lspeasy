@@ -301,7 +301,6 @@ export class WebSocketTransport implements Transport {
     ) {
       return new Promise((resolve) => {
         const cleanup = () => {
-          this.socket.removeAllListeners();
           resolve();
         };
 
