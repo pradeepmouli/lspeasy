@@ -34,28 +34,31 @@ export class CancellationTokenSource {
     this.emitter = new EventEmitter();
     this.cancelled = false;
 
-    // Create token with proper binding
-    const self = this;
+    // Create token with proper arrow function binding
     this._token = {
-      get isCancellationRequested() {
-        return self.cancelled;
-      },
-
+      isCancellationRequested: false,
       onCancellationRequested: (callback: () => void): Disposable => {
-        if (self.cancelled) {
+        if (this.cancelled) {
           // Already cancelled, call immediately
           callback();
           return { dispose: () => {} };
         } else {
-          self.emitter.once('cancelled', callback);
+          this.emitter.once('cancelled', callback);
           return {
             dispose: () => {
-              self.emitter.off('cancelled', callback);
+              this.emitter.off('cancelled', callback);
             }
           };
         }
       }
     };
+
+    // Use Object.defineProperty for the getter to maintain proper this binding
+    Object.defineProperty(this._token, 'isCancellationRequested', {
+      get: () => this.cancelled,
+      enumerable: true,
+      configurable: false
+    });
   }
 
   /**

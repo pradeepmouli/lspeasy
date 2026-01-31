@@ -225,14 +225,14 @@
 
 ### Performance & Benchmarks
 
-- [ ] T100 [P] Create benchmark suite in packages/core/tests/benchmarks/message-parse.bench.ts (target: <1ms p95)
-- [ ] T101 [P] Create benchmark suite in packages/server/tests/benchmarks/handler-dispatch.bench.ts (target: <0.1ms p95)
-- [ ] T102 [P] Create benchmark suite for cancellation propagation in packages/core/tests/benchmarks/cancellation.bench.ts (target: <100ms)
-- [ ] T103 Add vitest.benchmark.config.ts for running performance tests
+- [x] T100 [P] Create benchmark suite in packages/core/tests/benchmarks/message-parse.bench.ts (target: <1ms p95)
+- [x] T101 [P] Create benchmark suite in packages/server/tests/benchmarks/handler-dispatch.bench.ts (target: <0.1ms p95)
+- [x] T102 [P] Create benchmark suite for cancellation propagation in packages/core/tests/benchmarks/cancellation.bench.ts (target: <100ms)
+- [x] T103 Add vitest.benchmark.config.ts for running performance tests
 
 ### LSP Compliance
 
-- [ ] T104 [P] Create LSP 3.17 conformance test suite in e2e/lsp-compliance.spec.ts (all message types, error codes)
+- [x] T104 [P] Create LSP 3.17 conformance test suite in e2e/lsp-compliance.spec.ts (all message types, error codes)
 - [ ] T105 [P] Create test against typescript-language-server in e2e/real-servers.spec.ts
 - [ ] T106 [P] Create test against rust-analyzer in e2e/real-servers.spec.ts
 - [ ] T107 [P] Create test against pyright in e2e/real-servers.spec.ts
@@ -245,15 +245,15 @@
 - [X] T111 [P] Update packages/core/README.md with Transport interface guide
 - [X] T112 [P] Update packages/server/README.md with server building guide
 - [X] T113 [P] Update packages/client/README.md with client connection guide
-- [ ] T114 Add JSDoc comments to all public APIs (LSPServer, LSPClient, Transport)
+- [x] T114 Add JSDoc comments to all public APIs (LSPServer, LSPClient, Transport)
 
 ### CI/CD & Quality
 
-- [ ] T115 Setup GitHub Actions workflow for linting (oxlint) in .github/workflows/lint.yml
-- [ ] T116 [P] Setup GitHub Actions workflow for type checking in .github/workflows/typecheck.yml
-- [ ] T117 [P] Setup GitHub Actions workflow for unit tests in .github/workflows/test.yml
-- [ ] T118 [P] Setup GitHub Actions workflow for integration tests in .github/workflows/integration.yml
-- [ ] T119 [P] Setup GitHub Actions workflow for bundle size checks (size-limit) in .github/workflows/size.yml
+- [x] T115 Setup GitHub Actions workflow for linting (oxlint) in .github/workflows/lint.yml
+- [x] T116 [P] Setup GitHub Actions workflow for type checking in .github/workflows/typecheck.yml
+- [x] T117 [P] Setup GitHub Actions workflow for unit tests in .github/workflows/test.yml
+- [x] T118 [P] Setup GitHub Actions workflow for integration tests in .github/workflows/integration.yml
+- [x] T119 [P] Setup GitHub Actions workflow for bundle size checks (size-limit) in .github/workflows/size.yml
 - [ ] T120 Add test coverage reporting with minimum 80% threshold
 - [ ] T121 [P] Create performance benchmark suite for load testing (SC-005: 1000 concurrent requests, <100ms p95 latency) in packages/core/tests/benchmark/load.bench.ts
 - [ ] T122 [P] Conduct API similarity audit against MCP SDK patterns (SC-006: document ergonomic differences in docs/MCP_SDK_COMPARISON.md, ensure <10 conceptual differences)

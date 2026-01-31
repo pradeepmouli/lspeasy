@@ -7,6 +7,7 @@
 
 import type { ServerCapabilities, MethodsForCapabilities, CapabilityForMethod } from '@lspy/core';
 import { getCapabilityForMethod, supportsMethod } from '@lspy/core';
+import type { LSPRequestMethod } from '../packages/core/dist/protocol/infer';
 
 // Example 1: Type-level capability checking
 // ==========================================
@@ -21,16 +22,16 @@ type MyServerCaps = {
 
 // This type automatically includes only the supported methods
 // Result: 'textDocument/hover' | 'textDocument/completion' | 'textDocument/definition'
-type SupportedMethods = MethodsForCapabilities<MyServerCaps>;
+type _SupportedMethods = MethodsForCapabilities<MyServerCaps>;
 
 // Example 2: Get capability key from method name
 // ===============================================
 
 // Type-level: Get the capability key for a specific method
-type HoverCapKey = CapabilityForMethod<'textDocument/hover'>;
+type _HoverCapKey = CapabilityForMethod<'textDocument/hover'>;
 // Result: 'hoverProvider'
 
-type CompletionCapKey = CapabilityForMethod<'textDocument/completion'>;
+type _CompletionCapKey = CapabilityForMethod<'textDocument/completion'>;
 // Result: 'completionProvider'
 
 // Example 3: Runtime capability checking
@@ -62,7 +63,7 @@ console.log('Supports completion:', supportsCompletion); // true
 // Example 4: Dynamic capability filtering
 // ========================================
 
-function getAvailableMethods(capabilities: ServerCapabilities): string[] {
+function getAvailableMethods(capabilities: ServerCapabilities): LSPRequestMethod[] {
   const methods = [
     'textDocument/hover',
     'textDocument/completion',
@@ -74,7 +75,7 @@ function getAvailableMethods(capabilities: ServerCapabilities): string[] {
     'textDocument/rename',
     'workspace/symbol',
     'workspace/executeCommand'
-  ];
+  ] as LSPRequestMethod[];
 
   return methods.filter((method) => supportsMethod(method, capabilities));
 }
@@ -86,17 +87,17 @@ console.log('\nAvailable methods:', availableMethods);
 // Example 5: Type-safe method handler registration
 // =================================================
 
-interface MethodHandler<M extends string> {
+interface MethodHandler<M extends LSPRequestMethod> {
   method: M;
   capability: CapabilityForMethod<M>;
   handler: (params: any) => any;
 }
 
 // The type system ensures the capability matches the method
-const hoverHandler: MethodHandler<'textDocument/hover'> = {
+const _hoverHandler: MethodHandler<'textDocument/hover'> = {
   method: 'textDocument/hover',
   capability: 'hoverProvider', // ✓ Type-safe: must be 'hoverProvider'
-  handler: (params) => {
+  handler: (_params) => {
     // Handle hover request
     return null;
   }

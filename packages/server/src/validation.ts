@@ -3,7 +3,7 @@
  */
 
 import { z, ZodError } from 'zod';
-import { ResponseError, getSchemaForMethod } from '@lspy/core';
+import { ResponseError } from '@lspy/core';
 import type { RequestContext, NotificationContext } from './types.js';
 
 /**
@@ -11,9 +11,6 @@ import type { RequestContext, NotificationContext } from './types.js';
  * These are comprehensive LSP protocol schemas
  */
 import {
-  PositionSchema as positionSchema,
-  RangeSchema as rangeSchema,
-  TextDocumentIdentifierSchema as textDocumentIdentifierSchema,
   HoverParamsSchema as hoverParamsSchema,
   CompletionParamsSchema as completionParamsSchema,
   DefinitionParamsSchema as definitionParamsSchema,

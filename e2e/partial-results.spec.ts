@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspy/server';
 import { LSPClient } from '@lspy/client';
 import { StdioTransport, createPartialResultParams, createProgressToken } from '@lspy/core';
-import type { ProgressToken, CompletionItem, CompletionList } from '@lspy/core';
+import type { CompletionItem, CompletionList } from '@lspy/core';
 
 describe('Partial Result Streaming Integration', () => {
   let server: LSPServer;

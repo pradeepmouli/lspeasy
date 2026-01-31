@@ -5,11 +5,6 @@
  */
 
 import type { ProgressToken } from 'vscode-languageserver-protocol';
-import type {
-  WorkDoneProgressBegin,
-  WorkDoneProgressReport,
-  WorkDoneProgressEnd
-} from '@lspy/core';
 import { createProgressBegin, createProgressReport, createProgressEnd } from '@lspy/core';
 
 /**

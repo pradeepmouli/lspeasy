@@ -42,8 +42,8 @@ export class LifecycleManager {
    */
   async handleInitialize(
     params: InitializeParams,
-    transport: Transport,
-    id: number | string
+    _transport: Transport,
+    _id: number | string
   ): Promise<InitializeResult> {
     this.logger.info('Initializing server...');
     this.logger.debug('Initialize params:', params);
@@ -71,7 +71,7 @@ export class LifecycleManager {
   /**
    * Handle shutdown request
    */
-  async handleShutdown(transport: Transport, id: number | string): Promise<void> {
+  async handleShutdown(_transport: Transport, _id: number | string): Promise<void> {
     this.logger.info('Shutting down server...');
     this.logger.info('Server shutdown complete');
   }

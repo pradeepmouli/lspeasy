@@ -14,7 +14,8 @@ import { StdioTransport, createProgressToken } from '@lspy/core';
 import type {
   WorkspaceFolder,
   DidChangeWorkspaceFoldersParams,
-  DidChangeWatchedFilesParams
+  DidChangeWatchedFilesParams,
+  CancellationToken
 } from '@lspy/core';
 
 // Simulated workspace state
@@ -98,9 +99,9 @@ server.onNotification('textDocument/didChange', async (params) => {
 });
 
 // Handle hover with progress reporting
-server.onRequest('textDocument/hover', async (params, token) => {
+server.onRequest('textDocument/hover', async (params, _token: CancellationToken) => {
   // Create progress token
-  const progressToken = createProgressToken();
+  const _progressToken = createProgressToken();
 
   // Start progress (this would normally use window/workDoneProgress/create)
   console.error(`[Server] Starting hover computation with progress...`);

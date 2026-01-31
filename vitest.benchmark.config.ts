@@ -1,33 +1,23 @@
-import { bench, describe } from 'vitest';
-import { unique, flatten, chunk, capitalize } from './packages/utils/src/index';
+/**
+ * Vitest configuration for benchmark tests
+ */
 
-describe('Benchmarks', () => {
-  describe('Array Operations', () => {
-    const largeArray = Array.from({ length: 10000 }, (_, i) => i % 100);
-    const deepArray = Array.from({ length: 100 }, () => [1, 2, [3, 4]]);
+import { defineConfig } from 'vitest/config';
 
-    bench('unique - large array', () => {
-      unique(largeArray);
-    });
-
-    bench('flatten - deep array', () => {
-      flatten(deepArray, 2);
-    });
-
-    bench('chunk - large array', () => {
-      chunk(largeArray, 10);
-    });
-  });
-
-  describe('String Operations', () => {
-    const longString = 'Hello World'.repeat(100);
-
-    bench('capitalize', () => {
-      capitalize('hello');
-    });
-
-    bench('capitalize - long string', () => {
-      capitalize(longString);
-    });
-  });
+export default defineConfig({
+  test: {
+    benchmark: {
+      include: ['**/benchmarks/**/*.bench.ts'],
+      exclude: ['**/node_modules/**', '**/dist/**'],
+      reporters: ['default', 'verbose'],
+      outputFile: './benchmark-results.json'
+    }
+  },
+  resolve: {
+    alias: {
+      '@lspy/core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,
+      '@lspy/server': new URL('./packages/server/src/index.ts', import.meta.url).pathname,
+      '@lspy/client': new URL('./packages/client/src/index.ts', import.meta.url).pathname
+    }
+  }
 });

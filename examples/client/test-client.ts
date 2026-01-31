@@ -81,7 +81,7 @@ export class TestClientHarness {
     if (this.client) {
       try {
         await this.client.disconnect();
-      } catch (error) {
+      } catch {
         // Ignore disconnect errors
       }
       this.client = undefined;
