@@ -10,6 +10,7 @@ Core transport layer and utilities for the lspy Language Server Protocol SDK.
 - **StdioTransport**: Standard input/output transport implementation
 - **WebSocketTransport**: WebSocket transport with automatic reconnection
 - **JSON-RPC 2.0**: Message framing, parsing, and serialization
+- **Type-Safe Enums**: Enums for all LSP kind types with extensibility support
 - **Cancellation**: Token-based cancellation support
 - **Utilities**: Event emitters, disposables, and logging
 
@@ -24,6 +25,32 @@ yarn add @lspy/core
 ```
 
 ## Quick Start
+
+### Type-Safe LSP Enums
+
+The SDK exports enums for all LSP kind types, providing type safety and IDE autocomplete:
+
+```typescript
+import {
+  CompletionItemKind,
+  SymbolKind,
+  DiagnosticSeverity,
+  CodeActionKind,
+  FoldingRangeKind
+} from '@lspy/core';
+
+// Use enums instead of magic numbers
+const completion = {
+  label: 'myFunction',
+  kind: CompletionItemKind.Function // Instead of: kind: 2
+};
+
+// String-based kinds support both enums and custom values
+const codeAction = {
+  title: 'Quick fix',
+  kind: CodeActionKind.QuickFix // Or custom: 'refactor.extract.helper'
+};
+```
 
 ### Using StdioTransport
 
@@ -115,16 +142,16 @@ All transports implement the `Transport` interface:
 interface Transport {
   // Send a JSON-RPC message
   send(message: JSONRPCMessage): Promise<void>;
-  
+
   // Subscribe to incoming messages
   onMessage(handler: (message: JSONRPCMessage) => void): Disposable;
-  
+
   // Subscribe to errors
   onError(handler: (error: Error) => void): Disposable;
-  
+
   // Subscribe to connection close
   onClose(handler: () => void): Disposable;
-  
+
   // Close the transport
   close(): Promise<void>;
 }

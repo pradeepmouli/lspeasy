@@ -73,7 +73,7 @@ export type LSPRequest = {
     Hover: {
       Method: 'textDocument/hover';
       Params: HoverParams;
-      Result: Hover | null;
+      Result?: Hover | null;
       ClientCapability: HoverClientCapabilities;
       ServerCapability: 'hoverProvider';
       Options: HoverOptions;
@@ -82,7 +82,7 @@ export type LSPRequest = {
     Completion: {
       Method: 'textDocument/completion';
       Params: CompletionParams;
-      Result: CompletionList | CompletionItem[] | null;
+      Result?: CompletionList | CompletionItem[];
       ClientCapability: CompletionClientCapabilities;
       ServerCapability: 'completionProvider';
       Options: CompletionOptions;
@@ -91,7 +91,7 @@ export type LSPRequest = {
     Definition: {
       Method: 'textDocument/definition';
       Params: DefinitionParams;
-      Result: Definition | null;
+      Result?: Definition;
       ClientCapability: DefinitionClientCapabilities;
       ServerCapability: 'definitionProvider';
       Options: DefinitionOptions;
@@ -100,7 +100,7 @@ export type LSPRequest = {
     References: {
       Method: 'textDocument/references';
       Params: ReferenceParams;
-      Result: Location[] | null;
+      Result?: Location[];
       ClientCapability: ReferenceClientCapabilities;
       ServerCapability: 'referencesProvider';
       Options: ReferenceOptions;
@@ -109,7 +109,7 @@ export type LSPRequest = {
     DocumentSymbol: {
       Method: 'textDocument/documentSymbol';
       Params: DocumentSymbolParams;
-      Result: DocumentSymbol[] | SymbolInformation[] | null;
+      Result?: DocumentSymbol[] | SymbolInformation[];
       ClientCapability: DocumentSymbolClientCapabilities;
       ServerCapability: 'documentSymbolProvider';
       Options: DocumentSymbolOptions;
@@ -118,7 +118,7 @@ export type LSPRequest = {
     CodeAction: {
       Method: 'textDocument/codeAction';
       Params: CodeActionParams;
-      Result: (Command | CodeAction)[] | null;
+      Result?: (Command | CodeAction)[];
       ClientCapability: CodeActionClientCapabilities;
       ServerCapability: 'codeActionProvider';
       Options: CodeActionOptions;
@@ -127,7 +127,7 @@ export type LSPRequest = {
     Formatting: {
       Method: 'textDocument/formatting';
       Params: DocumentFormattingParams;
-      Result: TextEdit[] | null;
+      Result?: TextEdit[];
       ClientCapability: DocumentFormattingClientCapabilities;
       ServerCapability: 'documentFormattingProvider';
       Options: DocumentFormattingOptions;
@@ -136,7 +136,7 @@ export type LSPRequest = {
     Rename: {
       Method: 'textDocument/rename';
       Params: RenameParams;
-      Result: WorkspaceEdit | null;
+      Result?: WorkspaceEdit | null;
       ClientCapability: RenameClientCapabilities;
       ServerCapability: 'renameProvider';
       Options: RenameOptions;
@@ -147,7 +147,7 @@ export type LSPRequest = {
     Symbol: {
       Method: 'workspace/symbol';
       Params: WorkspaceSymbolParams;
-      Result: SymbolInformation[] | WorkspaceSymbol[] | null;
+      Result?: SymbolInformation[] | WorkspaceSymbol[];
       ClientCapability: WorkspaceSymbolClientCapabilities;
       ServerCapability: 'workspaceSymbolProvider';
       Options: WorkspaceSymbolOptions;
@@ -156,7 +156,7 @@ export type LSPRequest = {
     ExecuteCommand: {
       Method: 'workspace/executeCommand';
       Params: ExecuteCommandParams;
-      Result: any | null;
+      Result: void;
       ClientCapability: ExecuteCommandClientCapabilities;
       ServerCapability: 'executeCommandProvider';
       Options: ExecuteCommandOptions;

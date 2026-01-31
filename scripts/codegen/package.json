@@ -1,0 +1,9 @@
+{
+  "name": "@lspy/codegen",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ts-morph": "^21.0.1"
+  }
+}

@@ -70,9 +70,9 @@ export { LSPRequest, LSPNotification } from './protocol/namespaces.js';
 export type {
   LSPRequestMethod,
   LSPNotificationMethod,
-  InferRequestParams,
-  InferRequestResult,
-  InferNotificationParams
+  ParamsForMethod as InferRequestParams,
+  ResultForMethod as InferRequestResult,
+  ParamsForNotification as InferNotificationParams
 } from './protocol/infer.js';
 
 // LSP protocol schemas

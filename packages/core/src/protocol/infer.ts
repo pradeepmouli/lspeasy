@@ -41,7 +41,7 @@ export type LSPNotificationMethod = keyof FlatNotificationMap;
  * type HoverParams = InferRequestParams<'textDocument/hover'>
  * // Resolves to: HoverParams from vscode-languageserver-protocol
  */
-export type InferRequestParams<M extends string> = M extends LSPRequestMethod
+export type ParamsForMethod<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M]['Params']
   : never;
 
@@ -52,8 +52,20 @@ export type InferRequestParams<M extends string> = M extends LSPRequestMethod
  * type HoverResult = InferRequestResult<'textDocument/hover'>
  * // Resolves to: Hover | null
  */
-export type InferRequestResult<M extends string> = M extends LSPRequestMethod
+export type ResultForMethod<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M]['Result']
+  : never;
+
+export type ServerCapabilityForMethod<M extends string> = M extends LSPRequestMethod
+  ? FlatRequestMap[M] extends { ServerCapability: infer C }
+    ? C
+    : never
+  : never;
+
+export type ClientCapabilityForMethod<M extends string> = M extends LSPRequestMethod
+  ? FlatRequestMap[M] extends { ClientCapability: infer C }
+    ? C
+    : never
   : never;
 
 /**
@@ -63,8 +75,20 @@ export type InferRequestResult<M extends string> = M extends LSPRequestMethod
  * type DidOpenParams = InferNotificationParams<'textDocument/didOpen'>
  * // Resolves to: DidOpenTextDocumentParams from vscode-languageserver-protocol
  */
-export type InferNotificationParams<M extends string> = M extends LSPNotificationMethod
+export type ParamsForNotification<M extends string> = M extends LSPNotificationMethod
   ? FlatNotificationMap[M]['Params']
+  : never;
+
+export type OptionsForMethod<M extends string> = M extends LSPRequestMethod
+  ? FlatRequestMap[M] extends { Options: infer O }
+    ? O
+    : never
+  : never;
+
+export type RegistrationOptionsForMethod<M extends string> = M extends LSPRequestMethod
+  ? FlatRequestMap[M] extends { RegistrationOptions: infer R }
+    ? R
+    : never
   : never;
 
 /**

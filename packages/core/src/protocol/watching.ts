@@ -7,29 +7,32 @@
 import type {
   DidChangeWatchedFilesParams,
   FileEvent,
-  FileChangeType,
   DidChangeWatchedFilesRegistrationOptions,
   FileSystemWatcher,
   WatchKind
 } from 'vscode-languageserver-protocol';
+import { FileChangeType } from './types.js';
 
 // Re-export file watching types
 export type {
   DidChangeWatchedFilesParams,
   FileEvent,
-  FileChangeType,
   DidChangeWatchedFilesRegistrationOptions,
   FileSystemWatcher,
   WatchKind
 };
 
+// Re-export FileChangeType enum from types
+export { FileChangeType };
+
 /**
+ * @deprecated Use FileChangeType enum instead
  * File change types for convenience
  */
 export const FileChangeTypes = {
-  Created: 1 as FileChangeType,
-  Changed: 2 as FileChangeType,
-  Deleted: 3 as FileChangeType
+  Created: FileChangeType.Created,
+  Changed: FileChangeType.Changed,
+  Deleted: FileChangeType.Deleted
 } as const;
 
 /**
