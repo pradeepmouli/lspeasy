@@ -27,7 +27,7 @@ const coreNamespaces = fs.readFileSync(coreNamespacesPath, 'utf8');
 // Extract exports from protocol
 function extractExports(content, _source) {
   const exports = new Set();
-  
+
   // Match: export { Name, Name2 } from '...'
   // Also handle: export type { Name, Name2 } from '...'
   const reExportRegex = /export\s+(?:type\s+)?{([^}]+)}\s*from/g;
@@ -43,7 +43,7 @@ function extractExports(content, _source) {
     });
     names.forEach(n => n && exports.add(n));
   }
-  
+
   // Match: export * from '...' or export * as Name from '...'
   const exportStarRegex = /export\s+\*(?:\s+as\s+([A-Za-z_$][A-Za-z0-9_$]*))?\s+from/g;
   while ((match = exportStarRegex.exec(content)) !== null) {
@@ -52,13 +52,13 @@ function extractExports(content, _source) {
     }
     // For bare export *, we can't enumerate what's exported
   }
-  
+
   // Match: export interface Name / export type Name / export class Name / export const Name / export enum Name
   const directExportRegex = /export\s+(?:interface|type|class|const|enum|namespace|declare\s+(?:namespace|const|enum))\s+([A-Za-z_$][A-Za-z0-9_$]*)/g;
   while ((match = directExportRegex.exec(content)) !== null) {
     exports.add(match[1]);
   }
-  
+
   // Match: export { Name, Name2 }; (without from)
   const namedExportRegex = /export\s*{\s*([^}]+)\s*};/g;
   while ((match = namedExportRegex.exec(content)) !== null) {
@@ -71,7 +71,7 @@ function extractExports(content, _source) {
     });
     names.forEach(n => n && exports.add(n));
   }
-  
+
   return exports;
 }
 
@@ -109,7 +109,7 @@ if (missing.size === 0) {
   console.log('✅ All LSP exports are re-exported!');
 } else {
   console.log(`⚠️  Missing ${missing.size} exports:\n`);
-  
+
   // Categorize missing exports
   const categories = {
     types: [],
@@ -118,7 +118,7 @@ if (missing.size === 0) {
     enums: [],
     other: []
   };
-  
+
   for (const exp of Array.from(missing).sort()) {
     if (exp.includes('Request') || exp.includes('Handler')) {
       categories.requests.push(exp);
@@ -132,31 +132,31 @@ if (missing.size === 0) {
       categories.other.push(exp);
     }
   }
-  
+
   if (categories.types.length > 0) {
     console.log('📝 Missing Types/Params/Results:');
     categories.types.forEach(t => console.log(`   - ${t}`));
     console.log('');
   }
-  
+
   if (categories.enums.length > 0) {
     console.log('🔢 Missing Enums/Kinds:');
     categories.enums.forEach(t => console.log(`   - ${t}`));
     console.log('');
   }
-  
+
   if (categories.requests.length > 0) {
     console.log('📨 Missing Requests/Handlers:');
     categories.requests.forEach(t => console.log(`   - ${t}`));
     console.log('');
   }
-  
+
   if (categories.notifications.length > 0) {
     console.log('📢 Missing Notifications:');
     categories.notifications.forEach(t => console.log(`   - ${t}`));
     console.log('');
   }
-  
+
   if (categories.other.length > 0) {
     console.log('❓ Other Missing:');
     categories.other.forEach(t => console.log(`   - ${t}`));

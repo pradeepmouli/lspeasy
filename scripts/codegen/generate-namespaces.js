@@ -127,10 +127,10 @@ console.log(`📢 Found ${notifications.size} notifications\n`);
 function generateNamespace() {
   let code = `/**
  * LSP Request and Notification type definitions
- * 
+ *
  * This file is auto-generated from the LSP protocol definitions.
  * DO NOT EDIT MANUALLY - run 'pnpm run codegen' to regenerate.
- * 
+ *
  * Generated on: ${new Date().toISOString()}
  */
 
@@ -252,7 +252,7 @@ export namespace LSPNotification {
   code += `/**
  * Helper type to infer request params from method
  */
-export type InferRequestParams<M extends string> = 
+export type InferRequestParams<M extends string> =
   M extends LSPRequest.TextDocument.Hover.Method ? LSPRequest.TextDocument.Hover.Params :
   // Add more method mappings as needed
   never;
@@ -260,7 +260,7 @@ export type InferRequestParams<M extends string> =
 /**
  * Helper type to infer request result from method
  */
-export type InferRequestResult<M extends string> = 
+export type InferRequestResult<M extends string> =
   M extends LSPRequest.TextDocument.Hover.Method ? LSPRequest.TextDocument.Hover.Result :
   // Add more method mappings as needed
   never;
