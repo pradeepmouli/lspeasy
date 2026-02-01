@@ -1,6 +1,6 @@
-# API Contract: @lspy/core
+# API Contract: @lspeasy/core
 
-**Package**: @lspy/core
+**Package**: @lspeasy/core
 **Version**: 1.0.0
 **Purpose**: Shared types, transports, and utilities for LSP SDK
 
@@ -655,7 +655,7 @@ type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error';
 ### Creating Custom Transport
 
 ```typescript
-import { Transport, Message, Disposable } from '@lspy/core';
+import { Transport, Message, Disposable } from '@lspeasy/core';
 import { EventEmitter } from 'events';
 
 class HttpTransport implements Transport {
@@ -698,7 +698,7 @@ class HttpTransport implements Transport {
 ### Using Validation Schemas
 
 ```typescript
-import { HoverParams, HoverParamsSchema } from '@lspy/core/protocol';
+import { HoverParams, HoverParamsSchema } from '@lspeasy/core/protocol';
 
 function validateHoverParams(data: unknown): HoverParams {
   return HoverParamsSchema.parse(data);  // Throws ZodError if invalid

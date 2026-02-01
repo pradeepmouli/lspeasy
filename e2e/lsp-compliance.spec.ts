@@ -9,9 +9,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { LSPServer } from '@lspy/server';
-import { LSPClient } from '@lspy/client';
-import { StdioTransport, JSONRPCErrorCode } from '@lspy/core';
+import { LSPServer } from '@lspeasy/server';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport, JSONRPCErrorCode } from '@lspeasy/core';
 
 describe('LSP 3.17 Conformance', () => {
   let server: LSPServer;

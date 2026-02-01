@@ -8,7 +8,7 @@
  *   npx tsx examples/custom-transport.ts
  */
 
-import type { Transport, Message, Disposable } from '@lspy/core';
+import type { Transport, Message, Disposable } from '@lspeasy/core';
 import { EventEmitter } from 'events';
 import http from 'http';
 

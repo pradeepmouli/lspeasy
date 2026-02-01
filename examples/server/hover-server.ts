@@ -3,8 +3,8 @@
  * Demonstrates multiple handlers and text document sync with type inference
  */
 
-import { LSPServer, StdioTransport, ConsoleLogger } from '@lspy/server';
-import { LogLevel } from '@lspy/core';
+import { LSPServer, StdioTransport, ConsoleLogger } from '@lspeasy/server';
+import { LogLevel } from '@lspeasy/core';
 
 // Create server with logging
 const server = new LSPServer({

@@ -1,18 +1,18 @@
 [
   {
-    "name": "@lspy/core",
+    "name": "@lspeasy/core",
     "path": "packages/core/dist/index.js",
     "limit": "100 KB",
     "gzip": true
   },
   {
-    "name": "@lspy/server",
+    "name": "@lspeasy/server",
     "path": "packages/server/dist/index.js",
     "limit": "50 KB",
     "gzip": true
   },
   {
-    "name": "@lspy/client",
+    "name": "@lspeasy/client",
     "path": "packages/client/dist/index.js",
     "limit": "50 KB",
     "gzip": true

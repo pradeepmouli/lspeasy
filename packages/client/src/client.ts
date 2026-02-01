@@ -12,8 +12,8 @@ import type {
   Disposable,
   Logger,
   CancellationToken
-} from '@lspy/core';
-import { ConsoleLogger, LogLevel, CancellationTokenSource } from '@lspy/core';
+} from '@lspeasy/core';
+import { ConsoleLogger, LogLevel, CancellationTokenSource } from '@lspeasy/core';
 import type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
 import { TextDocumentRequests } from './requests/text-document.js';
 import { WorkspaceRequests } from './requests/workspace.js';
@@ -68,7 +68,7 @@ export class LSPClient {
 
     // Set up options with defaults
     this.options = {
-      name: options.name ?? 'lspy-client',
+      name: options.name ?? 'lspeasy-client',
       version: options.version ?? '1.0.0',
       logger: options.logger ?? new ConsoleLogger(options.logLevel ?? LogLevel.Info),
       logLevel: options.logLevel ?? LogLevel.Info

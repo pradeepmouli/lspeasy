@@ -1,15 +1,15 @@
-# @lspy/server
+# @lspeasy/server
 
 Build Language Server Protocol (LSP) servers with a simple, type-safe API.
 
 ## Installation
 
 ```bash
-npm install @lspy/server @lspy/core
+npm install @lspeasy/server @lspeasy/core
 # or
-pnpm add @lspy/server @lspy/core
+pnpm add @lspeasy/server @lspeasy/core
 # or
-yarn add @lspy/server @lspy/core
+yarn add @lspeasy/server @lspeasy/core
 ```
 
 ## Quick Start
@@ -17,8 +17,8 @@ yarn add @lspy/server @lspy/core
 Create a minimal hover server in less than 30 lines:
 
 ```typescript
-import { LSPServer, StdioTransport } from '@lspy/server';
-import type { HoverParams, Hover } from '@lspy/server';
+import { LSPServer, StdioTransport } from '@lspeasy/server';
+import type { HoverParams, Hover } from '@lspeasy/server';
 
 // Create server
 const server = new LSPServer({
@@ -133,7 +133,7 @@ interface ServerOptions {
 Throw `ResponseError` for custom error codes:
 
 ```typescript
-import { ResponseError, JSONRPCErrorCode } from '@lspy/server';
+import { ResponseError, JSONRPCErrorCode } from '@lspeasy/server';
 
 server.onRequest('custom/method', async (params) => {
   if (!params.valid) {

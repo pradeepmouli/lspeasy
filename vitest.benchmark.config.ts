@@ -15,9 +15,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@lspy/core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,
-      '@lspy/server': new URL('./packages/server/src/index.ts', import.meta.url).pathname,
-      '@lspy/client': new URL('./packages/client/src/index.ts', import.meta.url).pathname
+      '@lspeasy/core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,
+      '@lspeasy/server': new URL('./packages/server/src/index.ts', import.meta.url).pathname,
+      '@lspeasy/client': new URL('./packages/client/src/index.ts', import.meta.url).pathname
     }
   }
 });

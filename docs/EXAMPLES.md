@@ -1,6 +1,6 @@
 # Examples
 
-This document provides examples demonstrating how to use the lspy LSP SDK.
+This document provides examples demonstrating how to use the lspeasy LSP SDK.
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@ This document provides examples demonstrating how to use the lspy LSP SDK.
 ## Basic Server
 
 ```typescript
-import { LSPServer, StdioTransport } from '@lspy/server';
+import { LSPServer, StdioTransport } from '@lspeasy/server';
 
 const server = new LSPServer({
   name: 'my-language-server',
@@ -42,7 +42,7 @@ await server.listen(transport);
 ## Basic Client
 
 ```typescript
-import { LSPClient, WebSocketTransport } from '@lspy/client';
+import { LSPClient, WebSocketTransport } from '@lspeasy/client';
 
 const client = new LSPClient({
   name: 'my-client',
@@ -66,8 +66,8 @@ await client.shutdown();
 The server validates that handlers are only registered for capabilities that have been declared. In strict mode, attempting to register a handler for an undeclared capability will throw an error.
 
 ```typescript
-import { LSPServer, StdioTransport } from '@lspy/server';
-import type { ServerCapabilities } from '@lspy/core';
+import { LSPServer, StdioTransport } from '@lspeasy/server';
+import type { ServerCapabilities } from '@lspeasy/core';
 
 // Define server capabilities
 const capabilities: ServerCapabilities = {
@@ -105,7 +105,7 @@ await server.listen(transport);
 After connecting, the client dynamically exposes methods based on the server's declared capabilities. Methods for unsupported capabilities are not available.
 
 ```typescript
-import { LSPClient, WebSocketTransport } from '@lspy/client';
+import { LSPClient, WebSocketTransport } from '@lspeasy/client';
 
 const client = new LSPClient({
   name: 'capability-aware-client',

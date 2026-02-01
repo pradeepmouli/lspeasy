@@ -1,15 +1,15 @@
 /**
  * Type guards for capability-aware client usage
  *
- * Re-exports capability checking functions from @lspy/core, providing both
+ * Re-exports capability checking functions from @lspeasy/core, providing both
  * runtime checking and compile-time type safety for LSP operations.
  *
- * For detailed capability type utilities, see @lspy/core/protocol/capabilities
+ * For detailed capability type utilities, see @lspeasy/core/protocol/capabilities
  */
 
 import type { LSPClient } from './client.js';
-import type { ServerCapabilities, ClientSendMethods } from '@lspy/core';
-import { hasCapability as coreHasCapability } from '@lspy/core';
+import type { ServerCapabilities, ClientSendMethods } from '@lspeasy/core';
+import { hasCapability as coreHasCapability } from '@lspeasy/core';
 
 // Re-export core capability functions for convenience
 export {
@@ -22,7 +22,7 @@ export {
   supportsWorkspaceFolders,
   supportsFileWatching,
   supportsWorkDoneProgress
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 /**
  * Check if client has a specific server capability
@@ -56,7 +56,7 @@ export function hasServerCapability<K extends keyof ServerCapabilities>(
 /**
  * Type guard to check if client has hover capability
  *
- * @deprecated Use supportsHover() from @lspy/core instead
+ * @deprecated Use supportsHover() from @lspeasy/core instead
  */
 export function hasHoverCapability(client: LSPClient): client is LSPClient & {
   textDocument: ClientSendMethods<{ hoverProvider: true }>['TextDocument'];
@@ -67,7 +67,7 @@ export function hasHoverCapability(client: LSPClient): client is LSPClient & {
 /**
  * Type guard to check if client has completion capability
  *
- * @deprecated Use supportsCompletion() from @lspy/core instead
+ * @deprecated Use supportsCompletion() from @lspeasy/core instead
  */
 export function hasCompletionCapability(client: LSPClient): client is LSPClient & {
   textDocument: ClientSendMethods<{ completionProvider: {} }>['TextDocument'];
@@ -80,7 +80,7 @@ export function hasCompletionCapability(client: LSPClient): client is LSPClient 
 /**
  * Type guard to check if client has definition capability
  *
- * @deprecated Use supportsDefinition() from @lspy/core instead
+ * @deprecated Use supportsDefinition() from @lspeasy/core instead
  */
 export function hasDefinitionCapability(client: LSPClient): client is LSPClient & {
   textDocument: ClientSendMethods<{ definitionProvider: true }>['TextDocument'];
@@ -93,7 +93,7 @@ export function hasDefinitionCapability(client: LSPClient): client is LSPClient 
 /**
  * Type guard to check if client has references capability
  *
- * @deprecated Use supportsReferences() from @lspy/core instead
+ * @deprecated Use supportsReferences() from @lspeasy/core instead
  */
 export function hasReferencesCapability(client: LSPClient): client is LSPClient & {
   textDocument: ClientSendMethods<{ referencesProvider: true }>['TextDocument'];
@@ -106,7 +106,7 @@ export function hasReferencesCapability(client: LSPClient): client is LSPClient 
 /**
  * Type guard to check if client has document highlight capability
  *
- * @deprecated Use hasCapability() with 'documentHighlightProvider' from @lspy/core instead
+ * @deprecated Use hasCapability() with 'documentHighlightProvider' from @lspeasy/core instead
  */
 export function hasDocumentHighlightCapability(client: LSPClient): client is LSPClient & {
   textDocument: ClientSendMethods<{ documentHighlightProvider: true }>['TextDocument'];
@@ -120,7 +120,7 @@ export function hasDocumentHighlightCapability(client: LSPClient): client is LSP
 /**
  * Type guard to check if client has document symbol capability
  *
- * @deprecated Use supportsDocumentSymbol() from @lspy/core instead
+ * @deprecated Use supportsDocumentSymbol() from @lspeasy/core instead
  */
 export function hasDocumentSymbolCapability(client: LSPClient): client is LSPClient & {
   textDocument: ClientSendMethods<{ documentSymbolProvider: true }>['TextDocument'];
@@ -134,7 +134,7 @@ export function hasDocumentSymbolCapability(client: LSPClient): client is LSPCli
 /**
  * Type guard to check if client has code action capability
  *
- * @deprecated Use hasCapability() with 'codeActionProvider' from @lspy/core instead
+ * @deprecated Use hasCapability() with 'codeActionProvider' from @lspeasy/core instead
  */
 export function hasCodeActionCapability(client: LSPClient): client is LSPClient & {
   textDocument: ClientSendMethods<{ codeActionProvider: true }>['TextDocument'];
@@ -147,7 +147,7 @@ export function hasCodeActionCapability(client: LSPClient): client is LSPClient 
 /**
  * Type guard to check if client has workspace symbol capability
  *
- * @deprecated Use hasCapability() with 'workspaceSymbolProvider' from @lspy/core instead
+ * @deprecated Use hasCapability() with 'workspaceSymbolProvider' from @lspeasy/core instead
  */
 export function hasWorkspaceSymbolCapability(client: LSPClient): client is LSPClient & {
   workspace: ClientSendMethods<{ workspaceSymbolProvider: true }>['Workspace'];

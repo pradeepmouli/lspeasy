@@ -2,9 +2,9 @@
  * Type definitions for LSP Client
  */
 
-import type { Logger, LogLevel } from '@lspy/core';
+import type { Logger, LogLevel } from '@lspeasy/core';
 import type { ZodError } from 'zod';
-import type { ResponseMessage } from '@lspy/core';
+import type { ResponseMessage } from '@lspeasy/core';
 
 /**
  * LSP Client options

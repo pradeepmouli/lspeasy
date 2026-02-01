@@ -9,7 +9,7 @@ import type {
   InitializedParams,
   ServerCapabilities,
   Logger
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 /**
  * Manages LSP server lifecycle (initialize/initialized/shutdown/exit)

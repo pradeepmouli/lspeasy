@@ -4,7 +4,7 @@
  * Dynamically exposes/hides methods based on server capabilities
  */
 
-import type { ServerCapabilities, LSPRequest } from '@lspy/core';
+import type { ServerCapabilities, LSPRequest } from '@lspeasy/core';
 import type { LSPClient } from './client.js';
 
 /**

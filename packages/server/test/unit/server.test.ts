@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { LSPServer } from '@lspy/server';
-import { ConsoleLogger, LogLevel } from '@lspy/core';
+import { LSPServer } from '@lspeasy/server';
+import { ConsoleLogger, LogLevel } from '@lspeasy/core';
 
 describe('LSPServer', () => {
   describe('constructor', () => {

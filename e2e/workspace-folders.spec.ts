@@ -3,14 +3,14 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { LSPServer } from '@lspy/server';
-import { LSPClient } from '@lspy/client';
+import { LSPServer } from '@lspeasy/server';
+import { LSPClient } from '@lspeasy/client';
 import {
   StdioTransport,
   createWorkspaceFolder,
   createWorkspaceFoldersChangeEvent
-} from '@lspy/core';
-import type { WorkspaceFolder, DidChangeWorkspaceFoldersParams } from '@lspy/core';
+} from '@lspeasy/core';
+import type { WorkspaceFolder, DidChangeWorkspaceFoldersParams } from '@lspeasy/core';
 
 describe('Workspace Folders Integration', () => {
   let server: LSPServer;

@@ -1,10 +1,10 @@
-# @lspy/core
+# @lspeasy/core
 
-Core transport layer and utilities for the lspy Language Server Protocol SDK.
+Core transport layer and utilities for the lspeasy Language Server Protocol SDK.
 
 ## Overview
 
-`@lspy/core` provides the foundational building blocks for LSP communication:
+`@lspeasy/core` provides the foundational building blocks for LSP communication:
 
 - **Transport Interface**: Abstract transport layer for message exchange
 - **StdioTransport**: Standard input/output transport implementation
@@ -17,11 +17,11 @@ Core transport layer and utilities for the lspy Language Server Protocol SDK.
 ## Installation
 
 ```bash
-npm install @lspy/core
+npm install @lspeasy/core
 # or
-pnpm add @lspy/core
+pnpm add @lspeasy/core
 # or
-yarn add @lspy/core
+yarn add @lspeasy/core
 ```
 
 ## Quick Start
@@ -37,7 +37,7 @@ import {
   DiagnosticSeverity,
   CodeActionKind,
   FoldingRangeKind
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 // Use enums instead of magic numbers
 const completion = {
@@ -55,7 +55,7 @@ const codeAction = {
 ### Using StdioTransport
 
 ```typescript
-import { StdioTransport } from '@lspy/core';
+import { StdioTransport } from '@lspeasy/core';
 
 // Create transport for stdio communication
 const transport = new StdioTransport();
@@ -80,7 +80,7 @@ await transport.close();
 ### Using WebSocketTransport
 
 ```typescript
-import { WebSocketTransport } from '@lspy/core';
+import { WebSocketTransport } from '@lspeasy/core';
 
 // Client mode with automatic reconnection
 const transport = new WebSocketTransport({
@@ -117,7 +117,7 @@ await transport.send({
 ### Server Mode WebSocket
 
 ```typescript
-import { WebSocketTransport } from '@lspy/core';
+import { WebSocketTransport } from '@lspeasy/core';
 import { WebSocketServer } from 'ws';
 
 const wss = new WebSocketServer({ port: 3000 });
@@ -162,7 +162,7 @@ interface Transport {
 You can implement custom transports for any communication protocol:
 
 ```typescript
-import { Transport, Disposable, JSONRPCMessage } from '@lspy/core';
+import { Transport, Disposable, JSONRPCMessage } from '@lspeasy/core';
 import EventEmitter from 'events';
 
 class HTTPPollingTransport implements Transport {
@@ -231,7 +231,7 @@ class HTTPPollingTransport implements Transport {
 ### Parsing and Serialization
 
 ```typescript
-import { parseMessages, serializeMessage } from '@lspy/core';
+import { parseMessages, serializeMessage } from '@lspeasy/core';
 
 // Parse HTTP-style headers + JSON content
 const input = 'Content-Length: 59\r\n\r\n{"jsonrpc":"2.0","method":"initialize","id":1,"params":{}}';
@@ -285,7 +285,7 @@ const errorResponse = {
 ### CancellationToken
 
 ```typescript
-import { CancellationTokenSource } from '@lspy/core';
+import { CancellationTokenSource } from '@lspeasy/core';
 
 const source = new CancellationTokenSource();
 const token = source.token;
@@ -329,7 +329,7 @@ setTimeout(() => source.cancel(), 5000);
 ## Logging
 
 ```typescript
-import { ConsoleLogger, LogLevel } from '@lspy/core';
+import { ConsoleLogger, LogLevel } from '@lspeasy/core';
 
 // Create logger
 const logger = new ConsoleLogger('MyServer', LogLevel.Debug);
@@ -416,7 +416,7 @@ const transport = new WebSocketTransport({
 Use mock transports for testing:
 
 ```typescript
-import { Transport, Disposable, JSONRPCMessage } from '@lspy/core';
+import { Transport, Disposable, JSONRPCMessage } from '@lspeasy/core';
 import EventEmitter from 'events';
 
 class MockTransport implements Transport {

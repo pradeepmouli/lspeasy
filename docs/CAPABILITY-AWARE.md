@@ -2,7 +2,7 @@
 
 ## Overview
 
-The lspy SDK now supports **capability-aware runtime behavior** for both clients and servers:
+The lspeasy SDK now supports **capability-aware runtime behavior** for both clients and servers:
 
 - **Client**: Methods are dynamically exposed based on server-declared capabilities
 - **Server**: Handler registration is validated against declared capabilities
@@ -188,7 +188,7 @@ transport.simulateMessage({
 The SDK provides type guards that enable TypeScript to narrow types:
 
 ```typescript
-import { hasHoverCapability, hasCompletionCapability } from '@lspy/client';
+import { hasHoverCapability, hasCompletionCapability } from '@lspeasy/client';
 
 // Type guard narrows the type - TypeScript knows hover exists!
 if (hasHoverCapability(client)) {
@@ -197,7 +197,7 @@ if (hasHoverCapability(client)) {
 }
 
 // Check server capabilities directly
-import { hasServerCapability } from '@lspy/client';
+import { hasServerCapability } from '@lspeasy/client';
 
 if (hasServerCapability(client, 'hoverProvider')) {
   // TypeScript knows server has hoverProvider capability
@@ -224,7 +224,7 @@ const result = client.textDocument.hover
 
 ### Available Type Guards
 
-The SDK exports these type guards from `@lspy/client`:
+The SDK exports these type guards from `@lspeasy/client`:
 
 - `hasServerCapability(client, 'capabilityName')` - Check any server capability
 - `hasHoverCapability(client)` - Check hover support

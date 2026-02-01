@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { LSPClient } from '../../src/client.js';
-import { StdioTransport } from '@lspy/core';
+import { StdioTransport } from '@lspeasy/core';
 import { PassThrough } from 'node:stream';
 
 describe('High-level method builders', () => {

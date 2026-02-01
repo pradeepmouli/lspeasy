@@ -1,5 +1,5 @@
 {
-  "name": "@lspy/core",
+  "name": "@lspeasy/core",
   "version": "1.0.0",
   "description": "Core types, transports, and utilities for LSP SDK",
   "keywords": [
@@ -8,15 +8,15 @@
     "jsonrpc",
     "transport"
   ],
-  "homepage": "https://github.com/pradeepmouli/lspy#readme",
+  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
   "bugs": {
-    "url": "https://github.com/pradeepmouli/lspy/issues"
+    "url": "https://github.com/pradeepmouli/lspeasy/issues"
   },
   "license": "MIT",
   "author": "Pradeep Mouli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pradeepmouli/lspy.git",
+    "url": "https://github.com/pradeepmouli/lspeasy.git",
     "directory": "packages/core"
   },
   "type": "module",

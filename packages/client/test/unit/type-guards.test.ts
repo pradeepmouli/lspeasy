@@ -10,7 +10,7 @@ import {
   hasDefinitionCapability,
   supportsMethod,
   LSPClient
-} from '@lspy/client';
+} from '@lspeasy/client';
 
 describe('Type Guards', () => {
   describe('supportsMethod', () => {

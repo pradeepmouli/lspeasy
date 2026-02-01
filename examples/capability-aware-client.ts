@@ -13,7 +13,7 @@ import {
   hasHoverCapability,
   hasCompletionCapability,
   hasDefinitionCapability
-} from '@lspy/client';
+} from '@lspeasy/client';
 
 const transport = new WebSocketTransport('ws://localhost:8080');
 

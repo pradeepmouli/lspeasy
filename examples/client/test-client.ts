@@ -5,8 +5,8 @@
  * against real language servers.
  */
 
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 import type { ChildProcess } from 'node:child_process';
 import { spawn } from 'node:child_process';
 
@@ -48,7 +48,7 @@ export class TestClientHarness {
   /**
    * Start the server and connect the client
    */
-  async start(): Promise<import('@lspy/client').InitializeResult> {
+  async start(): Promise<import('@lspeasy/client').InitializeResult> {
     // Spawn language server process
     this.serverProcess = spawn(this.config.command, this.config.args, {
       cwd: this.config.cwd,

@@ -3,7 +3,7 @@
  * Demonstrates a basic hover server with automatic type inference
  */
 
-import { LSPServer, StdioTransport } from '@lspy/server';
+import { LSPServer, StdioTransport } from '@lspeasy/server';
 
 // Create server
 const server = new LSPServer({

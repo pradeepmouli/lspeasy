@@ -12,8 +12,8 @@
  *   npx tsx examples/client/websocket-client.ts
  */
 
-import { LSPClient } from '@lspy/client';
-import { WebSocketTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { WebSocketTransport } from '@lspeasy/core';
 
 async function main() {
   console.log('Connecting to WebSocket LSP server at ws://localhost:3000...');

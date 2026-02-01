@@ -3,11 +3,11 @@
  */
 
 import { z, ZodError } from 'zod';
-import { ResponseError } from '@lspy/core';
+import { ResponseError } from '@lspeasy/core';
 import type { RequestContext, NotificationContext } from './types.js';
 
 /**
- * Zod schemas imported from @lspy/core
+ * Zod schemas imported from @lspeasy/core
  * These are comprehensive LSP protocol schemas
  */
 import {
@@ -20,11 +20,11 @@ import {
   DidOpenTextDocumentParamsSchema as didOpenTextDocumentParamsSchema,
   DidChangeTextDocumentParamsSchema as didChangeTextDocumentParamsSchema,
   DidCloseTextDocumentParamsSchema as didCloseTextDocumentParamsSchema
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 /**
  * Schema registry for LSP methods
- * Now using schemas from @lspy/core
+ * Now using schemas from @lspeasy/core
  */
 export const methodSchemas: Record<string, z.ZodSchema | undefined> = {
   initialize: initializeParamsSchema,

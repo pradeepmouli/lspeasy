@@ -1,10 +1,10 @@
 /**
- * Type definitions for @lspy/server
+ * Type definitions for @lspeasy/server
  */
 
-import type { CancellationToken, Logger, ClientCapabilities } from '@lspy/core';
+import type { CancellationToken, Logger, ClientCapabilities } from '@lspeasy/core';
 import type { ZodError } from 'zod';
-import type { ResponseError as ResponseErrorInterface } from '@lspy/core';
+import type { ResponseError as ResponseErrorInterface } from '@lspeasy/core';
 
 /**
  * Server initialization options

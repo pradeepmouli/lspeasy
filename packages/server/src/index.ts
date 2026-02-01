@@ -1,5 +1,5 @@
 /**
- * @lspy/server - Build LSP servers with simple, typed API
+ * @lspeasy/server - Build LSP servers with simple, typed API
  */
 
 // Main server class
@@ -19,7 +19,7 @@ export { ServerState } from './types.js';
 // Internal exports for testing
 export { MessageDispatcher } from './dispatcher.js';
 
-// Re-export commonly used types from @lspy/core
+// Re-export commonly used types from @lspeasy/core
 export type {
   Transport,
   CancellationToken,
@@ -41,7 +41,7 @@ export type {
   InferRequestParams,
   InferRequestResult,
   InferNotificationParams
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 export {
   ResponseError,
@@ -49,4 +49,4 @@ export {
   StdioTransport,
   ConsoleLogger,
   LogLevel
-} from '@lspy/core';
+} from '@lspeasy/core';

@@ -3,10 +3,10 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { LSPServer } from '@lspy/server';
-import { LSPClient } from '@lspy/client';
-import { StdioTransport, createPartialResultParams, createProgressToken } from '@lspy/core';
-import type { CompletionItem, CompletionList } from '@lspy/core';
+import { LSPServer } from '@lspeasy/server';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport, createPartialResultParams, createProgressToken } from '@lspeasy/core';
+import type { CompletionItem, CompletionList } from '@lspeasy/core';
 
 describe('Partial Result Streaming Integration', () => {
   let server: LSPServer;

@@ -4,9 +4,9 @@
  * Ensures handlers can only be registered for declared capabilities
  */
 
-import type { ServerCapabilities } from '@lspy/core';
-import type { Logger } from '@lspy/core';
-import { getCapabilityForMethod, hasCapability } from '@lspy/core';
+import type { ServerCapabilities } from '@lspeasy/core';
+import type { Logger } from '@lspeasy/core';
+import { getCapabilityForMethod, hasCapability } from '@lspeasy/core';
 
 /**
  * Check if a capability is enabled in server capabilities

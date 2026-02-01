@@ -65,7 +65,7 @@ importers:
 
   packages/client:
     dependencies:
-      '@lspy/core':
+      '@lspeasy/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
@@ -100,7 +100,7 @@ importers:
 
   packages/server:
     dependencies:
-      '@lspy/core':
+      '@lspeasy/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:

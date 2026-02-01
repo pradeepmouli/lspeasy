@@ -7,7 +7,7 @@
 
 ## Summary
 
-Build a strongly-typed TypeScript SDK for LSP (Language Server Protocol) clients and servers with ergonomics inspired by the Model Context Protocol (MCP) TypeScript SDK. The SDK will provide three packages (@lspy/core, @lspy/server, @lspy/client) enabling developers to build language servers in under 30 lines of code with automatic JSON-RPC handling, runtime validation via Zod, and support for stdio/WebSocket transports. Technical approach: monorepo architecture with pnpm workspaces, strict TypeScript typing, and comprehensive logging following MCP SDK patterns.
+Build a strongly-typed TypeScript SDK for LSP (Language Server Protocol) clients and servers with ergonomics inspired by the Model Context Protocol (MCP) TypeScript SDK. The SDK will provide three packages (@lspeasy/core, @lspeasy/server, @lspeasy/client) enabling developers to build language servers in under 30 lines of code with automatic JSON-RPC handling, runtime validation via Zod, and support for stdio/WebSocket transports. Technical approach: monorepo architecture with pnpm workspaces, strict TypeScript typing, and comprehensive logging following MCP SDK patterns.
 
 ## Technical Context
 
@@ -32,7 +32,7 @@ Build a strongly-typed TypeScript SDK for LSP (Language Server Protocol) clients
 - Must maintain 100% LSP 3.17 spec compliance
 - Zero `any` types in public APIs
 - Minimum 80% test coverage for core packages
-- Bundle size: @lspy/core <100KB, @lspy/server <50KB, @lspy/client <50KB (all gzipped)
+- Bundle size: @lspeasy/core <100KB, @lspeasy/server <50KB, @lspeasy/client <50KB (all gzipped)
 - CI-enforced via size-limit package
 
 **Scale/Scope**:
@@ -46,11 +46,11 @@ Build a strongly-typed TypeScript SDK for LSP (Language Server Protocol) clients
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Verify compliance with lspy constitution (`.specify/memory/constitution.md`):
+Verify compliance with lspeasy constitution (`.specify/memory/constitution.md`):
 
 - [x] **LSP Protocol Compliance**: ✅ Feature explicitly requires 100% LSP 3.17 spec adherence (FR-013, FR-015)
 - [x] **Type Safety**: ✅ Zero `any` types mandated in requirements (FR-004, FR-005), strict TypeScript configuration required
-- [x] **Modularity**: ✅ Three-package structure (@lspy/core, @lspy/server, @lspy/client) matches modular architecture principle; clarified in spec session 2026-01-29
+- [x] **Modularity**: ✅ Three-package structure (@lspeasy/core, @lspeasy/server, @lspeasy/client) matches modular architecture principle; clarified in spec session 2026-01-29
 - [x] **Test-First**: ✅ Integration tests defined in user stories; SC-004 requires 100% malformed request detection; minimum 80% coverage
 - [x] **Async-First**: ✅ All I/O operations async (FR-010 cancellation tokens); performance requirement <100ms cancellation response (SC-009)
 - [x] **Performance**: ✅ Benchmarks identified: 1000+ concurrent requests (SC-005), cancellation <100ms (SC-009)
@@ -75,7 +75,7 @@ specs/[###-feature]/
 
 ```text
 packages/
-├── core/                 # @lspy/core
+├── core/                 # @lspeasy/core
 │   ├── src/
 │   │   ├── protocol/    # LSP 3.17 type definitions
 │   │   ├── jsonrpc/     # JSON-RPC 2.0 primitives
@@ -88,7 +88,7 @@ packages/
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── server/               # @lspy/server
+├── server/               # @lspeasy/server
 │   ├── src/
 │   │   ├── server.ts    # LSPServer class
 │   │   ├── handlers/    # Request/notification handler infrastructure
@@ -100,7 +100,7 @@ packages/
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── client/               # @lspy/client
+├── client/               # @lspeasy/client
 │   ├── src/
 │   │   ├── client.ts    # LSPClient class
 │   │   ├── requests/    # Typed request method builders
@@ -130,7 +130,7 @@ docs/
 └── API.md                    # Public API reference
 ```
 
-**Structure Decision**: Monorepo with three independent packages following MCP SDK architecture. Each package is independently buildable/testable. `@lspy/server` and `@lspy/client` depend on `@lspy/core` via `workspace:*` protocol. Examples demonstrate usage patterns. E2E tests validate LSP compliance and real-world compatibility.
+**Structure Decision**: Monorepo with three independent packages following MCP SDK architecture. Each package is independently buildable/testable. `@lspeasy/server` and `@lspeasy/client` depend on `@lspeasy/core` via `workspace:*` protocol. Examples demonstrate usage patterns. E2E tests validate LSP compliance and real-world compatibility.
 
 ## Complexity Tracking
 
@@ -154,19 +154,19 @@ All Phase 1 artifacts completed:
    - State machine diagrams for initialization and cancellation flows
    - Validation strategies: Zod schemas with runtime checking
 
-2. **[contracts/server-api.md](contracts/server-api.md)** - @lspy/server public API contract
+2. **[contracts/server-api.md](contracts/server-api.md)** - @lspeasy/server public API contract
    - LSPServer class with handler registration (supports both chaining and non-chaining)
    - ServerCapabilities declaration interface
    - Error handling contracts and validation strategies
    - Performance guarantees (<0.1ms handler dispatch)
 
-3. **[contracts/client-api.md](contracts/client-api.md)** - @lspy/client public API contract
+3. **[contracts/client-api.md](contracts/client-api.md)** - @lspeasy/client public API contract
    - LSPClient class with high-level request methods
    - Capability-organized request APIs (textDocument.*, workspace.*, etc.)
    - Server-to-client request handling (window/showMessage, etc.)
    - Compatibility guarantees (LSP 3.17 compliance)
 
-4. **[contracts/core-api.md](contracts/core-api.md)** - @lspy/core public API contract
+4. **[contracts/core-api.md](contracts/core-api.md)** - @lspeasy/core public API contract
    - Transport interface with StdioTransport and WebSocketTransport implementations
    - Protocol type exports (50+ LSP types from vscode-languageserver-protocol)
    - JSON-RPC 2.0 primitives (Message, Request, Response, Notification)

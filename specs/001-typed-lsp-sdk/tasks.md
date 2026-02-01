@@ -17,9 +17,9 @@
 **Purpose**: Initialize monorepo structure and tooling before any implementation
 
 - [x] T001 Create monorepo structure: packages/core/, packages/server/, packages/client/, examples/, e2e/, docs/
-- [x] T002 Initialize package.json for @lspy/core with TypeScript 5.x, Vitest, oxlint, oxfmt dependencies
-- [x] T003 [P] Initialize package.json for @lspy/server with workspace dependency on @lspy/core
-- [x] T004 [P] Initialize package.json for @lspy/client with workspace dependency on @lspy/core
+- [x] T002 Initialize package.json for @lspeasy/core with TypeScript 5.x, Vitest, oxlint, oxfmt dependencies
+- [x] T003 [P] Initialize package.json for @lspeasy/server with workspace dependency on @lspeasy/core
+- [x] T004 [P] Initialize package.json for @lspeasy/client with workspace dependency on @lspeasy/core
 - [x] T005 Configure TypeScript with strict mode, composite project references for monorepo
 - [x] T006 [P] Setup oxlint and oxfmt with .oxlintrc.json and .oxfmtrc.json (2 spaces, single quotes, semicolons)
 - [x] T007 [P] Configure simple-git-hooks and lint-staged for pre-commit checks
@@ -265,8 +265,8 @@
 
 ### MVP Scope (Phase 1-3 Complete)
 Ship with **User Story 1** complete:
-- @lspy/core with JSON-RPC, Transport, protocol types
-- @lspy/server with handler registration
+- @lspeasy/core with JSON-RPC, Transport, protocol types
+- @lspeasy/server with handler registration
 - StdioTransport only
 - Minimal examples
 - Basic tests

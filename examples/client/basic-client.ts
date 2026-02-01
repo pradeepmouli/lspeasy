@@ -14,8 +14,8 @@
  *   # npx ts-node examples/client/basic-client.ts
  */
 
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 import { spawn } from 'node:child_process';
 
 async function main() {

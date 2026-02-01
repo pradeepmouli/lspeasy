@@ -5,8 +5,12 @@
  * the LSP namespace structure to determine supported methods.
  */
 
-import type { ServerCapabilities, MethodsForCapabilities, CapabilityForMethod } from '@lspy/core';
-import { getCapabilityForMethod, supportsMethod } from '@lspy/core';
+import type {
+  ServerCapabilities,
+  MethodsForCapabilities,
+  CapabilityForMethod
+} from '@lspeasy/core';
+import { getCapabilityForMethod, supportsMethod } from '@lspeasy/core';
 import type { LSPRequestMethod } from '../packages/core/dist/protocol/infer';
 
 // Example 1: Type-level capability checking

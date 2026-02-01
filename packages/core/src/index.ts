@@ -1,5 +1,5 @@
 /**
- * @lspy/core - Core types, transports, and utilities for LSP SDK
+ * @lspeasy/core - Core types, transports, and utilities for LSP SDK
  */
 
 // JSON-RPC 2.0 types and utilities

@@ -1,8 +1,8 @@
 # API Reference
 
-Complete API documentation for all `lspy` packages.
+Complete API documentation for all `lspeasy` packages.
 
-## @lspy/core
+## @lspeasy/core
 
 ### Transport Interface
 
@@ -108,7 +108,7 @@ interface StdioTransportOptions {
 
 **Example:**
 ```typescript
-import { StdioTransport } from '@lspy/core';
+import { StdioTransport } from '@lspeasy/core';
 
 // Use default stdin/stdout
 const transport = new StdioTransport();
@@ -233,7 +233,7 @@ class DisposableStore {
 
 ---
 
-## @lspy/server
+## @lspeasy/server
 
 ### LSPServer
 
@@ -313,8 +313,8 @@ interface NotificationContext {
 #### Basic Server
 
 ```typescript
-import { LSPServer } from '@lspy/server';
-import { StdioTransport } from '@lspy/core';
+import { LSPServer } from '@lspeasy/server';
+import { StdioTransport } from '@lspeasy/core';
 
 const server = new LSPServer({
   name: 'my-language-server',
@@ -374,7 +374,7 @@ server.onNotification('textDocument/didOpen', (params) => {
 
 ---
 
-## @lspy/client
+## @lspeasy/client
 
 ### LSPClient
 
@@ -510,8 +510,8 @@ interface WorkspaceRequests {
 #### Basic Client
 
 ```typescript
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 import { spawn } from 'node:child_process';
 
 // Spawn language server
@@ -666,7 +666,7 @@ import type {
   InferRequestParams,
   InferRequestResult,
   InferNotificationParams
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 // Method name → Param types
 type HoverParams = InferRequestParams<'textDocument/hover'>;
@@ -805,9 +805,9 @@ connection.onHover((params) => {
 
 connection.listen();
 
-// After (lspy)
-import { LSPServer } from '@lspy/server';
-import { StdioTransport } from '@lspy/core';
+// After (lspeasy)
+import { LSPServer } from '@lspeasy/server';
+import { StdioTransport } from '@lspeasy/core';
 
 const server = new LSPServer();
 const transport = new StdioTransport();
@@ -823,7 +823,7 @@ await server.listen(transport);
 
 ```typescript
 // If you have custom JSON-RPC implementation:
-// 1. Replace with @lspy/core Transport
+// 1. Replace with @lspeasy/core Transport
 // 2. Use LSPServer/LSPClient for protocol handling
 // 3. Keep your business logic unchanged
 
@@ -855,7 +855,7 @@ server.onRequest('textDocument/hover', async (params) => {
 Enable debug logging:
 
 ```typescript
-import { LogLevel } from '@lspy/core';
+import { LogLevel } from '@lspeasy/core';
 
 const server = new LSPServer({
   logLevel: LogLevel.Debug

@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import type { LSPRequestMethod } from '@lspy/core';
+import type { LSPRequestMethod } from '@lspeasy/core';
 
 /**
  * Validation error thrown when server response doesn't match expected schema

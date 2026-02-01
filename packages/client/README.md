@@ -1,10 +1,10 @@
-# @lspy/client
+# @lspeasy/client
 
 Connect to Language Server Protocol servers with a simple, type-safe client API.
 
 ## Overview
 
-`@lspy/client` provides a high-level LSP client with:
+`@lspeasy/client` provides a high-level LSP client with:
 
 - **LSPClient**: Complete LSP client implementation with lifecycle management
 - **High-Level API**: Strongly-typed `textDocument.*` and `workspace.*` methods
@@ -17,11 +17,11 @@ Connect to Language Server Protocol servers with a simple, type-safe client API.
 ## Installation
 
 ```bash
-npm install @lspy/client @lspy/core vscode-languageserver-protocol
+npm install @lspeasy/client @lspeasy/core vscode-languageserver-protocol
 # or
-pnpm add @lspy/client @lspy/core vscode-languageserver-protocol
+pnpm add @lspeasy/client @lspeasy/core vscode-languageserver-protocol
 # or
-yarn add @lspy/client @lspy/core vscode-languageserver-protocol
+yarn add @lspeasy/client @lspeasy/core vscode-languageserver-protocol
 ```
 
 ## Quick Start
@@ -29,8 +29,8 @@ yarn add @lspy/client @lspy/core vscode-languageserver-protocol
 ### Basic Client
 
 ```typescript
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 import { spawn } from 'child_process';
 
 // Spawn language server
@@ -224,7 +224,7 @@ await client.sendNotification<ParamsType>(
 ### Cancellable Requests
 
 ```typescript
-import { CancellationTokenSource } from '@lspy/core';
+import { CancellationTokenSource } from '@lspeasy/core';
 
 const source = new CancellationTokenSource();
 
@@ -322,8 +322,8 @@ client.onRequest('window/showMessageRequest', async (params) => {
 ## WebSocket Client
 
 ```typescript
-import { LSPClient } from '@lspy/client';
-import { WebSocketTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { WebSocketTransport } from '@lspeasy/core';
 
 // Connect over WebSocket with automatic reconnection
 const transport = new WebSocketTransport({
@@ -427,8 +427,8 @@ function getDiagnostics(uri: string): Diagnostic[] {
 ## Testing
 
 ```typescript
-import { LSPClient } from '@lspy/client';
-import { MockTransport } from '@lspy/core/test/utils';
+import { LSPClient } from '@lspeasy/client';
+import { MockTransport } from '@lspeasy/core/test/utils';
 
 describe('LSP Client', () => {
   it('should send hover request', async () => {

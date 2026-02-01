@@ -3,9 +3,9 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { MessageDispatcher } from '@lspy/server';
-import { ConsoleLogger, LogLevel, ResponseError } from '@lspy/core';
-import type { Transport, RequestMessage, NotificationMessage } from '@lspy/core';
+import { MessageDispatcher } from '@lspeasy/server';
+import { ConsoleLogger, LogLevel, ResponseError } from '@lspeasy/core';
+import type { Transport, RequestMessage, NotificationMessage } from '@lspeasy/core';
 
 // Mock transport
 class MockTransport implements Transport {

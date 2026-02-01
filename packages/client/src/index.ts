@@ -1,5 +1,5 @@
 /**
- * @lspy/client - LSP Client for connecting to language servers
+ * @lspeasy/client - LSP Client for connecting to language servers
  */
 
 export { LSPClient } from './client.js';
@@ -19,4 +19,4 @@ export {
 } from './type-guards.js';
 
 // Re-export commonly used types from core
-export type { Transport, Logger, LogLevel, Disposable } from '@lspy/core';
+export type { Transport, Logger, LogLevel, Disposable } from '@lspeasy/core';

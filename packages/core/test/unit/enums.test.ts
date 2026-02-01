@@ -18,7 +18,7 @@ import {
   TextDocumentSaveReason,
   CodeActionKind,
   FoldingRangeKind
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 describe('LSP Kind Enums', () => {
   describe('CompletionItemKind', () => {

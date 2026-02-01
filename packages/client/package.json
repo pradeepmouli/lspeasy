@@ -1,5 +1,5 @@
 {
-  "name": "@lspy/client",
+  "name": "@lspeasy/client",
   "version": "1.0.0",
   "description": "Connect to LSP servers with typed client API",
   "keywords": [
@@ -8,15 +8,15 @@
     "lsp-client",
     "language-client"
   ],
-  "homepage": "https://github.com/pradeepmouli/lspy#readme",
+  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
   "bugs": {
-    "url": "https://github.com/pradeepmouli/lspy/issues"
+    "url": "https://github.com/pradeepmouli/lspeasy/issues"
   },
   "license": "MIT",
   "author": "Pradeep Mouli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pradeepmouli/lspy.git",
+    "url": "https://github.com/pradeepmouli/lspeasy.git",
     "directory": "packages/client"
   },
   "type": "module",
@@ -39,7 +39,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@lspy/core": "workspace:*"
+    "@lspeasy/core": "workspace:*"
   },
   "peerDependencies": {
     "zod": "^3.25.0"

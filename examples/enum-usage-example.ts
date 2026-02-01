@@ -23,7 +23,7 @@ import {
   type CodeActionClientCapabilities,
   type FoldingRangeClientCapabilities,
   type SemanticTokensClientCapabilities
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 // ============================================================================
 // Completion Items

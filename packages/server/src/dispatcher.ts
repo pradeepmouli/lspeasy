@@ -10,8 +10,8 @@ import type {
   CancellationToken,
   Logger,
   ClientCapabilities
-} from '@lspy/core';
-import { ResponseError, isRequestMessage, isNotificationMessage } from '@lspy/core';
+} from '@lspeasy/core';
+import { ResponseError, isRequestMessage, isNotificationMessage } from '@lspeasy/core';
 import type { RequestHandler, NotificationHandler, HandlerRegistration } from './types.js';
 
 /**

@@ -16,8 +16,8 @@ import type {
   InferRequestParams,
   InferRequestResult,
   InferNotificationParams
-} from '@lspy/core';
-import { ConsoleLogger, LogLevel, ResponseError, isRequestMessage } from '@lspy/core';
+} from '@lspeasy/core';
+import { ConsoleLogger, LogLevel, ResponseError, isRequestMessage } from '@lspeasy/core';
 import type { ServerOptions, RequestHandler, NotificationHandler } from './types.js';
 import { ServerState } from './types.js';
 import { MessageDispatcher } from './dispatcher.js';

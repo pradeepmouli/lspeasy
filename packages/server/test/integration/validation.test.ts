@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { LSPServer } from '@lspy/server';
-import type { Transport } from '@lspy/core';
+import { LSPServer } from '@lspeasy/server';
+import type { Transport } from '@lspeasy/core';
 
 // Mock transport
 class TestTransport implements Transport {

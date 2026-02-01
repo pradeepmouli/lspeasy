@@ -31,7 +31,7 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Verify compliance with lspy constitution (`.specify/memory/constitution.md`):
+Verify compliance with lspeasy constitution (`.specify/memory/constitution.md`):
 
 - [ ] **LSP Protocol Compliance**: Does the feature maintain strict LSP spec adherence?
 - [ ] **Type Safety**: Are all APIs fully typed with no `any` escapes?

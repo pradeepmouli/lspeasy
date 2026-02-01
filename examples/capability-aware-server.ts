@@ -7,8 +7,8 @@
  * 3. Strict mode prevents invalid handler registration
  */
 
-import { LSPServer, StdioTransport } from '@lspy/server';
-import type { ServerCapabilities } from '@lspy/core';
+import { LSPServer, StdioTransport } from '@lspeasy/server';
+import type { ServerCapabilities } from '@lspeasy/core';
 
 const transport = new StdioTransport();
 

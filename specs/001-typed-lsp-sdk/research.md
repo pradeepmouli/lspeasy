@@ -29,7 +29,7 @@
   - Gives full control over transport layer for future browser support
   - JSON-RPC 2.0 spec is simple enough to implement reliably
   - MCP SDK provides proven reference implementation
-- **Scope**: Implement Message types, framing, cancellation, error codes in `@lspy/core`
+- **Scope**: Implement Message types, framing, cancellation, error codes in `@lspeasy/core`
 
 **Alternatives Considered**:
 - vscode-jsonrpc v8.x → Rejected: Runtime dependency, couples to VS Code ecosystem, less MCP SDK alignment
@@ -55,7 +55,7 @@
 - **Cons**: Maintenance burden, need to update generator for each spec version
 
 **Decision**:
-- **Use vscode-languageserver-protocol v3.17.x as type-only dependency** (devDependency in `@lspy/core`)
+- **Use vscode-languageserver-protocol v3.17.x as type-only dependency** (devDependency in `@lspeasy/core`)
 - **Re-export types** through our hierarchical namespace structure (LSPRequest.*, LSPNotification.*)
 - **No runtime imports** from vscode-languageserver-protocol - types only at compile time
 - **Rationale**:
@@ -148,9 +148,9 @@
 
 | Package | Target (gzipped) | Hard Limit (gzipped) |
 |---------|------------------|----------------------|
-| @lspy/core | <100KB | <150KB |
-| @lspy/server | <50KB | <75KB |
-| @lspy/client | <50KB | <75KB |
+| @lspeasy/core | <100KB | <150KB |
+| @lspeasy/server | <50KB | <75KB |
+| @lspeasy/client | <50KB | <75KB |
 
 **Rationale**:
 - Core contains most types/validation → larger acceptable

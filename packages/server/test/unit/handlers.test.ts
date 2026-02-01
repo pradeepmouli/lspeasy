@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { LSPServer } from '@lspy/server';
-import type { HoverParams } from '@lspy/core';
+import { LSPServer } from '@lspeasy/server';
+import type { HoverParams } from '@lspeasy/core';
 
 describe('Handler Registration', () => {
   let server: LSPServer;

@@ -3,16 +3,16 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { LSPServer } from '@lspy/server';
-import { LSPClient } from '@lspy/client';
+import { LSPServer } from '@lspeasy/server';
+import { LSPClient } from '@lspeasy/client';
 import {
   StdioTransport,
   createProgressToken,
   createProgressBegin,
   createProgressReport,
   createProgressEnd
-} from '@lspy/core';
-import type { ProgressToken, WorkDoneProgressValue } from '@lspy/core';
+} from '@lspeasy/core';
+import type { ProgressToken, WorkDoneProgressValue } from '@lspeasy/core';
 
 describe('Progress Reporting Integration', () => {
   let server: LSPServer;

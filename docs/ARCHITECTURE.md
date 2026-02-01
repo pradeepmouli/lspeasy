@@ -2,12 +2,12 @@
 
 ## Overview
 
-`lspy` is a TypeScript SDK for building Language Server Protocol (LSP) clients and servers. It provides a strongly-typed, modern API inspired by the Model Context Protocol (MCP) SDK patterns.
+`lspeasy` is a TypeScript SDK for building Language Server Protocol (LSP) clients and servers. It provides a strongly-typed, modern API inspired by the Model Context Protocol (MCP) SDK patterns.
 
 ## Package Structure
 
 ```
-lspy/
+lspeasy/
 ├── packages/
 │   ├── core/         # Protocol types, transports, JSON-RPC
 │   ├── server/       # LSP server implementation
@@ -15,7 +15,7 @@ lspy/
 └── examples/         # Usage examples
 ```
 
-### @lspy/core
+### @lspeasy/core
 
 The foundation package providing:
 
@@ -30,7 +30,7 @@ The foundation package providing:
 - Message types and schemas
 - Protocol types (re-exported from vscode-languageserver-protocol)
 
-### @lspy/server
+### @lspeasy/server
 
 LSP server implementation with:
 
@@ -44,7 +44,7 @@ LSP server implementation with:
 - `ServerOptions` interface
 - Handler registration methods
 
-### @lspy/client
+### @lspeasy/client
 
 LSP client implementation with:
 
@@ -520,9 +520,9 @@ transport.send = async (message) => {
 
 ### API Stability
 
-- **@lspy/core**: Stable, minimal breaking changes
-- **@lspy/server**: Stable, additive changes only
-- **@lspy/client**: Stable, additive changes only
+- **@lspeasy/core**: Stable, minimal breaking changes
+- **@lspeasy/server**: Stable, additive changes only
+- **@lspeasy/client**: Stable, additive changes only
 
 ## References
 

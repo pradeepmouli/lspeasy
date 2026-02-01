@@ -5,7 +5,7 @@
  */
 
 import type { ProgressToken } from 'vscode-languageserver-protocol';
-import { createProgressBegin, createProgressReport, createProgressEnd } from '@lspy/core';
+import { createProgressBegin, createProgressReport, createProgressEnd } from '@lspeasy/core';
 
 /**
  * Progress reporter for work done progress

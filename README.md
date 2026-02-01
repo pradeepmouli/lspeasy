@@ -1,6 +1,6 @@
-# lspy
+# lspeasy
 
-[![CI](https://github.com/pradeepmouli/lspy/actions/workflows/ci.yml/badge.svg)](https://github.com/pradeepmouli/lspy/actions/workflows/ci.yml)
+[![CI](https://github.com/pradeepmouli/lspeasy/actions/workflows/ci.yml/badge.svg)](https://github.com/pradeepmouli/lspeasy/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](package.json)
 [![pnpm](https://img.shields.io/badge/pnpm-10.27.0-yellow)](package.json)
@@ -12,7 +12,7 @@ A modern **TypeScript SDK for building Language Server Protocol (LSP) clients an
 - 🔷 **Strongly-typed**: Full TypeScript support with LSP 3.17 types
 - 🚀 **Modern API**: Clean, promise-based API with async/await
 - 🔌 **Transport-agnostic**: Support for stdio, WebSocket, and custom transports
-- 📦 **Modular**: Three focused packages (`@lspy/core`, `@lspy/server`, `@lspy/client`)
+- 📦 **Modular**: Three focused packages (`@lspeasy/core`, `@lspeasy/server`, `@lspeasy/client`)
 - ✅ **Well-tested**: Comprehensive unit and integration tests
 - 📚 **Documented**: Complete API reference and architecture guide
 - 🎯 **Production-ready**: Memory-safe, error-resilient, performance-optimized
@@ -22,16 +22,16 @@ A modern **TypeScript SDK for building Language Server Protocol (LSP) clients an
 ### Installation
 
 ```bash
-npm install @lspy/core @lspy/server @lspy/client
+npm install @lspeasy/core @lspeasy/server @lspeasy/client
 # or
-pnpm add @lspy/core @lspy/server @lspy/client
+pnpm add @lspeasy/core @lspeasy/server @lspeasy/client
 ```
 
 ### Building an LSP Server
 
 ```typescript
-import { LSPServer } from '@lspy/server';
-import { StdioTransport } from '@lspy/core';
+import { LSPServer } from '@lspeasy/server';
+import { StdioTransport } from '@lspeasy/core';
 
 // Create server
 const server = new LSPServer({
@@ -75,8 +75,8 @@ await server.listen(transport);
 ### Building an LSP Client
 
 ```typescript
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 import { spawn } from 'node:child_process';
 
 // Spawn language server
@@ -121,7 +121,7 @@ await client.disconnect();
 
 ## Packages
 
-### @lspy/core
+### @lspeasy/core
 
 Core functionality and transport layer:
 
@@ -131,10 +131,10 @@ Core functionality and transport layer:
 - Utilities (cancellation tokens, logging, disposables)
 
 ```typescript
-import { StdioTransport, CancellationTokenSource } from '@lspy/core';
+import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
 ```
 
-### @lspy/server
+### @lspeasy/server
 
 LSP server implementation:
 
@@ -144,10 +144,10 @@ LSP server implementation:
 - Type-safe request/notification handlers
 
 ```typescript
-import { LSPServer } from '@lspy/server';
+import { LSPServer } from '@lspeasy/server';
 ```
 
-### @lspy/client
+### @lspeasy/client
 
 LSP client implementation:
 
@@ -157,7 +157,7 @@ LSP client implementation:
 - Server-to-client request handling
 
 ```typescript
-import { LSPClient } from '@lspy/client';
+import { LSPClient } from '@lspeasy/client';
 ```
 
 ## Examples
@@ -203,7 +203,7 @@ pnpm run format
 ### Project Structure
 
 ```
-lspy/
+lspeasy/
 ├── packages/
 │   ├── core/           # Transport and protocol foundation
 │   ├── server/         # LSP server implementation
@@ -373,4 +373,4 @@ MIT
 ---
 
 **Author**: Pradeep Mouli
-**Repository**: [github.com/pradeepmouli/lspy](https://github.com/pradeepmouli/lspy)
+**Repository**: [github.com/pradeepmouli/lspeasy](https://github.com/pradeepmouli/lspeasy)

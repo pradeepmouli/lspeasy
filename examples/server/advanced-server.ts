@@ -9,14 +9,14 @@
  * - Multiple text document features
  */
 
-import { LSPServer } from '@lspy/server';
-import { StdioTransport, createProgressToken } from '@lspy/core';
+import { LSPServer } from '@lspeasy/server';
+import { StdioTransport, createProgressToken } from '@lspeasy/core';
 import type {
   WorkspaceFolder,
   DidChangeWorkspaceFoldersParams,
   DidChangeWatchedFilesParams,
   CancellationToken
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 // Simulated workspace state
 const workspaceFolders = new Map<string, WorkspaceFolder>();

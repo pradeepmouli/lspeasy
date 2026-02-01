@@ -5,7 +5,7 @@
 
 import { bench, describe } from 'vitest';
 import { LSPServer } from '../../src/server.js';
-import type { HoverParams, CompletionParams } from '@lspy/core';
+import type { HoverParams, CompletionParams } from '@lspeasy/core';
 
 describe('Handler Dispatch Benchmarks', () => {
   describe('Request handler registration', () => {

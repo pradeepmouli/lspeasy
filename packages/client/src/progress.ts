@@ -4,7 +4,7 @@
  * @module client/progress
  */
 
-import type { ProgressToken, WorkDoneProgressValue } from '@lspy/core';
+import type { ProgressToken, WorkDoneProgressValue } from '@lspeasy/core';
 
 /**
  * Progress notification parameters

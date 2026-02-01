@@ -8,13 +8,13 @@
  * - Tracking long-running operations
  */
 
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 import type {
   WorkDoneProgressBegin,
   WorkDoneProgressReport,
   WorkDoneProgressEnd
-} from '@lspy/core';
+} from '@lspeasy/core';
 
 // Create client instance
 const client = new LSPClient({
