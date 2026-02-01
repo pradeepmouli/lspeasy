@@ -174,6 +174,7 @@ See the [examples](./examples) directory for complete working examples:
 
 ## Documentation
 
+- [Capability-Aware Features](./docs/CAPABILITY-AWARE.md) - Runtime capability validation and dynamic methods
 - [Architecture Guide](./docs/ARCHITECTURE.md) - System design and implementation details
 - [API Reference](./docs/API.md) - Complete API documentation
 - [Package READMEs](./packages) - Package-specific guides
@@ -229,6 +230,56 @@ pnpm test --coverage
 
 ## Key Concepts
 
+### Capability-Aware Design
+
+Both client and server support **capability-aware** operations:
+
+#### Server-Side Capability Validation
+
+Servers validate handler registration against declared capabilities:
+
+```typescript
+const server = new LSPServer({
+  strictCapabilities: true  // Enforce capability checking
+});
+
+server.setCapabilities({
+  hoverProvider: true,
+  // definitionProvider not declared
+});
+
+// ✅ Works - hover capability declared
+server.onRequest('textDocument/hover', async (params) => {
+  return { contents: 'Hover text' };
+});
+
+// ❌ Throws error in strict mode - capability not declared
+server.onRequest('textDocument/definition', async (params) => {
+  return { uri: params.textDocument.uri, range: ... };
+});
+```
+
+#### Client-Side Dynamic Methods
+
+Clients dynamically expose methods based on server capabilities:
+
+```typescript
+await client.connect(transport);
+
+// Methods only exist if server declares capability
+if ('hover' in client.textDocument) {
+  const result = await client.textDocument.hover({
+    textDocument: { uri: 'file:///example.ts' },
+    position: { line: 10, character: 5 }
+  });
+}
+
+// Check available methods
+const methods = Object.keys(client.textDocument)
+  .filter(k => typeof client.textDocument[k] === 'function');
+console.log('Available methods:', methods);
+```
+
 ### Transport Layer
 
 Transports handle message transmission:
@@ -255,7 +306,7 @@ server.onRequest('textDocument/definition', async (params) => {
   return { uri: '...', range: { ... } };
 });
 
-// Client side  
+// Client side
 const result = await client.textDocument.definition({
   textDocument: { uri: '...' },
   position: { line: 0, character: 5 }
@@ -301,7 +352,7 @@ disposable.dispose();
 
 - [x] Core JSON-RPC and transport layer
 - [x] LSP server implementation
-- [x] LSP client implementation  
+- [x] LSP client implementation
 - [x] Unit tests and documentation
 - [x] WebSocket transport
 - [ ] Progress reporting
@@ -321,5 +372,5 @@ MIT
 
 ---
 
-**Author**: Pradeep Mouli  
+**Author**: Pradeep Mouli
 **Repository**: [github.com/pradeepmouli/lspy](https://github.com/pradeepmouli/lspy)

@@ -9,7 +9,7 @@ import type {
   ClientCapabilities,
   TextDocumentSyncKind
 } from 'vscode-languageserver-protocol';
-import type { LSPRequest } from './namespaces.js';
+import { LSPRequest } from './namespaces.js';
 
 // Re-export capability types
 export type { ServerCapabilities, ClientCapabilities };
@@ -20,8 +20,8 @@ export type { ServerCapabilities, ClientCapabilities };
 type AllRequestDefinitions =
   | LSPRequest['TextDocument'][keyof LSPRequest['TextDocument']]
   | LSPRequest['Workspace'][keyof LSPRequest['Workspace']]
-  | LSPRequest['Initialize']
-  | LSPRequest['Shutdown'];
+  | LSPRequest['General']['Initialize']
+  | LSPRequest['General']['Shutdown'];
 
 /**
  * Filter request definitions that have a ServerCapability field
@@ -70,24 +70,16 @@ export type CapabilityForMethod<M extends RequestsWithCapabilities['Method']> = 
  * Map of LSP methods to their corresponding server capability keys
  * This is derived from the namespace structure
  */
-const METHOD_TO_CAPABILITY_MAP: Record<string, keyof ServerCapabilities> = {
-  'textDocument/hover': 'hoverProvider',
-  'textDocument/completion': 'completionProvider',
-  'textDocument/definition': 'definitionProvider',
-  'textDocument/references': 'referencesProvider',
-  'textDocument/documentSymbol': 'documentSymbolProvider',
-  'textDocument/codeAction': 'codeActionProvider',
-  'textDocument/formatting': 'documentFormattingProvider',
-  'textDocument/rename': 'renameProvider',
-  'workspace/symbol': 'workspaceSymbolProvider',
-  'workspace/executeCommand': 'executeCommandProvider'
-} as const;
 
 /**
  * Get the capability key for a given method at runtime
  */
 export function getCapabilityForMethod(method: string): keyof ServerCapabilities | undefined {
-  return METHOD_TO_CAPABILITY_MAP[method];
+  return (
+    (Object.values(LSPRequest) as any[])
+      .flatMap((ns) => Object.values(ns))
+      .find((req: any) => req.Method === method) as any
+  )?.ServerCapability;
 }
 
 /**

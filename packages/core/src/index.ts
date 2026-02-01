@@ -75,6 +75,14 @@ export type {
   ParamsForNotification as InferNotificationParams
 } from './protocol/infer.js';
 
+// Capability-conditional method interfaces (hand-written type transformations)
+export type {
+  ClientSendMethods,
+  ServerHandlers,
+  ServerSendMethods,
+  ClientHandlers
+} from './protocol/capability-methods.js';
+
 // LSP protocol schemas
 export {
   PositionSchema,

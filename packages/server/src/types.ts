@@ -37,6 +37,13 @@ export interface ServerOptions {
     error: ZodError,
     context: RequestContext | NotificationContext
   ) => ResponseErrorInterface;
+
+  /**
+   * Strict capability checking mode
+   * When true, throws error if handler registered for unsupported capability
+   * When false, logs warning and allows registration (default: false)
+   */
+  strictCapabilities?: boolean;
 }
 
 /**

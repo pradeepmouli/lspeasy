@@ -17,6 +17,7 @@ import { ConsoleLogger, LogLevel, CancellationTokenSource } from '@lspy/core';
 import type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
 import { TextDocumentRequests } from './requests/text-document.js';
 import { WorkspaceRequests } from './requests/workspace.js';
+import { createTextDocumentProxy, createWorkspaceProxy } from './capability-proxy.js';
 
 /**
  * LSP Client for connecting to language servers
@@ -40,7 +41,7 @@ export class LSPClient {
   private readonly logger: Logger;
   private readonly options: Required<Omit<ClientOptions, 'capabilities' | 'onValidationError'>>;
   private readonly capabilities?: import('vscode-languageserver-protocol').ClientCapabilities;
-  private serverCapabilities?: import('vscode-languageserver-protocol').ServerCapabilities;
+  public serverCapabilities?: import('vscode-languageserver-protocol').ServerCapabilities;
   private serverInfo?: { name: string; version?: string };
   private readonly onValidationError?: ClientOptions['onValidationError'];
   private transportDisposables: Disposable[];
@@ -81,9 +82,9 @@ export class LSPClient {
       this.onValidationError = options.onValidationError;
     }
 
-    // Initialize high-level methods
-    this.textDocument = new TextDocumentRequests(this);
-    this.workspace = new WorkspaceRequests(this);
+    // Initialize high-level methods (proxies will be created after server capabilities are received)
+    this.textDocument = createTextDocumentProxy(this);
+    this.workspace = createWorkspaceProxy(this);
   }
 
   /**

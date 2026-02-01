@@ -23,6 +23,7 @@ import { ServerState } from './types.js';
 import { MessageDispatcher } from './dispatcher.js';
 import { LifecycleManager } from './lifecycle.js';
 import { validateParams } from './validation.js';
+import { CapabilityGuard } from './capability-guard.js';
 
 /**
  * LSP Server class
@@ -34,6 +35,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   private readonly name: string;
   private readonly version: string;
   private readonly options: ServerOptions;
+  private capabilityGuard?: CapabilityGuard;
 
   private transport?: Transport | undefined;
   private state: ServerState = ServerState.Created;
@@ -93,6 +95,17 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
     method: Method,
     handler: RequestHandler<Params, Result>
   ): this {
+    // Check if handler can be registered based on capabilities
+    if (this.capabilityGuard && !this.capabilityGuard.canRegisterHandler(method)) {
+      // In non-strict mode, warning was already logged
+      if (!this.options.strictCapabilities) {
+        this.logger.debug(
+          `Registering handler for ${method} despite missing capability (non-strict mode)`
+        );
+      }
+      // In strict mode, canRegisterHandler already threw an error
+    }
+
     // Wrap handler with validation
     const wrappedHandler: RequestHandler<Params, Result> = async (params, token, context) => {
       // Validate params if schema exists
@@ -138,6 +151,17 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
     method: Method,
     handler: NotificationHandler<Params>
   ): this {
+    // Check if handler can be registered based on capabilities
+    if (this.capabilityGuard && !this.capabilityGuard.canRegisterHandler(method)) {
+      // In non-strict mode, warning was already logged
+      if (!this.options.strictCapabilities) {
+        this.logger.debug(
+          `Registering handler for ${method} despite missing capability (non-strict mode)`
+        );
+      }
+      // In strict mode, canRegisterHandler already threw an error
+    }
+
     // Wrap handler with validation
     const wrappedHandler: NotificationHandler<Params> = async (params, context) => {
       // Validate params if schema exists
@@ -161,6 +185,12 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
    */
   setCapabilities(capabilities: Capabilities): void {
     this.lifecycle.setCapabilities(capabilities as ServerCapabilities);
+    // Create capability guard with the new capabilities
+    this.capabilityGuard = new CapabilityGuard(
+      capabilities as ServerCapabilities,
+      this.logger,
+      this.options.strictCapabilities ?? false
+    );
   }
 
   /**

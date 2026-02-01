@@ -272,7 +272,7 @@ export type InferRequestResult<M extends string> =
 const generatedCode = generateNamespace();
 
 // Write to file
-const outputPath = join(projectRoot, 'packages/core/src/protocol/namespaces.generated.ts');
+const outputPath = join(projectRoot, 'packages/core/src/protocol/namespaces.ts');
 writeFileSync(outputPath, generatedCode, 'utf8');
 
 console.log(`✅ Generated ${outputPath}`);

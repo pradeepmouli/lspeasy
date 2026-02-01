@@ -1081,11 +1081,9 @@ import type {`
     }
 
     output.push('} as const;');
+    output.push('');
 
-    const outputPath = path.join(
-      process.cwd(),
-      'packages/core/src/protocol/namespaces.generated.ts'
-    );
+    const outputPath = path.join(process.cwd(), 'packages/core/src/protocol/namespaces.ts');
     fs.writeFileSync(outputPath, output.join('\n') + '\n');
     console.log(`   Written to ${outputPath}`);
 
