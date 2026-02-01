@@ -242,33 +242,33 @@ Main server class for handling LSP requests.
 ```typescript
 class LSPServer {
   constructor(options?: ServerOptions);
-  
+
   // Lifecycle
   listen(transport: Transport): Promise<void>;
   shutdown(): Promise<void>;
   isRunning(): boolean;
-  
+
   // Handler registration
   onRequest<M extends LSPRequestMethod>(
     method: M,
-    handler: (params: InferRequestParams<M>, context: RequestContext) => 
+    handler: (params: InferRequestParams<M>, context: RequestContext) =>
       Promise<InferRequestResult<M>> | InferRequestResult<M>
   ): Disposable;
-  
+
   onNotification<M extends LSPNotificationMethod>(
     method: M,
     handler: (params: InferNotificationParams<M>, context: NotificationContext) => void
   ): Disposable;
-  
+
   // Server capabilities
   getCapabilities(): ServerCapabilities;
-  
+
   // Send to client
   sendRequest<Params, Result>(
     method: string,
     params: Params
   ): Promise<Result>;
-  
+
   sendNotification<Params>(
     method: string,
     params: Params
@@ -283,10 +283,10 @@ interface ServerOptions {
   // Server identification
   name?: string;
   version?: string;
-  
+
   // Server capabilities
   capabilities?: ServerCapabilities;
-  
+
   // Logging
   logger?: Logger;
   logLevel?: LogLevel;
@@ -347,11 +347,11 @@ server.onRequest('textDocument/definition', async (params, context) => {
       params.textDocument.uri,
       params.position
     );
-    
+
     if (!definition) {
       return null;  // No definition found
     }
-    
+
     return {
       uri: definition.uri,
       range: definition.range
@@ -383,49 +383,49 @@ Main client class for connecting to LSP servers.
 ```typescript
 class LSPClient<ServerCapabilities = any> {
   constructor(options?: ClientOptions);
-  
+
   // Connection lifecycle
   connect(transport: Transport): Promise<InitializeResult>;
   disconnect(): Promise<void>;
   isConnected(): boolean;
-  
+
   // Low-level requests
   sendRequest<Params, Result>(
     method: string,
     params: Params,
     token?: CancellationToken
   ): Promise<Result>;
-  
+
   sendNotification<Params>(
     method: string,
     params: Params
   ): Promise<void>;
-  
+
   sendCancellableRequest<Params, Result>(
     method: string,
     params: Params
   ): CancellableRequest<Result>;
-  
+
   // Server-to-client handlers
   onRequest<Params, Result>(
     method: string,
     handler: (params: Params) => Promise<Result> | Result
   ): Disposable;
-  
+
   onNotification<Params>(
     method: string,
     handler: (params: Params) => void
   ): Disposable;
-  
+
   // Events
   onConnected(handler: () => void): Disposable;
   onDisconnected(handler: () => void): Disposable;
   onError(handler: (error: Error) => void): Disposable;
-  
+
   // Server info
   getServerCapabilities(): ServerCapabilities | undefined;
   getServerInfo(): { name: string; version?: string } | undefined;
-  
+
   // High-level APIs
   readonly textDocument: TextDocumentRequests;
   readonly workspace: WorkspaceRequests;
@@ -439,14 +439,14 @@ interface ClientOptions {
   // Client identification
   name?: string;
   version?: string;
-  
+
   // Client capabilities
   capabilities?: ClientCapabilities;
-  
+
   // Logging
   logger?: Logger;
   logLevel?: LogLevel;
-  
+
   // Error handling
   onValidationError?: (error: ZodError, response: ResponseMessage) => void;
 }
@@ -485,7 +485,7 @@ interface TextDocumentRequests {
   definition(params: DefinitionParams): Promise<Definition | null>;
   references(params: ReferenceParams): Promise<Location[] | null>;
   documentSymbol(params: DocumentSymbolParams): Promise<DocumentSymbol[] | SymbolInformation[] | null>;
-  
+
   // Document synchronization
   didOpen(params: DidOpenTextDocumentParams): Promise<void>;
   didChange(params: DidChangeTextDocumentParams): Promise<void>;

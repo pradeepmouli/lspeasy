@@ -469,12 +469,12 @@ class MyTransport implements Transport {
   async send(message: Message): Promise<void> {
     // Your transport logic
   }
-  
+
   onMessage(handler: (message: Message) => void): Disposable {
     // Register message handler
     return { dispose: () => { /* cleanup */ } };
   }
-  
+
   // ... implement other methods
 }
 ```
