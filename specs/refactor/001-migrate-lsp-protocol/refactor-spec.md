@@ -237,6 +237,16 @@ Generate types.ts + namespaces.ts
 
 ## Behavior Preservation Requirements
 
+### Backward Compatibility Definition
+
+For this refactoring, "backward compatible" means:
+- ✅ **TypeScript Type Compatibility**: Generated types preserve structural compatibility (no breaking type changes)
+- ✅ **Export List Identical**: Same exported symbols (type names, namespace names, function signatures)
+- ✅ **Semantic Equivalence**: Generated code has identical runtime behavior when compiled
+- ✅ **Consumer Code Unaffected**: All existing code importing LSP types compiles without modification
+- ⚠️ **NOT Byte-for-Byte Identical**: Implementation details (whitespace, comments, ordering) may differ
+- ⚠️ **NOT API Binary Compatible**: Generated .js/.d.ts files are regenerated, not append-only
+
 ### Observable Behaviors to Preserve
 1. **Type Exports**: All types exported from `packages/core/src/protocol/types.ts` must match current exports
 2. **Namespace Organization**: Categories in `namespaces.ts` must match current structure

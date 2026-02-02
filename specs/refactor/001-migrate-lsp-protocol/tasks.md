@@ -15,6 +15,18 @@
 - `[P]` = Parallelizable (can be done independently)
 - Tasks without `[P]` must be done sequentially
 
+## Task Numbering
+
+**Implementation Plan vs. Task Checklist**:
+- **Implementation Plan**: 28 logical tasks grouped by phase (numbered 1.1-4.5)
+- **Task Checklist**: 32 atomic tasks with unique IDs (T001-T032)
+- **Difference**: Some logical tasks split into multiple atomic sub-tasks
+
+**Mapping Examples**:
+- Implementation Plan Task 2.1-2.8 (8 tasks) → Tasks T005-T016 (12 atomic tasks)
+- Phase 2 includes additional validation/commit checkpoints as separate tasks
+- Final validation expanded into T031 (pre-PR checklist) + T032 (PR creation)
+
 ---
 
 ## Phase 1: Foundation (Day 1 - Feb 3, 2026)
@@ -53,7 +65,11 @@
   - Run type checking: pnpm run type-check
   - Run linting: pnpm run lint
   - Test fetching metaModel.json manually
-  - Test parser builds registries correctly
+  - Test parser builds registries correctly:
+    - Verify registry.requests.size ≥ 150 (typical LSP has ~150+ request methods)
+    - Verify registry.notifications.size ≥ 50 (typical LSP has ~50+ notifications)
+    - Verify getCategories().size ≥ 15 (expect categories: textDocument, workspace, window, etc.)
+    - Verify getAllStructures().length ≥ 100 (LSP has many structure types)
   - Verify all new files compile
   - Commit Phase 1 changes
 
