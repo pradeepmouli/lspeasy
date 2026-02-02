@@ -1,8 +1,8 @@
 # Migration Guide: TypeScript AST to metaModel.json Code Generation
 
-**Status**: Planning  
-**Priority**: Medium  
-**Effort**: 3-5 days  
+**Status**: Planning
+**Priority**: Medium
+**Effort**: 3-5 days
 **Impact**: Improved maintainability, better type inference, official protocol compliance
 
 ## Overview
@@ -87,7 +87,7 @@ export async function fetchMetaModel(
     const url =
       `https://raw.githubusercontent.com/microsoft/vscode-languageserver-node/` +
       `main/protocol/metaModel.json`;
-    
+
     return await downloadJSON<MetaModel>(url);
   } catch (error) {
     console.warn(`⚠️  GitHub fetch failed, trying npm fallback...`);
@@ -360,14 +360,14 @@ export class MetaModelParser {
     // Index requests
     for (const req of this.model.requests) {
       registry.requests.set(req.method, req);
-      
+
       if (req.serverCapability) {
         if (!registry.byCapability.server.has(req.serverCapability)) {
           registry.byCapability.server.set(req.serverCapability, []);
         }
         registry.byCapability.server.get(req.serverCapability)!.push(req);
       }
-      
+
       if (req.clientCapability) {
         if (!registry.byCapability.client.has(req.clientCapability)) {
           registry.byCapability.client.set(req.clientCapability, []);
@@ -379,14 +379,14 @@ export class MetaModelParser {
     // Index notifications
     for (const notif of this.model.notifications) {
       registry.notifications.set(notif.method, notif);
-      
+
       if (notif.serverCapability) {
         if (!registry.byCapability.server.has(notif.serverCapability)) {
           registry.byCapability.server.set(notif.serverCapability, []);
         }
         registry.byCapability.server.get(notif.serverCapability)!.push(notif);
       }
-      
+
       if (notif.clientCapability) {
         if (!registry.byCapability.client.has(notif.clientCapability)) {
           registry.byCapability.client.set(notif.clientCapability, []);
@@ -406,10 +406,10 @@ export class MetaModelParser {
       // Look up in structures, enums, type aliases
       const struct = this.model.structures.find(s => s.name === type.name);
       if (struct) return type; // Keep as reference for generation
-      
+
       const enumDef = this.model.enumerations.find(e => e.name === type.name);
       if (enumDef) return type;
-      
+
       const alias = this.model.typeAliases.find(a => a.name === type.name);
       if (alias) return type;
     }
@@ -478,7 +478,7 @@ export class MetaModelParser {
 Update `scripts/generate-protocol-types.ts` to use metaModel:
 
 **Key changes:**
-- Remove `analyzeProtocolFile()` and `analyzeTypesFile()` 
+- Remove `analyzeProtocolFile()` and `analyzeTypesFile()`
 - Replace with single `fetchAndParseMetaModel()`
 - Use `MetaModelParser` to build registries
 - Simplify enum extraction (use `Enumeration` directly from model)
@@ -673,7 +673,7 @@ Update `docs/ARCHITECTURE.md`:
 
 ### metaModel.json Source
 
-The LSP protocol types are generated from the official `metaModel.json` 
+The LSP protocol types are generated from the official `metaModel.json`
 provided by the VSCode Language Server team.
 
 **Source**: https://github.com/microsoft/vscode-languageserver-node/blob/main/protocol/metaModel.json
@@ -784,12 +784,11 @@ git stash
 
 ## Questions & Decisions
 
-**Q: Should we support multiple protocol versions?**  
+**Q: Should we support multiple protocol versions?**
 A: Deferred to Phase 2 - current implementation will use latest stable. Multi-version support can be added later if needed.
 
-**Q: What about custom/vendor-specific LSP extensions?**  
+**Q: What about custom/vendor-specific LSP extensions?**
 A: metaModel.json includes only official LSP. Custom extensions would need separate type definitions (future enhancement).
 
-**Q: How do we handle metaModel.json schema changes?**  
+**Q: How do we handle metaModel.json schema changes?**
 A: Pin to specific version in `scripts/fetch-metamodel.ts`, update type interfaces as schema evolves.
-
