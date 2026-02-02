@@ -178,6 +178,7 @@ import type {
   SemanticTokensParams,
   SemanticTokensRangeParams,
   SemanticTokensRegistrationOptions,
+  ServerCapabilities,
   ShowDocumentParams,
   ShowDocumentResult,
   ShowMessageParams,
@@ -226,7 +227,7 @@ export type LSPRequest = {
       Params: CallHierarchyPrepareParams;
       Result?: CallHierarchyItem[] | null;
       ClientCapability: CallHierarchyClientCapabilities;
-      ServerCapability: 'callHierarchyPrepareProvider';
+      ServerCapability: 'callHierarchyProvider';
       Options: CallHierarchyOptions;
       RegistrationOptions: CallHierarchyRegistrationOptions;
       Direction: 'clientToServer';
@@ -236,7 +237,7 @@ export type LSPRequest = {
       Params: DocumentColorParams;
       Result?: ColorInformation[];
       ClientCapability: void;
-      ServerCapability: 'documentColorProvider';
+      ServerCapability: 'colorProvider';
       Options: DocumentColorOptions;
       RegistrationOptions: DocumentColorRegistrationOptions;
       Direction: 'clientToServer';
@@ -246,7 +247,7 @@ export type LSPRequest = {
       Params: ColorPresentationParams;
       Result?: ColorPresentation[];
       ClientCapability: void;
-      ServerCapability: 'colorPresentationProvider';
+      ServerCapability: 'colorProvider';
       Options: void;
       RegistrationOptions: WorkDoneProgressOptions & TextDocumentRegistrationOptions;
       Direction: 'clientToServer';
@@ -1007,7 +1008,7 @@ export type LSPNotification = {
       Method: 'textDocument/willSave';
       Params: WillSaveTextDocumentParams;
       ClientCapability: void;
-      ServerCapability: 'willSaveTextDocumentProvider';
+      ServerCapability: ServerCapabilities['textDocumentSync'];
       Options: void;
       RegistrationOptions: void;
       Direction: 'clientToServer';

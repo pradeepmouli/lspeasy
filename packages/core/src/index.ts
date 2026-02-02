@@ -68,10 +68,10 @@ export * from './protocol/types.js';
 // Note: Single export statement exports both the type and const with same name
 export { LSPRequest, LSPNotification } from './protocol/namespaces.js';
 export type {
-  LSPRequestMethod,
+  M as LSPRequestMethod,
   LSPNotificationMethod,
-  ParamsForMethod as InferRequestParams,
-  ResultForMethod as InferRequestResult,
+  ParamsForRequest as InferRequestParams,
+  ResultForRequest as InferRequestResult,
   ParamsForNotification as InferNotificationParams
 } from './protocol/infer.js';
 

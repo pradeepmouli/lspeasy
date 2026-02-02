@@ -281,31 +281,28 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
    */
   private registerBuiltinHandlers(): void {
     // Initialize request - use onRequest to get validation
-    this.onRequest<'initialize', InitializeParams, any>(
-      'initialize',
-      async (params, token, context) => {
-        if (this.state !== ServerState.Created) {
-          throw ResponseError.invalidRequest('Server already initialized');
-        }
-
-        this.state = ServerState.Initializing;
-        this.clientCapabilities = params.capabilities;
-        this.dispatcher.setClientCapabilities(params.capabilities);
-
-        const result = await this.lifecycle.handleInitialize(params, this.transport!, context.id);
-        this.state = ServerState.Initialized;
-
-        return result;
+    this.onRequest('initialize', async (params, token, context) => {
+      if (this.state !== ServerState.Created) {
+        throw ResponseError.invalidRequest('Server already initialized');
       }
-    );
+
+      this.state = ServerState.Initializing;
+      this.clientCapabilities = params.capabilities;
+      this.dispatcher.setClientCapabilities(params.capabilities);
+
+      const result = await this.lifecycle.handleInitialize(params, this.transport!, context.id);
+      this.state = ServerState.Initialized;
+
+      return result;
+    });
 
     // Initialized notification - use onNotification to get validation
-    this.onNotification<'initialized', InitializedParams>('initialized', (params) => {
+    this.onNotification('initialized', (params) => {
       this.lifecycle.handleInitialized(params);
     });
 
     // Shutdown request
-    this.onRequest('shutdown', async (params, token, context) => {
+    this.onRequest('shutdown', async (_params, _token, context) => {
       if (this.state !== ServerState.Initialized) {
         throw ResponseError.invalidRequest('Server not initialized');
       }
@@ -323,7 +320,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
     });
 
     // Cancellation notification
-    this.onNotification<'$/cancelRequest', { id: number | string }>('$/cancelRequest', (params) => {
+    this.onNotification('$/cancelRequest', (params: { id: number | string }) => {
       const controller = this.cancellationTokens.get(params.id);
       if (controller) {
         controller.abort();

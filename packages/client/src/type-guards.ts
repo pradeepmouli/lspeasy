@@ -59,7 +59,7 @@ export function hasServerCapability<K extends keyof ServerCapabilities>(
  * @deprecated Use supportsHover() from @lspeasy/core instead
  */
 export function hasHoverCapability(client: LSPClient): client is LSPClient & {
-  textDocument: ClientSendMethods<{ hoverProvider: true }>['TextDocument'];
+  textDocument: ClientSendMethods<{ hoverProvider: true }>['textDocument'];
 } {
   return 'hover' in client.textDocument && typeof client.textDocument.hover === 'function';
 }
@@ -70,7 +70,7 @@ export function hasHoverCapability(client: LSPClient): client is LSPClient & {
  * @deprecated Use supportsCompletion() from @lspeasy/core instead
  */
 export function hasCompletionCapability(client: LSPClient): client is LSPClient & {
-  textDocument: ClientSendMethods<{ completionProvider: {} }>['TextDocument'];
+  textDocument: ClientSendMethods<{ completionProvider: {} }>['textDocument'];
 } {
   return (
     'completion' in client.textDocument && typeof client.textDocument.completion === 'function'
@@ -83,10 +83,12 @@ export function hasCompletionCapability(client: LSPClient): client is LSPClient 
  * @deprecated Use supportsDefinition() from @lspeasy/core instead
  */
 export function hasDefinitionCapability(client: LSPClient): client is LSPClient & {
-  textDocument: ClientSendMethods<{ definitionProvider: true }>['TextDocument'];
+  textDocument: ClientSendMethods<{ definitionProvider: true }>['textDocument'];
 } {
   return (
-    'definition' in client.textDocument && typeof client.textDocument.definition === 'function'
+    client.serverCapabilities?.definitionProvider === true &&
+    'definition' in client.textDocument &&
+    typeof client.textDocument.definition === 'function'
   );
 }
 
@@ -96,7 +98,7 @@ export function hasDefinitionCapability(client: LSPClient): client is LSPClient 
  * @deprecated Use supportsReferences() from @lspeasy/core instead
  */
 export function hasReferencesCapability(client: LSPClient): client is LSPClient & {
-  textDocument: ClientSendMethods<{ referencesProvider: true }>['TextDocument'];
+  textDocument: ClientSendMethods<{ referencesProvider: true }>['textDocument'];
 } {
   return (
     'references' in client.textDocument && typeof client.textDocument.references === 'function'
@@ -109,7 +111,7 @@ export function hasReferencesCapability(client: LSPClient): client is LSPClient 
  * @deprecated Use hasCapability() with 'documentHighlightProvider' from @lspeasy/core instead
  */
 export function hasDocumentHighlightCapability(client: LSPClient): client is LSPClient & {
-  textDocument: ClientSendMethods<{ documentHighlightProvider: true }>['TextDocument'];
+  textDocument: ClientSendMethods<{ documentHighlightProvider: true }>['textDocument'];
 } {
   return (
     'documentHighlight' in client.textDocument &&
@@ -123,7 +125,7 @@ export function hasDocumentHighlightCapability(client: LSPClient): client is LSP
  * @deprecated Use supportsDocumentSymbol() from @lspeasy/core instead
  */
 export function hasDocumentSymbolCapability(client: LSPClient): client is LSPClient & {
-  textDocument: ClientSendMethods<{ documentSymbolProvider: true }>['TextDocument'];
+  textDocument: ClientSendMethods<{ documentSymbolProvider: true }>['textDocument'];
 } {
   return (
     'documentSymbol' in client.textDocument &&
@@ -137,7 +139,7 @@ export function hasDocumentSymbolCapability(client: LSPClient): client is LSPCli
  * @deprecated Use hasCapability() with 'codeActionProvider' from @lspeasy/core instead
  */
 export function hasCodeActionCapability(client: LSPClient): client is LSPClient & {
-  textDocument: ClientSendMethods<{ codeActionProvider: true }>['TextDocument'];
+  textDocument: ClientSendMethods<{ codeActionProvider: true }>['textDocument'];
 } {
   return (
     'codeAction' in client.textDocument && typeof client.textDocument.codeAction === 'function'
@@ -150,7 +152,7 @@ export function hasCodeActionCapability(client: LSPClient): client is LSPClient 
  * @deprecated Use hasCapability() with 'workspaceSymbolProvider' from @lspeasy/core instead
  */
 export function hasWorkspaceSymbolCapability(client: LSPClient): client is LSPClient & {
-  workspace: ClientSendMethods<{ workspaceSymbolProvider: true }>['Workspace'];
+  workspace: ClientSendMethods<{ workspaceSymbolProvider: true }>['workspace'];
 } {
   return 'symbol' in client.workspace && typeof client.workspace.symbol === 'function';
 }

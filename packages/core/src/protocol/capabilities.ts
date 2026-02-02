@@ -17,16 +17,11 @@ export type { ServerCapabilities, ClientCapabilities };
 /**
  * Extract all request definition types from the namespace structure
  */
-type AllRequestDefinitions =
-  | LSPRequest['TextDocument'][keyof LSPRequest['TextDocument']]
-  | LSPRequest['Workspace'][keyof LSPRequest['Workspace']]
-  | LSPRequest['General']['Initialize']
-  | LSPRequest['General']['Shutdown'];
 
 /**
  * Filter request definitions that have a ServerCapability field
  */
-type RequestsWithCapabilities = Extract<AllRequestDefinitions, { ServerCapability: string }>;
+type RequestsWithCapabilities = Extract<LSPRequest[keyof LSPRequest], { ServerCapability: string }>;
 
 /**
  * Map a method to its server capability provider key

@@ -6,7 +6,8 @@
  */
 
 import type { ServerCapabilities, ClientCapabilities } from './types.js';
-import type { LSPRequest } from './namespaces.js';
+import { LSPRequest } from './namespaces.js';
+import type { CamelCase, KeyAsString } from 'type-fest';
 
 /**
  * Helper type to check if a capability is enabled
@@ -82,10 +83,6 @@ type RemoveNever<T> = {
 /**
  * Uncapitalize first letter of string
  */
-type Uncapitalize<S extends string> = S extends `${infer First}${infer Rest}`
-  ? `${Lowercase<First>}${Rest}`
-  : S;
-
 /**
  * Client methods for sending requests to server
  * Methods are conditionally visible based on ServerCapabilities
@@ -98,10 +95,11 @@ type Uncapitalize<S extends string> = S extends `${infer First}${infer Rest}`
  * // MyMethods.textDocument.definition is 'never' (not in capabilities)
  */
 export type ClientSendMethods<ServerCaps extends Partial<ServerCapabilities>> = {
-  [Namespace in keyof LSPRequest]: RemoveNever<{
-    [Method in keyof LSPRequest[Namespace] as Uncapitalize<
-      Method & string
-    >]: TransformToClientSendMethod<LSPRequest[Namespace][Method], ServerCaps>;
+  [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNever<{
+    [Method in keyof LSPRequest[Namespace] as CamelCase<Method>]: TransformToClientSendMethod<
+      LSPRequest[Namespace][Method],
+      ServerCaps
+    >;
   }>;
 };
 
@@ -116,13 +114,13 @@ export type ClientSendMethods<ServerCaps extends Partial<ServerCapabilities>> = 
  * // MyHandlers.onCompletion is 'never'
  */
 export type ServerHandlers<ServerCaps extends Partial<ServerCapabilities>> = {
-  [Namespace in keyof LSPRequest]: {
+  [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: {
     [Method in keyof LSPRequest[Namespace] as `on${Method & string}`]: TransformToServerHandler<
       LSPRequest[Namespace][Method],
       ServerCaps
     >;
   };
-}[keyof LSPRequest];
+}[CamelCase<keyof LSPRequest>];
 
 /**
  * Server methods for sending requests to client
@@ -135,8 +133,8 @@ export type ServerHandlers<ServerCaps extends Partial<ServerCapabilities>> = {
 export type ServerSendMethods<
   _ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities
 > = {
-  [Namespace in keyof LSPRequest]: RemoveNever<{
-    [Method in keyof LSPRequest[Namespace] as Uncapitalize<
+  [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNever<{
+    [Method in keyof LSPRequest[Namespace] as CamelCase<
       Method & string
     >]: TransformToServerSendMethod<LSPRequest[Namespace][Method]>;
   }>;
@@ -157,3 +155,22 @@ export type ClientHandlers<_ClientCaps extends Partial<ClientCapabilities>> = {
     >;
   };
 }[keyof LSPRequest];
+
+export const ClientRequestMethodToCapabilityMap: Map<string, keyof ServerCapabilities> = new Map(
+  (Object.values(LSPRequest) as any[])
+    .flatMap((ns) => Object.values(ns))
+    .map((req: any) => [req.Method, req.ServerCapability] as [string, keyof ServerCapabilities])
+);
+
+export const ClientNotificationMethodToCapabilityMap: Map<string, keyof ServerCapabilities> =
+  new Map(
+    Object.values(LSPRequest)
+      .flatMap((ns) => Object.values(ns))
+      .filter(
+        (req: any) =>
+          req.Direction === 'clientToServer' ||
+          req.Driection.map(
+            (req: any) => [req.Method, req.ServerCapability] as [string, keyof ServerCapabilities]
+          )
+      )
+  );

@@ -4,7 +4,9 @@
  * Uses mapped types and lookups instead of nested conditionals
  */
 
+import type { LSPRequestMethod, ServerCapabilities } from '@/core';
 import { LSPRequest, LSPNotification } from './namespaces.js';
+import type { UnionToIntersection } from 'type-fest';
 
 // Helper type to flatten nested method types into a flat map
 type FlattenMethods<T> = {
@@ -15,10 +17,6 @@ type FlattenMethods<T> = {
       : never;
 }[keyof T];
 
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void
-  ? I
-  : never;
-
 //@ts-ignore - TS bug workaround
 type FlatRequestMap = UnionToIntersection<FlattenMethods<LSPRequest>>;
 //@ts-ignore - TS bug workaround
@@ -27,7 +25,7 @@ type FlatNotificationMap = UnionToIntersection<FlattenMethods<LSPNotification>>;
 /**
  * Union type of all valid LSP request method names
  */
-export type LSPRequestMethod = keyof FlatRequestMap;
+export type M = keyof FlatRequestMap;
 
 /**
  * Union type of all valid LSP notification method names
@@ -41,7 +39,7 @@ export type LSPNotificationMethod = keyof FlatNotificationMap;
  * type HoverParams = InferRequestParams<'textDocument/hover'>
  * // Resolves to: HoverParams from vscode-languageserver-protocol
  */
-export type ParamsForMethod<M extends string> = M extends LSPRequestMethod
+export type ParamsForRequest<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M]['Params']
   : never;
 
@@ -52,17 +50,17 @@ export type ParamsForMethod<M extends string> = M extends LSPRequestMethod
  * type HoverResult = InferRequestResult<'textDocument/hover'>
  * // Resolves to: Hover | null
  */
-export type ResultForMethod<M extends string> = M extends LSPRequestMethod
+export type ResultForRequest<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M]['Result']
   : never;
 
-export type ServerCapabilityForMethod<M extends string> = M extends LSPRequestMethod
+export type ServerCapabilityForRequest<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M] extends { ServerCapability: infer C }
     ? C
     : never
   : never;
 
-export type ClientCapabilityForMethod<M extends string> = M extends LSPRequestMethod
+export type ClientCapabilityForRequest<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M] extends { ClientCapability: infer C }
     ? C
     : never
@@ -79,15 +77,33 @@ export type ParamsForNotification<M extends string> = M extends LSPNotificationM
   ? FlatNotificationMap[M]['Params']
   : never;
 
-export type OptionsForMethod<M extends string> = M extends LSPRequestMethod
+export type ServerCapabilityForNotification<M extends string> = M extends LSPNotificationMethod
+  ? FlatNotificationMap[M] extends { ServerCapability: infer C }
+    ? C
+    : never
+  : never;
+
+export type OptionsForRequest<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M] extends { Options: infer O }
     ? O
     : never
   : never;
 
-export type RegistrationOptionsForMethod<M extends string> = M extends LSPRequestMethod
+export type RegistrationOptionsForRequest<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M] extends { RegistrationOptions: infer R }
     ? R
+    : never
+  : never;
+
+export type DirectionForRequest<M extends string> = M extends LSPRequestMethod
+  ? FlatRequestMap[M] extends { Direction: infer D }
+    ? D
+    : never
+  : never;
+
+export type DirectionForNotification<M extends string> = M extends LSPNotificationMethod
+  ? FlatNotificationMap[M] extends { Direction: infer D }
+    ? D
     : never
   : never;
 
@@ -104,3 +120,55 @@ export type RegistrationOptionsForMethod<M extends string> = M extends LSPReques
  * 2. Types automatically available through lookup
  * → Automatically works in onRequest/sendRequest signatures
  */
+
+type ValuesOf<T> = T[keyof T];
+
+type RequestMethods = ValuesOf<typeof LSPRequest>;
+
+const RequestMap: {
+  Method: LSPRequestMethod;
+  Direction: DirectionForRequest<LSPRequestMethod>;
+  ServerCapability: ServerCapabilityForRequest<LSPRequestMethod>;
+}[] = Object.values(LSPRequest).flatMap((ns) => Object.values(ns));
+
+const NotificationMap: {
+  Method: LSPNotificationMethod;
+  Direction: DirectionForNotification<LSPNotificationMethod>;
+  ServerCapability: ServerCapabilityForNotification<LSPNotificationMethod>;
+}[] = Object.values(LSPNotification).flatMap((ns) => Object.values(ns));
+
+export const RequestMethodMap: Map<
+  LSPRequestMethod,
+  {
+    Direction: DirectionForRequest<LSPRequestMethod>;
+    ServerCapability: ServerCapabilityForRequest<LSPRequestMethod>;
+  }
+> = new Map(RequestMap.map((p) => [p.Method, p]));
+
+export const NotificationMethodMap: Map<
+  LSPNotificationMethod,
+  {
+    Direction: DirectionForNotification<LSPNotificationMethod>;
+    ServerCapability: ServerCapabilityForNotification<LSPNotificationMethod>;
+  }
+> = new Map(NotificationMap.map((p) => [p.Method, p]));
+
+/**
+ * Get the capability key for a given method at runtime
+ */
+export function getCapabilityForRequest(
+  method: LSPRequestMethod
+): keyof ServerCapabilities | 'alwaysOn' {
+  const entry = RequestMethodMap.get(method);
+  return entry?.ServerCapability ?? ('alwaysOn' as any); //TODO: fix namespaces.ts generation to actually align ServerCapability with ServerCapabilities keys
+}
+
+/**
+ * Get the capability key for a given notification method at runtime
+ */
+export function getCapabilityForNotification(
+  method: LSPNotificationMethod
+): keyof ServerCapabilities | undefined {
+  const entry = NotificationMethodMap.get(method);
+  return entry?.ServerCapability;
+}
