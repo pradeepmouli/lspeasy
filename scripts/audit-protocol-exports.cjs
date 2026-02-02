@@ -7,11 +7,17 @@ const fs = require('fs');
 const path = require('path');
 
 // Read vscode-languageserver-protocol's main export file
-const protocolPath = path.join(__dirname, '../node_modules/.pnpm/vscode-languageserver-protocol@3.17.5/node_modules/vscode-languageserver-protocol/lib/common/api.d.ts');
+const protocolPath = path.join(
+  __dirname,
+  '../node_modules/.pnpm/vscode-languageserver-protocol@3.17.5/node_modules/vscode-languageserver-protocol/lib/common/api.d.ts'
+);
 const protocolContent = fs.readFileSync(protocolPath, 'utf8');
 
 // Read vscode-languageserver-types exports
-const typesPath = path.join(__dirname, '../node_modules/.pnpm/vscode-languageserver-types@3.17.5/node_modules/vscode-languageserver-types/lib/esm/main.d.ts');
+const typesPath = path.join(
+  __dirname,
+  '../node_modules/.pnpm/vscode-languageserver-types@3.17.5/node_modules/vscode-languageserver-types/lib/esm/main.d.ts'
+);
 const typesContent = fs.readFileSync(typesPath, 'utf8');
 
 // Read our core exports
@@ -33,15 +39,16 @@ function extractExports(content, _source) {
   const reExportRegex = /export\s+(?:type\s+)?{([^}]+)}\s*from/g;
   let match;
   while ((match = reExportRegex.exec(content)) !== null) {
-    const names = match[1].split(',').map(n => {
+    const names = match[1].split(',').map((n) => {
       // Handle "Name as Alias" and "type Name"
-      const cleaned = n.trim()
+      const cleaned = n
+        .trim()
         .split(' as ')[0]
         .replace(/^type\s+/, '')
         .trim();
       return cleaned;
     });
-    names.forEach(n => n && exports.add(n));
+    names.forEach((n) => n && exports.add(n));
   }
 
   // Match: export * from '...' or export * as Name from '...'
@@ -54,7 +61,8 @@ function extractExports(content, _source) {
   }
 
   // Match: export interface Name / export type Name / export class Name / export const Name / export enum Name
-  const directExportRegex = /export\s+(?:interface|type|class|const|enum|namespace|declare\s+(?:namespace|const|enum))\s+([A-Za-z_$][A-Za-z0-9_$]*)/g;
+  const directExportRegex =
+    /export\s+(?:interface|type|class|const|enum|namespace|declare\s+(?:namespace|const|enum))\s+([A-Za-z_$][A-Za-z0-9_$]*)/g;
   while ((match = directExportRegex.exec(content)) !== null) {
     exports.add(match[1]);
   }
@@ -62,14 +70,15 @@ function extractExports(content, _source) {
   // Match: export { Name, Name2 }; (without from)
   const namedExportRegex = /export\s*{\s*([^}]+)\s*};/g;
   while ((match = namedExportRegex.exec(content)) !== null) {
-    const names = match[1].split(',').map(n => {
-      const cleaned = n.trim()
+    const names = match[1].split(',').map((n) => {
+      const cleaned = n
+        .trim()
         .split(' as ')[0]
         .replace(/^type\s+/, '')
         .trim();
       return cleaned;
     });
-    names.forEach(n => n && exports.add(n));
+    names.forEach((n) => n && exports.add(n));
   }
 
   return exports;
@@ -126,7 +135,12 @@ if (missing.size === 0) {
       categories.notifications.push(exp);
     } else if (exp.includes('Kind') || exp.includes('Type') || exp.includes('Tag')) {
       categories.enums.push(exp);
-    } else if (exp.endsWith('Params') || exp.endsWith('Result') || exp.endsWith('Options') || exp.endsWith('Capabilities')) {
+    } else if (
+      exp.endsWith('Params') ||
+      exp.endsWith('Result') ||
+      exp.endsWith('Options') ||
+      exp.endsWith('Capabilities')
+    ) {
       categories.types.push(exp);
     } else {
       categories.other.push(exp);
@@ -135,31 +149,31 @@ if (missing.size === 0) {
 
   if (categories.types.length > 0) {
     console.log('📝 Missing Types/Params/Results:');
-    categories.types.forEach(t => console.log(`   - ${t}`));
+    categories.types.forEach((t) => console.log(`   - ${t}`));
     console.log('');
   }
 
   if (categories.enums.length > 0) {
     console.log('🔢 Missing Enums/Kinds:');
-    categories.enums.forEach(t => console.log(`   - ${t}`));
+    categories.enums.forEach((t) => console.log(`   - ${t}`));
     console.log('');
   }
 
   if (categories.requests.length > 0) {
     console.log('📨 Missing Requests/Handlers:');
-    categories.requests.forEach(t => console.log(`   - ${t}`));
+    categories.requests.forEach((t) => console.log(`   - ${t}`));
     console.log('');
   }
 
   if (categories.notifications.length > 0) {
     console.log('📢 Missing Notifications:');
-    categories.notifications.forEach(t => console.log(`   - ${t}`));
+    categories.notifications.forEach((t) => console.log(`   - ${t}`));
     console.log('');
   }
 
   if (categories.other.length > 0) {
     console.log('❓ Other Missing:');
-    categories.other.forEach(t => console.log(`   - ${t}`));
+    categories.other.forEach((t) => console.log(`   - ${t}`));
     console.log('');
   }
 }
