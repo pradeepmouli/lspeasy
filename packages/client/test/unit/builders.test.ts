@@ -31,7 +31,15 @@ describe('High-level method builders', () => {
         jsonrpc: '2.0',
         id: 1,
         result: {
-          capabilities: {},
+          capabilities: {
+            hoverProvider: true,
+            completionProvider: {},
+            definitionProvider: true,
+            referencesProvider: true,
+            documentSymbolProvider: true,
+            workspaceSymbolProvider: true,
+            textDocumentSync: 1
+          },
           serverInfo: { name: 'test-server' }
         }
       };

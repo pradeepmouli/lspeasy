@@ -26,7 +26,7 @@ function isCapabilityEnabled(
 function createNamespaceProxy<T extends object>(
   client: LSPClient,
   namespace: keyof typeof LSPRequest,
-  methods: Record<string, { method: string; serverCapability: string }>
+  methods: Record<string, { method: string; serverCapability: string | null }>
 ): T {
   return new Proxy({} as T, {
     get(_target, prop: string) {
@@ -37,21 +37,37 @@ function createNamespaceProxy<T extends object>(
 
       const serverCaps = (client as any).serverCapabilities as ServerCapabilities | undefined;
 
-      // Check if capability is enabled
-      if (!isCapabilityEnabled(serverCaps, methodInfo.serverCapability)) {
+      // If serverCapability is null, method is always available (e.g., notifications)
+      const isAvailable =
+        methodInfo.serverCapability === null ||
+        isCapabilityEnabled(serverCaps, methodInfo.serverCapability);
+
+      if (!isAvailable) {
         // Return undefined for disabled capabilities (method doesn't exist)
         return undefined;
       }
 
-      // Return bound method that calls sendRequest
+      // Determine if this is a notification (sendNotification) or request (sendRequest)
+      const isNotification =
+        methodInfo.method.startsWith('textDocument/did') ||
+        methodInfo.method.startsWith('workspace/did');
+
+      // Return bound method that calls sendRequest or sendNotification
       return async (params: any) => {
-        return (client as any).sendRequest(methodInfo.method, params);
+        if (isNotification) {
+          return (client as any).sendNotification(methodInfo.method, params);
+        } else {
+          return (client as any).sendRequest(methodInfo.method, params);
+        }
       };
     },
 
     has(_target, prop: string) {
       const methodInfo = methods[prop];
       if (!methodInfo) return false;
+
+      // If serverCapability is null, method is always available
+      if (methodInfo.serverCapability === null) return true;
 
       const serverCaps = (client as any).serverCapabilities as ServerCapabilities | undefined;
       return isCapabilityEnabled(serverCaps, methodInfo.serverCapability);
@@ -60,14 +76,28 @@ function createNamespaceProxy<T extends object>(
     ownKeys(_target) {
       const serverCaps = (client as any).serverCapabilities as ServerCapabilities | undefined;
       if (!serverCaps) return [];
-      return Object.keys(methods).filter((key) =>
-        isCapabilityEnabled(serverCaps, methods[key]!.serverCapability)
-      );
+      return Object.keys(methods).filter((key) => {
+        const methodInfo = methods[key]!;
+        // Always include methods with null serverCapability
+        return (
+          methodInfo.serverCapability === null ||
+          isCapabilityEnabled(serverCaps, methodInfo.serverCapability)
+        );
+      });
     },
 
     getOwnPropertyDescriptor(_target, prop: string) {
       const methodInfo = methods[prop];
       if (!methodInfo) return undefined;
+
+      // If serverCapability is null, always return descriptor
+      if (methodInfo.serverCapability === null) {
+        return {
+          enumerable: true,
+          configurable: true,
+          writable: false
+        };
+      }
 
       const serverCaps = (client as any).serverCapabilities as ServerCapabilities | undefined;
       if (!isCapabilityEnabled(serverCaps, methodInfo.serverCapability)) {
@@ -162,7 +192,12 @@ export function createTextDocumentProxy(client: LSPClient): any {
     prepareTypeHierarchy: {
       method: 'textDocument/prepareTypeHierarchy',
       serverCapability: 'typeHierarchyProvider'
-    }
+    },
+    // Notification methods - always available regardless of capabilities
+    didOpen: { method: 'textDocument/didOpen', serverCapability: null },
+    didChange: { method: 'textDocument/didChange', serverCapability: null },
+    didClose: { method: 'textDocument/didClose', serverCapability: null },
+    didSave: { method: 'textDocument/didSave', serverCapability: null }
   };
 
   return createNamespaceProxy(client, 'TextDocument', methods);
@@ -180,7 +215,20 @@ export function createWorkspaceProxy(client: LSPClient): any {
     },
     willCreateFiles: { method: 'workspace/willCreateFiles', serverCapability: 'workspace' },
     willRenameFiles: { method: 'workspace/willRenameFiles', serverCapability: 'workspace' },
-    willDeleteFiles: { method: 'workspace/willDeleteFiles', serverCapability: 'workspace' }
+    willDeleteFiles: { method: 'workspace/willDeleteFiles', serverCapability: 'workspace' },
+    // Notification methods - always available regardless of capabilities
+    didChangeWorkspaceFolders: {
+      method: 'workspace/didChangeWorkspaceFolders',
+      serverCapability: null
+    },
+    didChangeConfiguration: {
+      method: 'workspace/didChangeConfiguration',
+      serverCapability: null
+    },
+    didChangeWatchedFiles: {
+      method: 'workspace/didChangeWatchedFiles',
+      serverCapability: null
+    }
   };
 
   return createNamespaceProxy(client, 'Workspace', methods);
