@@ -143,6 +143,14 @@ export enum FoldingRangeKind {
 }
 
 /**
+ * Token format for semantic tokens.
+ * @since 3.16.0
+ */
+export enum TokenFormat {
+  Relative = 'relative'
+}
+
+/**
  * The diagnostic's severity.
  */
 export enum DiagnosticSeverity {
@@ -900,7 +908,6 @@ export type {
   TextDocumentSyncClientCapabilities,
   TextDocumentSyncOptions,
   TextEditChange,
-  TokenFormat,
   TypeHierarchyClientCapabilities,
   TypeHierarchyItem,
   TypeHierarchyOptions,

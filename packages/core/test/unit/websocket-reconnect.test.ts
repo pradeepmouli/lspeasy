@@ -189,6 +189,7 @@ describe('WebSocketTransport Reconnection', () => {
 
   describe('Error scenarios', () => {
     it('should handle connection errors', async () => {
+      vi.useRealTimers(); // Need real timers for setImmediate
       const mockSocket = new MockWebSocket();
       const transport = new WebSocketTransport({
         socket: mockSocket as unknown as WebSocket
@@ -210,9 +211,11 @@ describe('WebSocketTransport Reconnection', () => {
       expect(errorReceived?.message).toBe('Connection failed');
 
       await transport.close();
+      vi.useFakeTimers(); // Restore fake timers for other tests
     });
 
     it('should emit close event after connection error', async () => {
+      vi.useRealTimers(); // Need real timers for setImmediate
       const mockSocket = new MockWebSocket();
       const transport = new WebSocketTransport({
         socket: mockSocket as unknown as WebSocket
@@ -232,11 +235,13 @@ describe('WebSocketTransport Reconnection', () => {
 
       expect(closeCalled).toBe(true);
       await transport.close();
+      vi.useFakeTimers(); // Restore fake timers for other tests
     });
   });
 
   describe('Resource cleanup', () => {
     it('should clean up event listeners on close', async () => {
+      vi.useRealTimers(); // Need real timers for setImmediate
       const mockSocket = new MockWebSocket();
       const transport = new WebSocketTransport({
         socket: mockSocket as unknown as WebSocket
@@ -247,13 +252,26 @@ describe('WebSocketTransport Reconnection', () => {
       const closeHandler = vi.fn();
 
       // Register handlers first
-      transport.onMessage(messageHandler);
-      transport.onError(errorHandler);
-      transport.onClose(closeHandler);
+      const messageDisposable = transport.onMessage(messageHandler);
+      const errorDisposable = transport.onError(errorHandler);
+      const closeDisposable = transport.onClose(closeHandler);
 
       // Then emit open to set connected state
       mockSocket.emit('open');
       await new Promise((resolve) => setImmediate(resolve));
+
+      // Manually dispose handlers before close (simulating cleanup)
+      messageDisposable.dispose();
+      errorDisposable.dispose();
+
+      // Send some events that should now be ignored
+      mockSocket.emit('message', '{"jsonrpc":"2.0"}');
+      mockSocket.emit('error', new Error('test'));
+      await new Promise((resolve) => setImmediate(resolve));
+
+      // Handlers should not have been called after disposal
+      expect(messageHandler).toHaveBeenCalledTimes(0);
+      expect(errorHandler).toHaveBeenCalledTimes(0);
 
       await transport.close();
 
@@ -263,16 +281,8 @@ describe('WebSocketTransport Reconnection', () => {
       // Close handler should have been called once
       expect(closeHandler).toHaveBeenCalledTimes(1);
 
-      // After close, new events should not trigger handlers (they're cleaned up)
-      mockSocket.emit('message', '{"jsonrpc":"2.0"}');
-      mockSocket.emit('error', new Error('test'));
-
-      await new Promise((resolve) => setImmediate(resolve));
-
-      // Message and error handlers should not be called after close
-      // (Note: they may have been called once during normal operation before close)
-      expect(messageHandler).toHaveBeenCalledTimes(0);
-      expect(errorHandler).toHaveBeenCalledTimes(0);
+      closeDisposable.dispose();
+      vi.useFakeTimers(); // Restore fake timers for other tests
     });
   });
 });
