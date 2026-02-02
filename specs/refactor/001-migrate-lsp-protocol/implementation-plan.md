@@ -177,11 +177,11 @@ console.log('Categories:', parser.getCategories().size);
 async initialize() {
   console.log('Fetching metaModel.json...');
   const metaModel = await fetchMetaModel({ cache: true });
-  
+
   this.parser = new MetaModelParser(metaModel);
   console.log('Building registries...');
   this.registry = this.parser.buildRegistry();
-  
+
   // Keep ts-morph for output generation
   this.outputProject = new Project({
     compilerOptions: { /* ... */ }
@@ -276,13 +276,13 @@ async initialize() {
 ```typescript
 async function validate() {
   console.log('🔍 Validating metaModel migration...\n');
-  
+
   // 1. Check files exist
   // 2. Check files compile
   // 3. Run type checking
   // 4. Run tests
   // 5. Compare with baseline
-  
+
   console.log('\n✅ Migration validation passed!');
 }
 ```

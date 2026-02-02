@@ -28,7 +28,7 @@
   - Implement npm module fallback
   - Add error handling for network failures
   - Export fetchMetaModel(options?) function
-  
+
 - [ ] T002 [P] Define metaModel type interfaces in scripts/lib/metamodel-types.ts
   - Create MetaModel root interface
   - Create Request, Notification interfaces

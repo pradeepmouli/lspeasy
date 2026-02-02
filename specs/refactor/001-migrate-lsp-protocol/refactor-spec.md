@@ -50,16 +50,16 @@ User description: "Migrate LSP protocol type code generator from parsing TypeScr
 Instead of parsing TypeScript AST from `protocol.d.ts`, directly consume the official `metaModel.json` from VSCode Language Server repository. This provides structured metadata (requests, notifications, capabilities, types) in a stable, versioned format. Direct JSON parsing replaces 1100+ lines of AST traversal with ~500 lines of declarative type mappings. We still use ts-morph's import management features to automatically add missing type imports from the protocol library to the generated files.
 
 **Files Affected**:
-- **Modified**: 
+- **Modified**:
   - `scripts/generate-protocol-types.ts` (simplify from AST to JSON parsing)
   - `docs/ARCHITECTURE.md` (document new source and generation process)
   - `CONTRIBUTING.md` (update LSP protocol update instructions)
-- **Created**: 
+- **Created**:
   - `scripts/fetch-metamodel.ts` (fetch metaModel.json with fallback)
   - `scripts/lib/metamodel-types.ts` (type interfaces for metaModel schema)
   - `scripts/lib/metamodel-parser.ts` (parse metaModel and build registries)
   - `scripts/validate-metamodel-migration.ts` (validation script)
-- **Deleted**: 
+- **Deleted**:
   - `scripts/codegen/analyze-protocol-file.ts` (no longer needed)
   - AST-related analysis functions from main generator
 
@@ -117,7 +117,7 @@ Generate types.ts + namespaces.ts
 - `scripts/generate-protocol-types.ts` - Entry point and main orchestration
   - Covered by: `scripts/__tests__/generate-protocol-types.test.ts` (existing)
   - Status: ✅ Adequate - tests verify generated output matches expected structure
-  
+
 - Generated output files:
   - `packages/core/src/protocol/types.ts` - Type exports
   - `packages/core/src/protocol/namespaces.ts` - Namespace definitions
