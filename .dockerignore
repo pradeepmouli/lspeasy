@@ -48,3 +48,6 @@ docs/
 .dockerignore
 Dockerfile*
 *.tsbuildinfo
+
+# MetaModel cache
+.cache/
