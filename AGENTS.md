@@ -11,26 +11,27 @@ This repository is designed for multi-agent collaboration (Copilot, Claude, Gemi
 ## Ground Rules
 - Prefer non-destructive changes; never reset user work.
 - Follow conventional commits.
-- Keep formatting consistent with .editorconfig and .oxfmtrc.json.
-- Run `pnpm run lint` and `pnpm test` after code changes when practical.
-- Keep docs current when changing scripts or workflows.
+- Always run formating, linting, type-checking, and tests before reporting completion or committing. Run formatting last.
+- Always keep docs current when changing scripts or workflows.
+- When adding dependencies, make sure to use the latest stable versions.
+- Abide by the rules in ./specify/memory/constitution.md
 
 ## Workflow Checklist
 1) Install deps: `pnpm install`
 2) Lint: `pnpm run lint`
 3) Test: `pnpm test`
-4) Format: `pnpm run format` (or `pnpm run format:check`)
+4) Format: `pnpm run format`
 5) Type-check (if added): `pnpm run type-check`
 
 ## Coding Standards
-- 2-space indentation; spaces (no tabs).
-- Semicolons required; single quotes; no trailing commas.
+- Use TypeScript strict mode.
+- Write JSDoc for all exported functions/types.
+- Avoid dynamic or inline imports.
 - Keep public API docs concise; avoid documenting internals.
 - Use vitest for tests; add coverage for public APIs.
 
 ## Agent-Specific Notes
-- Coordinate with other agents by updating docs (README, TEMPLATE_INITIALIZATION.md) when workflows change.
-- When modifying scripts, explain any new prompts or defaults in TEMPLATE_INITIALIZATION.md.
+- Coordinate with other agents by updating workflow docs (specs/**.md).
 - If adding hooks, prefer simple-git-hooks and lint-staged already in package.json.
 
 ## Deliverables Expectation
