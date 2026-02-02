@@ -2,7 +2,7 @@
 SYNC IMPACT REPORT
 ==================
 Version: 0.0.0 → 1.0.0
-Rationale: Initial constitution ratification for lspy project
+Rationale: Initial constitution ratification for lspeasy project
 
 Modified Principles: N/A (initial creation)
 Added Sections:
@@ -19,7 +19,7 @@ Templates Status:
 Follow-up TODOs: None
 -->
 
-# lspy Constitution
+# lspeasy Constitution
 
 TypeScript SDK for building Language Server Protocol (LSP) clients and servers
 
@@ -56,7 +56,7 @@ TypeScript's type system is our primary defense against runtime errors. All publ
 The SDK MUST be composed of focused, independently usable packages within the pnpm monorepo. Each package represents a coherent domain (protocol types, client, server, transports) and can be consumed separately.
 
 **Rules:**
-- Packages MUST have clear, single responsibilities (e.g., `@lspy/protocol`, `@lspy/client`, `@lspy/server`)
+- Packages MUST have clear, single responsibilities (e.g., `@lspeasy/protocol`, `@lspeasy/client`, `@lspeasy/server`)
 - Package dependencies MUST form a Directed Acyclic Graph (no circular dependencies)
 - Each package MUST be independently buildable and testable
 - Shared code goes into explicit utility packages, not copied
@@ -146,7 +146,7 @@ packages/
 
 ## Governance
 
-This constitution is the authoritative source for all development practices in the lspy project. It supersedes any conflicting guidance in other documentation.
+This constitution is the authoritative source for all development practices in the lspeasy project. It supersedes any conflicting guidance in other documentation.
 
 **Amendment Process:**
 1. Propose change with rationale (GitHub issue or discussion)

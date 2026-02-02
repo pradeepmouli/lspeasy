@@ -41,7 +41,7 @@ A developer wants to create a language server for their custom language by imple
 
 **Acceptance Scenarios**:
 
-1. **Given** a new TypeScript project, **When** developer imports `@lspy/server` and defines request handlers, **Then** they can start a server with stdio transport in <30 lines of code
+1. **Given** a new TypeScript project, **When** developer imports `@lspeasy/server` and defines request handlers, **Then** they can start a server with stdio transport in <30 lines of code
 2. **Given** an LSP server implementation, **When** client sends initialize request, **Then** server responds with declared capabilities without manual JSON-RPC handling
 3. **Given** a server with registered handlers, **When** client sends textDocument/hover request, **Then** handler receives typed parameters and returns typed response
 
@@ -109,10 +109,10 @@ A language server developer wants to implement advanced LSP capabilities like wo
 
 ### Functional Requirements
 
-- **FR-001**: SDK MUST provide `@lspy/server` package for building LSP servers with typed request/notification handlers
-- **FR-002**: SDK MUST provide `@lspy/client` package for connecting to LSP servers with typed request methods
-- **FR-003**: SDK MUST provide `@lspy/core` package with shared types, utilities, and base functionality used by both client and server
-- **FR-003a**: `@lspy/core` MUST include TypeScript definitions for all LSP 3.17 message types, JSON-RPC primitives, and common protocol utilities
+- **FR-001**: SDK MUST provide `@lspeasy/server` package for building LSP servers with typed request/notification handlers
+- **FR-002**: SDK MUST provide `@lspeasy/client` package for connecting to LSP servers with typed request methods
+- **FR-003**: SDK MUST provide `@lspeasy/core` package with shared types, utilities, and base functionality used by both client and server
+- **FR-003a**: `@lspeasy/core` MUST include TypeScript definitions for all LSP 3.17 message types, JSON-RPC primitives, and common protocol utilities
 - **FR-004**: Server MUST support registering handlers via fluent API compatible with MCP SDK patterns (e.g., `server.onRequest('textDocument/hover', handler)`); handler registration methods MUST support optional method chaining (return `this`) while remaining compatible with non-chaining usage
 - **FR-005**: Client MUST provide high-level methods for common requests (e.g., `client.textDocument.hover(params)`)
 - **FR-006**: SDK MUST handle LSP initialization handshake automatically (initialize request/response, initialized notification)
@@ -129,17 +129,17 @@ A language server developer wants to implement advanced LSP capabilities like wo
 
 ### Key Entities
 
-**Package: @lspy/server**
+**Package: @lspeasy/server**
 - **LSPServer**: Main server class that manages connection, capabilities, and request routing
 - **RequestHandler**: Type-safe function signature for handling specific LSP requests
 - **NotificationHandler**: Type-safe function signature for handling LSP notifications
 - **ServerCapabilities**: Strongly-typed object representing server's advertised capabilities
 
-**Package: @lspy/client**
+**Package: @lspeasy/client**
 - **LSPClient**: Main client class that manages connection, initialization, and typed request methods
 - **ClientCapabilities**: Strongly-typed object representing client's supported features
 
-**Package: @lspy/core**
+**Package: @lspeasy/core**
 - **Transport**: Abstract interface for stdio, WebSocket, HTTP transports (message send/receive); stdio and WebSocket implementations included
 - **Message**: Union type of LSP request, response, notification, and error messages
 - **CancellationToken**: Interface for aborting long-running operations

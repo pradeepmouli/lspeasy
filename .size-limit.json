@@ -1,12 +1,20 @@
 [
   {
-    "name": "@company/core",
+    "name": "@lspeasy/core",
     "path": "packages/core/dist/index.js",
-    "limit": "10 KB"
+    "limit": "100 KB",
+    "gzip": true
   },
   {
-    "name": "@company/utils",
-    "path": "packages/utils/dist/index.js",
-    "limit": "15 KB"
+    "name": "@lspeasy/server",
+    "path": "packages/server/dist/index.js",
+    "limit": "50 KB",
+    "gzip": true
+  },
+  {
+    "name": "@lspeasy/client",
+    "path": "packages/client/dist/index.js",
+    "limit": "50 KB",
+    "gzip": true
   }
 ]

@@ -10,7 +10,7 @@ This SDK's data model centers around LSP protocol messages, connection lifecycle
 
 ---
 
-## Package: @lspy/core
+## Package: @lspeasy/core
 
 ### 1. Message (Union Type)
 
@@ -111,7 +111,7 @@ Core LSP types as defined in LSP 3.17 specification.
 
 ---
 
-## Package: @lspy/server
+## Package: @lspeasy/server
 
 ### 5. LSPServer (Class)
 
@@ -210,7 +210,7 @@ interface ServerCapabilities {
 
 ---
 
-## Package: @lspy/client
+## Package: @lspeasy/client
 
 ### 9. LSPClient (Class)
 
@@ -275,7 +275,7 @@ interface ClientCapabilities {
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   @lspy/core                        │
+│                   @lspeasy/core                        │
 ├─────────────────────────────────────────────────────┤
 │  Transport Interface                                │
 │    ├─ StdioTransport                                │
@@ -298,7 +298,7 @@ interface ClientCapabilities {
                      │           │
                      │           │
         ┌────────────┴─┐     ┌──┴───────────┐
-        │ @lspy/server │     │ @lspy/client │
+        │ @lspeasy/server │     │ @lspeasy/client │
         └──────────────┘     └──────────────┘
              owns                  owns
         ┌────────────┐       ┌──────────────┐
@@ -359,7 +359,7 @@ interface ClientCapabilities {
 ## Summary
 
 **Total Entities**: 10 core types + 50+ LSP protocol types (re-exported)
-**Packages**: 3 (@lspy/core, @lspy/server, @lspy/client)
+**Packages**: 3 (@lspeasy/core, @lspeasy/server, @lspeasy/client)
 **Validation**: Zod schemas for runtime validation matching TypeScript types
 **State Management**: Explicit lifecycle states for server/client with error guards
 **Extensibility**: Transport interface allows custom implementations; Handler types allow any LSP capability

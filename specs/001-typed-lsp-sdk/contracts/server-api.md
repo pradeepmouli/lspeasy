@@ -1,6 +1,6 @@
-# API Contract: @lspy/server
+# API Contract: @lspeasy/server
 
-**Package**: @lspy/server
+**Package**: @lspeasy/server
 **Version**: 1.0.0
 **Purpose**: Public API for building LSP servers
 
@@ -218,9 +218,9 @@ enum ErrorCodes {
 ## Usage Example
 
 ```typescript
-import { LSPServer } from '@lspy/server';
-import { StdioTransport } from '@lspy/core';
-import type { HoverParams, Hover } from '@lspy/core/protocol';
+import { LSPServer } from '@lspeasy/server';
+import { StdioTransport } from '@lspeasy/core';
+import type { HoverParams, Hover } from '@lspeasy/core/protocol';
 
 const server = new LSPServer({
   name: 'my-language-server',
