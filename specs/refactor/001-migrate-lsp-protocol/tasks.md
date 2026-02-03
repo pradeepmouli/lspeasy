@@ -66,10 +66,10 @@
   - Run linting: pnpm run lint
   - Test fetching metaModel.json manually
   - Test parser builds registries correctly:
-    - Verify registry.requests.size ≥ 150 (typical LSP has ~150+ request methods)
-    - Verify registry.notifications.size ≥ 50 (typical LSP has ~50+ notifications)
-    - Verify getCategories().size ≥ 15 (expect categories: textDocument, workspace, window, etc.)
-    - Verify getAllStructures().length ≥ 100 (LSP has many structure types)
+    - Verify registry.requests.size ≥ 69 (LSP 3.17 has 69 requests)
+    - Verify registry.notifications.size ≥ 26 (LSP 3.17 has 26 notifications)
+    - Verify getCategories().size ≥ 14 (LSP 3.17 has 14 categories)
+    - Verify getAllStructures().length ≥ 387 (LSP 3.17 has 387 structures)
   - Verify all new files compile
   - Commit Phase 1 changes
 
