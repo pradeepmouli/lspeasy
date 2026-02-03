@@ -380,6 +380,16 @@ export interface Request {
   registrationMethod?: string;
 
   /**
+   * Server capability required for this request
+   */
+  serverCapability?: string;
+
+  /**
+   * Client capability required for this request
+   */
+  clientCapability?: string;
+
+  /**
    * Documentation for this request
    */
   documentation?: string;
@@ -428,6 +438,16 @@ export interface Notification {
    * Registration method (for dynamic registration)
    */
   registrationMethod?: string;
+
+  /**
+   * Client capability required for this notification
+   */
+  clientCapability?: string;
+
+  /**
+   * Server capability required for this notification
+   */
+  serverCapability?: string;
 
   /**
    * Documentation for this notification

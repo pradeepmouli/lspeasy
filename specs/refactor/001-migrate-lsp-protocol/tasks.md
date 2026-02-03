@@ -79,21 +79,21 @@
 
 ### Preparation
 
-- [ ] T005 Backup current implementation
+- [X] T005 Backup current implementation
   - Copy scripts/generate-protocol-types.ts to scripts/generate-protocol-types.ts.backup
   - Commit current state
   - Create git tag: refactor-001-phase1-complete
 
 ### Refactor Generator Structure
 
-- [ ] T006 Remove AST analysis code from scripts/generate-protocol-types.ts
+- [X] T006 Remove AST analysis code from scripts/generate-protocol-types.ts
   - Remove analyzeProtocolFile() function
   - Remove analyzeTypesFile() function
   - Remove AST-related imports (keep ts-morph Project/SourceFile)
   - Remove AST-related class properties
   - Commit: "refactor: remove AST analysis functions"
 
-- [ ] T007 Add metaModel imports to scripts/generate-protocol-types.ts
+- [X] T007 Add metaModel imports to scripts/generate-protocol-types.ts
   - Import fetchMetaModel from scripts/fetch-metamodel.ts
   - Import MetaModelParser from scripts/lib/metamodel-parser.ts
   - Import type interfaces from scripts/lib/metamodel-types.ts
