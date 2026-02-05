@@ -4,33 +4,45 @@
  * Uses mapped types and lookups instead of nested conditionals
  */
 
-import type { LSPRequestMethod, ServerCapabilities } from '@/core';
+import type { ServerCapabilities, ClientCapabilities } from 'vscode-languageserver-protocol';
 import { LSPRequest, LSPNotification } from './namespaces.js';
-import type { UnionToIntersection } from 'type-fest';
+import type { Paths, UnionToIntersection, ConditionalKeys, KeyAsString } from 'type-fest';
 
 // Helper type to flatten nested method types into a flat map
-type FlattenMethods<T> = {
+type FlattenMethods<T, IncludeProposed> = {
   [K in keyof T]: T[K] extends { Method: infer M }
-    ? { [P in M & string]: T[K] }
+    ? T[K] extends { Proposed: true }
+      ? IncludeProposed extends true
+        ? { [P in M & string]: T[K] }
+        : never
+      : { [P in M & string]: T[K] }
     : T[K] extends Record<string, any>
-      ? FlattenMethods<T[K]>
+      ? FlattenMethods<T[K], IncludeProposed>
       : never;
 }[keyof T];
 
 //@ts-ignore - TS bug workaround
-type FlatRequestMap = UnionToIntersection<FlattenMethods<LSPRequest>>;
+type FlatRequestMap = UnionToIntersection<FlattenMethods<LSPRequest, false>>;
 //@ts-ignore - TS bug workaround
-type FlatNotificationMap = UnionToIntersection<FlattenMethods<LSPNotification>>;
+type FlatNotificationMap = UnionToIntersection<FlattenMethods<LSPNotification, false>>;
 
 /**
  * Union type of all valid LSP request method names
  */
-export type M = keyof FlatRequestMap;
+export type LSPRequestMethod<
+  Direction extends 'clientToServer' | 'serverToClient' | 'both' = 'both'
+> = Direction extends 'both'
+  ? KeyAsString<FlatRequestMap>
+  : ConditionalKeys<FlatRequestMap, { Direction: Direction | 'both' }> & string;
 
 /**
  * Union type of all valid LSP notification method names
  */
-export type LSPNotificationMethod = keyof FlatNotificationMap;
+export type LSPNotificationMethod<
+  Direction extends 'clientToServer' | 'serverToClient' | 'both' = 'both'
+> = Direction extends 'both'
+  ? KeyAsString<FlatNotificationMap>
+  : ConditionalKeys<FlatNotificationMap, { Direction: Direction | 'both' }> & string;
 
 /**
  * Infer request parameters from method name
@@ -83,6 +95,12 @@ export type ServerCapabilityForNotification<M extends string> = M extends LSPNot
     : never
   : never;
 
+export type ClientCapabilityForNotification<M extends string> = M extends LSPNotificationMethod
+  ? FlatNotificationMap[M] extends { ClientCapability: infer C }
+    ? C
+    : never
+  : never;
+
 export type OptionsForRequest<M extends string> = M extends LSPRequestMethod
   ? FlatRequestMap[M] extends { Options: infer O }
     ? O
@@ -123,25 +141,16 @@ export type DirectionForNotification<M extends string> = M extends LSPNotificati
 
 type ValuesOf<T> = T[keyof T];
 
-type RequestMethods = ValuesOf<typeof LSPRequest>;
+const RequestMap = Object.values(LSPRequest).flatMap((ns) => Object.values(ns));
 
-const RequestMap: {
-  Method: LSPRequestMethod;
-  Direction: DirectionForRequest<LSPRequestMethod>;
-  ServerCapability: ServerCapabilityForRequest<LSPRequestMethod>;
-}[] = Object.values(LSPRequest).flatMap((ns) => Object.values(ns));
-
-const NotificationMap: {
-  Method: LSPNotificationMethod;
-  Direction: DirectionForNotification<LSPNotificationMethod>;
-  ServerCapability: ServerCapabilityForNotification<LSPNotificationMethod>;
-}[] = Object.values(LSPNotification).flatMap((ns) => Object.values(ns));
+const NotificationMap = Object.values(LSPNotification).flatMap((ns) => Object.values(ns));
 
 export const RequestMethodMap: Map<
   LSPRequestMethod,
   {
     Direction: DirectionForRequest<LSPRequestMethod>;
-    ServerCapability: ServerCapabilityForRequest<LSPRequestMethod>;
+    ServerCapability?: ServerCapabilityForRequest<LSPRequestMethod>;
+    ClientCapability?: ClientCapabilityForRequest<LSPRequestMethod>;
   }
 > = new Map(RequestMap.map((p) => [p.Method, p]));
 
@@ -149,26 +158,45 @@ export const NotificationMethodMap: Map<
   LSPNotificationMethod,
   {
     Direction: DirectionForNotification<LSPNotificationMethod>;
-    ServerCapability: ServerCapabilityForNotification<LSPNotificationMethod>;
+    ServerCapability?: ServerCapabilityForNotification<LSPNotificationMethod>;
+    ClientCapability?: ClientCapabilityForNotification<LSPNotificationMethod>;
   }
 > = new Map(NotificationMap.map((p) => [p.Method, p]));
 
 /**
  * Get the capability key for a given method at runtime
  */
-export function getCapabilityForRequest(
-  method: LSPRequestMethod
-): keyof ServerCapabilities | 'alwaysOn' {
+export function getCapabilityForRequestMethod<
+  M extends LSPRequestMethod<D>,
+  D extends 'clientToServer' | 'serverToClient' | 'both' = 'both'
+>(method: M, direction: D = 'both' as D): Paths<ServerCapabilities> | 'alwaysOn' {
   const entry = RequestMethodMap.get(method);
-  return entry?.ServerCapability ?? ('alwaysOn' as any); //TODO: fix namespaces.ts generation to actually align ServerCapability with ServerCapabilities keys
+  return entry?.ServerCapability ?? 'alwaysOn'; //TODO: fix namespaces.ts generation to actually align ServerCapability with ServerCapabilities keys
 }
 
 /**
  * Get the capability key for a given notification method at runtime
  */
-export function getCapabilityForNotification(
-  method: LSPNotificationMethod
-): keyof ServerCapabilities | undefined {
+export function getCapabilityForNotificationMethod<
+  M extends LSPNotificationMethod<D>,
+  D extends 'clientToServer' | 'serverToClient' | 'both' = 'both'
+>(method: M, direction: D = 'both' as D): Paths<ServerCapabilities> | 'alwaysOn' {
   const entry = NotificationMethodMap.get(method);
-  return entry?.ServerCapability;
+  return entry?.ServerCapability ?? 'alwaysOn';
+}
+
+export type RequestDefinition = typeof LSPRequest.CallHierarchy.IncomingCalls;
+
+export function getDefinitionForRequest<
+  N extends keyof typeof LSPRequest,
+  M extends keyof (typeof LSPRequest)[N]
+>(namespace: N, methodKey: M): (typeof LSPRequest)[N][M] {
+  return (LSPRequest[namespace] as any)[methodKey];
+}
+
+export function getDefinitionForNotification<
+  N extends keyof typeof LSPNotification,
+  M extends keyof (typeof LSPNotification)[N]
+>(namespace: N, methodKey: M): (typeof LSPNotification)[N][M] {
+  return (LSPNotification[namespace] as any)[methodKey];
 }

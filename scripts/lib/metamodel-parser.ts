@@ -67,15 +67,39 @@ export class MetaModelParser {
 
     const requests = new Map<string, Request>();
     const notifications = new Map<string, Notification>();
+    this.metaModel.requests.sort((a, b) => a.messageDirection.localeCompare(b.messageDirection));
 
     // Index all requests by method name
     for (const request of this.metaModel.requests) {
+      request.typeName = request.typeName.replace('Request', '');
+      const category = this.extractCategory(request.method);
+      if (category) {
+        request.typeName = request.typeName.toLowerCase().startsWith(category.toLowerCase())
+          ? request.typeName.substring(category.length)
+          : request.typeName;
+        request.category = category;
+      }
+
       requests.set(request.method, request);
     }
+
+    this.metaModel.notifications.sort((a, b) =>
+      a.messageDirection.localeCompare(b.messageDirection)
+    );
 
     // Index all notifications by method name
     for (const notification of this.metaModel.notifications) {
       notifications.set(notification.method, notification);
+      notification.typeName = notification.typeName.replace('Notification', '');
+      const category = this.extractCategory(notification.method);
+      if (category) {
+        notification.typeName = notification.typeName
+          .toLowerCase()
+          .startsWith(category.toLowerCase())
+          ? notification.typeName.substring(category.length)
+          : notification.typeName;
+        notification.category = category;
+      }
     }
 
     this.registry = { requests, notifications };
@@ -109,7 +133,7 @@ export class MetaModelParser {
 
     // Extract categories from request methods
     for (const request of this.metaModel.requests) {
-      const category = this.extractCategory(request.method);
+      const category = this.extractCategory(request.method) || 'lifecycle';
       if (category) {
         categories.add(category);
       }
@@ -117,7 +141,7 @@ export class MetaModelParser {
 
     // Extract categories from notification methods
     for (const notification of this.metaModel.notifications) {
-      const category = this.extractCategory(notification.method);
+      const category = this.extractCategory(notification.method) || 'lifecycle';
       if (category) {
         categories.add(category);
       }
@@ -138,7 +162,7 @@ export class MetaModelParser {
   private extractCategory(method: string): string | null {
     // Skip special methods that start with $
     if (method.startsWith('$/')) {
-      return null;
+      return 'general';
     }
 
     // Extract prefix before the first slash
@@ -148,7 +172,7 @@ export class MetaModelParser {
     }
 
     // Method has no category (e.g., "initialize", "shutdown")
-    return null;
+    return 'lifecycle';
   }
 
   /**

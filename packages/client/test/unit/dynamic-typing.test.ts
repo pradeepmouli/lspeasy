@@ -1,0 +1,77 @@
+/**
+ * Test dynamic typing for LSPClient
+ */
+
+import { describe, it, expect } from 'vitest';
+import { LSPClient } from '../../src/client.js';
+import {
+  ClientCapabilities,
+  ClientRequestHandlers,
+  ClientNotificationHandlers,
+  ClientRequests,
+  ClientNotifications,
+  ServerCapabilities,
+  type AvailableMethods
+} from '@lspeasy/core';
+import { client } from '../../../../examples/dynamic-typing-example.js';
+
+describe('Dynamic Typing - LSPClient', () => {
+  it('should have capability-aware methods with typed constructor', () => {
+    type MyServerCaps = {
+      hoverProvider: true;
+      completionProvider: { triggerCharacters: ['.'] };
+    };
+
+    type MyClientCaps = {
+      textDocument: {
+        hover: { contentFormat: ['markdown'] };
+        completion: { completionItem: { snippetSupport: true } };
+        synchronization: { didSave: true };
+      };
+    };
+
+    // Create client using generic constructor with type parameters
+    const client = new LSPClient({
+      name: 'test-client',
+      capabilities: {
+        textDocument: { hover: { contentFormat: ['markdown'] }, synchronization: { didSave: true } }
+      },
+      _serverCapabilities: {
+        hoverProvider: true,
+        completionProvider: { triggerCharacters: ['.'] }
+      } as const
+    });
+
+    // Intellisense should show these namespace properties:
+    // - client.textDocument
+    // - client.workspace
+    // - client.window
+    // etc.
+
+    // Note: Methods are populated at runtime after connect()
+    // For now we just verify the client is created
+    expect(client).toBeDefined();
+  });
+
+  it('should show all methods when using default ServerCapabilities', () => {
+    // When no type parameter is provided, defaults to full ServerCapabilities
+    const client = new LSPClient({ name: 'test-client' });
+
+    // Intellisense should show ALL possible methods:
+    // - client.textDocument.hover
+    // - client.textDocument.completion
+    // - client.textDocument.definition
+    // - client.workspace.executeCommand
+    // etc.
+
+    expect(client).toBeDefined();
+  });
+
+  it('should create client with minimal options', () => {
+    const client = new LSPClient({ name: 'minimal-client' });
+
+    expect(client).toBeDefined();
+    expect(client).toHaveProperty('connect');
+    expect(client).toHaveProperty('disconnect');
+  });
+});

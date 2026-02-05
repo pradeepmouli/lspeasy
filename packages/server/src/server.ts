@@ -13,9 +13,10 @@ import type {
   InitializedParams,
   LSPRequestMethod,
   LSPNotificationMethod,
-  InferRequestParams,
-  InferRequestResult,
-  InferNotificationParams
+  ParamsForRequest,
+  ResultForRequest,
+  ParamsForNotification,
+  Server
 } from '@lspeasy/core';
 import { ConsoleLogger, LogLevel, ResponseError, isRequestMessage } from '@lspeasy/core';
 import type { ServerOptions, RequestHandler, NotificationHandler } from './types.js';
@@ -24,14 +25,36 @@ import { MessageDispatcher } from './dispatcher.js';
 import { LifecycleManager } from './lifecycle.js';
 import { validateParams } from './validation.js';
 import { CapabilityGuard } from './capability-guard.js';
+import { initializeServerHandlerMethods, initializeServerSendMethods } from './capability-proxy.js';
 
 /**
- * LSP Server class
+ * Type alias to add capability-aware methods to LSPServer
+ * These methods are added at runtime based on registered handlers
+ */
+export type LSPServerWithCapabilities<
+  Capabilities extends Partial<ServerCapabilities> = ServerCapabilities
+> = LSPServer & Server<ClientCapabilities, Capabilities>;
+
+/**
+ * LSP Server class with dynamic capability-aware typing
+ *
+ * This class dynamically provides handler registration and send methods based on capabilities.
+ * Methods are type-safe and conditionally available based on the Capabilities type parameter.
+ *
+ * @template Capabilities - Server capabilities (defaults to ServerCapabilities)
+ *
+ * @example
+ * // Create a server with specific capabilities
+ * type MyCaps = { hoverProvider: true; completionProvider: { triggerCharacters: ['.'] } };
+ * const server = new LSPServer<MyCaps>();
+ * server.setCapabilities({ hoverProvider: true, completionProvider: { triggerCharacters: ['.'] } });
+ * // server.textDocument.onHover is available for registration
+ * // server.textDocument.onCompletion is available for registration
  */
 export class LSPServer<Capabilities extends Partial<ServerCapabilities> = ServerCapabilities> {
   private readonly logger: Logger;
   private readonly dispatcher: MessageDispatcher;
-  private readonly lifecycle: LifecycleManager;
+  private readonly lifecycleManager: LifecycleManager;
   private readonly name: string;
   private readonly version: string;
   private readonly options: ServerOptions;
@@ -61,7 +84,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
 
     // Create dispatcher and lifecycle manager
     this.dispatcher = new MessageDispatcher(this.logger);
-    this.lifecycle = new LifecycleManager(this.name, this.version, this.logger);
+    this.lifecycleManager = new LifecycleManager(this.name, this.version, this.logger);
 
     // Register built-in handlers
     this.registerBuiltinHandlers();
@@ -79,7 +102,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
    */
   onRequest<Method extends LSPRequestMethod & string>(
     method: Method,
-    handler: RequestHandler<InferRequestParams<Method>, InferRequestResult<Method>>
+    handler: RequestHandler<ParamsForRequest<Method>, ResultForRequest<Method>>
   ): this;
 
   /**
@@ -135,7 +158,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
    */
   onNotification<Method extends LSPNotificationMethod & string>(
     method: Method,
-    handler: NotificationHandler<InferNotificationParams<Method>>
+    handler: NotificationHandler<ParamsForNotification<Method>>
   ): this;
 
   /**
@@ -184,20 +207,24 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
    * Set server capabilities
    */
   setCapabilities(capabilities: Capabilities): void {
-    this.lifecycle.setCapabilities(capabilities as ServerCapabilities);
+    this.lifecycleManager.setCapabilities(capabilities as ServerCapabilities);
     // Create capability guard with the new capabilities
     this.capabilityGuard = new CapabilityGuard(
       capabilities as ServerCapabilities,
       this.logger,
       this.options.strictCapabilities ?? false
     );
+
+    // Initialize capability-aware handler methods based on declared capabilities
+    initializeServerHandlerMethods(this);
+    initializeServerSendMethods(this);
   }
 
   /**
    * Get current capabilities
    */
   getCapabilities(): ServerCapabilities {
-    return this.lifecycle.getCapabilities();
+    return this.lifecycleManager.getCapabilities();
   }
 
   /**
@@ -290,7 +317,11 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
       this.clientCapabilities = params.capabilities;
       this.dispatcher.setClientCapabilities(params.capabilities);
 
-      const result = await this.lifecycle.handleInitialize(params, this.transport!, context.id);
+      const result = await this.lifecycleManager.handleInitialize(
+        params,
+        this.transport!,
+        context.id
+      );
       this.state = ServerState.Initialized;
 
       return result;
@@ -298,7 +329,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
 
     // Initialized notification - use onNotification to get validation
     this.onNotification('initialized', (params) => {
-      this.lifecycle.handleInitialized(params);
+      this.lifecycleManager.handleInitialized(params);
     });
 
     // Shutdown request
@@ -307,7 +338,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
         throw ResponseError.invalidRequest('Server not initialized');
       }
 
-      await this.lifecycle.handleShutdown(this.transport!, context.id);
+      await this.lifecycleManager.handleShutdown(this.transport!, context.id);
       this.state = ServerState.ShuttingDown;
 
       return null;
@@ -315,7 +346,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
 
     // Exit notification
     this.onNotification('exit', () => {
-      this.lifecycle.handleExit();
+      this.lifecycleManager.handleExit();
       void this.close();
     });
 

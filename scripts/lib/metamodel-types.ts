@@ -340,9 +340,18 @@ export interface TypeAlias {
  */
 export interface Request {
   /**
+   * Request category (e.g., "textDocument", "workspace")
+   */
+  category: string;
+  /**
    * Request method name (e.g., "textDocument/hover")
    */
   method: string;
+
+  /**
+   * Request type name
+   */
+  typeName: string;
 
   /**
    * Request parameters type
@@ -415,9 +424,18 @@ export interface Request {
  */
 export interface Notification {
   /**
+   * Notification category (e.g., "textDocument", "workspace")
+   */
+  category: string;
+  /**
    * Notification method name (e.g., "textDocument/didOpen")
    */
   method: string;
+
+  /**
+   * Notification type name
+   */
+  typeName: string;
 
   /**
    * Notification parameters type

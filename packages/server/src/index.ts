@@ -11,7 +11,8 @@ export type {
   RequestHandler,
   NotificationHandler,
   RequestContext,
-  NotificationContext
+  NotificationContext,
+  Server
 } from './types.js';
 
 export { ServerState } from './types.js';
@@ -38,9 +39,9 @@ export type {
   // Type inference utilities
   LSPRequestMethod,
   LSPNotificationMethod,
-  InferRequestParams,
-  InferRequestResult,
-  InferNotificationParams
+  ParamsForRequest,
+  ResultForRequest,
+  ParamsForNotification
 } from '@lspeasy/core';
 
 export {

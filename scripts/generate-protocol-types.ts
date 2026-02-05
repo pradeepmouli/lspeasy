@@ -13,7 +13,14 @@
  * Usage: pnpm tsx scripts/generate-protocol-types.ts
  */
 
-import { Project, SourceFile } from 'ts-morph';
+import {
+  IndentationText,
+  Project,
+  QuoteKind,
+  SourceFile,
+  VariableDeclarationKind,
+  type CodeBlockWriter
+} from 'ts-morph';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import camelCase from 'camelcase';
@@ -58,7 +65,7 @@ class ProtocolTypeGenerator {
     switch (type.kind) {
       case 'reference':
         // Prefix with LSP namespace for imported types (unless skipPrefix is true for proposed types)
-        return skipLSPPrefix ? `any /* ${type.name} (proposed) */` : `LSP.${type.name}`;
+        return `LSP.${type.name}`;
       case 'base':
         // Base types don't need prefix
         return type.name;
@@ -95,7 +102,13 @@ class ProtocolTypeGenerator {
       tsConfigFilePath: path.join(process.cwd(), 'tsconfig.json'),
       compilerOptions: {
         declaration: true,
+
         outDir: path.join(process.cwd(), 'packages/core/src/protocol')
+      },
+      manipulationSettings: {
+        quoteKind: QuoteKind.Single,
+        indentationText: IndentationText.Tab,
+        insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces: true
       }
     });
 
@@ -116,7 +129,7 @@ class ProtocolTypeGenerator {
     this.extractCategories();
 
     // Step 3: Generate types.ts
-    await this.generateTypesFile();
+    //await this.generateTypesFile();
 
     // Step 4: Generate namespaces.ts
     await this.generateNamespacesFile();
@@ -146,6 +159,7 @@ class ProtocolTypeGenerator {
 
     const categoryMap = new Map<string, CategoryInfo>();
     const categories = this.parser.getCategories();
+    categories.add('lifecycle'); // Ensure 'lifecycle' category is included
 
     for (const category of categories) {
       const requests = this.parser.getRequestsByCategory(category);
@@ -165,342 +179,428 @@ class ProtocolTypeGenerator {
   private async generateTypesFile() {
     console.log('📝 Generating types.ts...');
 
-    const lines: string[] = [];
+    // Create source file with ts-morph
+    const sourceFile = this.outputProject.createSourceFile(this.typesOutputPath, '', {
+      overwrite: true
+    });
 
-    // Header
-    lines.push('/**');
-    lines.push(' * LSP Protocol Types');
-    lines.push(' *');
-    lines.push(' * Auto-generated from metaModel.json');
-    lines.push(' * DO NOT EDIT MANUALLY');
-    lines.push(' */');
-    lines.push('');
+    // Add header and re-export using template literal with actual newlines
+    sourceFile.addStatements(`/**
+ * LSP Protocol Types
+ *
+ * Auto-generated from metaModel.json
+ * DO NOT EDIT MANUALLY
+ */
 
-    // Simply re-export everything from vscode-languageserver-protocol
-    // The package itself knows what should be public
-    lines.push('// Re-export all LSP protocol types');
-    lines.push("export * from 'vscode-languageserver-protocol';");
-    lines.push('');
+// Re-export all LSP protocol types
+export * from './types.js';`);
 
-    // Write to file
-    const content = lines.join('\n');
-    fs.writeFileSync(this.typesOutputPath, content, 'utf-8');
+    // Save file (ts-morph will format it)
+    await sourceFile.save();
 
     console.log(`   ✅ Generated ${this.typesOutputPath}`);
-    console.log(`   ✅ Re-exporting all types from vscode-languageserver-protocol\n`);
+    console.log(`   ✅ Re-exporting all types from ./types.js\n`);
   }
 
   private async generateNamespacesFile() {
     console.log('📝 Generating namespaces.ts...');
 
-    const lines: string[] = [];
+    // Create source file with ts-morph
+    const sourceFile = this.outputProject.createSourceFile(this.namespacesOutputPath, '', {
+      overwrite: true
+    });
 
-    // Header
-    lines.push('/**');
-    lines.push(' * LSP Request and Notification namespaces');
-    lines.push(' * Auto-generated from metaModel.json');
-    lines.push(' *');
-    lines.push(' * DO NOT EDIT MANUALLY');
-    lines.push(' */');
-    lines.push('');
-    // Import all types from vscode-languageserver-protocol for type definitions
-    lines.push("import type * as LSP from 'vscode-languageserver-protocol';");
-    lines.push('');
+    // Add header comment
+    sourceFile.insertStatements(0, (writer) => {
+      writer.writeLine('/**');
+      writer.writeLine(' * LSP Request and Notification namespaces');
+      writer.writeLine(' * Auto-generated from metaModel.json');
+      writer.writeLine(' *');
+      writer.writeLine(' * DO NOT EDIT MANUALLY');
+      writer.writeLine(' */');
+    });
+
+    // Add import statement
+    sourceFile.addImportDeclaration({
+      namespaceImport: 'LSP',
+      moduleSpecifier: './types.js',
+      isTypeOnly: true
+    });
+
     // Generate a namespace for each category
     const sortedCategories = Array.from(this.categories.entries()).sort((a, b) =>
       a[0].localeCompare(b[0])
     );
 
-    for (const [categoryName, categoryInfo] of sortedCategories) {
-      lines.push(`/**`);
-      lines.push(` * ${categoryName} namespace`);
-      lines.push(` */`);
-      lines.push(`export namespace ${categoryName} {`);
+    // Build LSPRequest type using ts-morph
+    const lspRequestType = sourceFile.addTypeAlias({
+      name: 'LSPRequest',
+      isExported: true,
+      type: (writer) => {
+        writer.block(() => {
+          for (const [categoryName, categoryInfo] of sortedCategories) {
+            if (categoryInfo.requests.length === 0) continue;
 
-      // Track method names to avoid duplicates
-      const usedNames = new Set<string>();
-
-      // Add requests to namespace
-      for (const request of categoryInfo.requests) {
-        const methodParts = request.method.split('/');
-        let constName: string;
-
-        // For multi-level methods like "workspace/foldingRange/refresh",
-        // use the last two parts to create a unique name
-        if (methodParts.length > 2) {
-          const secondLast = camelCase(methodParts[methodParts.length - 2], { pascalCase: true });
-          const last = camelCase(methodParts[methodParts.length - 1], { pascalCase: true });
-          constName = secondLast + last;
-        } else {
-          const methodName = methodParts[methodParts.length - 1];
-          constName = camelCase(methodName, { pascalCase: true });
-        }
-
-        // Make sure name is unique within this namespace
-        let finalName = constName;
-        let counter = 2;
-        while (usedNames.has(finalName)) {
-          finalName = `${constName}${counter}`;
-          counter++;
-        }
-        usedNames.add(finalName);
-
-        lines.push(`  /**`);
-        if (request.documentation) {
-          const docLines = request.documentation.split('\n');
-          lines.push(`   * ${docLines[0]}`);
-        }
-        lines.push(`   * @method ${request.method}`);
-        lines.push(`   */`);
-        lines.push(`  export const ${finalName} = '${request.method}' as const;`);
+            writer.write(`${camelCase(categoryName, { pascalCase: true })}: `);
+            writer.block(() => {
+              const usedNames = new Set<string>();
+              for (const request of categoryInfo.requests) {
+                this.writeRequestType(writer, request, usedNames);
+              }
+            });
+            writer.write(';').newLine();
+          }
+        });
       }
+    });
 
-      // Add notifications to namespace
-      for (const notification of categoryInfo.notifications) {
-        const methodParts = notification.method.split('/');
-        let constName: string;
+    // Add JSDoc to LSPRequest
+    lspRequestType.addJsDoc({
+      description: 'LSP Request type definitions organized by namespace'
+    });
 
-        // For multi-level methods like "workspace/foldingRange/refresh",
-        // use the last two parts to create a unique name
-        if (methodParts.length > 2) {
-          const secondLast = camelCase(methodParts[methodParts.length - 2], { pascalCase: true });
-          const last = camelCase(methodParts[methodParts.length - 1], { pascalCase: true });
-          constName = secondLast + last;
-        } else {
-          const methodName = methodParts[methodParts.length - 1];
-          constName = camelCase(methodName, { pascalCase: true });
-        }
+    // Build LSPNotification type using ts-morph
+    const lspNotificationType = sourceFile.addTypeAlias({
+      name: 'LSPNotification',
+      isExported: true,
+      type: (writer) => {
+        writer.block(() => {
+          for (const [categoryName, categoryInfo] of sortedCategories) {
+            if (categoryInfo.notifications.length === 0) continue;
 
-        // Make sure name is unique within this namespace
-        let finalName = constName;
-        let counter = 2;
-        while (usedNames.has(finalName)) {
-          finalName = `${constName}${counter}`;
-          counter++;
-        }
-        usedNames.add(finalName);
-
-        lines.push(`  /**`);
-        if (notification.documentation) {
-          const docLines = notification.documentation.split('\n');
-          lines.push(`   * ${docLines[0]}`);
-        }
-        lines.push(`   * @method ${notification.method}`);
-        lines.push(`   */`);
-        lines.push(`  export const ${finalName} = '${notification.method}' as const;`);
+            writer.write(`${camelCase(categoryName, { pascalCase: true })}: `);
+            writer.block(() => {
+              const usedNames = new Set<string>();
+              for (const notification of categoryInfo.notifications) {
+                this.writeNotificationType(writer, notification, usedNames);
+              }
+            });
+            writer.write(';').newLine();
+          }
+        });
       }
+    });
 
-      lines.push('}');
-      lines.push('');
-    }
+    // Add JSDoc to LSPNotification
+    lspNotificationType.addJsDoc({
+      description: 'LSP Notification type definitions organized by namespace'
+    });
 
-    // Generate LSPRequest type for backward compatibility
-    lines.push('/**');
-    lines.push(' * LSP Request type definitions organized by namespace');
-    lines.push(' */');
-    lines.push('export type LSPRequest = {');
+    // Build LSPRequest const using ts-morph
+    const lspRequestConst = sourceFile.addVariableStatement({
+      declarationKind: VariableDeclarationKind.Const,
+      isExported: true,
+      declarations: [
+        {
+          name: 'LSPRequest',
+          initializer: (writer) => {
+            writer.block(() => {
+              for (const [categoryName, categoryInfo] of sortedCategories) {
+                if (categoryInfo.requests.length === 0) continue;
 
-    for (const [categoryName, categoryInfo] of sortedCategories) {
-      if (categoryInfo.requests.length === 0) continue;
-
-      lines.push(`  ${categoryName}: {`);
-      const usedNames = new Set<string>();
-
-      for (const request of categoryInfo.requests) {
-        const methodParts = request.method.split('/');
-        let constName: string;
-
-        if (methodParts.length > 2) {
-          const secondLast = camelCase(methodParts[methodParts.length - 2], { pascalCase: true });
-          const last = camelCase(methodParts[methodParts.length - 1], { pascalCase: true });
-          constName = secondLast + last;
-        } else {
-          const methodName = methodParts[methodParts.length - 1];
-          constName = camelCase(methodName, { pascalCase: true });
+                writer.write(`${camelCase(categoryName, { pascalCase: true })}: `);
+                writer.block(() => {
+                  const usedNames = new Set<string>();
+                  for (const request of categoryInfo.requests) {
+                    this.writeRequestConst(writer, request, usedNames);
+                  }
+                });
+                writer.write(',').newLine();
+              }
+            });
+          }
         }
+      ]
+    });
 
-        let finalName = constName;
-        let counter = 2;
-        while (usedNames.has(finalName)) {
-          finalName = `${constName}${counter}`;
-          counter++;
+    // Add JSDoc to LSPRequest const
+    lspRequestConst.addJsDoc({
+      description: 'LSP Request methods organized by namespace',
+      tags: [
+        {
+          tagName: 'deprecated',
+          text: 'Use individual namespace exports instead'
         }
-        usedNames.add(finalName);
+      ]
+    });
 
-        lines.push(`    ${finalName}: {`);
-        lines.push(`      Method: '${request.method}';`);
-        if (request.params) {
-          lines.push(`      Params: ${this.typeToString(request.params, request.proposed)};`);
-        } else {
-          lines.push(`      Params?: never;`);
+    let r = lspRequestConst.getDeclarations()[0].getText();
+    r = r.replace(/,\s*}$/, '\n} as const');
+    lspRequestConst.getDeclarations()[0].replaceWithText(r);
+
+    // Build LSPNotification const using ts-morph
+    const lspNotificationConst = sourceFile.addVariableStatement({
+      declarationKind: VariableDeclarationKind.Const,
+      isExported: true,
+
+      declarations: [
+        {
+          name: 'LSPNotification',
+
+          initializer: (writer: CodeBlockWriter) => {
+            writer.block(() => {
+              for (const [categoryName, categoryInfo] of sortedCategories) {
+                if (categoryInfo.notifications.length === 0) continue;
+
+                writer.write(`${camelCase(categoryName, { pascalCase: true })}: `);
+                writer.block(() => {
+                  const usedNames = new Set<string>();
+                  for (const notification of categoryInfo.notifications) {
+                    this.writeNotificationConst(writer, notification, usedNames);
+                  }
+                });
+                writer.write(',').newLine();
+              }
+            });
+          }
         }
-        if (request.result) {
-          lines.push(`      Result: ${this.typeToString(request.result, request.proposed)};`);
+      ]
+    });
+
+    // Add JSDoc to LSPNotification const
+    lspNotificationConst.addJsDoc({
+      description: 'LSP Notification methods organized by namespace',
+      tags: [
+        {
+          tagName: 'deprecated',
+          text: 'Use individual namespace exports instead'
         }
-        if (request.serverCapability) {
-          lines.push(`      ServerCapability: '${request.serverCapability}';`);
-        }
-        lines.push(`      Direction: 'clientToServer';`);
-        lines.push(`    };`);
-      }
+      ]
+    });
+    let n = lspNotificationConst.getDeclarations()[0].getText();
+    n = n.replace(/,\s*}$/, '\n} as const');
+    lspNotificationConst.getDeclarations()[0].replaceWithText(n);
 
-      lines.push(`  };`);
-    }
+    sourceFile.formatText();
 
-    lines.push('};');
-    lines.push('');
+    // Save file (ts-morph will format it)
+    await sourceFile.save();
 
-    // Generate LSPNotification type for backward compatibility
-    lines.push('/**');
-    lines.push(' * LSP Notification type definitions organized by namespace');
-    lines.push(' */');
-    lines.push('export type LSPNotification = {');
+    // Post-process to add 'as const' assertions to the const objects
+    /*let content = sourceFile.getFullText();
 
-    for (const [categoryName, categoryInfo] of sortedCategories) {
-      if (categoryInfo.notifications.length === 0) continue;
+    // Find and replace the trailing comma after the last category with 'as const'
+    // Match pattern: }, (with optional whitespace) then }; at the end of LSPRequest
+    content = content.replace(
+      /(export const LSPRequest = \{[\s\S]*?\n\s+\}\s*,\s*\n\s+\})\s*;/,
+      '$1 as const;'
+    );
 
-      lines.push(`  ${categoryName}: {`);
-      const usedNames = new Set<string>();
+    // Same for LSPNotification
+    content = content.replace(
+      /(export const LSPNotification = \{[\s\S]*?\n\s+\}\s*,\s*\n\s+\})\s*;$/m,
+      '$1 as const;'
+    );
 
-      for (const notification of categoryInfo.notifications) {
-        const methodParts = notification.method.split('/');
-        let constName: string;
-
-        if (methodParts.length > 2) {
-          const secondLast = camelCase(methodParts[methodParts.length - 2], { pascalCase: true });
-          const last = camelCase(methodParts[methodParts.length - 1], { pascalCase: true });
-          constName = secondLast + last;
-        } else {
-          const methodName = methodParts[methodParts.length - 1];
-          constName = camelCase(methodName, { pascalCase: true });
-        }
-
-        let finalName = constName;
-        let counter = 2;
-        while (usedNames.has(finalName)) {
-          finalName = `${constName}${counter}`;
-          counter++;
-        }
-        usedNames.add(finalName);
-
-        lines.push(`    ${finalName}: {`);
-        lines.push(`      Method: '${notification.method}';`);
-        if (notification.params) {
-          lines.push(
-            `      Params: ${this.typeToString(notification.params, notification.proposed)};`
-          );
-        }
-        if (notification.clientCapability) {
-          lines.push(`      ClientCapability: '${notification.clientCapability}';`);
-        }
-        lines.push(`      Direction: 'serverToClient';`);
-        lines.push(`    };`);
-      }
-
-      lines.push(`  };`);
-    }
-
-    lines.push('};');
-    lines.push('');
-
-    // Generate LSPRequest object for backward compatibility
-    lines.push('/**');
-    lines.push(' * LSP Request methods organized by namespace');
-    lines.push(' * @deprecated Use individual namespace exports instead');
-    lines.push(' */');
-    lines.push('export const LSPRequest = {');
-
-    for (const [categoryName, categoryInfo] of sortedCategories) {
-      if (categoryInfo.requests.length === 0) continue;
-
-      lines.push(`  ${categoryName}: {`);
-      const usedNames = new Set<string>();
-
-      for (const request of categoryInfo.requests) {
-        const methodParts = request.method.split('/');
-        let constName: string;
-
-        if (methodParts.length > 2) {
-          const secondLast = camelCase(methodParts[methodParts.length - 2], { pascalCase: true });
-          const last = camelCase(methodParts[methodParts.length - 1], { pascalCase: true });
-          constName = secondLast + last;
-        } else {
-          const methodName = methodParts[methodParts.length - 1];
-          constName = camelCase(methodName, { pascalCase: true });
-        }
-
-        let finalName = constName;
-        let counter = 2;
-        while (usedNames.has(finalName)) {
-          finalName = `${constName}${counter}`;
-          counter++;
-        }
-        usedNames.add(finalName);
-
-        lines.push(`    ${finalName}: {`);
-        lines.push(`      Method: '${request.method}' as const,`);
-        lines.push(`      Direction: 'clientToServer' as const`);
-        lines.push(`    },`);
-      }
-
-      lines.push(`  },`);
-    }
-
-    lines.push('} as const;');
-    lines.push('');
-
-    // Generate LSPNotification object for backward compatibility
-    lines.push('/**');
-    lines.push(' * LSP Notification methods organized by namespace');
-    lines.push(' * @deprecated Use individual namespace exports instead');
-    lines.push(' */');
-    lines.push('export const LSPNotification = {');
-
-    for (const [categoryName, categoryInfo] of sortedCategories) {
-      if (categoryInfo.notifications.length === 0) continue;
-
-      lines.push(`  ${categoryName}: {`);
-      const usedNames = new Set<string>();
-
-      for (const notification of categoryInfo.notifications) {
-        const methodParts = notification.method.split('/');
-        let constName: string;
-
-        if (methodParts.length > 2) {
-          const secondLast = camelCase(methodParts[methodParts.length - 2], { pascalCase: true });
-          const last = camelCase(methodParts[methodParts.length - 1], { pascalCase: true });
-          constName = secondLast + last;
-        } else {
-          const methodName = methodParts[methodParts.length - 1];
-          constName = camelCase(methodName, { pascalCase: true });
-        }
-
-        let finalName = constName;
-        let counter = 2;
-        while (usedNames.has(finalName)) {
-          finalName = `${constName}${counter}`;
-          counter++;
-        }
-        usedNames.add(finalName);
-
-        lines.push(`    ${finalName}: {`);
-        lines.push(`      Method: '${notification.method}' as const,`);
-        lines.push(`      Direction: 'serverToClient' as const`);
-        lines.push(`    },`);
-      }
-
-      lines.push(`  },`);
-    }
-
-    lines.push('} as const;');
-    lines.push('');
-
-    // Write to file
-    const content = lines.join('\n');
-    fs.writeFileSync(this.namespacesOutputPath, content, 'utf-8');
+    // Write back the modified content
+    sourceFile.replaceWithText(content);*/
+    await sourceFile.save();
 
     console.log(`   ✅ Generated ${this.namespacesOutputPath}`);
     console.log(`   ✅ Generated ${this.categories.size} namespaces\n`);
+  }
+
+  /**
+   * Write a request type definition using ts-morph CodeBlockWriter
+   */
+  private writeRequestType(writer: CodeBlockWriter, request: Request, usedNames: Set<string>) {
+    const finalName = this.getUniqueName(request.method, usedNames);
+
+    writer.write(`${request.typeName}: `);
+    writer.block(() => {
+      writer.writeLine(`Method: '${request.method}';`);
+
+      if (request.params) {
+        writer.writeLine(`Params: ${this.typeToString(request.params, request.proposed)};`);
+      } else {
+        writer.writeLine(`Params: undefined;`);
+      }
+
+      if (request.result) {
+        writer.writeLine(`Result: ${this.typeToString(request.result, request.proposed)};`);
+      }
+
+      if (request.partialResult) {
+        writer.writeLine(
+          `PartialResult: ${this.typeToString(request.partialResult, request.proposed)};`
+        );
+      }
+
+      if (request.registrationOptions) {
+        writer.writeLine(
+          `RegistrationOptions: ${this.typeToString(request.registrationOptions, request.proposed)};`
+        );
+      }
+
+      if (request.errorData) {
+        writer.writeLine(`ErrorData: ${this.typeToString(request.errorData, request.proposed)};`);
+      }
+
+      if (request.serverCapability) {
+        writer.writeLine(`ServerCapability: '${request.serverCapability}';`);
+      }
+
+      if (request.clientCapability) {
+        writer.writeLine(`ClientCapability: '${request.clientCapability}';`);
+      }
+
+      if (request.registrationMethod) {
+        writer.writeLine(`RegistrationMethod: '${request.registrationMethod}';`);
+      }
+
+      if (request.since) {
+        writer.writeLine(`Since: '${request.since.split(' ')[0]}';`);
+      }
+
+      if (request.proposed) {
+        writer.writeLine(`Proposed: true;`);
+      }
+
+      writer.writeLine(`Direction: '${request.messageDirection}';`);
+    });
+    writer.write(';').newLine();
+  }
+
+  /**
+   * Write a notification type definition using ts-morph CodeBlockWriter
+   */
+  private writeNotificationType(
+    writer: CodeBlockWriter,
+    notification: Notification,
+    usedNames: Set<string>
+  ) {
+    const finalName = this.getUniqueName(notification.method, usedNames);
+
+    writer.write(`${notification.typeName}: `);
+    writer.block(() => {
+      writer.writeLine(`Method: '${notification.method}';`);
+
+      if (notification.params) {
+        writer.writeLine(
+          `Params: ${this.typeToString(notification.params, notification.proposed)};`
+        );
+      } else {
+        writer.writeLine(`Params: undefined;`);
+      }
+
+      if (notification.clientCapability) {
+        writer.writeLine(`ClientCapability: '${notification.clientCapability}';`);
+      }
+
+      if (notification.serverCapability) {
+        writer.writeLine(`ServerCapability: '${notification.serverCapability}';`);
+      }
+
+      if (notification.registrationMethod) {
+        writer.writeLine(`RegistrationMethod: '${notification.registrationMethod}';`);
+      }
+
+      if (notification.registrationOptions) {
+        writer.writeLine(
+          `RegistrationOptions: ${this.typeToString(notification.registrationOptions, notification.proposed)};`
+        );
+      }
+
+      if (notification.since) {
+        writer.writeLine(`Since: '${notification.since.split(' ')[0]}';`);
+      }
+
+      if (notification.proposed) {
+        writer.writeLine(`Proposed: true;`);
+      }
+
+      writer.writeLine(`Direction: '${notification.messageDirection}';`);
+    });
+    writer.write(';').newLine();
+  }
+
+  /**
+   * Write a request const definition using ts-morph CodeBlockWriter
+   */
+  private writeRequestConst(writer: CodeBlockWriter, request: Request, usedNames: Set<string>) {
+    const finalName = this.getUniqueName(request.method, usedNames);
+
+    writer.write(`${request.typeName}: `);
+    writer.block(() => {
+      writer.writeLine(`Method: '${request.method}',`);
+      writer.writeLine(`Direction: '${request.messageDirection}'`);
+
+      if (request.serverCapability) {
+        writer.write(`,`).newLine();
+        writer.writeLine(`ServerCapability: '${request.serverCapability}'`);
+      }
+
+      if (request.clientCapability) {
+        writer.write(`,`).newLine();
+        writer.writeLine(`ClientCapability: '${request.clientCapability}'`);
+      }
+
+      if (request.registrationMethod) {
+        writer.write(`,`).newLine();
+        writer.writeLine(`RegistrationMethod: '${request.registrationMethod}'`);
+      }
+    });
+    writer.write(',').newLine();
+  }
+
+  /**
+   * Write a notification const definition using ts-morph CodeBlockWriter
+   */
+  private writeNotificationConst(
+    writer: CodeBlockWriter,
+    notification: Notification,
+    usedNames: Set<string>
+  ) {
+    const finalName = this.getUniqueName(notification.method, usedNames);
+
+    writer.write(`${notification.typeName}: `);
+    writer.block(() => {
+      writer.writeLine(`Method: '${notification.method}',`);
+      writer.writeLine(`Direction: '${notification.messageDirection}'`);
+
+      if (notification.serverCapability) {
+        writer.write(`,`).newLine();
+        writer.writeLine(`ServerCapability: '${notification.serverCapability}'`);
+      }
+
+      if (notification.clientCapability) {
+        writer.write(`,`).newLine();
+        writer.writeLine(`ClientCapability: '${notification.clientCapability}'`);
+      }
+
+      if (notification.registrationMethod) {
+        writer.write(`,`).newLine();
+        writer.writeLine(`RegistrationMethod: '${notification.registrationMethod}'`);
+      }
+    });
+    writer.write(',').newLine();
+  }
+
+  /**
+   * Get a unique name for a method, handling duplicates
+   */
+  private getUniqueName(method: string, usedNames: Set<string>): string {
+    const methodParts = method.split('/');
+    let constName: string;
+
+    if (methodParts.length > 2) {
+      const secondLast = camelCase(methodParts[methodParts.length - 2], { pascalCase: true });
+      const last = camelCase(methodParts[methodParts.length - 1], { pascalCase: true });
+      constName = secondLast + last;
+    } else {
+      const methodName = methodParts[methodParts.length - 1];
+      constName = camelCase(methodName, { pascalCase: true });
+    }
+
+    let finalName = constName;
+    let counter = 2;
+    while (usedNames.has(finalName)) {
+      finalName = `${constName}${counter}`;
+      counter++;
+    }
+    usedNames.add(finalName);
+
+    return finalName;
   }
 }
 

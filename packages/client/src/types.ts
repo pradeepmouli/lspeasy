@@ -2,14 +2,23 @@
  * Type definitions for LSP Client
  */
 
-import type { Logger, LogLevel } from '@lspeasy/core';
+import type { ClientCapabilities, Logger, LogLevel, Client } from '@lspeasy/core';
 import type { ZodError } from 'zod';
 import type { ResponseMessage } from '@lspeasy/core';
 
 /**
+ * Re-export Client type for convenience
+ */
+export type { Client } from '@lspeasy/core';
+
+/**
  * LSP Client options
  */
-export interface ClientOptions {
+export interface ClientOptions<
+  ClientCaps extends Partial<ClientCapabilities>,
+  ServerCaps extends Partial<import('@lspeasy/core').ServerCapabilities> =
+    import('@lspeasy/core').ServerCapabilities
+> {
   /**
    * Client identification (sent in initialize request)
    */
@@ -23,7 +32,13 @@ export interface ClientOptions {
   /**
    * Client capabilities to advertise
    */
-  capabilities?: import('vscode-languageserver-protocol').ClientCapabilities;
+  capabilities?: ClientCaps;
+
+  /**
+   * Expected server capabilities (for type inference only, not sent to server)
+   * @internal
+   */
+  _serverCapabilities?: ServerCaps;
 
   /**
    * Logger instance for client logging

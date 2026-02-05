@@ -11,18 +11,52 @@ import type {
   NotificationMessage,
   Disposable,
   Logger,
-  CancellationToken
+  CancellationToken,
+  LSPRequestMethod,
+  LSPRequest,
+  ParamsForRequest,
+  ResultForRequest,
+  LSPNotificationMethod,
+  ParamsForNotification,
+  InitializeParams,
+  ServerCapabilities,
+  ClientCapabilities,
+  Client
 } from '@lspeasy/core';
 import { ConsoleLogger, LogLevel, CancellationTokenSource } from '@lspeasy/core';
 import type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
-import { TextDocumentRequests } from './requests/text-document.js';
-import { WorkspaceRequests } from './requests/workspace.js';
-import { createTextDocumentProxy, createWorkspaceProxy } from './capability-proxy.js';
+import { initializeCapabilityMethods, updateCapabilityMethods } from './capability-proxy.js';
+
+/**
+ * Interface for dynamically added namespace methods
+ */
+
+/**
+ * Type alias to add capability-aware methods to LSPClient
+ * These methods are added at runtime via capability-proxy.ts
+ */
 
 /**
  * LSP Client for connecting to language servers
+ *
+ * This class dynamically extends with capability-aware methods based on server capabilities.
+ * Methods are type-safe and conditionally available based on the ServerCaps type parameter.
+ *
+ * @template ClientCaps - Client capabilities (defaults to ClientCapabilities)
+ * @template ServerCaps - Server capabilities (defaults to ServerCapabilities)
+ *
+ * @example
+ * // Create a client with specific server capabilities
+ * type MyServerCaps = { hoverProvider: true; completionProvider: { triggerCharacters: ['.'] } };
+ * const client = new LSPClient<ClientCapabilities, MyServerCaps>();
+ * // client.textDocument.hover is available (typed)
+ * // client.textDocument.completion is available (typed)
+ * // client.textDocument.definition is not available (missing from MyServerCaps)
  */
-export class LSPClient {
+class BaseLSPClient<
+  ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities,
+  ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities
+> {
   private transport?: Transport;
   private connected: boolean;
   private initialized: boolean;
@@ -39,24 +73,19 @@ export class LSPClient {
   private notificationHandlers: Map<string, (params: any) => void>;
   private events: EventEmitter;
   private readonly logger: Logger;
-  private readonly options: Required<Omit<ClientOptions, 'capabilities' | 'onValidationError'>>;
-  private readonly capabilities?: import('vscode-languageserver-protocol').ClientCapabilities;
-  public serverCapabilities?: import('vscode-languageserver-protocol').ServerCapabilities;
+  private readonly options: Required<
+    Omit<
+      ClientOptions<ClientCaps, ServerCaps>,
+      'capabilities' | 'onValidationError' | '_serverCapabilities'
+    >
+  >;
+  private readonly capabilities?: ClientCaps;
+  public serverCapabilities?: ServerCaps;
   private serverInfo?: { name: string; version?: string };
-  private readonly onValidationError?: ClientOptions['onValidationError'];
+  private readonly onValidationError?: ClientOptions<ClientCaps, ServerCaps>['onValidationError'];
   private transportDisposables: Disposable[];
 
-  /**
-   * High-level textDocument.* methods
-   */
-  public readonly textDocument: TextDocumentRequests;
-
-  /**
-   * High-level workspace.* methods
-   */
-  public readonly workspace: WorkspaceRequests;
-
-  constructor(options: ClientOptions = {}) {
+  constructor(options: ClientOptions<ClientCaps, ServerCaps> = {}) {
     this.connected = false;
     this.initialized = false;
     this.nextRequestId = 1;
@@ -82,9 +111,9 @@ export class LSPClient {
       this.onValidationError = options.onValidationError;
     }
 
-    // Initialize high-level methods (proxies will be created after server capabilities are received)
-    this.textDocument = createTextDocumentProxy(this);
-    this.workspace = createWorkspaceProxy(this);
+    // Initialize capability-aware methods on the client object
+    // These will be empty initially and populated after server capabilities are received
+    initializeCapabilityMethods(this as unknown as LSPClient<ClientCaps, ServerCaps>);
   }
 
   /**
@@ -109,7 +138,7 @@ export class LSPClient {
       // Send initialize request
       this.logger.debug('Sending initialize request');
 
-      const initializeParams: import('vscode-languageserver-protocol').InitializeParams = {
+      const initializeParams: InitializeParams = {
         processId: process.pid,
         clientInfo: {
           name: this.options.name,
@@ -119,16 +148,16 @@ export class LSPClient {
         rootUri: null
       };
 
-      const result = await this.sendRequest<
-        import('vscode-languageserver-protocol').InitializeParams,
-        InitializeResult
-      >('initialize', initializeParams);
+      const result = await this.sendRequest('initialize', initializeParams);
 
-      this.serverCapabilities = result.capabilities;
+      this.serverCapabilities = result.capabilities as ServerCaps;
       if (result.serverInfo) {
         this.serverInfo = result.serverInfo;
       }
       this.initialized = true;
+
+      // Update capability-aware methods based on server capabilities
+      updateCapabilityMethods(this as unknown as LSPClient<ClientCaps, ServerCaps>);
 
       // Send initialized notification
       await this.sendNotification('initialized', {});
@@ -168,11 +197,11 @@ export class LSPClient {
       // Send shutdown request
       if (this.initialized) {
         this.logger.debug('Sending shutdown request');
-        await this.sendRequest('shutdown', null);
+        await this.sendRequest('shutdown');
 
         // Send exit notification
         this.logger.debug('Sending exit notification');
-        await this.sendNotification('exit', null);
+        await this.sendNotification('exit');
       }
     } catch (error) {
       this.logger.error('Error during shutdown', error);
@@ -195,11 +224,11 @@ export class LSPClient {
   /**
    * Send a request to the server
    */
-  async sendRequest<Params = any, Result = any>(
-    method: string,
-    params: Params,
+  async sendRequest<K extends LSPRequestMethod<'clientToServer'>>(
+    method: K,
+    params?: ParamsForRequest<K>,
     token?: CancellationToken
-  ): Promise<Result> {
+  ): Promise<ResultForRequest<K>> {
     if (!this.connected || !this.transport) {
       throw new Error('Client is not connected');
     }
@@ -211,8 +240,8 @@ export class LSPClient {
 
     const id = this.nextRequestId++;
 
-    const request: RequestMessage = {
-      jsonrpc: '2.0',
+    const request = {
+      jsonrpc: '2.0' as const,
       id,
       method,
       params
@@ -220,7 +249,7 @@ export class LSPClient {
 
     this.logger.debug(`Sending request ${method}`, { id, params });
 
-    return new Promise<Result>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let cancellationDisposable: Disposable | undefined;
 
       // Store pending request first before setting up cancellation
@@ -265,7 +294,10 @@ export class LSPClient {
   /**
    * Send a notification to the server
    */
-  async sendNotification<Params = any>(method: string, params: Params): Promise<void> {
+  async sendNotification<M extends LSPNotificationMethod<'clientToServer'>>(
+    method: M,
+    params?: ParamsForNotification<M>
+  ): Promise<void> {
     if (!this.connected || !this.transport) {
       throw new Error('Client is not connected');
     }
@@ -284,13 +316,13 @@ export class LSPClient {
   /**
    * Send a cancellable request
    */
-  sendCancellableRequest<Params = any, Result = any>(
-    method: string,
-    params: Params
-  ): CancellableRequest<Result> {
+  sendCancellableRequest<M extends LSPRequestMethod<'clientToServer'>>(
+    method: M,
+    params?: ParamsForRequest<M>
+  ): CancellableRequest<ResultForRequest<M>> {
     const cancelSource = new CancellationTokenSource();
 
-    const promise = this.sendRequest<Params, Result>(method, params, cancelSource.token);
+    const promise = this.sendRequest(method, params, cancelSource.token);
 
     return {
       promise,
@@ -301,9 +333,9 @@ export class LSPClient {
   /**
    * Register handler for server-to-client requests
    */
-  onRequest<Params = any, Result = any>(
-    method: string,
-    handler: (params: Params) => Promise<Result> | Result
+  onRequest<M extends LSPRequestMethod<'serverToClient'>>(
+    method: M,
+    handler: (params: ParamsForRequest<M>) => Promise<ResultForRequest<M>> | ResultForRequest<M>
   ): Disposable {
     this.requestHandlers.set(method, handler);
 
@@ -317,7 +349,10 @@ export class LSPClient {
   /**
    * Register handler for server notifications
    */
-  onNotification<Params = any>(method: string, handler: (params: Params) => void): Disposable {
+  onNotification<M extends LSPNotificationMethod<'serverToClient'>>(
+    method: M,
+    handler: (params: ParamsForNotification<M>) => void
+  ): Disposable {
     this.notificationHandlers.set(method, handler);
 
     return {
@@ -366,7 +401,7 @@ export class LSPClient {
   /**
    * Get server capabilities
    */
-  getServerCapabilities(): import('vscode-languageserver-protocol').ServerCapabilities | undefined {
+  getServerCapabilities(): ServerCapabilities | undefined {
     return this.serverCapabilities;
   }
 
@@ -554,3 +589,16 @@ export class LSPClient {
     this.events.emit('disconnected');
   }
 }
+
+export type LSPClient<
+  ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities,
+  ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities
+> = BaseLSPClient<ClientCaps, ServerCaps> & Client<ClientCaps, ServerCaps>;
+
+// Generic constructor that preserves type parameters and infers both from options
+export const LSPClient: new <
+  ClientCaps extends Partial<ClientCapabilities>,
+  ServerCaps extends Partial<ServerCapabilities>
+>(
+  options?: ClientOptions<ClientCaps, ServerCaps>
+) => LSPClient<ClientCaps, ServerCaps> = BaseLSPClient as any;

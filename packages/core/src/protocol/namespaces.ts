@@ -4,843 +4,452 @@
  *
  * DO NOT EDIT MANUALLY
  */
+import type * as LSP from './types.js';
 
-import type * as LSP from 'vscode-languageserver-protocol';
-
-/**
- * callHierarchy namespace
- */
-export namespace callHierarchy {
-  /**
-   * A request to resolve the incoming calls for a given `CallHierarchyItem`.
-   * @method callHierarchy/incomingCalls
-   */
-  export const IncomingCalls = 'callHierarchy/incomingCalls' as const;
-  /**
-   * A request to resolve the outgoing calls for a given `CallHierarchyItem`.
-   * @method callHierarchy/outgoingCalls
-   */
-  export const OutgoingCalls = 'callHierarchy/outgoingCalls' as const;
-}
-
-/**
- * client namespace
- */
-export namespace client {
-  /**
-   * The `client/registerCapability` request is sent from the server to the client to register a new capability
-   * @method client/registerCapability
-   */
-  export const RegisterCapability = 'client/registerCapability' as const;
-  /**
-   * The `client/unregisterCapability` request is sent from the server to the client to unregister a previously registered capability
-   * @method client/unregisterCapability
-   */
-  export const UnregisterCapability = 'client/unregisterCapability' as const;
-}
-
-/**
- * codeAction namespace
- */
-export namespace codeAction {
-  /**
-   * Request to resolve additional information for a given code action.The request's
-   * @method codeAction/resolve
-   */
-  export const Resolve = 'codeAction/resolve' as const;
-}
-
-/**
- * codeLens namespace
- */
-export namespace codeLens {
-  /**
-   * A request to resolve a command for a given code lens.
-   * @method codeLens/resolve
-   */
-  export const Resolve = 'codeLens/resolve' as const;
-}
-
-/**
- * completionItem namespace
- */
-export namespace completionItem {
-  /**
-   * Request to resolve additional information for a given completion item.The request's
-   * @method completionItem/resolve
-   */
-  export const Resolve = 'completionItem/resolve' as const;
-}
-
-/**
- * documentLink namespace
- */
-export namespace documentLink {
-  /**
-   * Request to resolve additional information for a given document link. The request's
-   * @method documentLink/resolve
-   */
-  export const Resolve = 'documentLink/resolve' as const;
-}
-
-/**
- * inlayHint namespace
- */
-export namespace inlayHint {
-  /**
-   * A request to resolve additional properties for an inlay hint.
-   * @method inlayHint/resolve
-   */
-  export const Resolve = 'inlayHint/resolve' as const;
-}
-
-/**
- * notebookDocument namespace
- */
-export namespace notebookDocument {
-  /**
-   * A notification sent when a notebook opens.
-   * @method notebookDocument/didOpen
-   */
-  export const DidOpen = 'notebookDocument/didOpen' as const;
-  /**
-   * @method notebookDocument/didChange
-   */
-  export const DidChange = 'notebookDocument/didChange' as const;
-  /**
-   * A notification sent when a notebook document is saved.
-   * @method notebookDocument/didSave
-   */
-  export const DidSave = 'notebookDocument/didSave' as const;
-  /**
-   * A notification sent when a notebook closes.
-   * @method notebookDocument/didClose
-   */
-  export const DidClose = 'notebookDocument/didClose' as const;
-}
-
-/**
- * telemetry namespace
- */
-export namespace telemetry {
-  /**
-   * The telemetry event notification is sent from the server to the client to ask
-   * @method telemetry/event
-   */
-  export const Event = 'telemetry/event' as const;
-}
-
-/**
- * textDocument namespace
- */
-export namespace textDocument {
-  /**
-   * A request to resolve the implementation locations of a symbol at a given text
-   * @method textDocument/implementation
-   */
-  export const Implementation = 'textDocument/implementation' as const;
-  /**
-   * A request to resolve the type definition locations of a symbol at a given text
-   * @method textDocument/typeDefinition
-   */
-  export const TypeDefinition = 'textDocument/typeDefinition' as const;
-  /**
-   * A request to list all color symbols found in a given text document. The request's
-   * @method textDocument/documentColor
-   */
-  export const DocumentColor = 'textDocument/documentColor' as const;
-  /**
-   * A request to list all presentation for a color. The request's
-   * @method textDocument/colorPresentation
-   */
-  export const ColorPresentation = 'textDocument/colorPresentation' as const;
-  /**
-   * A request to provide folding ranges in a document. The request's
-   * @method textDocument/foldingRange
-   */
-  export const FoldingRange = 'textDocument/foldingRange' as const;
-  /**
-   * A request to resolve the type definition locations of a symbol at a given text
-   * @method textDocument/declaration
-   */
-  export const Declaration = 'textDocument/declaration' as const;
-  /**
-   * A request to provide selection ranges in a document. The request's
-   * @method textDocument/selectionRange
-   */
-  export const SelectionRange = 'textDocument/selectionRange' as const;
-  /**
-   * A request to result a `CallHierarchyItem` in a document at a given position.
-   * @method textDocument/prepareCallHierarchy
-   */
-  export const PrepareCallHierarchy = 'textDocument/prepareCallHierarchy' as const;
-  /**
-   * @since 3.16.0
-   * @method textDocument/semanticTokens/full
-   */
-  export const SemanticTokensFull = 'textDocument/semanticTokens/full' as const;
-  /**
-   * @since 3.16.0
-   * @method textDocument/semanticTokens/full/delta
-   */
-  export const FullDelta = 'textDocument/semanticTokens/full/delta' as const;
-  /**
-   * @since 3.16.0
-   * @method textDocument/semanticTokens/range
-   */
-  export const SemanticTokensRange = 'textDocument/semanticTokens/range' as const;
-  /**
-   * A request to provide ranges that can be edited together.
-   * @method textDocument/linkedEditingRange
-   */
-  export const LinkedEditingRange = 'textDocument/linkedEditingRange' as const;
-  /**
-   * A request to get the moniker of a symbol at a given text document position.
-   * @method textDocument/moniker
-   */
-  export const Moniker = 'textDocument/moniker' as const;
-  /**
-   * A request to result a `TypeHierarchyItem` in a document at a given position.
-   * @method textDocument/prepareTypeHierarchy
-   */
-  export const PrepareTypeHierarchy = 'textDocument/prepareTypeHierarchy' as const;
-  /**
-   * A request to provide inline values in a document. The request's parameter is of
-   * @method textDocument/inlineValue
-   */
-  export const InlineValue = 'textDocument/inlineValue' as const;
-  /**
-   * A request to provide inlay hints in a document. The request's parameter is of
-   * @method textDocument/inlayHint
-   */
-  export const InlayHint = 'textDocument/inlayHint' as const;
-  /**
-   * The document diagnostic request definition.
-   * @method textDocument/diagnostic
-   */
-  export const Diagnostic = 'textDocument/diagnostic' as const;
-  /**
-   * A request to provide inline completions in a document. The request's parameter is of
-   * @method textDocument/inlineCompletion
-   */
-  export const InlineCompletion = 'textDocument/inlineCompletion' as const;
-  /**
-   * A document will save request is sent from the client to the server before
-   * @method textDocument/willSaveWaitUntil
-   */
-  export const WillSaveWaitUntil = 'textDocument/willSaveWaitUntil' as const;
-  /**
-   * Request to request completion at a given text document position. The request's
-   * @method textDocument/completion
-   */
-  export const Completion = 'textDocument/completion' as const;
-  /**
-   * Request to request hover information at a given text document position. The request's
-   * @method textDocument/hover
-   */
-  export const Hover = 'textDocument/hover' as const;
-  /**
-   * @method textDocument/signatureHelp
-   */
-  export const SignatureHelp = 'textDocument/signatureHelp' as const;
-  /**
-   * A request to resolve the definition location of a symbol at a given text
-   * @method textDocument/definition
-   */
-  export const Definition = 'textDocument/definition' as const;
-  /**
-   * A request to resolve project-wide references for the symbol denoted
-   * @method textDocument/references
-   */
-  export const References = 'textDocument/references' as const;
-  /**
-   * Request to resolve a {@link DocumentHighlight} for a given
-   * @method textDocument/documentHighlight
-   */
-  export const DocumentHighlight = 'textDocument/documentHighlight' as const;
-  /**
-   * A request to list all symbols found in a given text document. The request's
-   * @method textDocument/documentSymbol
-   */
-  export const DocumentSymbol = 'textDocument/documentSymbol' as const;
-  /**
-   * A request to provide commands for the given text document and range.
-   * @method textDocument/codeAction
-   */
-  export const CodeAction = 'textDocument/codeAction' as const;
-  /**
-   * A request to provide code lens for the given text document.
-   * @method textDocument/codeLens
-   */
-  export const CodeLens = 'textDocument/codeLens' as const;
-  /**
-   * A request to provide document links
-   * @method textDocument/documentLink
-   */
-  export const DocumentLink = 'textDocument/documentLink' as const;
-  /**
-   * A request to format a whole document.
-   * @method textDocument/formatting
-   */
-  export const Formatting = 'textDocument/formatting' as const;
-  /**
-   * A request to format a range in a document.
-   * @method textDocument/rangeFormatting
-   */
-  export const RangeFormatting = 'textDocument/rangeFormatting' as const;
-  /**
-   * A request to format ranges in a document.
-   * @method textDocument/rangesFormatting
-   */
-  export const RangesFormatting = 'textDocument/rangesFormatting' as const;
-  /**
-   * A request to format a document on type.
-   * @method textDocument/onTypeFormatting
-   */
-  export const OnTypeFormatting = 'textDocument/onTypeFormatting' as const;
-  /**
-   * A request to rename a symbol.
-   * @method textDocument/rename
-   */
-  export const Rename = 'textDocument/rename' as const;
-  /**
-   * A request to test and perform the setup necessary for a rename.
-   * @method textDocument/prepareRename
-   */
-  export const PrepareRename = 'textDocument/prepareRename' as const;
-  /**
-   * The document open notification is sent from the client to the server to signal
-   * @method textDocument/didOpen
-   */
-  export const DidOpen = 'textDocument/didOpen' as const;
-  /**
-   * The document change notification is sent from the client to the server to signal
-   * @method textDocument/didChange
-   */
-  export const DidChange = 'textDocument/didChange' as const;
-  /**
-   * The document close notification is sent from the client to the server when
-   * @method textDocument/didClose
-   */
-  export const DidClose = 'textDocument/didClose' as const;
-  /**
-   * The document save notification is sent from the client to the server when
-   * @method textDocument/didSave
-   */
-  export const DidSave = 'textDocument/didSave' as const;
-  /**
-   * A document will save notification is sent from the client to the server before
-   * @method textDocument/willSave
-   */
-  export const WillSave = 'textDocument/willSave' as const;
-  /**
-   * Diagnostics notification are sent from the server to the client to signal
-   * @method textDocument/publishDiagnostics
-   */
-  export const PublishDiagnostics = 'textDocument/publishDiagnostics' as const;
-}
-
-/**
- * typeHierarchy namespace
- */
-export namespace typeHierarchy {
-  /**
-   * A request to resolve the supertypes for a given `TypeHierarchyItem`.
-   * @method typeHierarchy/supertypes
-   */
-  export const Supertypes = 'typeHierarchy/supertypes' as const;
-  /**
-   * A request to resolve the subtypes for a given `TypeHierarchyItem`.
-   * @method typeHierarchy/subtypes
-   */
-  export const Subtypes = 'typeHierarchy/subtypes' as const;
-}
-
-/**
- * window namespace
- */
-export namespace window {
-  /**
-   * The `window/workDoneProgress/create` request is sent from the server to the client to initiate progress
-   * @method window/workDoneProgress/create
-   */
-  export const WorkDoneProgressCreate = 'window/workDoneProgress/create' as const;
-  /**
-   * A request to show a document. This request might open an
-   * @method window/showDocument
-   */
-  export const ShowDocument = 'window/showDocument' as const;
-  /**
-   * The show message request is sent from the server to the client to show a message
-   * @method window/showMessageRequest
-   */
-  export const ShowMessageRequest = 'window/showMessageRequest' as const;
-  /**
-   * The `window/workDoneProgress/cancel` notification is sent from  the client to the server to cancel a progress
-   * @method window/workDoneProgress/cancel
-   */
-  export const WorkDoneProgressCancel = 'window/workDoneProgress/cancel' as const;
-  /**
-   * The show message notification is sent from a server to a client to ask
-   * @method window/showMessage
-   */
-  export const ShowMessage = 'window/showMessage' as const;
-  /**
-   * The log message notification is sent from the server to the client to ask
-   * @method window/logMessage
-   */
-  export const LogMessage = 'window/logMessage' as const;
-}
-
-/**
- * workspace namespace
- */
-export namespace workspace {
-  /**
-   * The `workspace/workspaceFolders` is sent from the server to the client to fetch the open workspace folders.
-   * @method workspace/workspaceFolders
-   */
-  export const WorkspaceFolders = 'workspace/workspaceFolders' as const;
-  /**
-   * The 'workspace/configuration' request is sent from the server to the client to fetch a certain
-   * @method workspace/configuration
-   */
-  export const Configuration = 'workspace/configuration' as const;
-  /**
-   * @since 3.18.0
-   * @method workspace/foldingRange/refresh
-   */
-  export const FoldingRangeRefresh = 'workspace/foldingRange/refresh' as const;
-  /**
-   * @since 3.16.0
-   * @method workspace/semanticTokens/refresh
-   */
-  export const SemanticTokensRefresh = 'workspace/semanticTokens/refresh' as const;
-  /**
-   * The will create files request is sent from the client to the server before files are actually
-   * @method workspace/willCreateFiles
-   */
-  export const WillCreateFiles = 'workspace/willCreateFiles' as const;
-  /**
-   * The will rename files request is sent from the client to the server before files are actually
-   * @method workspace/willRenameFiles
-   */
-  export const WillRenameFiles = 'workspace/willRenameFiles' as const;
-  /**
-   * The did delete files notification is sent from the client to the server when
-   * @method workspace/willDeleteFiles
-   */
-  export const WillDeleteFiles = 'workspace/willDeleteFiles' as const;
-  /**
-   * @since 3.17.0
-   * @method workspace/inlineValue/refresh
-   */
-  export const InlineValueRefresh = 'workspace/inlineValue/refresh' as const;
-  /**
-   * @since 3.17.0
-   * @method workspace/inlayHint/refresh
-   */
-  export const InlayHintRefresh = 'workspace/inlayHint/refresh' as const;
-  /**
-   * The workspace diagnostic request definition.
-   * @method workspace/diagnostic
-   */
-  export const Diagnostic = 'workspace/diagnostic' as const;
-  /**
-   * The diagnostic refresh request definition.
-   * @method workspace/diagnostic/refresh
-   */
-  export const DiagnosticRefresh = 'workspace/diagnostic/refresh' as const;
-  /**
-   * The `workspace/textDocumentContent` request is sent from the client to the
-   * @method workspace/textDocumentContent
-   */
-  export const TextDocumentContent = 'workspace/textDocumentContent' as const;
-  /**
-   * The `workspace/textDocumentContent` request is sent from the server to the client to refresh
-   * @method workspace/textDocumentContent/refresh
-   */
-  export const TextDocumentContentRefresh = 'workspace/textDocumentContent/refresh' as const;
-  /**
-   * A request to list project-wide symbols matching the query string given
-   * @method workspace/symbol
-   */
-  export const Symbol = 'workspace/symbol' as const;
-  /**
-   * A request to refresh all code actions
-   * @method workspace/codeLens/refresh
-   */
-  export const CodeLensRefresh = 'workspace/codeLens/refresh' as const;
-  /**
-   * A request send from the client to the server to execute a command. The request might return
-   * @method workspace/executeCommand
-   */
-  export const ExecuteCommand = 'workspace/executeCommand' as const;
-  /**
-   * A request sent from the server to the client to modified certain resources.
-   * @method workspace/applyEdit
-   */
-  export const ApplyEdit = 'workspace/applyEdit' as const;
-  /**
-   * The `workspace/didChangeWorkspaceFolders` notification is sent from the client to the server when the workspace
-   * @method workspace/didChangeWorkspaceFolders
-   */
-  export const DidChangeWorkspaceFolders = 'workspace/didChangeWorkspaceFolders' as const;
-  /**
-   * The did create files notification is sent from the client to the server when
-   * @method workspace/didCreateFiles
-   */
-  export const DidCreateFiles = 'workspace/didCreateFiles' as const;
-  /**
-   * The did rename files notification is sent from the client to the server when
-   * @method workspace/didRenameFiles
-   */
-  export const DidRenameFiles = 'workspace/didRenameFiles' as const;
-  /**
-   * The will delete files request is sent from the client to the server before files are actually
-   * @method workspace/didDeleteFiles
-   */
-  export const DidDeleteFiles = 'workspace/didDeleteFiles' as const;
-  /**
-   * The configuration change notification is sent from the client to the server
-   * @method workspace/didChangeConfiguration
-   */
-  export const DidChangeConfiguration = 'workspace/didChangeConfiguration' as const;
-  /**
-   * The watched files notification is sent from the client to the server when
-   * @method workspace/didChangeWatchedFiles
-   */
-  export const DidChangeWatchedFiles = 'workspace/didChangeWatchedFiles' as const;
-}
-
-/**
- * workspaceSymbol namespace
- */
-export namespace workspaceSymbol {
-  /**
-   * A request to resolve the range inside the workspace
-   * @method workspaceSymbol/resolve
-   */
-  export const Resolve = 'workspaceSymbol/resolve' as const;
-}
-
-/**
- * LSP Request type definitions organized by namespace
- */
+/** LSP Request type definitions organized by namespace */
 export type LSPRequest = {
-  callHierarchy: {
+  CallHierarchy: {
     IncomingCalls: {
       Method: 'callHierarchy/incomingCalls';
       Params: LSP.CallHierarchyIncomingCallsParams;
       Result: LSP.CallHierarchyIncomingCall[] | null;
+      PartialResult: LSP.CallHierarchyIncomingCall[];
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
     OutgoingCalls: {
       Method: 'callHierarchy/outgoingCalls';
       Params: LSP.CallHierarchyOutgoingCallsParams;
       Result: LSP.CallHierarchyOutgoingCall[] | null;
+      PartialResult: LSP.CallHierarchyOutgoingCall[];
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
   };
-  client: {
-    RegisterCapability: {
+  Client: {
+    Registration: {
       Method: 'client/registerCapability';
       Params: LSP.RegistrationParams;
       Result: null;
-      Direction: 'clientToServer';
+      Direction: 'serverToClient';
     };
-    UnregisterCapability: {
+    Unregistration: {
       Method: 'client/unregisterCapability';
       Params: LSP.UnregistrationParams;
       Result: null;
-      Direction: 'clientToServer';
+      Direction: 'serverToClient';
     };
   };
-  codeAction: {
+  CodeAction: {
     Resolve: {
       Method: 'codeAction/resolve';
       Params: LSP.CodeAction;
       Result: LSP.CodeAction;
       ServerCapability: 'codeActionProvider.resolveProvider';
+      ClientCapability: 'textDocument.codeAction.resolveSupport';
       Direction: 'clientToServer';
     };
   };
-  codeLens: {
+  CodeLens: {
     Resolve: {
       Method: 'codeLens/resolve';
       Params: LSP.CodeLens;
       Result: LSP.CodeLens;
       ServerCapability: 'codeLensProvider.resolveProvider';
+      ClientCapability: 'textDocument.codeLens.resolveSupport';
       Direction: 'clientToServer';
     };
   };
-  completionItem: {
-    Resolve: {
+  CompletionItem: {
+    CompletionResolve: {
       Method: 'completionItem/resolve';
       Params: LSP.CompletionItem;
       Result: LSP.CompletionItem;
       ServerCapability: 'completionProvider.resolveProvider';
+      ClientCapability: 'textDocument.completion.completionItem.resolveSupport';
       Direction: 'clientToServer';
     };
   };
-  documentLink: {
+  DocumentLink: {
     Resolve: {
       Method: 'documentLink/resolve';
       Params: LSP.DocumentLink;
       Result: LSP.DocumentLink;
       ServerCapability: 'documentLinkProvider.resolveProvider';
+      ClientCapability: 'textDocument.documentLink';
       Direction: 'clientToServer';
     };
   };
-  inlayHint: {
+  InlayHint: {
     Resolve: {
       Method: 'inlayHint/resolve';
       Params: LSP.InlayHint;
       Result: LSP.InlayHint;
       ServerCapability: 'inlayHintProvider.resolveProvider';
+      ClientCapability: 'textDocument.inlayHint.resolveSupport';
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
   };
-  textDocument: {
+  Lifecycle: {
+    Initialize: {
+      Method: 'initialize';
+      Params: LSP.InitializeParams;
+      Result: LSP.InitializeResult;
+      ErrorData: LSP.InitializeError;
+      Direction: 'clientToServer';
+    };
+    Shutdown: {
+      Method: 'shutdown';
+      Params: undefined;
+      Result: null;
+      Direction: 'clientToServer';
+    };
+  };
+  TextDocument: {
     Implementation: {
       Method: 'textDocument/implementation';
       Params: LSP.ImplementationParams;
       Result: LSP.Definition | LSP.DefinitionLink[] | null;
+      PartialResult: LSP.Location[] | LSP.DefinitionLink[];
+      RegistrationOptions: LSP.ImplementationRegistrationOptions;
       ServerCapability: 'implementationProvider';
+      ClientCapability: 'textDocument.implementation';
       Direction: 'clientToServer';
     };
     TypeDefinition: {
       Method: 'textDocument/typeDefinition';
       Params: LSP.TypeDefinitionParams;
       Result: LSP.Definition | LSP.DefinitionLink[] | null;
+      PartialResult: LSP.Location[] | LSP.DefinitionLink[];
+      RegistrationOptions: LSP.TypeDefinitionRegistrationOptions;
       ServerCapability: 'typeDefinitionProvider';
+      ClientCapability: 'textDocument.typeDefinition';
       Direction: 'clientToServer';
     };
     DocumentColor: {
       Method: 'textDocument/documentColor';
       Params: LSP.DocumentColorParams;
       Result: LSP.ColorInformation[];
+      PartialResult: LSP.ColorInformation[];
+      RegistrationOptions: LSP.DocumentColorRegistrationOptions;
       ServerCapability: 'colorProvider';
+      ClientCapability: 'textDocument.colorProvider';
       Direction: 'clientToServer';
     };
     ColorPresentation: {
       Method: 'textDocument/colorPresentation';
       Params: LSP.ColorPresentationParams;
       Result: LSP.ColorPresentation[];
+      PartialResult: LSP.ColorPresentation[];
+      RegistrationOptions: LSP.WorkDoneProgressOptions & LSP.TextDocumentRegistrationOptions;
       ServerCapability: 'colorProvider';
+      ClientCapability: 'textDocument.colorProvider';
       Direction: 'clientToServer';
     };
     FoldingRange: {
       Method: 'textDocument/foldingRange';
       Params: LSP.FoldingRangeParams;
       Result: LSP.FoldingRange[] | null;
+      PartialResult: LSP.FoldingRange[];
+      RegistrationOptions: LSP.FoldingRangeRegistrationOptions;
       ServerCapability: 'foldingRangeProvider';
+      ClientCapability: 'textDocument.foldingRange';
       Direction: 'clientToServer';
     };
     Declaration: {
       Method: 'textDocument/declaration';
       Params: LSP.DeclarationParams;
       Result: LSP.Declaration | LSP.DeclarationLink[] | null;
+      PartialResult: LSP.Location[] | LSP.DeclarationLink[];
+      RegistrationOptions: LSP.DeclarationRegistrationOptions;
       ServerCapability: 'declarationProvider';
+      ClientCapability: 'textDocument.declaration';
       Direction: 'clientToServer';
     };
     SelectionRange: {
       Method: 'textDocument/selectionRange';
       Params: LSP.SelectionRangeParams;
       Result: LSP.SelectionRange[] | null;
+      PartialResult: LSP.SelectionRange[];
+      RegistrationOptions: LSP.SelectionRangeRegistrationOptions;
       ServerCapability: 'selectionRangeProvider';
+      ClientCapability: 'textDocument.selectionRange';
       Direction: 'clientToServer';
     };
-    PrepareCallHierarchy: {
+    CallHierarchyPrepare: {
       Method: 'textDocument/prepareCallHierarchy';
       Params: LSP.CallHierarchyPrepareParams;
       Result: LSP.CallHierarchyItem[] | null;
+      RegistrationOptions: LSP.CallHierarchyRegistrationOptions;
       ServerCapability: 'callHierarchyProvider';
+      ClientCapability: 'textDocument.callHierarchy';
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
-    SemanticTokensFull: {
+    SemanticTokens: {
       Method: 'textDocument/semanticTokens/full';
       Params: LSP.SemanticTokensParams;
       Result: LSP.SemanticTokens | null;
+      PartialResult: LSP.SemanticTokensPartialResult;
+      RegistrationOptions: LSP.SemanticTokensRegistrationOptions;
       ServerCapability: 'semanticTokensProvider';
+      ClientCapability: 'textDocument.semanticTokens';
+      RegistrationMethod: 'textDocument/semanticTokens';
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
-    FullDelta: {
+    SemanticTokensDelta: {
       Method: 'textDocument/semanticTokens/full/delta';
       Params: LSP.SemanticTokensDeltaParams;
       Result: LSP.SemanticTokens | LSP.SemanticTokensDelta | null;
+      PartialResult: LSP.SemanticTokensPartialResult | LSP.SemanticTokensDeltaPartialResult;
+      RegistrationOptions: LSP.SemanticTokensRegistrationOptions;
       ServerCapability: 'semanticTokensProvider.full.delta';
+      ClientCapability: 'textDocument.semanticTokens.requests.full.delta';
+      RegistrationMethod: 'textDocument/semanticTokens';
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
     SemanticTokensRange: {
       Method: 'textDocument/semanticTokens/range';
       Params: LSP.SemanticTokensRangeParams;
       Result: LSP.SemanticTokens | null;
+      PartialResult: LSP.SemanticTokensPartialResult;
       ServerCapability: 'semanticTokensProvider.range';
+      ClientCapability: 'textDocument.semanticTokens.requests.range';
+      RegistrationMethod: 'textDocument/semanticTokens';
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
     LinkedEditingRange: {
       Method: 'textDocument/linkedEditingRange';
       Params: LSP.LinkedEditingRangeParams;
       Result: LSP.LinkedEditingRanges | null;
+      RegistrationOptions: LSP.LinkedEditingRangeRegistrationOptions;
       ServerCapability: 'linkedEditingRangeProvider';
+      ClientCapability: 'textDocument.linkedEditingRange';
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
     Moniker: {
       Method: 'textDocument/moniker';
       Params: LSP.MonikerParams;
       Result: LSP.Moniker[] | null;
+      PartialResult: LSP.Moniker[];
+      RegistrationOptions: LSP.MonikerRegistrationOptions;
       ServerCapability: 'monikerProvider';
+      ClientCapability: 'textDocument.moniker';
       Direction: 'clientToServer';
     };
-    PrepareTypeHierarchy: {
+    TypeHierarchyPrepare: {
       Method: 'textDocument/prepareTypeHierarchy';
       Params: LSP.TypeHierarchyPrepareParams;
       Result: LSP.TypeHierarchyItem[] | null;
+      RegistrationOptions: LSP.TypeHierarchyRegistrationOptions;
       ServerCapability: 'typeHierarchyProvider';
+      ClientCapability: 'textDocument.typeHierarchy';
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
     InlineValue: {
       Method: 'textDocument/inlineValue';
       Params: LSP.InlineValueParams;
       Result: LSP.InlineValue[] | null;
+      PartialResult: LSP.InlineValue[];
+      RegistrationOptions: LSP.InlineValueRegistrationOptions;
       ServerCapability: 'inlineValueProvider';
+      ClientCapability: 'textDocument.inlineValue';
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
     InlayHint: {
       Method: 'textDocument/inlayHint';
       Params: LSP.InlayHintParams;
       Result: LSP.InlayHint[] | null;
+      PartialResult: LSP.InlayHint[];
+      RegistrationOptions: LSP.InlayHintRegistrationOptions;
       ServerCapability: 'inlayHintProvider';
+      ClientCapability: 'textDocument.inlayHint';
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
-    Diagnostic: {
+    DocumentDiagnostic: {
       Method: 'textDocument/diagnostic';
       Params: LSP.DocumentDiagnosticParams;
       Result: LSP.DocumentDiagnosticReport;
+      PartialResult: LSP.DocumentDiagnosticReportPartialResult;
+      RegistrationOptions: LSP.DiagnosticRegistrationOptions;
+      ErrorData: LSP.DiagnosticServerCancellationData;
       ServerCapability: 'diagnosticProvider';
+      ClientCapability: 'textDocument.diagnostic';
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
     InlineCompletion: {
       Method: 'textDocument/inlineCompletion';
-      Params: any /* InlineCompletionParams (proposed) */;
-      Result:
-        | any /* InlineCompletionList (proposed) */
-        | any /* InlineCompletionItem (proposed) */[]
-        | null;
+      Params: LSP.InlineCompletionParams;
+      Result: LSP.InlineCompletionList | LSP.InlineCompletionItem[] | null;
+      PartialResult: LSP.InlineCompletionItem[];
+      RegistrationOptions: LSP.InlineCompletionRegistrationOptions;
       ServerCapability: 'inlineCompletionProvider';
+      ClientCapability: 'textDocument.inlineCompletion';
+      Since: '3.18.0';
+      Proposed: true;
       Direction: 'clientToServer';
     };
-    WillSaveWaitUntil: {
+    WillSaveTextDocumentWaitUntil: {
       Method: 'textDocument/willSaveWaitUntil';
       Params: LSP.WillSaveTextDocumentParams;
       Result: LSP.TextEdit[] | null;
+      RegistrationOptions: LSP.TextDocumentRegistrationOptions;
       ServerCapability: 'textDocumentSync.willSaveWaitUntil';
+      ClientCapability: 'textDocument.synchronization.willSaveWaitUntil';
       Direction: 'clientToServer';
     };
     Completion: {
       Method: 'textDocument/completion';
       Params: LSP.CompletionParams;
       Result: LSP.CompletionItem[] | LSP.CompletionList | null;
+      PartialResult: LSP.CompletionItem[];
+      RegistrationOptions: LSP.CompletionRegistrationOptions;
       ServerCapability: 'completionProvider';
+      ClientCapability: 'textDocument.completion';
       Direction: 'clientToServer';
     };
     Hover: {
       Method: 'textDocument/hover';
       Params: LSP.HoverParams;
       Result: LSP.Hover | null;
+      RegistrationOptions: LSP.HoverRegistrationOptions;
       ServerCapability: 'hoverProvider';
+      ClientCapability: 'textDocument.hover';
       Direction: 'clientToServer';
     };
     SignatureHelp: {
       Method: 'textDocument/signatureHelp';
       Params: LSP.SignatureHelpParams;
       Result: LSP.SignatureHelp | null;
+      RegistrationOptions: LSP.SignatureHelpRegistrationOptions;
       ServerCapability: 'signatureHelpProvider';
+      ClientCapability: 'textDocument.signatureHelp';
       Direction: 'clientToServer';
     };
     Definition: {
       Method: 'textDocument/definition';
       Params: LSP.DefinitionParams;
       Result: LSP.Definition | LSP.DefinitionLink[] | null;
+      PartialResult: LSP.Location[] | LSP.DefinitionLink[];
+      RegistrationOptions: LSP.DefinitionRegistrationOptions;
       ServerCapability: 'definitionProvider';
+      ClientCapability: 'textDocument.definition';
       Direction: 'clientToServer';
     };
     References: {
       Method: 'textDocument/references';
       Params: LSP.ReferenceParams;
       Result: LSP.Location[] | null;
+      PartialResult: LSP.Location[];
+      RegistrationOptions: LSP.ReferenceRegistrationOptions;
       ServerCapability: 'referencesProvider';
+      ClientCapability: 'textDocument.references';
       Direction: 'clientToServer';
     };
     DocumentHighlight: {
       Method: 'textDocument/documentHighlight';
       Params: LSP.DocumentHighlightParams;
       Result: LSP.DocumentHighlight[] | null;
+      PartialResult: LSP.DocumentHighlight[];
+      RegistrationOptions: LSP.DocumentHighlightRegistrationOptions;
       ServerCapability: 'documentHighlightProvider';
+      ClientCapability: 'textDocument.documentHighlight';
       Direction: 'clientToServer';
     };
     DocumentSymbol: {
       Method: 'textDocument/documentSymbol';
       Params: LSP.DocumentSymbolParams;
       Result: LSP.SymbolInformation[] | LSP.DocumentSymbol[] | null;
+      PartialResult: LSP.SymbolInformation[] | LSP.DocumentSymbol[];
+      RegistrationOptions: LSP.DocumentSymbolRegistrationOptions;
       ServerCapability: 'documentSymbolProvider';
+      ClientCapability: 'textDocument.documentSymbol';
       Direction: 'clientToServer';
     };
     CodeAction: {
       Method: 'textDocument/codeAction';
       Params: LSP.CodeActionParams;
       Result: LSP.Command | LSP.CodeAction[] | null;
+      PartialResult: LSP.Command | LSP.CodeAction[];
+      RegistrationOptions: LSP.CodeActionRegistrationOptions;
       ServerCapability: 'codeActionProvider';
+      ClientCapability: 'textDocument.codeAction';
       Direction: 'clientToServer';
     };
     CodeLens: {
       Method: 'textDocument/codeLens';
       Params: LSP.CodeLensParams;
       Result: LSP.CodeLens[] | null;
+      PartialResult: LSP.CodeLens[];
+      RegistrationOptions: LSP.CodeLensRegistrationOptions;
       ServerCapability: 'codeLensProvider';
+      ClientCapability: 'textDocument.codeLens';
       Direction: 'clientToServer';
     };
     DocumentLink: {
       Method: 'textDocument/documentLink';
       Params: LSP.DocumentLinkParams;
       Result: LSP.DocumentLink[] | null;
+      PartialResult: LSP.DocumentLink[];
+      RegistrationOptions: LSP.DocumentLinkRegistrationOptions;
       ServerCapability: 'documentLinkProvider';
+      ClientCapability: 'textDocument.documentLink';
       Direction: 'clientToServer';
     };
-    Formatting: {
+    DocumentFormatting: {
       Method: 'textDocument/formatting';
       Params: LSP.DocumentFormattingParams;
       Result: LSP.TextEdit[] | null;
+      RegistrationOptions: LSP.DocumentFormattingRegistrationOptions;
       ServerCapability: 'documentFormattingProvider';
+      ClientCapability: 'textDocument.formatting';
       Direction: 'clientToServer';
     };
-    RangeFormatting: {
+    DocumentRangeFormatting: {
       Method: 'textDocument/rangeFormatting';
       Params: LSP.DocumentRangeFormattingParams;
       Result: LSP.TextEdit[] | null;
+      RegistrationOptions: LSP.DocumentRangeFormattingRegistrationOptions;
       ServerCapability: 'documentRangeFormattingProvider';
+      ClientCapability: 'textDocument.rangeFormatting';
       Direction: 'clientToServer';
     };
-    RangesFormatting: {
+    DocumentRangesFormatting: {
       Method: 'textDocument/rangesFormatting';
-      Params: any /* DocumentRangesFormattingParams (proposed) */;
-      Result: any /* TextEdit (proposed) */[] | null;
+      Params: LSP.DocumentRangesFormattingParams;
+      Result: LSP.TextEdit[] | null;
+      RegistrationOptions: LSP.DocumentRangeFormattingRegistrationOptions;
       ServerCapability: 'documentRangeFormattingProvider.rangesSupport';
+      ClientCapability: 'textDocument.rangeFormatting.rangesSupport';
+      Since: '3.18.0';
+      Proposed: true;
       Direction: 'clientToServer';
     };
-    OnTypeFormatting: {
+    DocumentOnTypeFormatting: {
       Method: 'textDocument/onTypeFormatting';
       Params: LSP.DocumentOnTypeFormattingParams;
       Result: LSP.TextEdit[] | null;
+      RegistrationOptions: LSP.DocumentOnTypeFormattingRegistrationOptions;
       ServerCapability: 'documentOnTypeFormattingProvider';
+      ClientCapability: 'textDocument.onTypeFormatting';
       Direction: 'clientToServer';
     };
     Rename: {
       Method: 'textDocument/rename';
       Params: LSP.RenameParams;
       Result: LSP.WorkspaceEdit | null;
+      RegistrationOptions: LSP.RenameRegistrationOptions;
       ServerCapability: 'renameProvider';
+      ClientCapability: 'textDocument.rename';
       Direction: 'clientToServer';
     };
     PrepareRename: {
@@ -848,229 +457,334 @@ export type LSPRequest = {
       Params: LSP.PrepareRenameParams;
       Result: LSP.PrepareRenameResult | null;
       ServerCapability: 'renameProvider.prepareProvider';
+      ClientCapability: 'textDocument.rename.prepareSupport';
+      Since: '3.16';
       Direction: 'clientToServer';
     };
   };
-  typeHierarchy: {
+  TypeHierarchy: {
     Supertypes: {
       Method: 'typeHierarchy/supertypes';
       Params: LSP.TypeHierarchySupertypesParams;
       Result: LSP.TypeHierarchyItem[] | null;
+      PartialResult: LSP.TypeHierarchyItem[];
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
     Subtypes: {
       Method: 'typeHierarchy/subtypes';
       Params: LSP.TypeHierarchySubtypesParams;
       Result: LSP.TypeHierarchyItem[] | null;
+      PartialResult: LSP.TypeHierarchyItem[];
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
   };
-  window: {
+  Window: {
     WorkDoneProgressCreate: {
       Method: 'window/workDoneProgress/create';
       Params: LSP.WorkDoneProgressCreateParams;
       Result: null;
-      Direction: 'clientToServer';
+      ClientCapability: 'window.workDoneProgress';
+      Direction: 'serverToClient';
     };
     ShowDocument: {
       Method: 'window/showDocument';
       Params: LSP.ShowDocumentParams;
       Result: LSP.ShowDocumentResult;
-      Direction: 'clientToServer';
+      ClientCapability: 'window.showDocument.support';
+      Since: '3.16.0';
+      Direction: 'serverToClient';
     };
-    ShowMessageRequest: {
+    ShowMessage: {
       Method: 'window/showMessageRequest';
       Params: LSP.ShowMessageRequestParams;
       Result: LSP.MessageActionItem | null;
-      Direction: 'clientToServer';
+      ClientCapability: 'window.showMessage';
+      Direction: 'serverToClient';
     };
   };
-  workspace: {
-    WorkspaceFolders: {
-      Method: 'workspace/workspaceFolders';
-      Params?: never;
-      Result: LSP.WorkspaceFolder[] | null;
-      ServerCapability: 'workspace.workspaceFolders';
-      Direction: 'clientToServer';
-    };
-    Configuration: {
-      Method: 'workspace/configuration';
-      Params: LSP.ConfigurationParams;
-      Result: LSP.LSPAny[];
-      Direction: 'clientToServer';
-    };
-    FoldingRangeRefresh: {
-      Method: 'workspace/foldingRange/refresh';
-      Params?: never;
-      Result: null;
-      Direction: 'clientToServer';
-    };
-    SemanticTokensRefresh: {
-      Method: 'workspace/semanticTokens/refresh';
-      Params?: never;
-      Result: null;
-      Direction: 'clientToServer';
-    };
+  Workspace: {
     WillCreateFiles: {
       Method: 'workspace/willCreateFiles';
       Params: LSP.CreateFilesParams;
       Result: LSP.WorkspaceEdit | null;
+      RegistrationOptions: LSP.FileOperationRegistrationOptions;
       ServerCapability: 'workspace.fileOperations.willCreate';
+      ClientCapability: 'workspace.fileOperations.willCreate';
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
     WillRenameFiles: {
       Method: 'workspace/willRenameFiles';
       Params: LSP.RenameFilesParams;
       Result: LSP.WorkspaceEdit | null;
+      RegistrationOptions: LSP.FileOperationRegistrationOptions;
       ServerCapability: 'workspace.fileOperations.willRename';
+      ClientCapability: 'workspace.fileOperations.willRename';
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
     WillDeleteFiles: {
       Method: 'workspace/willDeleteFiles';
       Params: LSP.DeleteFilesParams;
       Result: LSP.WorkspaceEdit | null;
+      RegistrationOptions: LSP.FileOperationRegistrationOptions;
       ServerCapability: 'workspace.fileOperations.willDelete';
-      Direction: 'clientToServer';
-    };
-    InlineValueRefresh: {
-      Method: 'workspace/inlineValue/refresh';
-      Params?: never;
-      Result: null;
-      Direction: 'clientToServer';
-    };
-    InlayHintRefresh: {
-      Method: 'workspace/inlayHint/refresh';
-      Params?: never;
-      Result: null;
+      ClientCapability: 'workspace.fileOperations.willDelete';
+      Since: '3.16.0';
       Direction: 'clientToServer';
     };
     Diagnostic: {
       Method: 'workspace/diagnostic';
       Params: LSP.WorkspaceDiagnosticParams;
       Result: LSP.WorkspaceDiagnosticReport;
+      PartialResult: LSP.WorkspaceDiagnosticReportPartialResult;
+      ErrorData: LSP.DiagnosticServerCancellationData;
       ServerCapability: 'diagnosticProvider.workspaceDiagnostics';
-      Direction: 'clientToServer';
-    };
-    DiagnosticRefresh: {
-      Method: 'workspace/diagnostic/refresh';
-      Params?: never;
-      Result: null;
+      ClientCapability: 'workspace.diagnostics';
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
     TextDocumentContent: {
       Method: 'workspace/textDocumentContent';
-      Params: any /* TextDocumentContentParams (proposed) */;
-      Result: any /* TextDocumentContentResult (proposed) */;
+      Params: LSP.TextDocumentContentParams;
+      Result: LSP.TextDocumentContentResult;
+      RegistrationOptions: LSP.TextDocumentContentRegistrationOptions;
       ServerCapability: 'workspace.textDocumentContent';
-      Direction: 'clientToServer';
-    };
-    TextDocumentContentRefresh: {
-      Method: 'workspace/textDocumentContent/refresh';
-      Params: any /* TextDocumentContentRefreshParams (proposed) */;
-      Result: null;
+      ClientCapability: 'workspace.textDocumentContent';
+      Since: '3.18.0';
+      Proposed: true;
       Direction: 'clientToServer';
     };
     Symbol: {
       Method: 'workspace/symbol';
       Params: LSP.WorkspaceSymbolParams;
       Result: LSP.SymbolInformation[] | LSP.WorkspaceSymbol[] | null;
+      PartialResult: LSP.SymbolInformation[] | LSP.WorkspaceSymbol[];
+      RegistrationOptions: LSP.WorkspaceSymbolRegistrationOptions;
       ServerCapability: 'workspaceSymbolProvider';
-      Direction: 'clientToServer';
-    };
-    CodeLensRefresh: {
-      Method: 'workspace/codeLens/refresh';
-      Params?: never;
-      Result: null;
+      ClientCapability: 'workspace.symbol';
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
     ExecuteCommand: {
       Method: 'workspace/executeCommand';
       Params: LSP.ExecuteCommandParams;
       Result: LSP.LSPAny | null;
+      RegistrationOptions: LSP.ExecuteCommandRegistrationOptions;
       ServerCapability: 'executeCommandProvider';
+      ClientCapability: 'workspace.executeCommand';
       Direction: 'clientToServer';
     };
-    ApplyEdit: {
+    Folders: {
+      Method: 'workspace/workspaceFolders';
+      Params: undefined;
+      Result: LSP.WorkspaceFolder[] | null;
+      ServerCapability: 'workspace.workspaceFolders';
+      ClientCapability: 'workspace.workspaceFolders';
+      Direction: 'serverToClient';
+    };
+    Configuration: {
+      Method: 'workspace/configuration';
+      Params: LSP.ConfigurationParams;
+      Result: LSP.LSPAny[];
+      ClientCapability: 'workspace.configuration';
+      Direction: 'serverToClient';
+    };
+    FoldingRangeRefresh: {
+      Method: 'workspace/foldingRange/refresh';
+      Params: undefined;
+      Result: null;
+      ClientCapability: 'workspace.foldingRange.refreshSupport';
+      Since: '3.18.0';
+      Proposed: true;
+      Direction: 'serverToClient';
+    };
+    SemanticTokensRefresh: {
+      Method: 'workspace/semanticTokens/refresh';
+      Params: undefined;
+      Result: null;
+      ClientCapability: 'workspace.semanticTokens.refreshSupport';
+      Since: '3.16.0';
+      Direction: 'serverToClient';
+    };
+    InlineValueRefresh: {
+      Method: 'workspace/inlineValue/refresh';
+      Params: undefined;
+      Result: null;
+      ClientCapability: 'workspace.inlineValue.refreshSupport';
+      Since: '3.17.0';
+      Direction: 'serverToClient';
+    };
+    InlayHintRefresh: {
+      Method: 'workspace/inlayHint/refresh';
+      Params: undefined;
+      Result: null;
+      ClientCapability: 'workspace.inlayHint.refreshSupport';
+      Since: '3.17.0';
+      Direction: 'serverToClient';
+    };
+    DiagnosticRefresh: {
+      Method: 'workspace/diagnostic/refresh';
+      Params: undefined;
+      Result: null;
+      ClientCapability: 'workspace.diagnostics.refreshSupport';
+      Since: '3.17.0';
+      Direction: 'serverToClient';
+    };
+    TextDocumentContentRefresh: {
+      Method: 'workspace/textDocumentContent/refresh';
+      Params: LSP.TextDocumentContentRefreshParams;
+      Result: null;
+      Since: '3.18.0';
+      Proposed: true;
+      Direction: 'serverToClient';
+    };
+    CodeLensRefresh: {
+      Method: 'workspace/codeLens/refresh';
+      Params: undefined;
+      Result: null;
+      ClientCapability: 'workspace.codeLens';
+      Since: '3.16.0';
+      Direction: 'serverToClient';
+    };
+    ApplyWorkspaceEdit: {
       Method: 'workspace/applyEdit';
       Params: LSP.ApplyWorkspaceEditParams;
       Result: LSP.ApplyWorkspaceEditResult;
-      Direction: 'clientToServer';
+      ClientCapability: 'workspace.applyEdit';
+      Direction: 'serverToClient';
     };
   };
-  workspaceSymbol: {
+  WorkspaceSymbol: {
     Resolve: {
       Method: 'workspaceSymbol/resolve';
       Params: LSP.WorkspaceSymbol;
       Result: LSP.WorkspaceSymbol;
       ServerCapability: 'workspaceSymbolProvider.resolveProvider';
+      ClientCapability: 'workspace.symbol.resolveSupport';
+      Since: '3.17.0';
       Direction: 'clientToServer';
     };
   };
 };
-
-/**
- * LSP Notification type definitions organized by namespace
- */
+/** LSP Notification type definitions organized by namespace */
 export type LSPNotification = {
-  notebookDocument: {
-    DidOpen: {
-      Method: 'notebookDocument/didOpen';
-      Params: LSP.DidOpenNotebookDocumentParams;
-      Direction: 'serverToClient';
+  General: {
+    Cancel: {
+      Method: '$/cancelRequest';
+      Params: LSP.CancelParams;
+      Direction: 'both';
     };
-    DidChange: {
-      Method: 'notebookDocument/didChange';
-      Params: LSP.DidChangeNotebookDocumentParams;
-      Direction: 'serverToClient';
+    Progress: {
+      Method: '$/progress';
+      Params: LSP.ProgressParams;
+      Direction: 'both';
     };
-    DidSave: {
-      Method: 'notebookDocument/didSave';
-      Params: LSP.DidSaveNotebookDocumentParams;
-      Direction: 'serverToClient';
+    SetTrace: {
+      Method: '$/setTrace';
+      Params: LSP.SetTraceParams;
+      Direction: 'clientToServer';
     };
-    DidClose: {
-      Method: 'notebookDocument/didClose';
-      Params: LSP.DidCloseNotebookDocumentParams;
+    LogTrace: {
+      Method: '$/logTrace';
+      Params: LSP.LogTraceParams;
       Direction: 'serverToClient';
     };
   };
-  telemetry: {
+  Lifecycle: {
+    Initialized: {
+      Method: 'initialized';
+      Params: LSP.InitializedParams;
+      Direction: 'clientToServer';
+    };
+    Exit: {
+      Method: 'exit';
+      Params: undefined;
+      Direction: 'clientToServer';
+    };
+  };
+  NotebookDocument: {
+    DidOpenNotebookDocument: {
+      Method: 'notebookDocument/didOpen';
+      Params: LSP.DidOpenNotebookDocumentParams;
+      RegistrationMethod: 'notebookDocument/sync';
+      RegistrationOptions: LSP.NotebookDocumentSyncRegistrationOptions;
+      Since: '3.17.0';
+      Direction: 'clientToServer';
+    };
+    DidChangeNotebookDocument: {
+      Method: 'notebookDocument/didChange';
+      Params: LSP.DidChangeNotebookDocumentParams;
+      RegistrationMethod: 'notebookDocument/sync';
+      RegistrationOptions: LSP.NotebookDocumentSyncRegistrationOptions;
+      Direction: 'clientToServer';
+    };
+    DidSaveNotebookDocument: {
+      Method: 'notebookDocument/didSave';
+      Params: LSP.DidSaveNotebookDocumentParams;
+      RegistrationMethod: 'notebookDocument/sync';
+      RegistrationOptions: LSP.NotebookDocumentSyncRegistrationOptions;
+      Since: '3.17.0';
+      Direction: 'clientToServer';
+    };
+    DidCloseNotebookDocument: {
+      Method: 'notebookDocument/didClose';
+      Params: LSP.DidCloseNotebookDocumentParams;
+      RegistrationMethod: 'notebookDocument/sync';
+      RegistrationOptions: LSP.NotebookDocumentSyncRegistrationOptions;
+      Since: '3.17.0';
+      Direction: 'clientToServer';
+    };
+  };
+  Telemetry: {
     Event: {
       Method: 'telemetry/event';
       Params: LSP.LSPAny;
       Direction: 'serverToClient';
     };
   };
-  textDocument: {
-    DidOpen: {
+  TextDocument: {
+    DidOpenTextDocument: {
       Method: 'textDocument/didOpen';
       Params: LSP.DidOpenTextDocumentParams;
       ClientCapability: 'textDocument.synchronization';
-      Direction: 'serverToClient';
+      ServerCapability: 'textDocumentSync.openClose';
+      RegistrationOptions: LSP.TextDocumentRegistrationOptions;
+      Direction: 'clientToServer';
     };
-    DidChange: {
+    DidChangeTextDocument: {
       Method: 'textDocument/didChange';
       Params: LSP.DidChangeTextDocumentParams;
       ClientCapability: 'textDocument.synchronization';
-      Direction: 'serverToClient';
+      ServerCapability: 'textDocumentSync';
+      RegistrationOptions: LSP.TextDocumentChangeRegistrationOptions;
+      Direction: 'clientToServer';
     };
-    DidClose: {
+    DidCloseTextDocument: {
       Method: 'textDocument/didClose';
       Params: LSP.DidCloseTextDocumentParams;
       ClientCapability: 'textDocument.synchronization';
-      Direction: 'serverToClient';
+      ServerCapability: 'textDocumentSync.openClose';
+      RegistrationOptions: LSP.TextDocumentRegistrationOptions;
+      Direction: 'clientToServer';
     };
-    DidSave: {
+    DidSaveTextDocument: {
       Method: 'textDocument/didSave';
       Params: LSP.DidSaveTextDocumentParams;
       ClientCapability: 'textDocument.synchronization.didSave';
-      Direction: 'serverToClient';
+      ServerCapability: 'textDocumentSync.save';
+      RegistrationOptions: LSP.TextDocumentSaveRegistrationOptions;
+      Direction: 'clientToServer';
     };
-    WillSave: {
+    WillSaveTextDocument: {
       Method: 'textDocument/willSave';
       Params: LSP.WillSaveTextDocumentParams;
       ClientCapability: 'textDocument.synchronization.willSave';
-      Direction: 'serverToClient';
+      ServerCapability: 'textDocumentSync.willSave';
+      RegistrationOptions: LSP.TextDocumentRegistrationOptions;
+      Direction: 'clientToServer';
     };
     PublishDiagnostics: {
       Method: 'textDocument/publishDiagnostics';
@@ -1079,11 +793,11 @@ export type LSPNotification = {
       Direction: 'serverToClient';
     };
   };
-  window: {
+  Window: {
     WorkDoneProgressCancel: {
       Method: 'window/workDoneProgress/cancel';
       Params: LSP.WorkDoneProgressCancelParams;
-      Direction: 'serverToClient';
+      Direction: 'clientToServer';
     };
     ShowMessage: {
       Method: 'window/showMessage';
@@ -1097,41 +811,53 @@ export type LSPNotification = {
       Direction: 'serverToClient';
     };
   };
-  workspace: {
+  Workspace: {
     DidChangeWorkspaceFolders: {
       Method: 'workspace/didChangeWorkspaceFolders';
       Params: LSP.DidChangeWorkspaceFoldersParams;
-      Direction: 'serverToClient';
+      ServerCapability: 'workspace.workspaceFolders.changeNotifications';
+      Direction: 'clientToServer';
     };
     DidCreateFiles: {
       Method: 'workspace/didCreateFiles';
       Params: LSP.CreateFilesParams;
       ClientCapability: 'workspace.fileOperations.didCreate';
-      Direction: 'serverToClient';
+      ServerCapability: 'workspace.fileOperations.didCreate';
+      RegistrationOptions: LSP.FileOperationRegistrationOptions;
+      Since: '3.16.0';
+      Direction: 'clientToServer';
     };
     DidRenameFiles: {
       Method: 'workspace/didRenameFiles';
       Params: LSP.RenameFilesParams;
       ClientCapability: 'workspace.fileOperations.didRename';
-      Direction: 'serverToClient';
+      ServerCapability: 'workspace.fileOperations.didRename';
+      RegistrationOptions: LSP.FileOperationRegistrationOptions;
+      Since: '3.16.0';
+      Direction: 'clientToServer';
     };
     DidDeleteFiles: {
       Method: 'workspace/didDeleteFiles';
       Params: LSP.DeleteFilesParams;
       ClientCapability: 'workspace.fileOperations.didDelete';
-      Direction: 'serverToClient';
+      ServerCapability: 'workspace.fileOperations.didDelete';
+      RegistrationOptions: LSP.FileOperationRegistrationOptions;
+      Since: '3.16.0';
+      Direction: 'clientToServer';
     };
     DidChangeConfiguration: {
       Method: 'workspace/didChangeConfiguration';
       Params: LSP.DidChangeConfigurationParams;
       ClientCapability: 'workspace.didChangeConfiguration';
-      Direction: 'serverToClient';
+      RegistrationOptions: LSP.DidChangeConfigurationRegistrationOptions;
+      Direction: 'clientToServer';
     };
     DidChangeWatchedFiles: {
       Method: 'workspace/didChangeWatchedFiles';
       Params: LSP.DidChangeWatchedFilesParams;
       ClientCapability: 'workspace.didChangeWatchedFiles';
-      Direction: 'serverToClient';
+      RegistrationOptions: LSP.DidChangeWatchedFilesRegistrationOptions;
+      Direction: 'clientToServer';
     };
   };
 };
@@ -1141,393 +867,567 @@ export type LSPNotification = {
  * @deprecated Use individual namespace exports instead
  */
 export const LSPRequest = {
-  callHierarchy: {
+  CallHierarchy: {
     IncomingCalls: {
-      Method: 'callHierarchy/incomingCalls' as const,
-      Direction: 'clientToServer' as const
+      Method: 'callHierarchy/incomingCalls',
+      Direction: 'clientToServer'
     },
     OutgoingCalls: {
-      Method: 'callHierarchy/outgoingCalls' as const,
-      Direction: 'clientToServer' as const
+      Method: 'callHierarchy/outgoingCalls',
+      Direction: 'clientToServer'
     }
   },
-  client: {
-    RegisterCapability: {
-      Method: 'client/registerCapability' as const,
-      Direction: 'clientToServer' as const
+  Client: {
+    Registration: {
+      Method: 'client/registerCapability',
+      Direction: 'serverToClient'
     },
-    UnregisterCapability: {
-      Method: 'client/unregisterCapability' as const,
-      Direction: 'clientToServer' as const
+    Unregistration: {
+      Method: 'client/unregisterCapability',
+      Direction: 'serverToClient'
     }
   },
-  codeAction: {
+  CodeAction: {
     Resolve: {
-      Method: 'codeAction/resolve' as const,
-      Direction: 'clientToServer' as const
+      Method: 'codeAction/resolve',
+      Direction: 'clientToServer',
+      ServerCapability: 'codeActionProvider.resolveProvider',
+      ClientCapability: 'textDocument.codeAction.resolveSupport'
     }
   },
-  codeLens: {
+  CodeLens: {
     Resolve: {
-      Method: 'codeLens/resolve' as const,
-      Direction: 'clientToServer' as const
+      Method: 'codeLens/resolve',
+      Direction: 'clientToServer',
+      ServerCapability: 'codeLensProvider.resolveProvider',
+      ClientCapability: 'textDocument.codeLens.resolveSupport'
     }
   },
-  completionItem: {
+  CompletionItem: {
+    CompletionResolve: {
+      Method: 'completionItem/resolve',
+      Direction: 'clientToServer',
+      ServerCapability: 'completionProvider.resolveProvider',
+      ClientCapability: 'textDocument.completion.completionItem.resolveSupport'
+    }
+  },
+  DocumentLink: {
     Resolve: {
-      Method: 'completionItem/resolve' as const,
-      Direction: 'clientToServer' as const
+      Method: 'documentLink/resolve',
+      Direction: 'clientToServer',
+      ServerCapability: 'documentLinkProvider.resolveProvider',
+      ClientCapability: 'textDocument.documentLink'
     }
   },
-  documentLink: {
+  InlayHint: {
     Resolve: {
-      Method: 'documentLink/resolve' as const,
-      Direction: 'clientToServer' as const
+      Method: 'inlayHint/resolve',
+      Direction: 'clientToServer',
+      ServerCapability: 'inlayHintProvider.resolveProvider',
+      ClientCapability: 'textDocument.inlayHint.resolveSupport'
     }
   },
-  inlayHint: {
-    Resolve: {
-      Method: 'inlayHint/resolve' as const,
-      Direction: 'clientToServer' as const
+  Lifecycle: {
+    Initialize: {
+      Method: 'initialize',
+      Direction: 'clientToServer'
+    },
+    Shutdown: {
+      Method: 'shutdown',
+      Direction: 'clientToServer'
     }
   },
-  textDocument: {
+  TextDocument: {
     Implementation: {
-      Method: 'textDocument/implementation' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/implementation',
+      Direction: 'clientToServer',
+      ServerCapability: 'implementationProvider',
+      ClientCapability: 'textDocument.implementation'
     },
     TypeDefinition: {
-      Method: 'textDocument/typeDefinition' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/typeDefinition',
+      Direction: 'clientToServer',
+      ServerCapability: 'typeDefinitionProvider',
+      ClientCapability: 'textDocument.typeDefinition'
     },
     DocumentColor: {
-      Method: 'textDocument/documentColor' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/documentColor',
+      Direction: 'clientToServer',
+      ServerCapability: 'colorProvider',
+      ClientCapability: 'textDocument.colorProvider'
     },
     ColorPresentation: {
-      Method: 'textDocument/colorPresentation' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/colorPresentation',
+      Direction: 'clientToServer',
+      ServerCapability: 'colorProvider',
+      ClientCapability: 'textDocument.colorProvider'
     },
     FoldingRange: {
-      Method: 'textDocument/foldingRange' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/foldingRange',
+      Direction: 'clientToServer',
+      ServerCapability: 'foldingRangeProvider',
+      ClientCapability: 'textDocument.foldingRange'
     },
     Declaration: {
-      Method: 'textDocument/declaration' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/declaration',
+      Direction: 'clientToServer',
+      ServerCapability: 'declarationProvider',
+      ClientCapability: 'textDocument.declaration'
     },
     SelectionRange: {
-      Method: 'textDocument/selectionRange' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/selectionRange',
+      Direction: 'clientToServer',
+      ServerCapability: 'selectionRangeProvider',
+      ClientCapability: 'textDocument.selectionRange'
     },
-    PrepareCallHierarchy: {
-      Method: 'textDocument/prepareCallHierarchy' as const,
-      Direction: 'clientToServer' as const
+    CallHierarchyPrepare: {
+      Method: 'textDocument/prepareCallHierarchy',
+      Direction: 'clientToServer',
+      ServerCapability: 'callHierarchyProvider',
+      ClientCapability: 'textDocument.callHierarchy'
     },
-    SemanticTokensFull: {
-      Method: 'textDocument/semanticTokens/full' as const,
-      Direction: 'clientToServer' as const
+    SemanticTokens: {
+      Method: 'textDocument/semanticTokens/full',
+      Direction: 'clientToServer',
+      ServerCapability: 'semanticTokensProvider',
+      ClientCapability: 'textDocument.semanticTokens',
+      RegistrationMethod: 'textDocument/semanticTokens'
     },
-    FullDelta: {
-      Method: 'textDocument/semanticTokens/full/delta' as const,
-      Direction: 'clientToServer' as const
+    SemanticTokensDelta: {
+      Method: 'textDocument/semanticTokens/full/delta',
+      Direction: 'clientToServer',
+      ServerCapability: 'semanticTokensProvider.full.delta',
+      ClientCapability: 'textDocument.semanticTokens.requests.full.delta',
+      RegistrationMethod: 'textDocument/semanticTokens'
     },
     SemanticTokensRange: {
-      Method: 'textDocument/semanticTokens/range' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/semanticTokens/range',
+      Direction: 'clientToServer',
+      ServerCapability: 'semanticTokensProvider.range',
+      ClientCapability: 'textDocument.semanticTokens.requests.range',
+      RegistrationMethod: 'textDocument/semanticTokens'
     },
     LinkedEditingRange: {
-      Method: 'textDocument/linkedEditingRange' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/linkedEditingRange',
+      Direction: 'clientToServer',
+      ServerCapability: 'linkedEditingRangeProvider',
+      ClientCapability: 'textDocument.linkedEditingRange'
     },
     Moniker: {
-      Method: 'textDocument/moniker' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/moniker',
+      Direction: 'clientToServer',
+      ServerCapability: 'monikerProvider',
+      ClientCapability: 'textDocument.moniker'
     },
-    PrepareTypeHierarchy: {
-      Method: 'textDocument/prepareTypeHierarchy' as const,
-      Direction: 'clientToServer' as const
+    TypeHierarchyPrepare: {
+      Method: 'textDocument/prepareTypeHierarchy',
+      Direction: 'clientToServer',
+      ServerCapability: 'typeHierarchyProvider',
+      ClientCapability: 'textDocument.typeHierarchy'
     },
     InlineValue: {
-      Method: 'textDocument/inlineValue' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/inlineValue',
+      Direction: 'clientToServer',
+      ServerCapability: 'inlineValueProvider',
+      ClientCapability: 'textDocument.inlineValue'
     },
     InlayHint: {
-      Method: 'textDocument/inlayHint' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/inlayHint',
+      Direction: 'clientToServer',
+      ServerCapability: 'inlayHintProvider',
+      ClientCapability: 'textDocument.inlayHint'
     },
-    Diagnostic: {
-      Method: 'textDocument/diagnostic' as const,
-      Direction: 'clientToServer' as const
+    DocumentDiagnostic: {
+      Method: 'textDocument/diagnostic',
+      Direction: 'clientToServer',
+      ServerCapability: 'diagnosticProvider',
+      ClientCapability: 'textDocument.diagnostic'
     },
     InlineCompletion: {
-      Method: 'textDocument/inlineCompletion' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/inlineCompletion',
+      Direction: 'clientToServer',
+      ServerCapability: 'inlineCompletionProvider',
+      ClientCapability: 'textDocument.inlineCompletion'
     },
-    WillSaveWaitUntil: {
-      Method: 'textDocument/willSaveWaitUntil' as const,
-      Direction: 'clientToServer' as const
+    WillSaveTextDocumentWaitUntil: {
+      Method: 'textDocument/willSaveWaitUntil',
+      Direction: 'clientToServer',
+      ServerCapability: 'textDocumentSync.willSaveWaitUntil',
+      ClientCapability: 'textDocument.synchronization.willSaveWaitUntil'
     },
     Completion: {
-      Method: 'textDocument/completion' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/completion',
+      Direction: 'clientToServer',
+      ServerCapability: 'completionProvider',
+      ClientCapability: 'textDocument.completion'
     },
     Hover: {
-      Method: 'textDocument/hover' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/hover',
+      Direction: 'clientToServer',
+      ServerCapability: 'hoverProvider',
+      ClientCapability: 'textDocument.hover'
     },
     SignatureHelp: {
-      Method: 'textDocument/signatureHelp' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/signatureHelp',
+      Direction: 'clientToServer',
+      ServerCapability: 'signatureHelpProvider',
+      ClientCapability: 'textDocument.signatureHelp'
     },
     Definition: {
-      Method: 'textDocument/definition' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/definition',
+      Direction: 'clientToServer',
+      ServerCapability: 'definitionProvider',
+      ClientCapability: 'textDocument.definition'
     },
     References: {
-      Method: 'textDocument/references' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/references',
+      Direction: 'clientToServer',
+      ServerCapability: 'referencesProvider',
+      ClientCapability: 'textDocument.references'
     },
     DocumentHighlight: {
-      Method: 'textDocument/documentHighlight' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/documentHighlight',
+      Direction: 'clientToServer',
+      ServerCapability: 'documentHighlightProvider',
+      ClientCapability: 'textDocument.documentHighlight'
     },
     DocumentSymbol: {
-      Method: 'textDocument/documentSymbol' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/documentSymbol',
+      Direction: 'clientToServer',
+      ServerCapability: 'documentSymbolProvider',
+      ClientCapability: 'textDocument.documentSymbol'
     },
     CodeAction: {
-      Method: 'textDocument/codeAction' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/codeAction',
+      Direction: 'clientToServer',
+      ServerCapability: 'codeActionProvider',
+      ClientCapability: 'textDocument.codeAction'
     },
     CodeLens: {
-      Method: 'textDocument/codeLens' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/codeLens',
+      Direction: 'clientToServer',
+      ServerCapability: 'codeLensProvider',
+      ClientCapability: 'textDocument.codeLens'
     },
     DocumentLink: {
-      Method: 'textDocument/documentLink' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/documentLink',
+      Direction: 'clientToServer',
+      ServerCapability: 'documentLinkProvider',
+      ClientCapability: 'textDocument.documentLink'
     },
-    Formatting: {
-      Method: 'textDocument/formatting' as const,
-      Direction: 'clientToServer' as const
+    DocumentFormatting: {
+      Method: 'textDocument/formatting',
+      Direction: 'clientToServer',
+      ServerCapability: 'documentFormattingProvider',
+      ClientCapability: 'textDocument.formatting'
     },
-    RangeFormatting: {
-      Method: 'textDocument/rangeFormatting' as const,
-      Direction: 'clientToServer' as const
+    DocumentRangeFormatting: {
+      Method: 'textDocument/rangeFormatting',
+      Direction: 'clientToServer',
+      ServerCapability: 'documentRangeFormattingProvider',
+      ClientCapability: 'textDocument.rangeFormatting'
     },
-    RangesFormatting: {
-      Method: 'textDocument/rangesFormatting' as const,
-      Direction: 'clientToServer' as const
+    DocumentRangesFormatting: {
+      Method: 'textDocument/rangesFormatting',
+      Direction: 'clientToServer',
+      ServerCapability: 'documentRangeFormattingProvider.rangesSupport',
+      ClientCapability: 'textDocument.rangeFormatting.rangesSupport'
     },
-    OnTypeFormatting: {
-      Method: 'textDocument/onTypeFormatting' as const,
-      Direction: 'clientToServer' as const
+    DocumentOnTypeFormatting: {
+      Method: 'textDocument/onTypeFormatting',
+      Direction: 'clientToServer',
+      ServerCapability: 'documentOnTypeFormattingProvider',
+      ClientCapability: 'textDocument.onTypeFormatting'
     },
     Rename: {
-      Method: 'textDocument/rename' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/rename',
+      Direction: 'clientToServer',
+      ServerCapability: 'renameProvider',
+      ClientCapability: 'textDocument.rename'
     },
     PrepareRename: {
-      Method: 'textDocument/prepareRename' as const,
-      Direction: 'clientToServer' as const
+      Method: 'textDocument/prepareRename',
+      Direction: 'clientToServer',
+      ServerCapability: 'renameProvider.prepareProvider',
+      ClientCapability: 'textDocument.rename.prepareSupport'
     }
   },
-  typeHierarchy: {
+  TypeHierarchy: {
     Supertypes: {
-      Method: 'typeHierarchy/supertypes' as const,
-      Direction: 'clientToServer' as const
+      Method: 'typeHierarchy/supertypes',
+      Direction: 'clientToServer'
     },
     Subtypes: {
-      Method: 'typeHierarchy/subtypes' as const,
-      Direction: 'clientToServer' as const
+      Method: 'typeHierarchy/subtypes',
+      Direction: 'clientToServer'
     }
   },
-  window: {
+  Window: {
     WorkDoneProgressCreate: {
-      Method: 'window/workDoneProgress/create' as const,
-      Direction: 'clientToServer' as const
+      Method: 'window/workDoneProgress/create',
+      Direction: 'serverToClient',
+      ClientCapability: 'window.workDoneProgress'
     },
     ShowDocument: {
-      Method: 'window/showDocument' as const,
-      Direction: 'clientToServer' as const
+      Method: 'window/showDocument',
+      Direction: 'serverToClient',
+      ClientCapability: 'window.showDocument.support'
     },
-    ShowMessageRequest: {
-      Method: 'window/showMessageRequest' as const,
-      Direction: 'clientToServer' as const
+    ShowMessage: {
+      Method: 'window/showMessageRequest',
+      Direction: 'serverToClient',
+      ClientCapability: 'window.showMessage'
     }
   },
-  workspace: {
-    WorkspaceFolders: {
-      Method: 'workspace/workspaceFolders' as const,
-      Direction: 'clientToServer' as const
-    },
-    Configuration: {
-      Method: 'workspace/configuration' as const,
-      Direction: 'clientToServer' as const
-    },
-    FoldingRangeRefresh: {
-      Method: 'workspace/foldingRange/refresh' as const,
-      Direction: 'clientToServer' as const
-    },
-    SemanticTokensRefresh: {
-      Method: 'workspace/semanticTokens/refresh' as const,
-      Direction: 'clientToServer' as const
-    },
+  Workspace: {
     WillCreateFiles: {
-      Method: 'workspace/willCreateFiles' as const,
-      Direction: 'clientToServer' as const
+      Method: 'workspace/willCreateFiles',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspace.fileOperations.willCreate',
+      ClientCapability: 'workspace.fileOperations.willCreate'
     },
     WillRenameFiles: {
-      Method: 'workspace/willRenameFiles' as const,
-      Direction: 'clientToServer' as const
+      Method: 'workspace/willRenameFiles',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspace.fileOperations.willRename',
+      ClientCapability: 'workspace.fileOperations.willRename'
     },
     WillDeleteFiles: {
-      Method: 'workspace/willDeleteFiles' as const,
-      Direction: 'clientToServer' as const
-    },
-    InlineValueRefresh: {
-      Method: 'workspace/inlineValue/refresh' as const,
-      Direction: 'clientToServer' as const
-    },
-    InlayHintRefresh: {
-      Method: 'workspace/inlayHint/refresh' as const,
-      Direction: 'clientToServer' as const
+      Method: 'workspace/willDeleteFiles',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspace.fileOperations.willDelete',
+      ClientCapability: 'workspace.fileOperations.willDelete'
     },
     Diagnostic: {
-      Method: 'workspace/diagnostic' as const,
-      Direction: 'clientToServer' as const
-    },
-    DiagnosticRefresh: {
-      Method: 'workspace/diagnostic/refresh' as const,
-      Direction: 'clientToServer' as const
+      Method: 'workspace/diagnostic',
+      Direction: 'clientToServer',
+      ServerCapability: 'diagnosticProvider.workspaceDiagnostics',
+      ClientCapability: 'workspace.diagnostics'
     },
     TextDocumentContent: {
-      Method: 'workspace/textDocumentContent' as const,
-      Direction: 'clientToServer' as const
-    },
-    TextDocumentContentRefresh: {
-      Method: 'workspace/textDocumentContent/refresh' as const,
-      Direction: 'clientToServer' as const
+      Method: 'workspace/textDocumentContent',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspace.textDocumentContent',
+      ClientCapability: 'workspace.textDocumentContent'
     },
     Symbol: {
-      Method: 'workspace/symbol' as const,
-      Direction: 'clientToServer' as const
-    },
-    CodeLensRefresh: {
-      Method: 'workspace/codeLens/refresh' as const,
-      Direction: 'clientToServer' as const
+      Method: 'workspace/symbol',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspaceSymbolProvider',
+      ClientCapability: 'workspace.symbol'
     },
     ExecuteCommand: {
-      Method: 'workspace/executeCommand' as const,
-      Direction: 'clientToServer' as const
+      Method: 'workspace/executeCommand',
+      Direction: 'clientToServer',
+      ServerCapability: 'executeCommandProvider',
+      ClientCapability: 'workspace.executeCommand'
     },
-    ApplyEdit: {
-      Method: 'workspace/applyEdit' as const,
-      Direction: 'clientToServer' as const
+    Folders: {
+      Method: 'workspace/workspaceFolders',
+      Direction: 'serverToClient',
+      ServerCapability: 'workspace.workspaceFolders',
+      ClientCapability: 'workspace.workspaceFolders'
+    },
+    Configuration: {
+      Method: 'workspace/configuration',
+      Direction: 'serverToClient',
+      ClientCapability: 'workspace.configuration'
+    },
+    FoldingRangeRefresh: {
+      Method: 'workspace/foldingRange/refresh',
+      Direction: 'serverToClient',
+      ClientCapability: 'workspace.foldingRange.refreshSupport'
+    },
+    SemanticTokensRefresh: {
+      Method: 'workspace/semanticTokens/refresh',
+      Direction: 'serverToClient',
+      ClientCapability: 'workspace.semanticTokens.refreshSupport'
+    },
+    InlineValueRefresh: {
+      Method: 'workspace/inlineValue/refresh',
+      Direction: 'serverToClient',
+      ClientCapability: 'workspace.inlineValue.refreshSupport'
+    },
+    InlayHintRefresh: {
+      Method: 'workspace/inlayHint/refresh',
+      Direction: 'serverToClient',
+      ClientCapability: 'workspace.inlayHint.refreshSupport'
+    },
+    DiagnosticRefresh: {
+      Method: 'workspace/diagnostic/refresh',
+      Direction: 'serverToClient',
+      ClientCapability: 'workspace.diagnostics.refreshSupport'
+    },
+    TextDocumentContentRefresh: {
+      Method: 'workspace/textDocumentContent/refresh',
+      Direction: 'serverToClient'
+    },
+    CodeLensRefresh: {
+      Method: 'workspace/codeLens/refresh',
+      Direction: 'serverToClient',
+      ClientCapability: 'workspace.codeLens'
+    },
+    ApplyWorkspaceEdit: {
+      Method: 'workspace/applyEdit',
+      Direction: 'serverToClient',
+      ClientCapability: 'workspace.applyEdit'
     }
   },
-  workspaceSymbol: {
+  WorkspaceSymbol: {
     Resolve: {
-      Method: 'workspaceSymbol/resolve' as const,
-      Direction: 'clientToServer' as const
+      Method: 'workspaceSymbol/resolve',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspaceSymbolProvider.resolveProvider',
+      ClientCapability: 'workspace.symbol.resolveSupport'
     }
   }
 } as const;
-
 /**
  * LSP Notification methods organized by namespace
  * @deprecated Use individual namespace exports instead
  */
 export const LSPNotification = {
-  notebookDocument: {
-    DidOpen: {
-      Method: 'notebookDocument/didOpen' as const,
-      Direction: 'serverToClient' as const
+  General: {
+    Cancel: {
+      Method: '$/cancelRequest',
+      Direction: 'both'
     },
-    DidChange: {
-      Method: 'notebookDocument/didChange' as const,
-      Direction: 'serverToClient' as const
+    Progress: {
+      Method: '$/progress',
+      Direction: 'both'
     },
-    DidSave: {
-      Method: 'notebookDocument/didSave' as const,
-      Direction: 'serverToClient' as const
+    SetTrace: {
+      Method: '$/setTrace',
+      Direction: 'clientToServer'
     },
-    DidClose: {
-      Method: 'notebookDocument/didClose' as const,
-      Direction: 'serverToClient' as const
+    LogTrace: {
+      Method: '$/logTrace',
+      Direction: 'serverToClient'
     }
   },
-  telemetry: {
+  Lifecycle: {
+    Initialized: {
+      Method: 'initialized',
+      Direction: 'clientToServer'
+    },
+    Exit: {
+      Method: 'exit',
+      Direction: 'clientToServer'
+    }
+  },
+  NotebookDocument: {
+    DidOpenNotebookDocument: {
+      Method: 'notebookDocument/didOpen',
+      Direction: 'clientToServer',
+      RegistrationMethod: 'notebookDocument/sync'
+    },
+    DidChangeNotebookDocument: {
+      Method: 'notebookDocument/didChange',
+      Direction: 'clientToServer',
+      RegistrationMethod: 'notebookDocument/sync'
+    },
+    DidSaveNotebookDocument: {
+      Method: 'notebookDocument/didSave',
+      Direction: 'clientToServer',
+      RegistrationMethod: 'notebookDocument/sync'
+    },
+    DidCloseNotebookDocument: {
+      Method: 'notebookDocument/didClose',
+      Direction: 'clientToServer',
+      RegistrationMethod: 'notebookDocument/sync'
+    }
+  },
+  Telemetry: {
     Event: {
-      Method: 'telemetry/event' as const,
-      Direction: 'serverToClient' as const
+      Method: 'telemetry/event',
+      Direction: 'serverToClient'
     }
   },
-  textDocument: {
-    DidOpen: {
-      Method: 'textDocument/didOpen' as const,
-      Direction: 'serverToClient' as const
+  TextDocument: {
+    DidOpenTextDocument: {
+      Method: 'textDocument/didOpen',
+      Direction: 'clientToServer',
+      ServerCapability: 'textDocumentSync.openClose',
+      ClientCapability: 'textDocument.synchronization'
     },
-    DidChange: {
-      Method: 'textDocument/didChange' as const,
-      Direction: 'serverToClient' as const
+    DidChangeTextDocument: {
+      Method: 'textDocument/didChange',
+      Direction: 'clientToServer',
+      ServerCapability: 'textDocumentSync',
+      ClientCapability: 'textDocument.synchronization'
     },
-    DidClose: {
-      Method: 'textDocument/didClose' as const,
-      Direction: 'serverToClient' as const
+    DidCloseTextDocument: {
+      Method: 'textDocument/didClose',
+      Direction: 'clientToServer',
+      ServerCapability: 'textDocumentSync.openClose',
+      ClientCapability: 'textDocument.synchronization'
     },
-    DidSave: {
-      Method: 'textDocument/didSave' as const,
-      Direction: 'serverToClient' as const
+    DidSaveTextDocument: {
+      Method: 'textDocument/didSave',
+      Direction: 'clientToServer',
+      ServerCapability: 'textDocumentSync.save',
+      ClientCapability: 'textDocument.synchronization.didSave'
     },
-    WillSave: {
-      Method: 'textDocument/willSave' as const,
-      Direction: 'serverToClient' as const
+    WillSaveTextDocument: {
+      Method: 'textDocument/willSave',
+      Direction: 'clientToServer',
+      ServerCapability: 'textDocumentSync.willSave',
+      ClientCapability: 'textDocument.synchronization.willSave'
     },
     PublishDiagnostics: {
-      Method: 'textDocument/publishDiagnostics' as const,
-      Direction: 'serverToClient' as const
+      Method: 'textDocument/publishDiagnostics',
+      Direction: 'serverToClient',
+      ClientCapability: 'textDocument.publishDiagnostics'
     }
   },
-  window: {
+  Window: {
     WorkDoneProgressCancel: {
-      Method: 'window/workDoneProgress/cancel' as const,
-      Direction: 'serverToClient' as const
+      Method: 'window/workDoneProgress/cancel',
+      Direction: 'clientToServer'
     },
     ShowMessage: {
-      Method: 'window/showMessage' as const,
-      Direction: 'serverToClient' as const
+      Method: 'window/showMessage',
+      Direction: 'serverToClient',
+      ClientCapability: 'window.showMessage'
     },
     LogMessage: {
-      Method: 'window/logMessage' as const,
-      Direction: 'serverToClient' as const
+      Method: 'window/logMessage',
+      Direction: 'serverToClient'
     }
   },
-  workspace: {
+  Workspace: {
     DidChangeWorkspaceFolders: {
-      Method: 'workspace/didChangeWorkspaceFolders' as const,
-      Direction: 'serverToClient' as const
+      Method: 'workspace/didChangeWorkspaceFolders',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspace.workspaceFolders.changeNotifications'
     },
     DidCreateFiles: {
-      Method: 'workspace/didCreateFiles' as const,
-      Direction: 'serverToClient' as const
+      Method: 'workspace/didCreateFiles',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspace.fileOperations.didCreate',
+      ClientCapability: 'workspace.fileOperations.didCreate'
     },
     DidRenameFiles: {
-      Method: 'workspace/didRenameFiles' as const,
-      Direction: 'serverToClient' as const
+      Method: 'workspace/didRenameFiles',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspace.fileOperations.didRename',
+      ClientCapability: 'workspace.fileOperations.didRename'
     },
     DidDeleteFiles: {
-      Method: 'workspace/didDeleteFiles' as const,
-      Direction: 'serverToClient' as const
+      Method: 'workspace/didDeleteFiles',
+      Direction: 'clientToServer',
+      ServerCapability: 'workspace.fileOperations.didDelete',
+      ClientCapability: 'workspace.fileOperations.didDelete'
     },
     DidChangeConfiguration: {
-      Method: 'workspace/didChangeConfiguration' as const,
-      Direction: 'serverToClient' as const
+      Method: 'workspace/didChangeConfiguration',
+      Direction: 'clientToServer',
+      ClientCapability: 'workspace.didChangeConfiguration'
     },
     DidChangeWatchedFiles: {
-      Method: 'workspace/didChangeWatchedFiles' as const,
-      Direction: 'serverToClient' as const
+      Method: 'workspace/didChangeWatchedFiles',
+      Direction: 'clientToServer',
+      ClientCapability: 'workspace.didChangeWatchedFiles'
     }
   }
 } as const;

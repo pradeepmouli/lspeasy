@@ -67,21 +67,11 @@ export * from './protocol/types.js';
 // LSP protocol types and constants (overloaded with same name - type and const)
 // Note: Single export statement exports both the type and const with same name
 export { LSPRequest, LSPNotification } from './protocol/namespaces.js';
-export type {
-  M as LSPRequestMethod,
-  LSPNotificationMethod,
-  ParamsForRequest as InferRequestParams,
-  ResultForRequest as InferRequestResult,
-  ParamsForNotification as InferNotificationParams
-} from './protocol/infer.js';
+export * from './protocol/infer.js';
 
 // Capability-conditional method interfaces (hand-written type transformations)
-export type {
-  ClientSendMethods,
-  ServerHandlers,
-  ServerSendMethods,
-  ClientHandlers
-} from './protocol/capability-methods.js';
+export * from './protocol/capability-methods.js';
+export type { Client, Server } from './protocol/capability-methods.js';
 
 // LSP protocol schemas
 export {
@@ -129,7 +119,6 @@ export type {
   WatchKind
 } from './protocol/watching.js';
 export {
-  FileChangeTypes,
   WatchKinds,
   createFileEvent,
   createFileSystemWatcher,
@@ -154,30 +143,13 @@ export {
 } from './protocol/progress.js';
 
 export type { PartialResultParams } from './protocol/partial.js';
+
 export {
   createPartialResultParams,
   hasPartialResultToken,
   getPartialResultToken
 } from './protocol/partial.js';
 
-export type {
-  ServerCapabilities,
-  ClientCapabilities,
-  MethodsForCapabilities,
-  CapabilityForMethod,
-  MethodToCapability
-} from './protocol/capabilities.js';
-export {
-  hasCapability,
-  getCapabilityForMethod,
-  supportsMethod,
-  supportsHover,
-  supportsCompletion,
-  supportsDefinition,
-  supportsReferences,
-  supportsDocumentSymbol,
-  supportsWorkspaceFolders,
-  supportsFileWatching,
-  supportsWorkDoneProgress,
-  TextDocumentSyncKinds
-} from './protocol/capabilities.js';
+export * from './protocol/capabilities.js';
+
+export * from './protocol/capability-methods.js';

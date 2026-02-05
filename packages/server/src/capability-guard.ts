@@ -4,9 +4,13 @@
  * Ensures handlers can only be registered for declared capabilities
  */
 
-import type { ServerCapabilities } from '@lspeasy/core';
+import type { LSPNotificationMethod, ServerCapabilities } from '@lspeasy/core';
 import type { Logger } from '@lspeasy/core';
-import { getCapabilityForMethod, hasCapability } from '@lspeasy/core';
+import {
+  hasCapability,
+  getCapabilityForRequestMethod,
+  getCapabilityForNotificationMethod
+} from '@lspeasy/core';
 
 /**
  * Check if a capability is enabled in server capabilities
@@ -63,7 +67,7 @@ export class CapabilityGuard {
     }
 
     // Check if method requires a capability
-    const capabilityKey = getCapabilityForMethod(method);
+    const capabilityKey = getCapabilityForNotificationMethod(method as any);
     if (!capabilityKey) {
       // Unknown method - allow in non-strict mode
       if (!this.strict) {
@@ -78,9 +82,12 @@ export class CapabilityGuard {
       }
       return false;
     }
+    if (capabilityKey === 'alwaysOn') {
+      return true;
+    }
 
     // Check if capability is declared
-    if (!isCapabilityEnabled(this.capabilities, capabilityKey)) {
+    if (!hasCapability(this.capabilities, capabilityKey)) {
       const error = `Cannot register handler for ${method}: server capability '${capabilityKey}' not declared`;
       this.logger.warn(error);
 
@@ -93,16 +100,6 @@ export class CapabilityGuard {
     return true;
   }
 
-  /**
-   * Get the capability key for a method
-   */
-  getCapabilityKey(method: string): keyof ServerCapabilities | undefined {
-    return getCapabilityForMethod(method);
-  }
-
-  /**
-   * Get all methods that are allowed based on current capabilities
-   */
   getAllowedMethods(): string[] {
     // This would require iterating through all LSP methods
     // For now, return an empty array - can be enhanced if needed
