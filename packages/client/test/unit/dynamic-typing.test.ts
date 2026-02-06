@@ -50,7 +50,7 @@ describe('Dynamic Typing - LSPClient', () => {
 
     // Note: Methods are populated at runtime after connect()
     // For now we just verify the client is created
-    expect(client).toBeDefined();
+    expect(client.callHierarchy.incomingCalls).toBeDefined();
   });
 
   it('should show all methods when using default ServerCapabilities', () => {

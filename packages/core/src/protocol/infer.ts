@@ -139,8 +139,6 @@ export type DirectionForNotification<M extends string> = M extends LSPNotificati
  * → Automatically works in onRequest/sendRequest signatures
  */
 
-type ValuesOf<T> = T[keyof T];
-
 const RequestMap = Object.values(LSPRequest).flatMap((ns) => Object.values(ns));
 
 const NotificationMap = Object.values(LSPNotification).flatMap((ns) => Object.values(ns));
