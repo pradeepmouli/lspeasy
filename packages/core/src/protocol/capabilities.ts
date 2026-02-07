@@ -5,7 +5,6 @@
  */
 
 import type { ServerCapabilities, ClientCapabilities } from 'vscode-languageserver-protocol';
-import { LSPRequest } from './namespaces.js';
 import type { Paths, PickDeep } from 'type-fest';
 import {
   getCapabilityForNotificationMethod,

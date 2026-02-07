@@ -1,0 +1,6 @@
+ruleDirs:
+  - /Users/pmouli/GitHub.nosync/lspy/rules
+testConfigs:
+  - testDir: /Users/pmouli/GitHub.nosync/lspy/rule-tests
+utilDirs:
+  - /Users/pmouli/GitHub.nosync/lspy/utils

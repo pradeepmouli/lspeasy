@@ -8,10 +8,8 @@
 import type {
   ServerCapabilities,
   ClientCapabilities,
-  ClientSendMethods,
-  ServerHandlers,
-  ServerSendMethods,
-  ClientHandlers
+  Client,
+  Server
 } from '../packages/core/src/index.js';
 
 // ========================================

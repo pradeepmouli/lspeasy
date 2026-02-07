@@ -1,13 +1,12 @@
 export type * from 'vscode-languageserver-protocol';
+export type TextDocumentContentParams = unknown;
+export type TextDocumentContent = unknown;
 
-export type TextDocumentContentParams = any;
-export type TextDocumentContent = any;
+export type TextDocumentContentResult = unknown;
 
-export type TextDocumentContentResult = any;
+export type TextDocumentContentRegistrationOptions = unknown;
 
-export type TextDocumentContentRegistrationOptions = any;
-
-export type TextDocumentContentRefreshParams = any;
+export type TextDocumentContentRefreshParams = unknown;
 
 export type CancelParams = { id: number | string };
 

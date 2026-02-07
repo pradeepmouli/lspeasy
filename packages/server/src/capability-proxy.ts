@@ -123,8 +123,8 @@ export function initializeServerSendMethods<Capabilities extends Partial<ServerC
 
       // Create send method
       const sendMethodName = camelCase(methodKey);
-      namespace[sendMethodName] = async function (params: any) {
-        // Note: Server needs to implement sendRequest method for server-to-client requests
+      namespace[sendMethodName] = async function (_params: any) {
+        // TODO: Server needs to implement sendRequest method for server-to-client requests
         // This would require extending the server implementation
         throw new Error('Server-to-client requests not yet implemented in LSPServer');
       };

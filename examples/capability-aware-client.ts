@@ -4,33 +4,30 @@
  * This example shows how:
  * 1. Client connects to server and receives capabilities
  * 2. Client methods are dynamically available based on server capabilities
- * 3. Type guards provide compile-time type safety
+ * 3. Runtime capability checking provides type safety
  */
 
-import {
-  LSPClient,
-  WebSocketTransport,
-  hasHoverCapability,
-  hasCompletionCapability,
-  hasDefinitionCapability
-} from '@lspeasy/client';
+import { LSPClient } from '../packages/client/src/client.js';
+import { WebSocketTransport } from '../packages/core/src/transport/websocket.js';
+import { LogLevel } from '../packages/core/src/index.js';
 
-const transport = new WebSocketTransport('ws://localhost:8080');
+const transport = new WebSocketTransport({ url: 'ws://localhost:8080' });
 
 const client = new LSPClient({
   name: 'capability-aware-client',
   version: '1.0.0',
-  logLevel: 'info'
+  logLevel: LogLevel.Info
 });
 
 // Connect to server and initialize
 await client.connect(transport);
 
 // After initialization, client receives server capabilities
-console.log('Server capabilities:', client.serverCapabilities);
+const serverCaps = client.getServerCapabilities();
+console.log('Server capabilities:', serverCaps);
 
-// ✅ Use type guards for compile-time type safety
-if (hasHoverCapability(client)) {
+// ✅ Check server capabilities before calling methods
+if (serverCaps?.hoverProvider) {
   // TypeScript now knows hover method exists with proper types
   const hoverResult = await client.textDocument.hover({
     textDocument: { uri: 'file:///example.ts' },
@@ -41,8 +38,8 @@ if (hasHoverCapability(client)) {
   console.log('Server does not support hover');
 }
 
-// ✅ Type guards narrow the type for completion
-if (hasCompletionCapability(client)) {
+// ✅ Check for completion capability
+if (serverCaps?.completionProvider) {
   const completionResult = await client.textDocument.completion({
     textDocument: { uri: 'file:///example.ts' },
     position: { line: 10, character: 5 }
@@ -52,8 +49,8 @@ if (hasCompletionCapability(client)) {
   console.log('Server does not support completion');
 }
 
-// ❌ If server does NOT declare definitionProvider, type guard returns false
-if (hasDefinitionCapability(client)) {
+// ✅ Check for definition capability
+if (serverCaps?.definitionProvider) {
   const definitionResult = await client.textDocument.definition({
     textDocument: { uri: 'file:///example.ts' },
     position: { line: 10, character: 5 }
@@ -63,17 +60,17 @@ if (hasDefinitionCapability(client)) {
   console.log('Server does not support goto definition');
 }
 
-// Alternative: Check with 'in' operator (less type-safe)
-if ('references' in client.textDocument) {
+// Alternative: Check capabilities inline
+if (serverCaps?.referencesProvider) {
   console.log('Server supports references');
+  const refs = await client.textDocument.references({
+    textDocument: { uri: 'file:///example.ts' },
+    position: { line: 10, character: 5 },
+    context: { includeDeclaration: true }
+  });
+  console.log('References:', refs);
 }
 
-// List available methods based on current capabilities
-const availableMethods = Object.keys(client.textDocument).filter(
-  (key) => typeof client.textDocument[key] === 'function'
-);
-console.log('Available textDocument methods:', availableMethods);
-
 // Cleanup
-await client.shutdown();
+await client.sendRequest('shutdown', undefined);
 await client.disconnect();

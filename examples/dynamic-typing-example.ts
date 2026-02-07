@@ -2,9 +2,9 @@
  * Example demonstrating dynamic typing with LSPClient and LSPServer
  */
 
-import { LSPClient } from '@lspeasy/client';
-import { LSPServer } from '@lspeasy/server';
-import type { ClientCapabilities, ServerCapabilities } from '@lspeasy/core';
+import { LSPClient } from '../packages/client/src/client.js';
+import { LSPServer } from '../packages/server/src/server.js';
+import type { ClientCapabilities, ServerCapabilities } from '../packages/core/src/index.js';
 
 // ===============================================
 // CLIENT DYNAMIC TYPING EXAMPLE
@@ -62,14 +62,14 @@ server.setCapabilities({
 // server.textDocument.onDefinition((params) => { ... }) -> Type error
 
 // You can also use the traditional onRequest/onNotification methods:
-server.onRequest('textDocument/hover', async (params) => {
+server.onRequest('textDocument/hover', async (params: any) => {
   // params is automatically typed as HoverParams
   return {
     contents: `Hover text at ${params.position.line}:${params.position.character}`
   };
 });
 
-server.onRequest('textDocument/completion', async (params) => {
+server.onRequest('textDocument/completion', async (params: any) => {
   // params is automatically typed as CompletionParams
   return {
     isIncomplete: false,

@@ -64,10 +64,10 @@ export function createProgressReport(
   cancellable?: boolean
 ): WorkDoneProgressReport {
   const result: WorkDoneProgressReport = { kind: 'report' };
-  if (message !== undefined) {
+  if (message) {
     result.message = message;
   }
-  if (percentage !== undefined) {
+  if (percentage) {
     result.percentage = percentage;
   }
   if (cancellable !== undefined) {
@@ -81,7 +81,7 @@ export function createProgressReport(
  */
 export function createProgressEnd(message?: string): WorkDoneProgressEnd {
   const result: WorkDoneProgressEnd = { kind: 'end' };
-  if (message !== undefined) {
+  if (message) {
     result.message = message;
   }
   return result;

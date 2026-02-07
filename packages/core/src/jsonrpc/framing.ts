@@ -71,7 +71,7 @@ export function parseMessage(buffer: Buffer): { message: Message; bytesRead: num
   }
 
   const contentLength = parseInt(contentLengthStr, 10);
-  if (isNaN(contentLength) || contentLength < 0) {
+  if (Number.isNaN(contentLength) || contentLength < 0) {
     throw new Error(`Invalid Content-Length: ${contentLengthStr}`);
   }
 
