@@ -13,16 +13,6 @@ import {
 } from '@lspeasy/core';
 
 /**
- * Check if a capability is enabled in server capabilities
- */
-function isCapabilityEnabled(
-  capabilities: Partial<ServerCapabilities>,
-  capabilityKey: keyof ServerCapabilities
-): boolean {
-  return hasCapability(capabilities as ServerCapabilities, capabilityKey);
-}
-
-/**
  * Validates that a handler can be registered for a method
  * based on declared server capabilities
  */

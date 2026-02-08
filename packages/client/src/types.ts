@@ -15,9 +15,7 @@ export type { Client } from '@lspeasy/core';
  * LSP Client options
  */
 export interface ClientOptions<
-  ClientCaps extends Partial<ClientCapabilities>,
-  ServerCaps extends Partial<import('@lspeasy/core').ServerCapabilities> =
-    import('@lspeasy/core').ServerCapabilities
+  ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities
 > {
   /**
    * Client identification (sent in initialize request)
@@ -33,12 +31,6 @@ export interface ClientOptions<
    * Client capabilities to advertise
    */
   capabilities?: ClientCaps;
-
-  /**
-   * Expected server capabilities (for type inference only, not sent to server)
-   * @internal
-   */
-  _serverCapabilities?: ServerCaps;
 
   /**
    * Logger instance for client logging

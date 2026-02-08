@@ -228,6 +228,47 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   }
 
   /**
+   * Register a single capability, returning a new typed reference via intersection.
+   * The returned reference is the same instance, with a narrowed type that includes
+   * the newly registered capability.
+   *
+   * @template K - The capability key to register
+   * @param key - The server capability key (e.g. 'hoverProvider')
+   * @param value - The capability value
+   * @returns The same server instance with an expanded capability type
+   *
+   * @example
+   * const server = new LSPServer();
+   * const withHover = server.registerCapability('hoverProvider', true);
+   * // withHover is typed as LSPServer<Capabilities & Pick<ServerCapabilities, 'hoverProvider'>>
+   */
+  registerCapability<K extends keyof ServerCapabilities>(
+    key: K,
+    value: ServerCapabilities[K]
+  ): LSPServer<Capabilities & Pick<ServerCapabilities, K>> {
+    const current = this.getCapabilities();
+    const updated = { ...current, [key]: value } as Capabilities & Pick<ServerCapabilities, K>;
+    this.setCapabilities(updated);
+    return this as unknown as LSPServer<Capabilities & Pick<ServerCapabilities, K>>;
+  }
+
+  /**
+   * Zero-cost type narrowing for client capabilities.
+   * Returns `this` cast to include capability-aware send methods for the given ClientCaps.
+   *
+   * @template C - The expected client capabilities shape
+   * @returns The same server instance, typed with capability-aware methods
+   *
+   * @example
+   * const server = new LSPServer<MyCaps>();
+   * const typed = server.expect<MyClientCaps>();
+   * // typed now has send methods gated by MyClientCaps
+   */
+  expect<C extends Partial<ClientCapabilities>>(): this & Server<C, Capabilities> {
+    return this as this & Server<C, Capabilities>;
+  }
+
+  /**
    * Start listening on a transport
    */
   async listen(transport: Transport): Promise<void> {

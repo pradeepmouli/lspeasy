@@ -11,7 +11,8 @@ import {
   LSPRequest,
   LSPNotification,
   getDefinitionForRequest,
-  getDefinitionForNotification
+  getDefinitionForNotification,
+  hasCapability
 } from '@lspeasy/core';
 import camelCase from 'camelcase';
 
@@ -158,24 +159,4 @@ export function initializeServerSendMethods<Capabilities extends Partial<ServerC
       };
     }
   }
-}
-
-/**
- * Check if a capability is present in the capabilities object
- */
-function hasCapability(
-  capabilities: Partial<ServerCapabilities> | undefined,
-  capabilityPath: string
-): boolean {
-  if (!capabilities) return false;
-
-  const parts = capabilityPath.split('.');
-  let current: any = capabilities;
-
-  for (const part of parts) {
-    if (current === undefined || current === null) return false;
-    current = current[part];
-  }
-
-  return current !== undefined && current !== false && current !== null;
 }

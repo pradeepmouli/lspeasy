@@ -3,7 +3,69 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import type { ServerCapabilities, ClientCapabilities } from '@lspeasy/core';
 import { LSPServer } from '../../src/server.js';
+
+describe('Server.registerCapability()', () => {
+  it('should add a capability and return a typed server', () => {
+    const server = new LSPServer();
+    const withHover = server.registerCapability('hoverProvider', true);
+
+    // The returned value is the same instance
+    expect(withHover).toBe(server);
+
+    // Capabilities should include hoverProvider
+    const caps = withHover.getCapabilities();
+    expect(caps.hoverProvider).toBe(true);
+  });
+
+  it('should support chaining multiple registerCapability calls', () => {
+    const server = new LSPServer();
+    const typed = server
+      .registerCapability('hoverProvider', true)
+      .registerCapability('completionProvider', { triggerCharacters: ['.'] })
+      .registerCapability('definitionProvider', true);
+
+    const caps = typed.getCapabilities();
+    expect(caps.hoverProvider).toBe(true);
+    expect(caps.completionProvider).toEqual({ triggerCharacters: ['.'] });
+    expect(caps.definitionProvider).toBe(true);
+  });
+
+  it('should re-inject handler methods after registerCapability', () => {
+    const server = new LSPServer();
+
+    // Initially no capabilities
+    server.setCapabilities({});
+    expect((server as any).textDocument?.onHover).toBeUndefined();
+
+    // Register hover capability
+    const withHover = server.registerCapability('hoverProvider', true);
+
+    // Now onHover should be available
+    expect((withHover as any).textDocument.onHover).toBeDefined();
+    expect(typeof (withHover as any).textDocument.onHover).toBe('function');
+  });
+});
+
+describe('Server.expect()', () => {
+  it('should return the same instance', () => {
+    const server = new LSPServer();
+    server.setCapabilities({ hoverProvider: true });
+
+    const typed = server.expect<{ textDocument: { hover: {} } }>();
+    expect(typed).toBe(server);
+  });
+
+  it('should be callable with no runtime cost', () => {
+    const server = new LSPServer();
+    server.setCapabilities({ hoverProvider: true });
+
+    // expect<> is zero-cost - it just casts the type
+    const typed = server.expect<ClientCapabilities>();
+    expect(typed.getCapabilities().hoverProvider).toBe(true);
+  });
+});
 
 describe('Runtime Capability Checking - Server', () => {
   it('should only add handler methods for declared capabilities', () => {

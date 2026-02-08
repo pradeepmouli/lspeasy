@@ -151,5 +151,3 @@ export {
 } from './protocol/partial.js';
 
 export * from './protocol/capabilities.js';
-
-export * from './protocol/capability-methods.js';

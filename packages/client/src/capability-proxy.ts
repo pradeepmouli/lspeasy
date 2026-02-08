@@ -4,62 +4,23 @@
  * Dynamically adds methods/namespaces to the client object based on server capabilities
  */
 
-import type {
-  ClientNotifications,
-  ClientRequests,
-  ClientRequestHandlers,
-  ClientNotificationHandlers,
-  ServerCapabilities
-} from '@lspeasy/core';
+import type { ServerCapabilities } from '@lspeasy/core';
 import {
   LSPRequest,
   LSPNotification,
   getDefinitionForRequest,
   getDefinitionForNotification,
-  hasCapability,
-  serverSupportsRequest
+  hasCapability
 } from '@lspeasy/core';
 import type { LSPClient } from './client.js';
 import camelCase from 'camelcase';
-import { is } from 'zod/locales';
-/**
- * Check if a server capability is enabled
- */
-function isCapabilityEnabled(
-  capabilities: Partial<ServerCapabilities> | undefined,
-  capabilityKey: string
-): boolean {
-  if (!capabilities) return false;
-
-  const value = (capabilities as any)[capabilityKey];
-  return value !== undefined && value !== false && value !== null;
-}
-
-/**
- * Extract the method string from a request/notification type definition
- */
-function getMethodFromDefinition(def: any): string | undefined {
-  return def?.Method;
-}
-
-/**
- * Extract the server capability key from a request/notification type definition
- */
-function getServerCapabilityFromDefinition(def: any): string | null {
-  return def?.ServerCapability ?? null;
-}
-
-/**
- * Adds capability-aware namespace methods directly to the client object
- */
 
 /**
  * Initializes capability-aware methods on the client object based on LSPRequest definitions
  */
 export function initializeCapabilityMethods<
-  ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>,
-  ServerCaps extends Partial<ServerCapabilities>
->(client: LSPClient<ClientCaps, ServerCaps>): void {
+  ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>
+>(client: LSPClient<ClientCaps>): void {
   if (!client.serverCapabilities) {
     // Server capabilities not yet known; cannot initialize methods
     return;
@@ -111,9 +72,8 @@ export function initializeCapabilityMethods<
  * This should be called after initialization to add/remove methods based on actual capabilities
  */
 export function updateCapabilityMethods<
-  ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>,
-  ServerCaps extends Partial<ServerCapabilities>
->(client: LSPClient<ClientCaps, ServerCaps>): void {
+  ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>
+>(client: LSPClient<ClientCaps>): void {
   // Re-run initialization to update methods based on new capabilities
   initializeCapabilityMethods(client);
 }

@@ -40,23 +40,19 @@ import { initializeCapabilityMethods, updateCapabilityMethods } from './capabili
  * LSP Client for connecting to language servers
  *
  * This class dynamically extends with capability-aware methods based on server capabilities.
- * Methods are type-safe and conditionally available based on the ServerCaps type parameter.
+ * Use `.expect<ServerCaps>()` after initialization to get typed access to server capabilities.
  *
  * @template ClientCaps - Client capabilities (defaults to ClientCapabilities)
- * @template ServerCaps - Server capabilities (defaults to ServerCapabilities)
  *
  * @example
- * // Create a client with specific server capabilities
- * type MyServerCaps = { hoverProvider: true; completionProvider: { triggerCharacters: ['.'] } };
- * const client = new LSPClient<ClientCapabilities, MyServerCaps>();
- * // client.textDocument.hover is available (typed)
- * // client.textDocument.completion is available (typed)
- * // client.textDocument.definition is not available (missing from MyServerCaps)
+ * // Create a client, then narrow server capabilities after connecting
+ * const client = new LSPClient<MyClientCaps>();
+ * await client.connect(transport);
+ * const typed = client.expect<{ hoverProvider: true; completionProvider: {} }>();
+ * // typed.textDocument.hover is available (typed)
+ * // typed.textDocument.completion is available (typed)
  */
-class BaseLSPClient<
-  ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities,
-  ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities
-> {
+class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities> {
   private transport?: Transport;
   private connected: boolean;
   private initialized: boolean;
@@ -74,18 +70,15 @@ class BaseLSPClient<
   private events: EventEmitter;
   private readonly logger: Logger;
   private readonly options: Required<
-    Omit<
-      ClientOptions<ClientCaps, ServerCaps>,
-      'capabilities' | 'onValidationError' | '_serverCapabilities'
-    >
+    Omit<ClientOptions<ClientCaps>, 'capabilities' | 'onValidationError'>
   >;
   private readonly capabilities?: ClientCaps;
-  public serverCapabilities?: ServerCaps;
+  public serverCapabilities?: ServerCapabilities;
   private serverInfo?: { name: string; version?: string };
-  private readonly onValidationError?: ClientOptions<ClientCaps, ServerCaps>['onValidationError'];
+  private readonly onValidationError?: ClientOptions<ClientCaps>['onValidationError'];
   private transportDisposables: Disposable[];
 
-  constructor(options: ClientOptions<ClientCaps, ServerCaps> = {}) {
+  constructor(options: ClientOptions<ClientCaps> = {}) {
     this.connected = false;
     this.initialized = false;
     this.nextRequestId = 1;
@@ -113,7 +106,7 @@ class BaseLSPClient<
 
     // Initialize capability-aware methods on the client object
     // These will be empty initially and populated after server capabilities are received
-    initializeCapabilityMethods(this as unknown as LSPClient<ClientCaps, ServerCaps>);
+    initializeCapabilityMethods(this as unknown as LSPClient<ClientCaps>);
   }
 
   /**
@@ -150,14 +143,14 @@ class BaseLSPClient<
 
       const result = await this.sendRequest('initialize', initializeParams);
 
-      this.serverCapabilities = result.capabilities as ServerCaps;
+      this.serverCapabilities = result.capabilities;
       if (result.serverInfo) {
         this.serverInfo = result.serverInfo;
       }
       this.initialized = true;
 
       // Update capability-aware methods based on server capabilities
-      updateCapabilityMethods(this as unknown as LSPClient<ClientCaps, ServerCaps>);
+      updateCapabilityMethods(this as unknown as LSPClient<ClientCaps>);
 
       // Send initialized notification
       await this.sendNotification('initialized', {});
@@ -413,6 +406,23 @@ class BaseLSPClient<
   }
 
   /**
+   * Zero-cost type narrowing for server capabilities.
+   * Returns `this` cast to include capability-aware methods for the given ServerCaps.
+   *
+   * @template S - The expected server capabilities shape
+   * @returns The same client instance, typed with capability-aware methods
+   *
+   * @example
+   * const client = new LSPClient<MyClientCaps>();
+   * await client.connect(transport);
+   * const typed = client.expect<{ hoverProvider: true }>();
+   * const result = await typed.textDocument.hover(params);
+   */
+  expect<S extends Partial<ServerCapabilities>>(): this & Client<ClientCaps, S> {
+    return this as this & Client<ClientCaps, S>;
+  }
+
+  /**
    * Handle incoming message from transport
    */
   private handleMessage(message: Message): void {
@@ -590,15 +600,10 @@ class BaseLSPClient<
   }
 }
 
-export type LSPClient<
-  ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities,
-  ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities
-> = BaseLSPClient<ClientCaps, ServerCaps> & Client<ClientCaps, ServerCaps>;
+export type LSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities> =
+  BaseLSPClient<ClientCaps> & Client<ClientCaps, ServerCapabilities>;
 
-// Generic constructor that preserves type parameters and infers both from options
-export const LSPClient: new <
-  ClientCaps extends Partial<ClientCapabilities>,
-  ServerCaps extends Partial<ServerCapabilities>
->(
-  options?: ClientOptions<ClientCaps, ServerCaps>
-) => LSPClient<ClientCaps, ServerCaps> = BaseLSPClient as any;
+// Generic constructor that preserves type parameters
+export const LSPClient: new <ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities>(
+  options?: ClientOptions<ClientCaps>
+) => LSPClient<ClientCaps> = BaseLSPClient as any;
