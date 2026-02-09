@@ -96,8 +96,11 @@ export function createProgressCreateParams(token: ProgressToken): WorkDoneProgre
 
 /**
  * Helper to create a unique progress token
- * Returns a numeric token based on current timestamp and random value
+ * Returns a numeric token based on current timestamp and counter for uniqueness
  */
+let tokenCounter = 0;
 export function createProgressToken(): ProgressToken {
-  return Date.now() * 1000 + Math.floor(Math.random() * 1000);
+  // Combine timestamp with incrementing counter to ensure uniqueness
+  // even when called rapidly within the same millisecond
+  return Date.now() * 1000 + (tokenCounter++ % 1000);
 }
