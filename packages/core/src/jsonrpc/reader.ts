@@ -11,12 +11,14 @@ import { parseMessage } from './framing.js';
  * MessageReader reads JSON-RPC messages from a stream
  */
 export class MessageReader extends EventEmitter {
-  private buffer: Buffer;
+  private chunks: Buffer[];
+  private totalLength: number;
   private closed: boolean;
 
   constructor(private readonly stream: Readable) {
     super();
-    this.buffer = Buffer.alloc(0);
+    this.chunks = [];
+    this.totalLength = 0;
     this.closed = false;
 
     // Set up stream event handlers
@@ -34,8 +36,9 @@ export class MessageReader extends EventEmitter {
       return;
     }
 
-    // Append to buffer
-    this.buffer = Buffer.concat([this.buffer, chunk]);
+    // Add chunk to array instead of concatenating
+    this.chunks.push(chunk);
+    this.totalLength += chunk.length;
 
     // Try to parse messages
     this.parseMessages();
@@ -45,12 +48,19 @@ export class MessageReader extends EventEmitter {
    * Parse all complete messages from buffer
    */
   private parseMessages(): void {
-    while (this.buffer.length > 0 && !this.closed) {
+    while (this.totalLength > 0 && !this.closed) {
       try {
-        const result = parseMessage(this.buffer);
+        // Concatenate chunks only when parsing
+        const buffer =
+          this.chunks.length === 1 ? this.chunks[0]! : Buffer.concat(this.chunks, this.totalLength);
+        const result = parseMessage(buffer);
 
         if (!result) {
           // Incomplete message, wait for more data
+          // Optimize by combining chunks if we have multiple
+          if (this.chunks.length > 1) {
+            this.chunks = [buffer];
+          }
           break;
         }
 
@@ -59,12 +69,22 @@ export class MessageReader extends EventEmitter {
         // Emit message
         this.emit('message', message);
 
-        // Remove parsed bytes from buffer
-        this.buffer = this.buffer.subarray(bytesRead);
+        // Remove parsed bytes from buffer efficiently
+        if (bytesRead === this.totalLength) {
+          // Consumed all data
+          this.chunks = [];
+          this.totalLength = 0;
+        } else {
+          // Create new buffer with remaining data
+          const remaining = buffer.subarray(bytesRead);
+          this.chunks = [remaining];
+          this.totalLength = remaining.length;
+        }
       } catch (error) {
         this.emit('error', error instanceof Error ? error : new Error(String(error)));
         // Clear buffer on parse error
-        this.buffer = Buffer.alloc(0);
+        this.chunks = [];
+        this.totalLength = 0;
         break;
       }
     }
@@ -106,7 +126,8 @@ export class MessageReader extends EventEmitter {
     }
 
     this.closed = true;
-    this.buffer = Buffer.alloc(0);
+    this.chunks = [];
+    this.totalLength = 0;
 
     // Remove stream listeners
     this.stream.removeAllListeners();

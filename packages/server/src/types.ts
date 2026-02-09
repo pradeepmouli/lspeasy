@@ -6,6 +6,7 @@ import type {
   CancellationToken,
   Logger,
   ClientCapabilities,
+  ServerCapabilities,
   Server,
   LogLevel
 } from '@lspeasy/core';

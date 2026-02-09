@@ -64,10 +64,10 @@ export function createProgressReport(
   cancellable?: boolean
 ): WorkDoneProgressReport {
   const result: WorkDoneProgressReport = { kind: 'report' };
-  if (message) {
+  if (message !== undefined) {
     result.message = message;
   }
-  if (percentage) {
+  if (percentage !== undefined) {
     result.percentage = percentage;
   }
   if (cancellable !== undefined) {
@@ -81,7 +81,7 @@ export function createProgressReport(
  */
 export function createProgressEnd(message?: string): WorkDoneProgressEnd {
   const result: WorkDoneProgressEnd = { kind: 'end' };
-  if (message) {
+  if (message !== undefined) {
     result.message = message;
   }
   return result;
@@ -92,4 +92,12 @@ export function createProgressEnd(message?: string): WorkDoneProgressEnd {
  */
 export function createProgressCreateParams(token: ProgressToken): WorkDoneProgressCreateParams {
   return { token };
+}
+
+/**
+ * Helper to create a unique progress token
+ * Returns a numeric token based on current timestamp and random value
+ */
+export function createProgressToken(): ProgressToken {
+  return Date.now() * 1000 + Math.floor(Math.random() * 1000);
 }

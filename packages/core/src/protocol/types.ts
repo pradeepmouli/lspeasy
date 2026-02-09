@@ -1,4 +1,6 @@
-export type * from 'vscode-languageserver-protocol';
+// Re-export all types and runtime values (enums, constants) from vscode-languageserver-protocol
+export * from 'vscode-languageserver-protocol';
+
 export type TextDocumentContentParams = unknown;
 export type TextDocumentContent = unknown;
 

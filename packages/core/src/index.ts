@@ -139,7 +139,8 @@ export {
   createProgressBegin,
   createProgressReport,
   createProgressEnd,
-  createProgressCreateParams
+  createProgressCreateParams,
+  createProgressToken
 } from './protocol/progress.js';
 
 export type { PartialResultParams } from './protocol/partial.js';
