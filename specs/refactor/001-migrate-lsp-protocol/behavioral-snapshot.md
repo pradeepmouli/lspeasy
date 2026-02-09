@@ -128,8 +128,8 @@ pnpm test:e2e
 pnpm run type-check
 
 # Specifically check generated files compile
-npx tsc --noEmit packages/core/src/protocol/types.ts
-npx tsc --noEmit packages/core/src/protocol/namespaces.ts
+npx tsgo --noEmit packages/core/src/protocol/types.ts
+npx tsgo --noEmit packages/core/src/protocol/namespaces.ts
 
 # Build all packages (they depend on generated types)
 pnpm run build

@@ -12,10 +12,6 @@ describe('Dynamic Typing - Type Inference', () => {
       name: 'test-client',
       capabilities: {
         textDocument: { hover: { contentFormat: ['markdown'] } }
-      },
-      _serverCapabilities: {} as {
-        hoverProvider: true;
-        completionProvider: { triggerCharacters: ['.'] };
       }
     });
 

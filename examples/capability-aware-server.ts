@@ -32,7 +32,8 @@ const capabilities: ServerCapabilities = {
 const server = new LSPServer({
   name: 'capability-aware-server',
   version: '1.0.0',
-  logLevel: 'info',
+  logLevel: LogLevel.Info,
+  capabilities: { definitionProvider: true },
   strictCapabilities: true // Throws error if handler doesn't match capability
 });
 

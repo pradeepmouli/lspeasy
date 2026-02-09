@@ -644,7 +644,7 @@ async function validateMigration() {
   console.log('✓ Checking type inference...');
   try {
     // Compile-time check via TypeScript
-    execSync('tsc --noEmit', { cwd: process.cwd() });
+    execSync('tsgo --noEmit', { cwd: process.cwd() });
   } catch (e) {
     console.error('✗ Type checking failed:', e.message);
     process.exit(1);

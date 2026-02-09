@@ -29,14 +29,6 @@ import { CapabilityGuard } from './capability-guard.js';
 import { initializeServerHandlerMethods, initializeServerSendMethods } from './capability-proxy.js';
 
 /**
- * Type alias to add capability-aware methods to LSPServer
- * These methods are added at runtime based on registered handlers
- */
-export type LSPServerWithCapabilities<
-  Capabilities extends Partial<ServerCapabilities> = ServerCapabilities
-> = LSPServer & Server<ClientCapabilities, Capabilities>;
-
-/**
  * LSP Server class with dynamic capability-aware typing
  *
  * This class dynamically provides handler registration and send methods based on capabilities.
@@ -52,7 +44,7 @@ export type LSPServerWithCapabilities<
  * // server.textDocument.onHover is available for registration
  * // server.textDocument.onCompletion is available for registration
  */
-export class LSPServer<Capabilities extends Partial<ServerCapabilities> = ServerCapabilities> {
+export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = ServerCapabilities> {
   private readonly logger: Logger;
   private readonly dispatcher: MessageDispatcher;
   private readonly lifecycleManager: LifecycleManager;
@@ -221,8 +213,8 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
     );
 
     // Initialize capability-aware handler methods based on declared capabilities
-    initializeServerHandlerMethods(this);
-    initializeServerSendMethods(this);
+    initializeServerHandlerMethods(this as any);
+    initializeServerSendMethods(this as any);
   }
 
   /**
@@ -505,3 +497,11 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
     }
   }
 }
+
+export type LSPServer<ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities> =
+  BaseLSPServer<ServerCaps> & Server<ClientCapabilities, ServerCaps>;
+
+// Generic constructor that preserves type parameters
+export const LSPServer: new <ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities>(
+  options?: ServerOptions<ServerCaps>
+) => LSPServer<ServerCaps> = BaseLSPServer as any;

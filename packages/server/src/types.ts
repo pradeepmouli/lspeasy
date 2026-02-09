@@ -7,7 +7,8 @@ import type {
   Logger,
   ClientCapabilities,
   Server,
-  LogLevel
+  LogLevel,
+  ServerCapabilities
 } from '@lspeasy/core';
 import type { ZodError } from 'zod';
 import type { ResponseError as ResponseErrorInterface } from '@lspeasy/core';
@@ -51,6 +52,11 @@ export interface ServerOptions<
     message: RequestContext | NotificationContext
   ) => ResponseErrorInterface | void;
 
+  /**
+   * Capabilities to declare during initialization
+   */
+
+  capabilities?: Capabilities;
   /**
    * Strict capability checking mode
    * When true, throws error if handler registered for unsupported capability
