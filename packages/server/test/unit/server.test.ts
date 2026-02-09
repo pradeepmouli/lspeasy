@@ -11,7 +11,7 @@ describe('LSPServer', () => {
     it('should create server with default options', () => {
       const server = new LSPServer();
       expect(server).toBeDefined();
-      expect(server.getCapabilities()).toEqual({});
+      expect(server.getServerCapabilities()).toEqual({});
     });
 
     it('should create server with custom options', () => {
@@ -56,21 +56,21 @@ describe('LSPServer', () => {
       };
 
       server.setCapabilities(capabilities);
-      expect(server.getCapabilities()).toEqual(capabilities);
+      expect(server.getServerCapabilities()).toEqual(capabilities);
     });
 
     it('should override previous capabilities', () => {
       server.setCapabilities({ hoverProvider: true });
       server.setCapabilities({ completionProvider: {} });
 
-      expect(server.getCapabilities()).toEqual({
+      expect(server.getServerCapabilities()).toEqual({
         completionProvider: {}
       });
     });
 
     it('should accept empty capabilities', () => {
       server.setCapabilities({});
-      expect(server.getCapabilities()).toEqual({});
+      expect(server.getServerCapabilities()).toEqual({});
     });
 
     it('should accept partial capabilities', () => {
@@ -80,7 +80,7 @@ describe('LSPServer', () => {
       };
 
       server.setCapabilities(capabilities);
-      const result = server.getCapabilities();
+      const result = server.getServerCapabilities();
 
       expect(result.textDocumentSync).toBe(1);
       expect(result.hoverProvider).toBe(true);

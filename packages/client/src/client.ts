@@ -72,7 +72,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   private readonly options: Required<
     Omit<ClientOptions<ClientCaps>, 'capabilities' | 'onValidationError'>
   >;
-  private readonly capabilities?: ClientCaps;
+  private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
   private serverInfo?: { name: string; version?: string };
   private readonly onValidationError?: ClientOptions<ClientCaps>['onValidationError'];
@@ -403,6 +403,50 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    */
   getServerInfo(): { name: string; version?: string } | undefined {
     return this.serverInfo;
+  }
+
+  /**
+   * Set client capabilities
+   */
+  setCapabilities(capabilities: ClientCaps): void {
+    this.capabilities = capabilities;
+    // Note: Client capabilities are sent during initialize, so this only affects
+    // the local reference. To update server-side, would need client/registerCapability request.
+  }
+
+  /**
+   * Get client capabilities
+   */
+  getClientCapabilities(): ClientCaps | undefined {
+    return this.capabilities;
+  }
+
+  /**
+   * Register a single client capability, returning a new typed reference via intersection.
+   * The returned reference is the same instance, with a narrowed type that includes
+   * the newly registered capability.
+   *
+   * Note: This updates the local capability reference. To notify the server of capability
+   * changes, the LSP 3.17 client/registerCapability request should be used separately.
+   *
+   * @template K - The capability key to register
+   * @param key - The client capability key
+   * @param value - The capability value
+   * @returns The same client instance with an expanded capability type
+   *
+   * @example
+   * const client = new LSPClient();
+   * const withWorkspace = client.registerCapability('workspace', { workspaceFolders: true });
+   * // withWorkspace is typed as LSPClient<ClientCaps & Pick<ClientCapabilities, 'workspace'>>
+   */
+  registerCapability<K extends keyof ClientCapabilities>(
+    key: K,
+    value: ClientCapabilities[K]
+  ): LSPClient<ClientCaps & Pick<ClientCapabilities, K>> {
+    const current = this.capabilities ?? ({} as ClientCaps);
+    const updated = { ...current, [key]: value } as ClientCaps & Pick<ClientCapabilities, K>;
+    this.setCapabilities(updated);
+    return this as unknown as LSPClient<ClientCaps & Pick<ClientCapabilities, K>>;
   }
 
   /**

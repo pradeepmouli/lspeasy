@@ -41,6 +41,26 @@ export class MessageDispatcher {
   }
 
   /**
+   * Unregister a request handler
+   */
+  unregisterRequest(method: string): void {
+    if (this.handlers.has(method)) {
+      this.handlers.delete(method);
+      this.logger.debug(`Unregistered request handler: ${method}`);
+    }
+  }
+
+  /**
+   * Unregister a notification handler
+   */
+  unregisterNotification(method: string): void {
+    if (this.handlers.has(method)) {
+      this.handlers.delete(method);
+      this.logger.debug(`Unregistered notification handler: ${method}`);
+    }
+  }
+
+  /**
    * Set client capabilities (from initialize request)
    */
   setClientCapabilities(capabilities: ClientCapabilities): void {

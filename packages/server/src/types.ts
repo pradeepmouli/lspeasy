@@ -2,7 +2,13 @@
  * Type definitions for @lspeasy/server
  */
 
-import type { CancellationToken, Logger, ClientCapabilities, Server } from '@lspeasy/core';
+import type {
+  CancellationToken,
+  Logger,
+  ClientCapabilities,
+  Server,
+  LogLevel
+} from '@lspeasy/core';
 import type { ZodError } from 'zod';
 import type { ResponseError as ResponseErrorInterface } from '@lspeasy/core';
 
@@ -14,7 +20,9 @@ export type { Server } from '@lspeasy/core';
 /**
  * Server initialization options
  */
-export interface ServerOptions {
+export interface ServerOptions<
+  Capabilities extends Partial<ServerCapabilities> = ServerCapabilities
+> {
   /**
    * Server name (sent in initialize response)
    */
@@ -33,15 +41,15 @@ export interface ServerOptions {
   /**
    * Log level (defaults to 'info')
    */
-  logLevel?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
+  logLevel?: LogLevel;
 
   /**
    * Custom validation error handler
    */
   onValidationError?: (
     error: ZodError,
-    context: RequestContext | NotificationContext
-  ) => ResponseErrorInterface;
+    message: RequestContext | NotificationContext
+  ) => ResponseErrorInterface | void;
 
   /**
    * Strict capability checking mode

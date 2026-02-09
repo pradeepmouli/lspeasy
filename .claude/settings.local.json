@@ -5,7 +5,9 @@
       "mcp__acp__Edit",
       "mcp__acp__Write",
       "Skill(commit-commands:commit)",
-      "Skill(commit-commands:commit:*)"
+      "Skill(commit-commands:commit:*)",
+      "Skill(speckit.refactor)",
+      "Skill(speckit.refactor:*)"
     ]
   }
 }

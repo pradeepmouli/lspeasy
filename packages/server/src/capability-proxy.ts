@@ -23,7 +23,7 @@ import camelCase from 'camelcase';
 export function initializeServerHandlerMethods<Capabilities extends Partial<ServerCapabilities>>(
   server: LSPServer<Capabilities>
 ): void {
-  const capabilities = server.getCapabilities();
+  const capabilities = server.getServerCapabilities();
 
   // Add handler registration methods for requests
   for (const [namespaceName, namespaceDefinitions] of Object.entries(LSPRequest)) {

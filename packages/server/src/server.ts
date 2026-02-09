@@ -2,6 +2,7 @@
  * LSP Server - Main server class for handling LSP connections
  */
 
+import EventEmitter from 'node:events';
 import type {
   Transport,
   Message,
@@ -57,29 +58,25 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   private readonly lifecycleManager: LifecycleManager;
   private readonly name: string;
   private readonly version: string;
-  private readonly options: ServerOptions;
+  private readonly options: ServerOptions<Capabilities>;
   private capabilityGuard?: CapabilityGuard;
+  private events: EventEmitter;
 
   private transport?: Transport | undefined;
   private state: ServerState = ServerState.Created;
   private cancellationTokens = new Map<number | string, AbortController>();
   private clientCapabilities?: ClientCapabilities;
+  private clientInfo?: { name: string; version?: string };
   private disposables: Disposable[] = [];
 
-  constructor(options: ServerOptions = {}) {
+  constructor(options: ServerOptions<Capabilities> = {}) {
     this.options = options;
     this.name = options.name ?? 'lsp-server';
     this.version = options.version ?? '1.0.0';
+    this.events = new EventEmitter();
 
     // Setup logger
-    const logLevelMap: Record<string, LogLevel> = {
-      trace: LogLevel.Trace,
-      debug: LogLevel.Debug,
-      info: LogLevel.Info,
-      warn: LogLevel.Warn,
-      error: LogLevel.Error
-    };
-    const logLevel = logLevelMap[options.logLevel ?? 'info'];
+    const logLevel = options.logLevel ?? LogLevel.Info;
     this.logger = options.logger ?? new ConsoleLogger(logLevel);
 
     // Create dispatcher and lifecycle manager
@@ -103,7 +100,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   onRequest<Method extends LSPRequestMethod & string>(
     method: Method,
     handler: RequestHandler<ParamsForRequest<Method>, ResultForRequest<Method>>
-  ): this;
+  ): Disposable;
 
   /**
    * Register a request handler with explicit type parameters (backwards compatible)
@@ -111,13 +108,13 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   onRequest<Method extends string, Params = unknown, Result = unknown>(
     method: Method,
     handler: RequestHandler<Params, Result>
-  ): this;
+  ): Disposable;
 
   // Implementation
   onRequest<Method extends string, Params = unknown, Result = unknown>(
     method: Method,
     handler: RequestHandler<Params, Result>
-  ): this {
+  ): Disposable {
     // Check if handler can be registered based on capabilities
     if (this.capabilityGuard && !this.capabilityGuard.canRegisterHandler(method)) {
       // In non-strict mode, warning was already logged
@@ -144,7 +141,11 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
     };
 
     this.dispatcher.registerRequest(method, wrappedHandler);
-    return this;
+    return {
+      dispose: () => {
+        this.dispatcher.unregisterRequest(method);
+      }
+    };
   }
 
   /**
@@ -159,7 +160,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   onNotification<Method extends LSPNotificationMethod & string>(
     method: Method,
     handler: NotificationHandler<ParamsForNotification<Method>>
-  ): this;
+  ): Disposable;
 
   /**
    * Register a notification handler with explicit type parameters (backwards compatible)
@@ -167,13 +168,13 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   onNotification<Method extends string, Params = unknown>(
     method: Method,
     handler: NotificationHandler<Params>
-  ): this;
+  ): Disposable;
 
   // Implementation
   onNotification<Method extends string, Params = unknown>(
     method: Method,
     handler: NotificationHandler<Params>
-  ): this {
+  ): Disposable {
     // Check if handler can be registered based on capabilities
     if (this.capabilityGuard && !this.capabilityGuard.canRegisterHandler(method)) {
       // In non-strict mode, warning was already logged
@@ -200,7 +201,11 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
     };
 
     this.dispatcher.registerNotification(method, wrappedHandler);
-    return this;
+    return {
+      dispose: () => {
+        this.dispatcher.unregisterNotification(method);
+      }
+    };
   }
 
   /**
@@ -221,10 +226,17 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   }
 
   /**
-   * Get current capabilities
+   * Get server capabilities
    */
-  getCapabilities(): ServerCapabilities {
+  getServerCapabilities(): ServerCapabilities {
     return this.lifecycleManager.getCapabilities();
+  }
+
+  /**
+   * Get client capabilities (available after initialization)
+   */
+  getClientCapabilities(): ClientCapabilities | undefined {
+    return this.clientCapabilities;
   }
 
   /**
@@ -246,7 +258,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
     key: K,
     value: ServerCapabilities[K]
   ): LSPServer<Capabilities & Pick<ServerCapabilities, K>> {
-    const current = this.getCapabilities();
+    const current = this.getServerCapabilities();
     const updated = { ...current, [key]: value } as Capabilities & Pick<ServerCapabilities, K>;
     this.setCapabilities(updated);
     return this as unknown as LSPServer<Capabilities & Pick<ServerCapabilities, K>>;
@@ -290,6 +302,8 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
       this.logger.error('Transport error:', error);
     });
     this.disposables.push(errorDisposable);
+
+    this.events.emit('listening');
   }
 
   /**
@@ -315,6 +329,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
       controller.abort();
     }
 
+    this.events.emit('shutdown');
     await this.close();
   }
 
@@ -345,6 +360,63 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
   }
 
   /**
+   * Check if server is listening and initialized
+   */
+  isListening(): boolean {
+    return this.state === ServerState.Initialized && this.transport !== undefined;
+  }
+
+  /**
+   * Get current server state
+   */
+  getState(): ServerState {
+    return this.state;
+  }
+
+  /**
+   * Get client info (available after initialization)
+   */
+  getClientInfo(): { name: string; version?: string } | undefined {
+    return this.clientInfo;
+  }
+
+  /**
+   * Subscribe to listening events
+   */
+  onListening(handler: () => void): Disposable {
+    this.events.on('listening', handler);
+    return {
+      dispose: () => {
+        this.events.off('listening', handler);
+      }
+    };
+  }
+
+  /**
+   * Subscribe to shutdown events
+   */
+  onShutdown(handler: () => void): Disposable {
+    this.events.on('shutdown', handler);
+    return {
+      dispose: () => {
+        this.events.off('shutdown', handler);
+      }
+    };
+  }
+
+  /**
+   * Subscribe to error events
+   */
+  onError(handler: (error: Error) => void): Disposable {
+    this.events.on('error', handler);
+    return {
+      dispose: () => {
+        this.events.off('error', handler);
+      }
+    };
+  }
+
+  /**
    * Register built-in lifecycle handlers
    */
   private registerBuiltinHandlers(): void {
@@ -356,6 +428,9 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
 
       this.state = ServerState.Initializing;
       this.clientCapabilities = params.capabilities;
+      if (params.clientInfo) {
+        this.clientInfo = params.clientInfo;
+      }
       this.dispatcher.setClientCapabilities(params.capabilities);
 
       const result = await this.lifecycleManager.handleInitialize(
@@ -426,6 +501,7 @@ export class LSPServer<Capabilities extends Partial<ServerCapabilities> = Server
       await this.dispatcher.dispatch(message, this.transport!, this.cancellationTokens);
     } catch (error) {
       this.logger.error('Error handling message:', error);
+      this.events.emit('error', error as Error);
     }
   }
 }

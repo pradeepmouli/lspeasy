@@ -15,7 +15,7 @@ describe('Server.registerCapability()', () => {
     expect(withHover).toBe(server);
 
     // Capabilities should include hoverProvider
-    const caps = withHover.getCapabilities();
+    const caps = withHover.getServerCapabilities();
     expect(caps.hoverProvider).toBe(true);
   });
 
@@ -26,7 +26,7 @@ describe('Server.registerCapability()', () => {
       .registerCapability('completionProvider', { triggerCharacters: ['.'] })
       .registerCapability('definitionProvider', true);
 
-    const caps = typed.getCapabilities();
+    const caps = typed.getServerCapabilities();
     expect(caps.hoverProvider).toBe(true);
     expect(caps.completionProvider).toEqual({ triggerCharacters: ['.'] });
     expect(caps.definitionProvider).toBe(true);
@@ -63,7 +63,7 @@ describe('Server.expect()', () => {
 
     // expect<> is zero-cost - it just casts the type
     const typed = server.expect<ClientCapabilities>();
-    expect(typed.getCapabilities().hoverProvider).toBe(true);
+    expect(typed.getServerCapabilities().hoverProvider).toBe(true);
   });
 });
 

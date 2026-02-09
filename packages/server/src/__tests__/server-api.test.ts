@@ -12,7 +12,7 @@ describe('LSPServer.registerCapability()', () => {
     const withHover = server.registerCapability('hoverProvider', true);
 
     expect(withHover).toBe(server);
-    expect(withHover.getCapabilities().hoverProvider).toBe(true);
+    expect(withHover.getServerCapabilities().hoverProvider).toBe(true);
   });
 
   it('should support chaining multiple registerCapability calls', () => {
@@ -23,7 +23,7 @@ describe('LSPServer.registerCapability()', () => {
       .registerCapability('completionProvider', { triggerCharacters: ['.'] })
       .registerCapability('definitionProvider', true);
 
-    const caps = typed.getCapabilities();
+    const caps = typed.getServerCapabilities();
     expect(caps.hoverProvider).toBe(true);
     expect(caps.completionProvider).toEqual({ triggerCharacters: ['.'] });
     expect(caps.definitionProvider).toBe(true);
@@ -34,7 +34,7 @@ describe('LSPServer.registerCapability()', () => {
     server.setCapabilities({ hoverProvider: true });
     server.registerCapability('completionProvider', {});
 
-    const caps = server.getCapabilities();
+    const caps = server.getServerCapabilities();
     expect(caps.hoverProvider).toBe(true);
     expect(caps.completionProvider).toEqual({});
   });
@@ -54,6 +54,6 @@ describe('LSPServer.expect()', () => {
     server.setCapabilities({ hoverProvider: true });
 
     const typed = server.expect<ClientCapabilities>();
-    expect(typed.getCapabilities().hoverProvider).toBe(true);
+    expect(typed.getServerCapabilities().hoverProvider).toBe(true);
   });
 });
