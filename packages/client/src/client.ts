@@ -26,6 +26,7 @@ import { DisposableEventEmitter, HandlerRegistry } from '@lspeasy/core/utils';
 import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
 import type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
 import { initializeCapabilityMethods, updateCapabilityMethods } from './capability-proxy.js';
+import { CapabilityGuard } from './capability-guard.js';
 
 /**
  * Interface for dynamically added namespace methods
@@ -77,6 +78,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   public serverCapabilities?: ServerCapabilities;
   private serverInfo?: { name: string; version?: string };
   private readonly onValidationError?: ClientOptions<ClientCaps>['onValidationError'];
+  private capabilityGuard?: CapabilityGuard;
 
   constructor(options: ClientOptions<ClientCaps> = {}) {
     this.connected = false;
@@ -146,6 +148,13 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
         this.serverInfo = result.serverInfo;
       }
       this.initialized = true;
+
+      // Create capability guard to validate outgoing requests
+      this.capabilityGuard = new CapabilityGuard(
+        result.capabilities,
+        this.logger,
+        false // non-strict mode by default
+      );
 
       // Update capability-aware methods based on server capabilities
       updateCapabilityMethods(this as unknown as LSPClient<ClientCaps>);
@@ -224,6 +233,11 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       throw new Error('Client is not connected');
     }
 
+    // Validate request against server capabilities
+    if (this.capabilityGuard && !this.capabilityGuard.canSendRequest(method)) {
+      this.logger.warn(`Server does not support request method ${method}`);
+    }
+
     // Check if already cancelled before doing anything
     if (token?.isCancellationRequested) {
       return Promise.reject(new Error('Request was cancelled'));
@@ -273,6 +287,11 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   ): Promise<void> {
     if (!this.connected || !this.transport) {
       throw new Error('Client is not connected');
+    }
+
+    // Validate notification against server capabilities
+    if (this.capabilityGuard && !this.capabilityGuard.canSendNotification(method)) {
+      this.logger.warn(`Server does not support notification method ${method}`);
     }
 
     const notification: NotificationMessage = {
