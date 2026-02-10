@@ -64,7 +64,17 @@ describe('High-level method builders', () => {
           referencesProvider: true,
           documentSymbolProvider: true,
           workspaceSymbolProvider: true,
-          textDocumentSync: 1
+          textDocumentSync: {
+            openClose: true,
+            change: 1, // Full sync
+            save: { includeText: true }
+          },
+          workspace: {
+            workspaceFolders: {
+              supported: true,
+              changeNotifications: true
+            }
+          }
         },
         serverInfo: { name: 'test-server' }
       }

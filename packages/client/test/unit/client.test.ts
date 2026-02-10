@@ -223,16 +223,22 @@ describe('LSPClient', () => {
 
       await connectPromise;
 
-      const outputPromise = new Promise<string>((resolve) => {
-        const chunks: Buffer[] = [];
-        outputStream.on('data', (chunk) => {
-          chunks.push(chunk);
-          const buffer = Buffer.concat(chunks);
-          const str = buffer.toString('utf8');
-          if (str.includes('"method":"exit"')) {
-            resolve(str);
+      // Set up listener for output BEFORE calling disconnect
+      let shutdownSent = false;
+      let exitSent = false;
+      const outputPromise = new Promise<void>((resolve) => {
+        const listener = (chunk: Buffer) => {
+          const str = chunk.toString('utf8');
+          if (str.includes('"method":"shutdown"')) {
+            shutdownSent = true;
           }
-        });
+          if (str.includes('"method":"exit"')) {
+            exitSent = true;
+            outputStream.off('data', listener);
+            resolve();
+          }
+        };
+        outputStream.on('data', listener);
       });
 
       const disconnectPromise = client.disconnect();
@@ -249,9 +255,15 @@ describe('LSPClient', () => {
         inputStream.write(buffer);
       });
 
-      const output = await outputPromise;
-      expect(output).toContain('"method":"shutdown"');
-      expect(output).toContain('"method":"exit"');
+      await Promise.race([
+        outputPromise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout waiting for exit')), 1000)
+        )
+      ]);
+
+      expect(shutdownSent).toBe(true);
+      expect(exitSent).toBe(true);
 
       await disconnectPromise;
 

@@ -6,7 +6,11 @@
 
 import type { ServerCapabilities } from '@lspeasy/core';
 import type { Logger } from '@lspeasy/core';
-import { hasCapability, getCapabilityForNotificationMethod } from '@lspeasy/core';
+import {
+  hasCapability,
+  getCapabilityForNotificationMethod,
+  getCapabilityForRequestMethod
+} from '@lspeasy/core';
 
 /**
  * Validates that a handler can be registered for a method
@@ -52,8 +56,12 @@ export class CapabilityGuard {
       return true;
     }
 
-    // Check if method requires a capability
-    const capabilityKey = getCapabilityForNotificationMethod(method as any);
+    // Check if method requires a capability (try both request and notification)
+    let capabilityKey = getCapabilityForRequestMethod(method as any);
+    if (!capabilityKey) {
+      capabilityKey = getCapabilityForNotificationMethod(method as any);
+    }
+
     if (!capabilityKey) {
       // Unknown method - allow in non-strict mode
       if (!this.strict) {

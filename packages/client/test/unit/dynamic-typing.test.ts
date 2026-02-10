@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { LSPClient } from '../../src/client.js';
+import { updateCapabilityMethods } from '../../src/capability-proxy.js';
 
 describe('Dynamic Typing - LSPClient', () => {
   it('should have capability-aware methods with typed constructor', () => {
@@ -16,8 +17,12 @@ describe('Dynamic Typing - LSPClient', () => {
     });
     (client as any).serverCapabilities = {
       hoverProvider: true,
-      completionProvider: { triggerCharacters: ['.'] }
+      completionProvider: { triggerCharacters: ['.'] },
+      callHierarchyProvider: true
     } as const;
+
+    // Populate methods based on server capabilities
+    updateCapabilityMethods(client as any);
 
     // Intellisense should show these namespace properties:
     // - client.textDocument
@@ -26,7 +31,6 @@ describe('Dynamic Typing - LSPClient', () => {
     // etc.
 
     // Note: Methods are populated at runtime after connect()
-    // For now we just verify the client is created
     expect(client.callHierarchy.incomingCalls).toBeDefined();
   });
 
