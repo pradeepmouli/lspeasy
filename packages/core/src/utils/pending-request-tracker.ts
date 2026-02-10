@@ -7,8 +7,8 @@ import { randomUUID } from 'node:crypto';
 type PendingEntry<TResponse, TMeta> = {
   resolve: (value: TResponse) => void;
   reject: (error: Error) => void;
-  timeoutId?: ReturnType<typeof setTimeout>;
-  metadata?: TMeta;
+  timeoutId: ReturnType<typeof setTimeout> | undefined;
+  metadata: TMeta | undefined;
 };
 
 /**
@@ -43,7 +43,8 @@ export class PendingRequestTracker<TResponse, TMeta = undefined> {
         this.clearTimeout(id);
         rejectEntry(error);
       },
-      metadata
+      metadata,
+      timeoutId: undefined
     };
 
     this.pending.set(id, entry);

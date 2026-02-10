@@ -19,7 +19,7 @@ export interface TransportHandlers {
  * Manages transport event listeners and disposal.
  */
 export class TransportAttachment {
-  private transport?: Transport;
+  private transport: Transport | undefined;
   private disposables: Disposable[] = [];
 
   /**
