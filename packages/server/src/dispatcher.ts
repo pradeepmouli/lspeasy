@@ -13,14 +13,23 @@ import type {
 } from '@lspeasy/core';
 import { ResponseError, isRequestMessage, isNotificationMessage } from '@lspeasy/core';
 import { HandlerRegistry } from '@lspeasy/core/utils';
-import type { RequestHandler, NotificationHandler } from './types.js';
+import type {
+  RequestHandler,
+  NotificationHandler,
+  RequestContext,
+  NotificationContext
+} from './types.js';
 
 /**
  * Message dispatcher manages request/notification routing
  */
 export class MessageDispatcher {
-  private requestHandlers = new HandlerRegistry<unknown, unknown>();
-  private notificationHandlers = new HandlerRegistry<unknown, void>();
+  private requestHandlers = new HandlerRegistry<
+    unknown,
+    unknown,
+    [CancellationToken, RequestContext]
+  >();
+  private notificationHandlers = new HandlerRegistry<unknown, void, [NotificationContext]>();
   private pendingRequests = new Map<number | string, AbortController>();
   private clientCapabilities?: ClientCapabilities;
 

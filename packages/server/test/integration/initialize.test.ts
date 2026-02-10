@@ -4,8 +4,8 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
-import { LogLevel, TextDocumentSyncKind } from '@lspeasy/core';
-import type { Transport, InitializeParams } from '@lspeasy/core';
+import { LogLevel } from '@lspeasy/core';
+import type { Transport, InitializeParams, TextDocumentSyncKind } from '@lspeasy/core';
 
 // Mock transport for testing
 class TestTransport implements Transport {
@@ -63,6 +63,7 @@ class TestTransport implements Transport {
 describe('Initialize Handshake Integration', () => {
   let server: LSPServer;
   let transport: TestTransport;
+  const fullSync = 1 as TextDocumentSyncKind;
 
   beforeEach(async () => {
     server = new LSPServer({
@@ -72,7 +73,7 @@ describe('Initialize Handshake Integration', () => {
     });
 
     server.setCapabilities({
-      textDocumentSync: TextDocumentSyncKind.Full,
+      textDocumentSync: fullSync,
       hoverProvider: true
     });
 
@@ -117,7 +118,7 @@ describe('Initialize Handshake Integration', () => {
 
     expect(response.result).toBeDefined();
     expect(response.result.capabilities).toEqual({
-      textDocumentSync: TextDocumentSyncKind.Full,
+      textDocumentSync: fullSync,
       hoverProvider: true
     });
     expect(response.result.serverInfo).toEqual({

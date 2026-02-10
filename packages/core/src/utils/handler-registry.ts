@@ -7,22 +7,22 @@ import type { Disposable } from './disposable.js';
 /**
  * Handler function type.
  */
-export type Handler<TRequest, TResponse> = (
+export type Handler<TRequest, TResponse, TRest extends unknown[] = []> = (
   params: TRequest,
-  ...rest: unknown[]
+  ...rest: TRest
 ) => Promise<TResponse> | TResponse;
 
 /**
  * Registry for request/notification handlers keyed by method.
  */
-export class HandlerRegistry<TRequest, TResponse> {
-  private handlers = new Map<string, Handler<TRequest, TResponse>>();
+export class HandlerRegistry<TRequest, TResponse, TRest extends unknown[] = []> {
+  private handlers = new Map<string, Handler<TRequest, TResponse, TRest>>();
   private categories = new Map<string, Set<string>>();
 
   /**
    * Register a handler for the given method.
    */
-  register(method: string, handler: Handler<TRequest, TResponse>): Disposable {
+  register(method: string, handler: Handler<TRequest, TResponse, TRest>): Disposable {
     this.handlers.set(method, handler);
     this.addCategory(method);
 
@@ -45,7 +45,7 @@ export class HandlerRegistry<TRequest, TResponse> {
   /**
    * Get a handler by method.
    */
-  get(method: string): Handler<TRequest, TResponse> | undefined {
+  get(method: string): Handler<TRequest, TResponse, TRest> | undefined {
     return this.handlers.get(method);
   }
 

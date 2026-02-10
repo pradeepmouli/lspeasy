@@ -39,6 +39,11 @@ type IsClientCapabilityEnabled<Caps, A = Record<string, any>> = A extends {
     ? true
     : false
   : true /* No capability required */;
+
+type StripNamespaceSuffix<
+  Namespace extends string,
+  Method extends string
+> = Method extends `${infer Prefix}${Namespace}` ? Prefix : Method;
 /**
  * Transform a request type definition into a method signature
  * Only included if the server capability is enabled
@@ -280,7 +285,7 @@ export namespace Client {
     RemoveNever<{
       [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
         [Method in keyof Notifications[Namespace] as CamelCase<
-          Method & string
+          StripNamespaceSuffix<Namespace & string, Method & string>
         >]: IsClientCapabilityEnabled<ClientCaps, Notifications[Namespace][Method]> extends true
           ? Notifications[Namespace][Method]
           : never;
@@ -316,7 +321,7 @@ export namespace Server {
     RemoveNever<{
       [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
         [Method in keyof Notifications[Namespace] as CamelCase<
-          Method & string
+          StripNamespaceSuffix<Namespace & string, Method & string>
         >]: IsServerCapabilityEnabled<ServerCaps, Notifications[Namespace][Method]> extends true
           ? Notifications[Namespace][Method]
           : never;
