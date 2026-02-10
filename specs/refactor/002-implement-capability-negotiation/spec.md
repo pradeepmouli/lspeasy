@@ -10,6 +10,29 @@
 ## Overview
 This refactor eliminates 380 lines of duplicate code by extracting shared utilities for event emitter management, handler registries, transport attachment, and pending request tracking from `client.ts` and `server.ts` into reusable components.
 
+## User Stories
+
+### US1 (P1): Shared Utilities
+As a maintainer, I want shared utilities for event emission, handler registries, transport attachment, and pending request tracking so that client and server behavior stays consistent and easier to maintain.
+
+**Acceptance Criteria**:
+- Utilities exist in `packages/core/src/utils/` with unit tests.
+- Only `DisposableEventEmitter` and `HandlerRegistry` are exported from the utils index.
+
+### US2 (P2): Client Migration
+As a maintainer, I want the client to use shared utilities so that behavior remains consistent while duplication is removed.
+
+**Acceptance Criteria**:
+- Client behavior remains consistent with existing tests.
+- Request IDs are unique strings and timeouts are configurable.
+
+### US3 (P3): Server Migration
+As a maintainer, I want the server to use shared utilities so that behavior remains consistent while duplication is removed.
+
+**Acceptance Criteria**:
+- Server behavior remains consistent with existing tests.
+- Handler registration and validation defaults remain strict unless explicitly disabled.
+
 ## Motivation
 
 ### Current Problems

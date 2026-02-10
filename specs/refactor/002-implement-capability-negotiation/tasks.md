@@ -23,7 +23,7 @@ description: "Task list for REF-002 shared utilities refactor"
 **Purpose**: Establish baseline understanding and shared scaffolding
 
 - [ ] T001 Review duplication hotspots in packages/core/src/client.ts and packages/core/src/server.ts
-- [ ] T002 [P] Confirm utility export surface in packages/core/src/utils/index.ts (create file if missing)
+- [ ] T002 [P] Create or update packages/core/src/utils/index.ts to export DisposableEventEmitter and HandlerRegistry
 
 ---
 
@@ -31,8 +31,7 @@ description: "Task list for REF-002 shared utilities refactor"
 
 **Purpose**: Shared prerequisites for all user stories
 
-- [ ] T003 Create or update packages/core/src/utils/index.ts to export DisposableEventEmitter and HandlerRegistry
-- [ ] T004 [P] Add utils test directory structure under packages/core/tests/utils/ (create folder and placeholder if needed)
+- [ ] T003 [P] Add utils test directory structure under packages/core/tests/utils/ (create folder and placeholder if needed)
 
 **Checkpoint**: Foundations ready for utility implementations
 
@@ -46,18 +45,18 @@ description: "Task list for REF-002 shared utilities refactor"
 
 ### Tests for User Story 1 (REQUIRED)
 
-- [ ] T005 [P] [US1] Add unit tests for DisposableEventEmitter in packages/core/tests/utils/disposable-event-emitter.test.ts
-- [ ] T006 [P] [US1] Add unit tests for HandlerRegistry in packages/core/tests/utils/handler-registry.test.ts
-- [ ] T007 [P] [US1] Add unit tests for TransportAttachment in packages/core/tests/utils/transport-attachment.test.ts
-- [ ] T008 [P] [US1] Add unit tests for PendingRequestTracker in packages/core/tests/utils/pending-request-tracker.test.ts
+- [ ] T004 [P] [US1] Add unit tests for DisposableEventEmitter in packages/core/tests/utils/disposable-event-emitter.test.ts
+- [ ] T005 [P] [US1] Add unit tests for HandlerRegistry in packages/core/tests/utils/handler-registry.test.ts
+- [ ] T006 [P] [US1] Add unit tests for TransportAttachment in packages/core/tests/utils/transport-attachment.test.ts
+- [ ] T007 [P] [US1] Add unit tests for PendingRequestTracker in packages/core/tests/utils/pending-request-tracker.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T009 [P] [US1] Implement DisposableEventEmitter in packages/core/src/utils/disposable-event-emitter.ts with TSDoc
-- [ ] T010 [P] [US1] Implement HandlerRegistry in packages/core/src/utils/handler-registry.ts with TSDoc and prefix grouping
-- [ ] T011 [P] [US1] Implement TransportAttachment in packages/core/src/utils/transport-attachment.ts with TSDoc
-- [ ] T012 [P] [US1] Implement PendingRequestTracker in packages/core/src/utils/pending-request-tracker.ts using string IDs
-- [ ] T013 [US1] Wire utils exports in packages/core/src/utils/index.ts (export only DisposableEventEmitter and HandlerRegistry)
+- [ ] T008 [P] [US1] Implement DisposableEventEmitter in packages/core/src/utils/disposable-event-emitter.ts with TSDoc
+- [ ] T009 [P] [US1] Implement HandlerRegistry in packages/core/src/utils/handler-registry.ts with TSDoc and prefix grouping
+- [ ] T010 [P] [US1] Implement TransportAttachment in packages/core/src/utils/transport-attachment.ts with TSDoc
+- [ ] T011 [P] [US1] Implement PendingRequestTracker in packages/core/src/utils/pending-request-tracker.ts using string IDs
+- [ ] T012 [US1] Wire utils exports in packages/core/src/utils/index.ts (export only DisposableEventEmitter and HandlerRegistry)
 
 **Checkpoint**: Utilities are tested, exported appropriately, and ready for consumption
 
@@ -71,14 +70,14 @@ description: "Task list for REF-002 shared utilities refactor"
 
 ### Tests for User Story 2 (REQUIRED)
 
-- [ ] T014 [P] [US2] Update client integration tests in packages/core/tests/client.test.ts for new utilities behavior
+- [ ] T013 [P] [US2] Update client integration tests in packages/core/tests/client.test.ts for new utilities behavior
 
 ### Implementation for User Story 2
 
-- [ ] T015 [US2] Refactor packages/core/src/client.ts to use DisposableEventEmitter
-- [ ] T016 [US2] Refactor packages/core/src/client.ts to use HandlerRegistry
-- [ ] T017 [US2] Refactor packages/core/src/client.ts to use TransportAttachment
-- [ ] T018 [US2] Refactor packages/core/src/client.ts to use PendingRequestTracker with configurable timeouts
+- [ ] T014 [US2] Refactor packages/core/src/client.ts to use DisposableEventEmitter
+- [ ] T015 [US2] Refactor packages/core/src/client.ts to use HandlerRegistry
+- [ ] T016 [US2] Refactor packages/core/src/client.ts to use TransportAttachment
+- [ ] T017 [US2] Refactor packages/core/src/client.ts to use PendingRequestTracker with configurable timeouts
 
 **Checkpoint**: Client behavior preserved with shared utilities
 
@@ -92,7 +91,8 @@ description: "Task list for REF-002 shared utilities refactor"
 
 ### Tests for User Story 3 (REQUIRED)
 
-- [ ] T019 [P] [US3] Update server integration tests in packages/core/tests/server.test.ts for new utilities behavior
+- [ ] T018 [P] [US3] Update server integration tests in packages/core/tests/server.test.ts for new utilities behavior
+- [ ] T019 [P] [US3] Add coverage for strict validation default in packages/core/tests/server.test.ts
 
 ### Implementation for User Story 3
 
@@ -109,9 +109,12 @@ description: "Task list for REF-002 shared utilities refactor"
 
 **Purpose**: Cross-story validation, cleanup, and documentation updates
 
-- [ ] T024 [P] Update docs/DEVELOPMENT.md to mention shared utilities and test locations
+- [ ] T024 [P] Update docs/DEVELOPMENT.md with usage examples for new utilities
 - [ ] T025 Run quickstart validation steps from specs/refactor/002-implement-capability-negotiation/quickstart.md
-- [ ] T026 [P] Remove leftover duplicate helper code from packages/core/src/client.ts and packages/core/src/server.ts
+- [ ] T026 [P] Add performance benchmark for request dispatch/handler lookup (document baseline and result)
+- [ ] T027 [P] Add memory leak verification step for pending requests and event listeners
+- [ ] T028 [P] Add coverage check for core utilities (target 95%+)
+- [ ] T029 [P] Remove leftover duplicate helper code from packages/core/src/client.ts and packages/core/src/server.ts
 
 ---
 
