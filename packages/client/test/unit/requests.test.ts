@@ -7,6 +7,31 @@ import { LSPClient } from '../../src/client.js';
 import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
 import { PassThrough } from 'node:stream';
 
+const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } | undefined => {
+  const text = chunk.toString('utf8');
+  const start = text.indexOf('{');
+  if (start === -1) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(text.slice(start)) as { id?: string | number; method?: string };
+  } catch {
+    return undefined;
+  }
+};
+
+const captureRequestId = (outputStream: PassThrough, method: string): Promise<string | number> => {
+  return new Promise((resolve) => {
+    outputStream.on('data', (chunk: Buffer) => {
+      const message = parseMessage(chunk);
+      if (message?.method === method && message.id !== undefined) {
+        resolve(message.id);
+      }
+    });
+  });
+};
+
 describe('LSPClient requests and notifications', () => {
   let client: LSPClient;
   let inputStream: PassThrough;
@@ -27,39 +52,39 @@ describe('LSPClient requests and notifications', () => {
     });
 
     // Connect and initialize
+    const initIdPromise = captureRequestId(outputStream, 'initialize');
     const connectPromise = client.connect(transport);
 
-    setTimeout(() => {
-      const initResponse = {
-        jsonrpc: '2.0',
-        id: 1,
-        result: {
-          capabilities: {},
-          serverInfo: { name: 'test-server' }
-        }
-      };
-      const responseStr = JSON.stringify(initResponse);
-      const buffer = Buffer.from(`Content-Length: ${responseStr.length}\r\n\r\n${responseStr}`);
-      inputStream.write(buffer);
-    }, 10);
+    const initId = await initIdPromise;
+    const initResponse = {
+      jsonrpc: '2.0',
+      id: initId,
+      result: {
+        capabilities: {},
+        serverInfo: { name: 'test-server' }
+      }
+    };
+    const responseStr = JSON.stringify(initResponse);
+    const buffer = Buffer.from(`Content-Length: ${responseStr.length}\r\n\r\n${responseStr}`);
+    inputStream.write(buffer);
 
     await connectPromise;
   });
 
   describe('sendRequest', () => {
     it('should send request and receive response', async () => {
+      const requestIdPromise = captureRequestId(outputStream, 'textDocument/hover');
       const requestPromise = client.sendRequest('textDocument/hover', {
         textDocument: { uri: 'file:///test.ts' },
         position: { line: 0, character: 5 }
       });
 
-      // Wait for request to be sent
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      const requestId = await requestIdPromise;
 
       // Simulate server response
       const hoverResponse = {
         jsonrpc: '2.0',
-        id: 2,
+        id: requestId,
         result: {
           contents: 'Test hover'
         }
@@ -73,17 +98,18 @@ describe('LSPClient requests and notifications', () => {
     });
 
     it('should reject on error response', async () => {
+      const requestIdPromise = captureRequestId(outputStream, 'textDocument/definition');
       const requestPromise = client.sendRequest('textDocument/definition', {
         textDocument: { uri: 'file:///test.ts' },
         position: { line: 0, character: 5 }
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      const requestId = await requestIdPromise;
 
       // Simulate server error response
       const errorResponse = {
         jsonrpc: '2.0',
-        id: 2,
+        id: requestId,
         error: {
           code: -32601,
           message: 'Method not found'
@@ -99,6 +125,8 @@ describe('LSPClient requests and notifications', () => {
     it('should support cancellable requests', async () => {
       const cancelSource = new CancellationTokenSource();
 
+      const requestIdPromise = captureRequestId(outputStream, 'textDocument/completion');
+
       const requestPromise = client.sendRequest(
         'textDocument/completion',
         {
@@ -108,8 +136,7 @@ describe('LSPClient requests and notifications', () => {
         cancelSource.token
       );
 
-      // Cancel the request
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await requestIdPromise;
       cancelSource.cancel();
 
       await expect(requestPromise).rejects.toThrow('Request was cancelled');
@@ -221,7 +248,7 @@ describe('LSPClient requests and notifications', () => {
       const handlerPromise = new Promise<any>((resolve) => {
         client.onRequest('workspace/configuration', async (params) => {
           resolve(params);
-          return { settings: {} };
+          return [{ settings: {} }];
         });
       });
 
@@ -262,7 +289,7 @@ describe('LSPClient requests and notifications', () => {
       const serverRequest = {
         jsonrpc: '2.0',
         id: 100,
-        method: 'unknown/method',
+        method: 'workspace/semanticTokens/refresh',
         params: {}
       };
       const requestStr = JSON.stringify(serverRequest);
@@ -275,9 +302,9 @@ describe('LSPClient requests and notifications', () => {
     });
 
     it('should return disposable to unregister handler', async () => {
-      const handler = async () => ({ result: 'test' });
+      const handler = async () => [] as Array<unknown>;
 
-      const disposable = client.onRequest('test/method', handler);
+      const disposable = client.onRequest('workspace/configuration', handler);
       expect(disposable.dispose).toBeDefined();
 
       disposable.dispose();
@@ -301,7 +328,7 @@ describe('LSPClient requests and notifications', () => {
       const serverRequest = {
         jsonrpc: '2.0',
         id: 101,
-        method: 'test/method',
+        method: 'workspace/configuration',
         params: {}
       };
       const requestStr = JSON.stringify(serverRequest);
@@ -338,7 +365,7 @@ describe('LSPClient requests and notifications', () => {
     it('should return disposable to unregister handler', () => {
       const handler = () => {};
 
-      const disposable = client.onNotification('test/notification', handler);
+      const disposable = client.onNotification('window/logMessage', handler);
       expect(disposable.dispose).toBeDefined();
 
       disposable.dispose();

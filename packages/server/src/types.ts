@@ -45,12 +45,23 @@ export interface ServerOptions<
   logLevel?: LogLevel;
 
   /**
+   * Default request timeout in milliseconds for server-initiated requests
+   */
+  requestTimeout?: number;
+
+  /**
    * Custom validation error handler
    */
   onValidationError?: (
     error: ZodError,
     message: RequestContext | NotificationContext
   ) => ResponseErrorInterface | void;
+
+  /**
+   * Enable parameter validation for requests and notifications
+   * Defaults to true
+   */
+  validateParams?: boolean;
 
   /**
    * Capabilities to declare during initialization

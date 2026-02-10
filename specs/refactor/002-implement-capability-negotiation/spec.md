@@ -37,7 +37,7 @@ As a maintainer, I want the server to use shared utilities so that behavior rema
 
 ### Current Problems
 
-The current implementation in `packages/core/src/client.ts` and `packages/core/src/server.ts` contains significant code duplication that creates maintenance burden and increases the risk of bugs:
+The current implementation in `packages/client/src/client.ts` and `packages/server/src/server.ts` contains significant code duplication that creates maintenance burden and increases the risk of bugs:
 
 #### 1. **Duplicate Event Emitter Management** (~80 lines duplicated)
 Both client and server independently implement:
@@ -220,17 +220,17 @@ class PendingRequestTracker<TResponse> {
 5. `/packages/core/src/utils/index.ts` - Export barrel file
 
 ### Files to Modify
-1. `/packages/core/src/client.ts` - Replace inline implementations with utilities (~190 lines removed)
-2. `/packages/core/src/server.ts` - Replace inline implementations with utilities (~190 lines removed)
+1. `/packages/client/src/client.ts` - Replace inline implementations with utilities (~190 lines removed)
+2. `/packages/server/src/server.ts` - Replace inline implementations with utilities (~190 lines removed)
 3. `/packages/core/src/dispatcher.ts` - May benefit from HandlerRegistry
 
 ### Test Files to Create/Modify
-1. `/packages/core/tests/utils/disposable-event-emitter.test.ts` - New tests
-2. `/packages/core/tests/utils/handler-registry.test.ts` - New tests
-3. `/packages/core/tests/utils/transport-attachment.test.ts` - New tests
-4. `/packages/core/tests/utils/pending-request-tracker.test.ts` - New tests
-5. `/packages/core/tests/client.test.ts` - Update to verify integration
-6. `/packages/core/tests/server.test.ts` - Update to verify integration
+1. `/packages/core/test/utils/disposable-event-emitter.test.ts` - New tests
+2. `/packages/core/test/utils/handler-registry.test.ts` - New tests
+3. `/packages/core/test/utils/transport-attachment.test.ts` - New tests
+4. `/packages/core/test/utils/pending-request-tracker.test.ts` - New tests
+5. `/packages/client/test/unit/client.test.ts` - Update to verify integration
+6. `/packages/server/test/unit/server.test.ts` - Update to verify integration
 
 ## Behavior Preservation Requirements
 

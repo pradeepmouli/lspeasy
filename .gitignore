@@ -12,5 +12,12 @@ coverage/
 .pnpm-debug.log*
 *.tsbuildinfo
 
+# IDE
+.vscode/
+.idea/
+
+# Editor swap files
+*.swp
+
 # MetaModel cache
 .cache/

@@ -124,10 +124,8 @@ export function initializeServerSendMethods<Capabilities extends Partial<ServerC
 
       // Create send method
       const sendMethodName = camelCase(methodKey);
-      namespace[sendMethodName] = async function (_params: any) {
-        // TODO: Server needs to implement sendRequest method for server-to-client requests
-        // This would require extending the server implementation
-        throw new Error('Server-to-client requests not yet implemented in LSPServer');
+      namespace[sendMethodName] = async function (params: any) {
+        return (server as any).sendRequest(def.Method, params);
       };
     }
   }
@@ -153,9 +151,7 @@ export function initializeServerSendMethods<Capabilities extends Partial<ServerC
       // Create send method
       const sendMethodName = camelCase(methodKey);
       namespace[sendMethodName] = async function (params: any) {
-        // Note: Server needs to implement sendNotification method for server-to-client notifications
-        // This would require extending the server implementation
-        throw new Error('Server-to-client notifications not yet implemented in LSPServer');
+        return (server as any).sendNotification(def.Method, params);
       };
     }
   }

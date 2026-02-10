@@ -43,6 +43,11 @@ export interface ClientOptions<
   logLevel?: LogLevel;
 
   /**
+   * Default request timeout in milliseconds for outgoing requests
+   */
+  requestTimeout?: number;
+
+  /**
    * Callback for response validation errors
    */
   onValidationError?: (error: ZodError, response: ResponseMessage) => void;
