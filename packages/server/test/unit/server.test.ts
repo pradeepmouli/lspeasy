@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { LSPServer } from '../../src/server.js';
-import { ConsoleLogger, LogLevel } from '@lspeasy/core';
+import { ConsoleLogger, LogLevel, TextDocumentSyncKind } from '@lspeasy/core';
 
 describe('LSPServer', () => {
   describe('constructor', () => {
@@ -20,7 +20,7 @@ describe('LSPServer', () => {
         name: 'test-server',
         version: '2.0.0',
         logger,
-        logLevel: 'debug'
+        logLevel: LogLevel.Debug
       });
 
       expect(server).toBeDefined();
@@ -84,14 +84,14 @@ describe('LSPServer', () => {
 
     it('should accept partial capabilities', () => {
       const capabilities = {
-        textDocumentSync: 1,
+        textDocumentSync: TextDocumentSyncKind.Full,
         hoverProvider: true
       };
 
       server.setCapabilities(capabilities);
       const result = server.getServerCapabilities();
 
-      expect(result.textDocumentSync).toBe(1);
+      expect(result.textDocumentSync).toBe(TextDocumentSyncKind.Full);
       expect(result.hoverProvider).toBe(true);
     });
   });

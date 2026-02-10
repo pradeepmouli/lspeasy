@@ -15,6 +15,13 @@ import {
 import type { LSPClient } from './client.js';
 import camelCase from 'camelcase';
 
+function deriveNotificationMethodKey(namespaceName: string, notificationKey: string): string {
+  if (notificationKey.endsWith(namespaceName)) {
+    return notificationKey.slice(0, -namespaceName.length);
+  }
+  return notificationKey;
+}
+
 /**
  * Initializes capability-aware methods on the client object based on LSPRequest definitions
  */
@@ -60,7 +67,8 @@ export function initializeCapabilityMethods<
       const d = getDefinitionForNotification(namespaceName as any, notification);
       // Notifications typically don't require capabilities, but check anyway
       if (!d.ServerCapability || hasCapability(client.serverCapabilities, d.ServerCapability)) {
-        (client as any)[clientPropertyName][camelCase(notification)] = (a: any) =>
+        const methodKey = deriveNotificationMethodKey(namespaceName, notification);
+        (client as any)[clientPropertyName][camelCase(methodKey)] = (a: any) =>
           client.sendNotification(d.Method, a);
       }
     }

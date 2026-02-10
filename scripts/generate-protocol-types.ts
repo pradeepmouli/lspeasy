@@ -95,6 +95,7 @@ class ProtocolTypeGenerator {
   // Output paths
   private readonly typesOutputPath: string;
   private readonly namespacesOutputPath: string;
+  private readonly enumsOutputPath: string;
 
   constructor() {
     // Initialize ts-morph project for output generation (import management)
@@ -117,6 +118,7 @@ class ProtocolTypeGenerator {
       process.cwd(),
       'packages/core/src/protocol/namespaces.ts'
     );
+    this.enumsOutputPath = path.join(process.cwd(), 'packages/core/src/protocol/enums.ts');
   }
 
   async generate() {
@@ -130,6 +132,9 @@ class ProtocolTypeGenerator {
 
     // Step 3: Generate types.ts
     //await this.generateTypesFile();
+
+    // Step 3b: Generate enums.ts
+    await this.generateEnumsFile();
 
     // Step 4: Generate namespaces.ts
     await this.generateNamespacesFile();
@@ -398,6 +403,47 @@ export * from './types.js';`);
 
     console.log(`   ✅ Generated ${this.namespacesOutputPath}`);
     console.log(`   ✅ Generated ${this.categories.size} namespaces\n`);
+  }
+
+  private async generateEnumsFile() {
+    console.log('📝 Generating enums.ts...');
+
+    const sourceFile = this.outputProject.createSourceFile(this.enumsOutputPath, '', {
+      overwrite: true
+    });
+
+    sourceFile.addStatements(`/**
+ * LSP Protocol Enums
+ *
+ * Auto-generated from metaModel.json
+ * DO NOT EDIT MANUALLY
+ */`);
+
+    const enums = this.parser
+      .getAllEnumerations()
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    for (const enumeration of enums) {
+      const enumDeclaration = sourceFile.addEnum({
+        name: enumeration.name,
+        isExported: true
+      });
+
+      for (const entry of enumeration.values) {
+        enumDeclaration.addMember({
+          name: entry.name,
+          initializer:
+            typeof entry.value === 'string' ? JSON.stringify(entry.value) : String(entry.value)
+        });
+      }
+    }
+
+    sourceFile.formatText();
+    await sourceFile.save();
+
+    console.log(`   ✅ Generated ${this.enumsOutputPath}`);
+    console.log(`   ✅ Generated ${enums.length} enums\n`);
   }
 
   /**

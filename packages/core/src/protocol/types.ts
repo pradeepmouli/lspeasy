@@ -1,21 +1,5 @@
 export type * from 'vscode-languageserver-protocol';
-export {
-  CodeActionKind,
-  CompletionItemKind,
-  CompletionItemTag,
-  DiagnosticSeverity,
-  DiagnosticTag,
-  DocumentHighlightKind,
-  FileChangeType,
-  FoldingRangeKind,
-  InsertTextFormat,
-  MessageType,
-  SymbolKind,
-  SymbolTag,
-  TextDocumentSaveReason,
-  TextDocumentSyncKind,
-  TokenFormat
-} from 'vscode-languageserver-protocol';
+
 export type TextDocumentContentParams = unknown;
 export type TextDocumentContent = unknown;
 

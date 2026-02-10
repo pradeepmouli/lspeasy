@@ -4,6 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '../../src/server.js';
+import { LogLevel } from '@lspeasy/core';
 import type { Transport } from '@lspeasy/core';
 
 // Mock transport
@@ -59,7 +60,7 @@ describe('Parameter Validation Integration', () => {
     server = new LSPServer({
       name: 'validation-test-server',
       version: '1.0.0',
-      logLevel: 'error'
+      logLevel: LogLevel.Error
     });
 
     server.setCapabilities({
@@ -187,12 +188,12 @@ describe('Parameter Validation Integration', () => {
   it('should use custom validation error handler', async () => {
     const customServer = new LSPServer({
       name: 'custom-validation-server',
-      logLevel: 'error',
+      logLevel: LogLevel.Error,
       onValidationError: (error, _context) => {
         return {
           code: -32099,
           message: 'Custom validation error',
-          data: { zodErrors: error.errors }
+          data: { zodErrors: error.issues }
         };
       }
     });
@@ -237,7 +238,7 @@ describe('Parameter Validation Integration', () => {
   it('should skip validation when disabled', async () => {
     const noValidationServer = new LSPServer({
       name: 'no-validation-server',
-      logLevel: 'error',
+      logLevel: LogLevel.Error,
       validateParams: false
     });
 
@@ -305,7 +306,7 @@ describe('Parameter Validation Integration', () => {
   });
 
   it('should validate initialize params', async () => {
-    const newServer = new LSPServer({ logLevel: 'error' });
+    const newServer = new LSPServer({ logLevel: LogLevel.Error });
     const newTransport = new TestTransport();
     await newServer.listen(newTransport);
 

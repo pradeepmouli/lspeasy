@@ -5,6 +5,8 @@ coverage/
 .coverage/
 *.log
 .DS_Store
+Thumbs.db
+*.tmp
 .env
 .env.local
 .env.*.local

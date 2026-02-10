@@ -7,7 +7,10 @@ import type { Disposable } from './disposable.js';
 /**
  * Handler function type.
  */
-export type Handler<TRequest, TResponse> = (params: TRequest) => Promise<TResponse> | TResponse;
+export type Handler<TRequest, TResponse> = (
+  params: TRequest,
+  ...rest: unknown[]
+) => Promise<TResponse> | TResponse;
 
 /**
  * Registry for request/notification handlers keyed by method.

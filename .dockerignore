@@ -28,6 +28,7 @@ coverage/
 .DS_Store
 Thumbs.db
 *.swp
+*.tmp
 
 # Test files
 *.test.ts
