@@ -17,14 +17,14 @@ Extract shared utilities for event emitters, handler registries, transport attac
   the iteration process.
 -->
 
-**Language/Version**: TypeScript 5.9 (Node.js >=20, pnpm >=10)  
-**Primary Dependencies**: vitest, ts-morph, oxlint, oxfmt, tsx  
-**Storage**: N/A (in-memory structures, Map-backed registries)  
-**Testing**: Vitest (unit + e2e), TypeScript type-check  
-**Target Platform**: Node.js CLI/SDK (macOS/Linux/CI)  
-**Project Type**: Monorepo (pnpm workspaces; packages + scripts)  
-**Performance Goals**: No regressions in request dispatch or handler lookup; <=5% baseline variance  
-**Constraints**: LSP compliance, strict validation default, configurable timeouts, backward compatibility not required for request IDs  
+**Language/Version**: TypeScript 5.9 (Node.js >=20, pnpm >=10)
+**Primary Dependencies**: vitest, ts-morph, oxlint, oxfmt, tsx
+**Storage**: N/A (in-memory structures, Map-backed registries)
+**Testing**: Vitest (unit + e2e), TypeScript type-check
+**Target Platform**: Node.js CLI/SDK (macOS/Linux/CI)
+**Project Type**: Monorepo (pnpm workspaces; packages + scripts)
+**Performance Goals**: No regressions in request dispatch or handler lookup; <=5% baseline variance
+**Constraints**: LSP compliance, strict validation default, configurable timeouts, backward compatibility not required for request IDs
 **Scale/Scope**: Core client/server utilities, shared handler/event/transport logic
 
 ## Constitution Check
