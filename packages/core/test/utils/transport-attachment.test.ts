@@ -8,18 +8,25 @@ import { TransportAttachment } from '../../src/utils/transport-attachment.js';
 
 describe('TransportAttachment', () => {
   const createTransport = () => {
-    return {
-      onMessage: vi.fn().mockReturnValue({ dispose: vi.fn() }),
-      onError: vi.fn().mockReturnValue({ dispose: vi.fn() }),
-      onClose: vi.fn().mockReturnValue({ dispose: vi.fn() }),
+    const onMessage = vi.fn().mockReturnValue({ dispose: vi.fn() });
+    const onError = vi.fn().mockReturnValue({ dispose: vi.fn() });
+    const onClose = vi.fn((handler: () => void) => {
+      return { dispose: vi.fn(), handler };
+    });
+    const transport = {
+      onMessage,
+      onError,
+      onClose,
       send: vi.fn(async () => undefined),
       close: vi.fn(async () => undefined),
       isConnected: vi.fn(() => true)
     } satisfies Transport;
+
+    return { transport, onMessage, onError, onClose };
   };
 
   it('attaches handlers and exposes attachment state', () => {
-    const transport = createTransport();
+    const { transport, onMessage, onError, onClose } = createTransport();
     const attachment = new TransportAttachment();
     const handlers = {
       onMessage: vi.fn(),
@@ -30,13 +37,13 @@ describe('TransportAttachment', () => {
     attachment.attach(transport, handlers);
 
     expect(attachment.isAttached()).toBe(true);
-    expect(transport.onMessage).toHaveBeenCalledWith(handlers.onMessage);
-    expect(transport.onError).toHaveBeenCalledWith(handlers.onError);
-    expect(transport.onClose).toHaveBeenCalledTimes(1);
+    expect(onMessage).toHaveBeenCalledWith(handlers.onMessage);
+    expect(onError).toHaveBeenCalledWith(handlers.onError);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('detaches and disposes handlers', () => {
-    const transport = createTransport();
+    const { transport, onMessage, onError, onClose } = createTransport();
     const attachment = new TransportAttachment();
     const handlers = {
       onMessage: vi.fn(),
@@ -46,9 +53,9 @@ describe('TransportAttachment', () => {
 
     const disposable = attachment.attach(transport, handlers);
     const disposables = [
-      transport.onMessage.mock.results[0]?.value,
-      transport.onError.mock.results[0]?.value,
-      transport.onClose.mock.results[0]?.value
+      onMessage.mock.results[0]?.value,
+      onError.mock.results[0]?.value,
+      onClose.mock.results[0]?.value
     ];
 
     disposable.dispose();
@@ -57,5 +64,30 @@ describe('TransportAttachment', () => {
     for (const item of disposables) {
       expect(item?.dispose).toHaveBeenCalledTimes(1);
     }
+  });
+
+  it('detaches when transport closes and forwards close handler', () => {
+    const { transport, onClose } = createTransport();
+    const attachment = new TransportAttachment();
+    const handlers = {
+      onMessage: vi.fn(),
+      onError: vi.fn(),
+      onClose: vi.fn()
+    };
+
+    attachment.attach(transport, handlers);
+    const closeEntry = onClose.mock.results[0]?.value as { handler?: () => void } | undefined;
+    closeEntry?.handler?.();
+
+    expect(handlers.onClose).toHaveBeenCalledTimes(1);
+    expect(attachment.isAttached()).toBe(false);
+  });
+
+  it('is safe to detach without an attachment', () => {
+    const attachment = new TransportAttachment();
+
+    attachment.detach();
+
+    expect(attachment.isAttached()).toBe(false);
   });
 });

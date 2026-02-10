@@ -41,4 +41,37 @@ describe('PendingRequestTracker', () => {
 
     await expect(promise).rejects.toThrow('Request timed out');
   });
+
+  it('uses default timeout when provided', async () => {
+    const tracker = new PendingRequestTracker<string>(25);
+    const { promise } = tracker.create();
+
+    vi.advanceTimersByTime(30);
+
+    await expect(promise).rejects.toThrow('Request timed out');
+  });
+
+  it('returns metadata for pending requests', () => {
+    const tracker = new PendingRequestTracker<string, { method: string }>();
+    const { id } = tracker.create(undefined, { method: 'initialize' });
+
+    expect(tracker.getMetadata(id)).toEqual({ method: 'initialize' });
+  });
+
+  it('ignores resolve/reject for unknown ids', () => {
+    const tracker = new PendingRequestTracker<string>();
+
+    expect(() => tracker.resolve('missing', 'ok')).not.toThrow();
+    expect(() => tracker.reject('missing', new Error('fail'))).not.toThrow();
+  });
+
+  it('clears pending requests with a custom error', async () => {
+    const tracker = new PendingRequestTracker<string>();
+    const { promise } = tracker.create();
+    const error = new Error('cleared');
+
+    tracker.clear(error);
+
+    await expect(promise).rejects.toBe(error);
+  });
 });

@@ -63,6 +63,7 @@ describe('LSPClient', () => {
 
       //expect(client.')).toBeDefined();
       //expect(client.workspace).toBeDefined();
+      expect(client).toBeDefined();
     });
   });
 

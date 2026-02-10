@@ -110,11 +110,11 @@ description: "Task list for REF-002 shared utilities refactor"
 **Purpose**: Cross-story validation, cleanup, and documentation updates
 
 - [x] T024 [P] Update docs/DEVELOPMENT.md with usage examples for new utilities
-- [ ] T025 Run quickstart validation steps from specs/refactor/002-implement-capability-negotiation/quickstart.md
-- [ ] T026 [P] Add performance benchmark for request dispatch/handler lookup (document baseline and result)
+- [x] T025 Run quickstart validation steps from specs/refactor/002-implement-capability-negotiation/quickstart.md
+- [x] T026 [P] Add performance benchmark for request dispatch/handler lookup (document baseline and result)
 - [x] T027 [P] Add memory leak verification step for pending requests and event listeners
-- [ ] T028 [P] Add coverage check for core utilities (target 95%+)
-- [ ] T029 [P] Remove leftover duplicate helper code from packages/client/src/client.ts and packages/server/src/server.ts
+- [x] T028 [P] Add coverage check for core utilities (target 95%+)
+- [x] T029 [P] Remove leftover duplicate helper code from packages/client/src/client.ts and packages/server/src/server.ts
 
 ---
 

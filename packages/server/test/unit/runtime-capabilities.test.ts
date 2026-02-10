@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import type { ServerCapabilities, ClientCapabilities } from '@lspeasy/core';
+import type { ClientCapabilities } from '@lspeasy/core';
 import { LSPServer } from '../../src/server.js';
 
 describe('Server.registerCapability()', () => {

@@ -28,6 +28,14 @@ describe('HandlerRegistry', () => {
     expect(registry.get('workspace/symbol')).toBeUndefined();
   });
 
+  it('ignores unregistering unknown handlers', () => {
+    const registry = new HandlerRegistry<string, number>();
+
+    registry.unregister('workspace/unknown');
+
+    expect(registry.get('workspace/unknown')).toBeUndefined();
+  });
+
   it('returns a disposable for registration', () => {
     const registry = new HandlerRegistry<string, number>();
     const handler = vi.fn();
@@ -47,5 +55,30 @@ describe('HandlerRegistry', () => {
 
     expect(registry.get('textDocument/hover')).toBeUndefined();
     expect(registry.get('workspace/symbol')).toBeUndefined();
+  });
+
+  it('keeps other handlers when unregistering shared prefixes', () => {
+    const registry = new HandlerRegistry<string, number>();
+    const first = vi.fn().mockReturnValue(1);
+    const second = vi.fn().mockReturnValue(2);
+
+    registry.register('workspace/symbol', first);
+    registry.register('workspace/executeCommand', second);
+
+    registry.unregister('workspace/symbol');
+
+    expect(registry.get('workspace/symbol')).toBeUndefined();
+    expect(registry.get('workspace/executeCommand')?.('params')).toBe(2);
+  });
+
+  it('supports methods without a namespace separator', () => {
+    const registry = new HandlerRegistry<string, number>();
+    const handler = vi.fn().mockReturnValue(7);
+
+    registry.register('initialize', handler);
+
+    expect(registry.get('initialize')?.('params')).toBe(7);
+    registry.unregister('initialize');
+    expect(registry.get('initialize')).toBeUndefined();
   });
 });

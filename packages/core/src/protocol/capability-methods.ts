@@ -13,13 +13,11 @@ import type {
   ConditionalPick,
   ConditionalPickDeep,
   KeyAsString,
-  NonEmptyObject,
   PascalCase,
   Paths,
   Simplify,
   SimplifyDeep
 } from 'type-fest';
-import { request } from 'node:http';
 
 /**
  * Helper type to check if a capability is enabled
@@ -115,11 +113,6 @@ type RemoveNeverFromNamespace<T> = Simplify<{
   [K in keyof T as T[K] extends never ? never : K]: T[K];
 }>;
 
-type RemoveEmptyObject<T> = keyof T extends never ? never : T;
-
-/**
- * Uncapitalize first letter of string
- */
 /**
  * Client methods for sending requests to server
  * Methods are conditionally visible based on ServerCapabilities
@@ -294,10 +287,6 @@ export namespace Client {
   >;
 }
 
-type isServerToClient<T> = T extends { Direction: 'serverToClient' | 'both' } ? true : false;
-
-type isClientToServer<T> = T extends { Direction: 'clientToServer' | 'both' } ? true : false;
-
 export namespace Server {
   export type AvailableRequests<
     ServerCaps extends Partial<ServerCapabilities>,
@@ -371,21 +360,6 @@ export type AvailableMethods<
     >;
   };
 };
-
-type MyServerCaps = {
-  hoverProvider: true;
-  completionProvider: { triggerCharacters: ['.'] };
-};
-
-type MyClientCaps = {
-  textDocument: {
-    hover: { contentFormat: ['markdown'] };
-    completion: { completionItem: { snippetSupport: true } };
-    synchronization: { didSave: true };
-  };
-};
-type path = Paths<MyClientCaps>;
-type test = Client<MyClientCaps, MyServerCaps>;
 
 export type Client<
   ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities,

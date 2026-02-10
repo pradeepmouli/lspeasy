@@ -8,8 +8,10 @@
 import type {
   ServerCapabilities,
   ClientCapabilities,
-  Client,
-  Server
+  ClientRequests,
+  ServerHandlers,
+  ServerSendMethods,
+  ClientRequestHandlers
 } from '../packages/core/src/index.js';
 
 // ========================================
@@ -25,7 +27,7 @@ type MinimalServerCaps = {
 };
 
 // Client methods are narrowed to only what server supports
-type MinimalClientMethods = ClientSendMethods<MinimalServerCaps>;
+type MinimalClientMethods = ClientRequests<MinimalServerCaps>;
 
 // ✅ TypeScript will show these methods:
 //   client.textDocument.hover(params)
@@ -36,10 +38,12 @@ type MinimalClientMethods = ClientSendMethods<MinimalServerCaps>;
 //   client.textDocument.references(params)
 
 // Test: Verify hover is available
-type TestHoverAvailable = MinimalClientMethods['TextDocument']['hover']; // (params: HoverParams) => Promise<Hover | null>
+type TestHoverAvailable = MinimalClientMethods['textDocument']['hover']; // (params: HoverParams) => Promise<Hover | null>
 
 // Test: Verify definition is never (not available)
-type TestDefinitionNotAvailable = MinimalClientMethods['TextDocument']['definition']; // never
+type TestDefinitionNotAvailable = 'definition' extends keyof MinimalClientMethods['textDocument']
+  ? true
+  : false;
 
 // ========================================
 // Example 2: Server with narrow capabilities
@@ -81,7 +85,7 @@ type TestOnCompletionNotAvailable = Extract<MyServerHandlers, { onCompletion: an
 type FullServerCaps = ServerCapabilities;
 
 // All client methods are available
-type FullClientMethods = ClientSendMethods<FullServerCaps>;
+type FullClientMethods = ClientRequests<FullServerCaps>;
 
 // ✅ TypeScript will show ALL textDocument methods:
 //   client.textDocument.hover(params)
@@ -131,7 +135,7 @@ type MyServerSendMethods = ServerSendMethods<MyClientCaps>;
 //   server.client.registration(params)
 
 // Client can register handlers for server requests
-type MyClientHandlers = ClientHandlers<MyClientCaps>;
+type MyClientHandlers = ClientRequestHandlers<MyClientCaps>;
 
 // ✅ Available handlers:
 //   client.onShowMessageRequest(handler)
@@ -143,10 +147,10 @@ type MyClientHandlers = ClientHandlers<MyClientCaps>;
 // ========================================
 
 // Verify the transformations produce correct method signatures
-type VerifyHoverSignature = FullClientMethods['TextDocument']['hover'];
+type VerifyHoverSignature = FullClientMethods['textDocument']['hover'];
 // Should be: (params: HoverParams) => Promise<Hover | null>
 
-type VerifyCompletionSignature = FullClientMethods['TextDocument']['completion'];
+type VerifyCompletionSignature = FullClientMethods['textDocument']['completion'];
 // Should be: (params: CompletionParams) => Promise<CompletionList | CompletionItem[] | null>
 
 console.log('Examples compiled successfully!');

@@ -196,7 +196,7 @@ export async function fetchMetaModel(options: FetchMetaModelOptions = {}): Promi
     if (cached) {
       try {
         return JSON.parse(cached) as MetaModel;
-      } catch (parseError) {
+      } catch {
         console.warn('⚠️  Cached file is invalid, will refetch');
       }
     }

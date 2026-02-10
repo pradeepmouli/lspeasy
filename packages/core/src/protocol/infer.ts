@@ -4,7 +4,7 @@
  * Uses mapped types and lookups instead of nested conditionals
  */
 
-import type { ServerCapabilities, ClientCapabilities } from 'vscode-languageserver-protocol';
+import type { ServerCapabilities } from 'vscode-languageserver-protocol';
 import { LSPRequest, LSPNotification } from './namespaces.js';
 import type { Paths, UnionToIntersection, ConditionalKeys, KeyAsString } from 'type-fest';
 
@@ -167,7 +167,7 @@ export const NotificationMethodMap: Map<
 export function getCapabilityForRequestMethod<
   M extends LSPRequestMethod<D>,
   D extends 'clientToServer' | 'serverToClient' | 'both' = 'both'
->(method: M, direction: D = 'both' as D): Paths<ServerCapabilities> | 'alwaysOn' {
+>(method: M, _direction: D = 'both' as D): Paths<ServerCapabilities> | 'alwaysOn' {
   const entry = RequestMethodMap.get(method);
   return entry?.ServerCapability ?? 'alwaysOn'; //TODO: fix namespaces.ts generation to actually align ServerCapability with ServerCapabilities keys
 }
@@ -178,7 +178,7 @@ export function getCapabilityForRequestMethod<
 export function getCapabilityForNotificationMethod<
   M extends LSPNotificationMethod<D>,
   D extends 'clientToServer' | 'serverToClient' | 'both' = 'both'
->(method: M, direction: D = 'both' as D): Paths<ServerCapabilities> | 'alwaysOn' {
+>(method: M, _direction: D = 'both' as D): Paths<ServerCapabilities> | 'alwaysOn' {
   const entry = NotificationMethodMap.get(method);
   return entry?.ServerCapability ?? 'alwaysOn';
 }

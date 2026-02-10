@@ -4,23 +4,9 @@
  * Ensures handlers can only be registered for declared capabilities
  */
 
-import type { LSPNotificationMethod, ServerCapabilities } from '@lspeasy/core';
+import type { ServerCapabilities } from '@lspeasy/core';
 import type { Logger } from '@lspeasy/core';
-import {
-  hasCapability,
-  getCapabilityForRequestMethod,
-  getCapabilityForNotificationMethod
-} from '@lspeasy/core';
-
-/**
- * Check if a capability is enabled in server capabilities
- */
-function isCapabilityEnabled(
-  capabilities: Partial<ServerCapabilities>,
-  capabilityKey: keyof ServerCapabilities
-): boolean {
-  return hasCapability(capabilities as ServerCapabilities, capabilityKey);
-}
+import { hasCapability, getCapabilityForNotificationMethod } from '@lspeasy/core';
 
 /**
  * Validates that a handler can be registered for a method

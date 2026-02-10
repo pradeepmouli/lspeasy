@@ -2,62 +2,12 @@
  * Integration test for capability-aware runtime behavior
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
-import type { Transport, ServerCapabilities, InitializeParams } from '@lspeasy/core';
-
-// Simple test transport for capability testing
-class TestTransport implements Transport {
-  private messageHandlers: Array<(message: any) => void> = [];
-  private errorHandlers: Array<(error: Error) => void> = [];
-  private closeHandlers: Array<() => void> = [];
-  public sentMessages: any[] = [];
-  private _connected = true;
-
-  async send(message: any): Promise<void> {
-    this.sentMessages.push(message);
-  }
-
-  onMessage(handler: (message: any) => void) {
-    this.messageHandlers.push(handler);
-    return { dispose: () => {} };
-  }
-
-  onError(handler: (error: Error) => void) {
-    this.errorHandlers.push(handler);
-    return { dispose: () => {} };
-  }
-
-  onClose(handler: () => void) {
-    this.closeHandlers.push(handler);
-    return { dispose: () => {} };
-  }
-
-  async close(): Promise<void> {
-    this._connected = false;
-    for (const handler of this.closeHandlers) {
-      handler();
-    }
-  }
-
-  isConnected(): boolean {
-    return this._connected;
-  }
-
-  simulateMessage(message: any): void {
-    for (const handler of this.messageHandlers) {
-      handler(message);
-    }
-  }
-}
+import type { ServerCapabilities } from '@lspeasy/core';
 
 describe('Capability-Aware Runtime', () => {
   let server: LSPServer;
-  let transport: TestTransport;
-
-  beforeEach(() => {
-    transport = new TestTransport();
-  });
 
   describe('Server Capability Validation', () => {
     it('should allow handler registration for declared capabilities in non-strict mode', async () => {

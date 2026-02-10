@@ -7,13 +7,7 @@
 
 import type { LSPServer } from './server.js';
 import type { ServerCapabilities } from '@lspeasy/core';
-import {
-  LSPRequest,
-  LSPNotification,
-  getDefinitionForRequest,
-  getDefinitionForNotification,
-  hasCapability
-} from '@lspeasy/core';
+import { LSPRequest, LSPNotification, hasCapability } from '@lspeasy/core';
 import camelCase from 'camelcase';
 
 /**

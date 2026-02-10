@@ -4,7 +4,6 @@
  * Dynamically adds methods/namespaces to the client object based on server capabilities
  */
 
-import type { ServerCapabilities } from '@lspeasy/core';
 import {
   LSPRequest,
   LSPNotification,

@@ -51,7 +51,7 @@ server.onRequest('textDocument/hover', async (params: any) => {
 });
 
 // ✅ This works - completion capability is declared
-server.onRequest('textDocument/completion', async (params: any) => {
+server.onRequest('textDocument/completion', async (_params: any) => {
   return {
     isIncomplete: false,
     items: [

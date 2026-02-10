@@ -12,7 +12,6 @@ import type {
   Logger,
   CancellationToken,
   LSPRequestMethod,
-  LSPRequest,
   ParamsForRequest,
   ResultForRequest,
   LSPNotificationMethod,

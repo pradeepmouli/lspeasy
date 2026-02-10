@@ -1,3 +1,10 @@
+/**
+ * LSP Protocol Types
+ *
+ * Auto-generated from metaModel.json
+ * DO NOT EDIT MANUALLY
+ */
+
 export type * from 'vscode-languageserver-protocol';
 
 export type TextDocumentContentParams = unknown;

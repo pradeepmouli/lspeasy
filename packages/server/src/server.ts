@@ -12,8 +12,6 @@ import type {
   Logger,
   ServerCapabilities,
   ClientCapabilities,
-  InitializeParams,
-  InitializedParams,
   LSPRequestMethod,
   LSPNotificationMethod,
   ParamsForRequest,

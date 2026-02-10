@@ -4,43 +4,20 @@
 
 import { describe, it, expect } from 'vitest';
 import { LSPClient } from '../../src/client.js';
-import {
-  ClientCapabilities,
-  ClientRequestHandlers,
-  ClientNotificationHandlers,
-  ClientRequests,
-  ClientNotifications,
-  ServerCapabilities,
-  type AvailableMethods
-} from '@lspeasy/core';
-import { client } from '../../../../examples/dynamic-typing-example.js';
 
 describe('Dynamic Typing - LSPClient', () => {
   it('should have capability-aware methods with typed constructor', () => {
-    type MyServerCaps = {
-      hoverProvider: true;
-      completionProvider: { triggerCharacters: ['.'] };
-    };
-
-    type MyClientCaps = {
-      textDocument: {
-        hover: { contentFormat: ['markdown'] };
-        completion: { completionItem: { snippetSupport: true } };
-        synchronization: { didSave: true };
-      };
-    };
-
     // Create client using generic constructor with type parameters
     const client = new LSPClient({
       name: 'test-client',
       capabilities: {
         textDocument: { hover: { contentFormat: ['markdown'] }, synchronization: { didSave: true } }
-      },
-      _serverCapabilities: {
-        hoverProvider: true,
-        completionProvider: { triggerCharacters: ['.'] }
-      } as const
+      }
     });
+    (client as any).serverCapabilities = {
+      hoverProvider: true,
+      completionProvider: { triggerCharacters: ['.'] }
+    } as const;
 
     // Intellisense should show these namespace properties:
     // - client.textDocument
