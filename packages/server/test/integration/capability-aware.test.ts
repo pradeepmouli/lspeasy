@@ -44,6 +44,16 @@ describe('Capability-Aware Runtime', () => {
       };
       server.setCapabilities(capabilities);
 
+      // Test canRegisterHandler directly
+      const guard = (server as any).capabilityGuard;
+      console.warn('Testing hover:', guard.canRegisterHandler('textDocument/hover'));
+      try {
+        console.warn('Testing definition:', guard.canRegisterHandler('textDocument/definition'));
+        console.warn('Definition did NOT throw!');
+      } catch (e) {
+        console.warn('Definition threw:', (e as Error).message);
+      }
+
       // Hover should work
       expect(() => {
         server.onRequest('textDocument/hover', async () => ({ contents: 'hover' }));

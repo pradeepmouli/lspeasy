@@ -31,6 +31,7 @@ export class CapabilityGuard {
    * @throws Error if strict mode enabled and capability not declared
    */
   canRegisterHandler(method: string): boolean {
+    console.warn(`[CapabilityGuard.canRegisterHandler] called with method: ${method}`);
     // Special methods that don't require capabilities
     const alwaysAllowed = [
       'initialize',
@@ -58,8 +59,14 @@ export class CapabilityGuard {
 
     // Check if method requires a capability (try both request and notification)
     let capabilityKey = getCapabilityForRequestMethod(method as any);
+    console.warn(
+      `[CapabilityGuard] Method ${method}: capabilityKey from request = ${capabilityKey}`
+    );
     if (!capabilityKey) {
       capabilityKey = getCapabilityForNotificationMethod(method as any);
+      console.warn(
+        `[CapabilityGuard] Method ${method}: capabilityKey from notification = ${capabilityKey}`
+      );
     }
 
     if (!capabilityKey) {
