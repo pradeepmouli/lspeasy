@@ -164,9 +164,12 @@ describe('LSPClient requests and notifications', () => {
       );
 
       await requestIdPromise;
+
+      // Set up the expectation BEFORE cancelling to ensure handler is attached
+      const expectation = expect(requestPromise).rejects.toThrow('Request was cancelled');
       cancelSource.cancel();
 
-      await expect(requestPromise).rejects.toThrow('Request was cancelled');
+      await expectation;
     });
 
     it('should handle already cancelled token', async () => {
@@ -263,10 +266,11 @@ describe('LSPClient requests and notifications', () => {
       expect(promise).toBeInstanceOf(Promise);
       expect(typeof cancel).toBe('function');
 
-      // Cancel the request
+      // Set up the expectation BEFORE cancelling to ensure handler is attached
+      const expectation = expect(promise).rejects.toThrow('Request was cancelled');
       cancel();
 
-      await expect(promise).rejects.toThrow('Request was cancelled');
+      await expectation;
     });
   });
 
