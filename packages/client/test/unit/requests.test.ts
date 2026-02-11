@@ -7,10 +7,6 @@ import { LSPClient } from '../../src/client.js';
 import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
 import { PassThrough } from 'node:stream';
 
-// Note: Do not install global `unhandledRejection` handlers here.
-// Tests should handle expected promise rejections explicitly using
-// `await`, `.catch()`, or `expect(...).rejects` so that Vitest can
-// correctly report unexpected unhandled rejections.
 const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } | undefined => {
   const text = chunk.toString('utf8');
   const start = text.indexOf('{');
@@ -175,8 +171,8 @@ describe('LSPClient requests and notifications', () => {
 
       await expectation;
 
-      // Wait for any pending process.nextTick callbacks to complete
-      await new Promise((resolve) => setImmediate(resolve));
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
 
     it('should handle already cancelled token', async () => {
@@ -194,8 +190,8 @@ describe('LSPClient requests and notifications', () => {
 
       await expect(requestPromise).rejects.toThrow('Request was cancelled');
 
-      // Wait for any pending process.nextTick callbacks to complete
-      await new Promise((resolve) => setImmediate(resolve));
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
 
     it('should throw if not connected', async () => {
@@ -281,6 +277,9 @@ describe('LSPClient requests and notifications', () => {
       cancel();
 
       await expectation;
+
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
   });
 
