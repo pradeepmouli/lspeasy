@@ -7,6 +7,8 @@
 import type { ClientCapabilities, ServerCapabilities } from '@lspeasy/core';
 import type { Logger } from '@lspeasy/core';
 import {
+  LSPNotification,
+  LSPRequest,
   getClientCapabilityForNotificationMethod,
   getClientCapabilityForRequestMethod,
   hasCapability,
@@ -14,6 +16,41 @@ import {
   getCapabilityForNotificationMethod,
   getCapabilityForRequestMethod
 } from '@lspeasy/core';
+
+type CapabilityKey = 'ServerCapability' | 'ClientCapability';
+
+function buildMethodSets(capabilityKey: CapabilityKey): {
+  all: Set<string>;
+  alwaysAllowed: Set<string>;
+} {
+  const all = new Set<string>();
+  const alwaysAllowed = new Set<string>();
+
+  for (const namespaceDefinitions of Object.values(LSPRequest)) {
+    for (const definition of Object.values(namespaceDefinitions)) {
+      const entry = definition as { Method: string } & Record<CapabilityKey, string | undefined>;
+      all.add(entry.Method);
+      if (!entry[capabilityKey]) {
+        alwaysAllowed.add(entry.Method);
+      }
+    }
+  }
+
+  for (const namespaceDefinitions of Object.values(LSPNotification)) {
+    for (const definition of Object.values(namespaceDefinitions)) {
+      const entry = definition as { Method: string } & Record<CapabilityKey, string | undefined>;
+      all.add(entry.Method);
+      if (!entry[capabilityKey]) {
+        alwaysAllowed.add(entry.Method);
+      }
+    }
+  }
+
+  return { all, alwaysAllowed };
+}
+
+const SERVER_METHODS = buildMethodSets('ServerCapability');
+const CLIENT_METHODS = buildMethodSets('ClientCapability');
 
 /**
  * Validates that a handler can be registered for a method
@@ -34,28 +71,21 @@ export class CapabilityGuard {
    * @throws Error if strict mode enabled and capability not declared
    */
   canRegisterHandler(method: string): boolean {
-    // Special methods that don't require capabilities
-    const alwaysAllowed = [
-      'initialize',
-      'initialized',
-      'shutdown',
-      'exit',
-      '$/cancelRequest',
-      'textDocument/didOpen',
-      'textDocument/didChange',
-      'textDocument/didClose',
-      'textDocument/didSave',
-      'textDocument/willSave',
-      'workspace/didChangeConfiguration',
-      'workspace/didChangeWatchedFiles',
-      'workspace/didChangeWorkspaceFolders',
-      'notebookDocument/didOpen',
-      'notebookDocument/didChange',
-      'notebookDocument/didSave',
-      'notebookDocument/didClose'
-    ];
+    if (!SERVER_METHODS.all.has(method)) {
+      if (!this.strict) {
+        this.logger.debug(`Unknown method ${method}, allowing in non-strict mode`);
+        return true;
+      }
 
-    if (alwaysAllowed.includes(method)) {
+      const error = `Cannot register handler for unknown method: ${method}`;
+      this.logger.error(error);
+      if (this.strict) {
+        throw new Error(error);
+      }
+      return false;
+    }
+
+    if (SERVER_METHODS.alwaysAllowed.has(method)) {
       return true;
     }
 
@@ -123,6 +153,21 @@ export class ClientCapabilityGuard {
    * @throws Error if strict mode enabled and client capability not declared
    */
   canSendRequest(method: string): boolean {
+    if (!CLIENT_METHODS.all.has(method)) {
+      if (!this.strict) {
+        this.logger.debug(`Unknown request method ${method}, allowing in non-strict mode`);
+        return true;
+      }
+
+      const error = `Cannot send request for unknown method: ${method}`;
+      this.logger.error(error);
+      throw new Error(error);
+    }
+
+    if (CLIENT_METHODS.alwaysAllowed.has(method)) {
+      return true;
+    }
+
     const capabilityKey = getClientCapabilityForRequestMethod(method as any);
     if (!capabilityKey) {
       if (!this.strict) {
@@ -160,6 +205,21 @@ export class ClientCapabilityGuard {
    * @throws Error if strict mode enabled and client capability not declared
    */
   canSendNotification(method: string): boolean {
+    if (!CLIENT_METHODS.all.has(method)) {
+      if (!this.strict) {
+        this.logger.debug(`Unknown notification method ${method}, allowing in non-strict mode`);
+        return true;
+      }
+
+      const error = `Cannot send notification for unknown method: ${method}`;
+      this.logger.error(error);
+      throw new Error(error);
+    }
+
+    if (CLIENT_METHODS.alwaysAllowed.has(method)) {
+      return true;
+    }
+
     const capabilityKey = getClientCapabilityForNotificationMethod(method as any);
     if (!capabilityKey) {
       if (!this.strict) {

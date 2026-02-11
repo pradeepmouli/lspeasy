@@ -323,6 +323,10 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       throw new Error('Server is not listening');
     }
 
+    if (this.clientCapabilityGuard && !this.clientCapabilityGuard.canSendNotification(method)) {
+      this.logger.warn(`Client capability not declared for notification ${method}`);
+    }
+
     const notification: NotificationMessage = {
       jsonrpc: '2.0',
       method,
