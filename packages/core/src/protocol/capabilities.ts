@@ -7,10 +7,14 @@
 import type { ServerCapabilities, ClientCapabilities } from 'vscode-languageserver-protocol';
 import type { Paths, PickDeep } from 'type-fest';
 import {
+  getClientCapabilityForNotificationMethod,
+  getClientCapabilityForRequestMethod,
   getCapabilityForNotificationMethod,
   getCapabilityForRequestMethod,
   type LSPNotificationMethod,
   type LSPRequestMethod,
+  type ClientCapabilityForNotification,
+  type ClientCapabilityForRequest,
   type ServerCapabilityForNotification,
   type ServerCapabilityForRequest
 } from './infer.js';
@@ -91,12 +95,52 @@ export function serverSupportsNotification<M extends LSPNotificationMethod<'clie
 }
 
 /**
+ * Check if a method is supported by the given client capabilities
+ */
+export function clientSupportsRequest<M extends LSPRequestMethod<'serverToClient'>>(
+  method: M,
+  capabilities: ClientCapabilities
+): capabilities is ClientCapabilities &
+  PickDeep<ClientCapabilities, ClientCapabilityForRequest<M>> {
+  const capabilityKey = getClientCapabilityForRequestMethod(method);
+  if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
+    return true;
+  }
+  const value = getProperty(capabilities, capabilityKey);
+  return value !== null && value !== undefined && value !== false;
+}
+
+export function clientSupportsNotification<M extends LSPNotificationMethod<'serverToClient'>>(
+  method: M,
+  capabilities: ClientCapabilities
+): capabilities is ClientCapabilities &
+  PickDeep<ClientCapabilities, ClientCapabilityForNotification<M>> {
+  const capabilityKey = getClientCapabilityForNotificationMethod(method);
+  if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
+    return true;
+  }
+  const value = getProperty(capabilities, capabilityKey);
+  return value !== null && value !== undefined && value !== false;
+}
+
+/**
  * Check if a server capability is enabled
  */
 export function hasCapability<K extends Paths<ServerCapabilities>>(
   capabilities: ServerCapabilities,
   capability: K
 ): capabilities is ServerCapabilities & PickDeep<ServerCapabilities, K> {
+  const value = getProperty(capabilities, capability);
+  return value !== null && value !== undefined && value !== false;
+}
+
+/**
+ * Check if a client capability is enabled
+ */
+export function hasClientCapability<K extends Paths<ClientCapabilities>>(
+  capabilities: ClientCapabilities,
+  capability: K
+): capabilities is ClientCapabilities & PickDeep<ClientCapabilities, K> {
   const value = getProperty(capabilities, capability);
   return value !== null && value !== undefined && value !== false;
 }

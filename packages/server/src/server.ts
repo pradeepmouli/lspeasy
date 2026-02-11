@@ -33,7 +33,7 @@ import { ServerState } from './types.js';
 import { MessageDispatcher } from './dispatcher.js';
 import { LifecycleManager } from './lifecycle.js';
 import { validateParams } from './validation.js';
-import { CapabilityGuard } from './capability-guard.js';
+import { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
 import { initializeServerHandlerMethods, initializeServerSendMethods } from './capability-proxy.js';
 
 /**
@@ -60,6 +60,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   private readonly version: string;
   private readonly options: ServerOptions<Capabilities>;
   private capabilityGuard?: CapabilityGuard;
+  private clientCapabilityGuard?: ClientCapabilityGuard;
   private events: DisposableEventEmitter<{
     listening: [];
     shutdown: [];

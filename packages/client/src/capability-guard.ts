@@ -4,10 +4,13 @@
  * Ensures clients only send requests/notifications that the server supports
  */
 
-import type { ServerCapabilities } from '@lspeasy/core';
+import type { ClientCapabilities, ServerCapabilities } from '@lspeasy/core';
 import type { Logger } from '@lspeasy/core';
 import {
+  getClientCapabilityForNotificationMethod,
+  getClientCapabilityForRequestMethod,
   hasCapability,
+  hasClientCapability,
   getCapabilityForNotificationMethod,
   getCapabilityForRequestMethod
 } from '@lspeasy/core';
@@ -150,5 +153,87 @@ export class CapabilityGuard {
    */
   getServerCapabilities(): Partial<ServerCapabilities> {
     return { ...this.capabilities };
+  }
+}
+
+/**
+ * Validates that handlers can be registered based on
+ * declared client capabilities
+ */
+export class ClientCapabilityGuard {
+  constructor(
+    private readonly capabilities: Partial<ClientCapabilities>,
+    private readonly logger: Logger,
+    private readonly strict: boolean = false
+  ) {}
+
+  /**
+   * Check if handler registration is allowed for this method
+   *
+   * @param method - LSP method name
+   * @returns true if allowed, false otherwise
+   * @throws Error if strict mode enabled and client capability not declared
+   */
+  canRegisterHandler(method: string): boolean {
+    const capabilityKey = getClientCapabilityForRequestMethod(method as any);
+    if (!capabilityKey) {
+      const notificationCapability = getClientCapabilityForNotificationMethod(method as any);
+      if (!notificationCapability) {
+        if (!this.strict) {
+          this.logger.debug(`Unknown method ${method}, allowing in non-strict mode`);
+          return true;
+        }
+
+        const error = `Cannot register handler for unknown method: ${method}`;
+        this.logger.error(error);
+        throw new Error(error);
+      }
+      return this.isNotificationAllowed(method, notificationCapability);
+    }
+
+    return this.isRequestAllowed(method, capabilityKey);
+  }
+
+  /**
+   * Get list of capabilities the client declared
+   */
+  getClientCapabilities(): Partial<ClientCapabilities> {
+    return { ...this.capabilities };
+  }
+
+  private isRequestAllowed(method: string, capabilityKey: string | 'alwaysOn'): boolean {
+    if (capabilityKey === 'alwaysOn') {
+      return true;
+    }
+
+    if (!hasClientCapability(this.capabilities, capabilityKey as any)) {
+      const error = `Cannot register handler for ${method}: client capability '${capabilityKey}' not declared`;
+      this.logger.warn(error);
+
+      if (this.strict) {
+        throw new Error(error);
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  private isNotificationAllowed(method: string, capabilityKey: string | 'alwaysOn'): boolean {
+    if (capabilityKey === 'alwaysOn') {
+      return true;
+    }
+
+    if (!hasClientCapability(this.capabilities, capabilityKey as any)) {
+      const error = `Cannot register handler for ${method}: client capability '${capabilityKey}' not declared`;
+      this.logger.warn(error);
+
+      if (this.strict) {
+        throw new Error(error);
+      }
+      return false;
+    }
+
+    return true;
   }
 }

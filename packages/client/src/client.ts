@@ -26,7 +26,7 @@ import { DisposableEventEmitter, HandlerRegistry } from '@lspeasy/core/utils';
 import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
 import type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
 import { initializeCapabilityMethods, updateCapabilityMethods } from './capability-proxy.js';
-import { CapabilityGuard } from './capability-guard.js';
+import { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
 
 /**
  * Interface for dynamically added namespace methods
@@ -73,12 +73,14 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     logger: Logger;
     logLevel: LogLevel;
     requestTimeout: number | undefined;
+    strictCapabilities: boolean;
   };
   private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
   private serverInfo?: { name: string; version?: string };
   private readonly onValidationError?: ClientOptions<ClientCaps>['onValidationError'];
   private capabilityGuard?: CapabilityGuard;
+  private clientCapabilityGuard?: ClientCapabilityGuard;
 
   constructor(options: ClientOptions<ClientCaps> = {}) {
     this.connected = false;
@@ -89,7 +91,8 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       version: options.version ?? '1.0.0',
       logger: options.logger ?? new ConsoleLogger(options.logLevel ?? LogLevel.Info),
       logLevel: options.logLevel ?? LogLevel.Info,
-      requestTimeout: options.requestTimeout
+      requestTimeout: options.requestTimeout,
+      strictCapabilities: options.strictCapabilities ?? false
     };
 
     this.logger = this.options.logger;
@@ -104,6 +107,13 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     if (options.onValidationError) {
       this.onValidationError = options.onValidationError;
     }
+
+    // Initialize capability guard for server-to-client handlers
+    this.clientCapabilityGuard = new ClientCapabilityGuard(
+      this.capabilities ?? {},
+      this.logger,
+      this.options.strictCapabilities
+    );
 
     // Initialize capability-aware methods on the client object
     // These will be empty initially and populated after server capabilities are received
@@ -153,7 +163,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       this.capabilityGuard = new CapabilityGuard(
         result.capabilities,
         this.logger,
-        false // non-strict mode by default
+        this.options.strictCapabilities
       );
 
       // Update capability-aware methods based on server capabilities
@@ -329,6 +339,9 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     method: M,
     handler: (params: ParamsForRequest<M>) => Promise<ResultForRequest<M>> | ResultForRequest<M>
   ): Disposable {
+    if (this.clientCapabilityGuard && !this.clientCapabilityGuard.canRegisterHandler(method)) {
+      this.logger.warn(`Client capability not declared for handler ${method}`);
+    }
     return this.requestHandlers.register(method, handler as (params: unknown) => unknown);
   }
 
@@ -339,6 +352,9 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     method: M,
     handler: (params: ParamsForNotification<M>) => void
   ): Disposable {
+    if (this.clientCapabilityGuard && !this.clientCapabilityGuard.canRegisterHandler(method)) {
+      this.logger.warn(`Client capability not declared for handler ${method}`);
+    }
     return this.notificationHandlers.register(method, handler as (params: unknown) => void);
   }
 
@@ -382,6 +398,11 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    */
   setCapabilities(capabilities: ClientCaps): void {
     this.capabilities = capabilities;
+    this.clientCapabilityGuard = new ClientCapabilityGuard(
+      capabilities,
+      this.logger,
+      this.options.strictCapabilities
+    );
     // Note: Client capabilities are sent during initialize, so this only affects
     // the local reference. To update server-side, would need client/registerCapability request.
   }

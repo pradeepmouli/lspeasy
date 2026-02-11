@@ -48,6 +48,13 @@ export interface ClientOptions<
   requestTimeout?: number;
 
   /**
+   * Strict capability checking mode
+   * When true, throws error if handler registered or request sent for unsupported capability
+   * When false, logs warning and allows registration/sending (default: false)
+   */
+  strictCapabilities?: boolean;
+
+  /**
    * Callback for response validation errors
    */
   onValidationError?: (error: ZodError, response: ResponseMessage) => void;
