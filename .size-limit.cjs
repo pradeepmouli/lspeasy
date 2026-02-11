@@ -9,20 +9,20 @@ module.exports = [
     path: 'packages/core/dist/index.js',
     limit: '100 KB',
     gzip: true,
-    modifyEsbuildConfig,
+    modifyEsbuildConfig
   },
   {
     name: '@lspeasy/server',
     path: 'packages/server/dist/index.js',
     limit: '100 KB',
     gzip: true,
-    modifyEsbuildConfig,
+    modifyEsbuildConfig
   },
   {
     name: '@lspeasy/client',
     path: 'packages/client/dist/index.js',
     limit: '100 KB',
     gzip: true,
-    modifyEsbuildConfig,
+    modifyEsbuildConfig
   }
 ];
