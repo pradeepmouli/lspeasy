@@ -75,6 +75,18 @@ describe('LSPClient requests and notifications', () => {
     inputStream.write(buffer);
 
     await connectPromise;
+
+    // Consume the 'initialized' notification that was sent after connection
+    await new Promise<void>((resolve) => {
+      const onData = (chunk: Buffer) => {
+        const message = parseMessage(chunk);
+        if (message?.method === 'initialized') {
+          outputStream.off('data', onData);
+          resolve();
+        }
+      };
+      outputStream.on('data', onData);
+    });
   });
 
   describe('sendRequest', () => {
