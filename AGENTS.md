@@ -9,7 +9,7 @@ This repository is designed for multi-agent collaboration (Copilot, Claude, Gemi
 - Tooling: pnpm, oxlint, oxfmt, Vitest, simple-git-hooks, lint-staged
 
 ## Ground Rules
-- If running terminal commands in an iteractive session, use the integrated terminal so the user can see the output and verify success.
+- If running terminal commands in an interactive session, use the integrated terminal so the user can see the output and verify success.
 - Always check the latest version of dependencies before adding new ones.
 - Prefer non-destructive changes; never reset user work.
 - Follow conventional commits.
