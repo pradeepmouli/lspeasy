@@ -21,6 +21,8 @@ const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } 
   }
 };
 
+const INITIALIZED_NOTIFICATION_TIMEOUT_MS = 1000;
+
 const captureRequestId = (outputStream: PassThrough, method: string): Promise<string | number> => {
   return new Promise((resolve) => {
     let buffer = Buffer.alloc(0);
@@ -75,6 +77,25 @@ describe('LSPClient requests and notifications', () => {
     inputStream.write(buffer);
 
     await connectPromise;
+
+    // Consume the 'initialized' notification that was sent after connection
+    await new Promise<void>((resolve, reject) => {
+      const onData = (chunk: Buffer) => {
+        const message = parseMessage(chunk);
+        if (message?.method === 'initialized') {
+          clearTimeout(timeout);
+          outputStream.off('data', onData);
+          resolve();
+        }
+      };
+
+      const timeout = setTimeout(() => {
+        outputStream.off('data', onData);
+        reject(new Error('Timeout waiting for initialized notification'));
+      }, INITIALIZED_NOTIFICATION_TIMEOUT_MS);
+
+      outputStream.on('data', onData);
+    });
   });
 
   describe('sendRequest', () => {
