@@ -5,6 +5,16 @@
 **Status**: Draft
 **Input**: User description: "LSP Client/Server DX Improvements & Middleware System - middleware support, native WebSocket, one-shot notifications, connection health, server-to-client request ergonomics, didChange ergonomics"
 
+## Clarifications
+
+### Session 2026-02-11
+
+- Q: Should middleware be allowed to change JSON-RPC `id` (including via a renamed field like `$id`)? -> A: Keep `id` immutable.
+- Q: Should `waitForNotification` have a required timeout, a default timeout, or no default timeout? -> A: Timeout must be provided explicitly (required).
+- Q: How should document version tracking work for `didChange` helpers? -> A: Provide a `DocumentVersionTracker` utility; helpers accept either a tracker or an explicit version.
+- Q: Should WebSocket heartbeat monitoring be enabled by default or opt-in? -> A: Opt-in (disabled by default).
+- Q: Should there be a limit on the number of middleware that can be registered? -> A: Unlimited middleware supported.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Middleware-Based Message Interception (Priority: P1)
@@ -116,7 +126,7 @@ A developer using the LSP client wants ergonomic helpers for the most common doc
 - What happens when middleware throws an error during message processing? The error must not crash the client/server; it should be caught and reported via the error event system.
 - What happens when a native WebSocket connection is created in a Node.js version older than 22.4 where WebSocket is not available? A clear error message must indicate the minimum Node.js version required or suggest installing `ws`.
 - What happens when multiple `waitForNotification` calls are active for the same method? Each must resolve independently when its filter matches.
-- What happens when middleware modifies a message's `id` field? The system must either prevent this or handle the ID mismatch gracefully.
+- What happens when middleware modifies a message's `id` field? The system must prevent this and surface a clear error.
 - What happens when connection health heartbeat detects an unresponsive server? The system must fire a state change event but not automatically disconnect (that decision belongs to the consumer).
 - What happens when a server-to-client request handler is registered after the client is already connected? The handler must be available for subsequent requests.
 
@@ -134,6 +144,7 @@ A developer using the LSP client wants ergonomic helpers for the most common doc
 - **FR-006**: A separate package (`@lspeasy/middleware-pino`) MUST provide pino-based structured logging as a middleware, with no pino dependency in the core, client, or server packages.
 - **FR-007**: Middleware MUST be able to short-circuit the pipeline (e.g., return a cached response without forwarding to the server).
 - **FR-008**: Middleware MUST receive sufficient context to distinguish message types (request vs. notification, inbound vs. outbound) and access the method name.
+- **FR-008a**: Middleware MUST NOT modify a JSON-RPC message `id`; attempts MUST be rejected with a clear error.
 
 #### Native WebSocket
 
@@ -150,6 +161,7 @@ A developer using the LSP client wants ergonomic helpers for the most common doc
 - **FR-016**: The `waitForNotification` method MUST support an optional timeout, rejecting with a descriptive error if the timeout elapses.
 - **FR-017**: The `waitForNotification` method MUST automatically clean up its internal listener upon resolution, rejection, or timeout (no resource leaks).
 - **FR-018**: Multiple concurrent `waitForNotification` calls for the same method MUST each resolve independently.
+- **FR-018a**: The `waitForNotification` method MUST require an explicit timeout option; no default timeout is applied.
 
 #### Connection Health Monitoring
 
@@ -157,6 +169,7 @@ A developer using the LSP client wants ergonomic helpers for the most common doc
 - **FR-020**: The SDK MUST emit state change events with previous and current state when transitions occur.
 - **FR-021**: The SDK MUST track and expose timestamps of the last message sent and last message received.
 - **FR-022**: For WebSocket transports, the SDK MUST support optional ping/pong heartbeat monitoring with configurable interval and timeout.
+- **FR-022a**: Heartbeat monitoring MUST be opt-in (disabled by default).
 - **FR-023**: When heartbeat monitoring detects an unresponsive server, the SDK MUST emit a health event but MUST NOT automatically disconnect.
 
 #### Server-to-Client Request Handling
@@ -171,6 +184,7 @@ A developer using the LSP client wants ergonomic helpers for the most common doc
 - **FR-028**: The SDK MUST provide helper functions for constructing `DidChangeTextDocumentParams` for both incremental and full-document sync modes.
 - **FR-029**: Helper functions MUST auto-increment the document version number for successive changes to the same document URI.
 - **FR-030**: Helper functions MUST correctly construct `TextDocumentContentChangeEvent` objects for range-based (incremental) changes.
+- **FR-030a**: Helpers MUST accept either an explicit version or a `DocumentVersionTracker` instance to manage versions.
 
 ### Key Entities
 
