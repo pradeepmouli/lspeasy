@@ -7,21 +7,14 @@ import { LSPClient } from '../../src/client.js';
 import { StdioTransport } from '@lspeasy/core';
 import { PassThrough } from 'node:stream';
 
-// Suppress expected unhandled rejections in tests
+// Delegate unhandled rejections to any original listeners without filtering by message
 const originalListeners = process.listeners('unhandledRejection');
 process.removeAllListeners('unhandledRejection');
-process.on('unhandledRejection', (reason) => {
-  // Expected test rejections - ignore them
-  const isTestRejection =
-    reason instanceof Error &&
-    (reason.message.includes('Invalid request') ||
-      reason.message.includes('Method not found') ||
-      reason.message.includes('Request was cancelled'));
-
-  if (!isTestRejection) {
-    // Re-emit for unexpected rejections
-    originalListeners.forEach((listener) => listener(reason, Promise.reject(reason)));
-  }
+process.on('unhandledRejection', (reason, promise) => {
+  originalListeners.forEach((listener) => {
+    // Preserve the original listener signature (reason, promise)
+    listener(reason, promise);
+  });
 });
 
 const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } | undefined => {
