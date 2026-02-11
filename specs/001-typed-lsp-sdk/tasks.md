@@ -16,15 +16,15 @@
 
 **Purpose**: Initialize monorepo structure and tooling before any implementation
 
-- [ ] T001 Create monorepo structure: packages/core/, packages/server/, packages/client/, examples/, e2e/, docs/
-- [ ] T002 Initialize package.json for @lspy/core with TypeScript 5.x, Vitest, oxlint, oxfmt dependencies
-- [ ] T003 [P] Initialize package.json for @lspy/server with workspace dependency on @lspy/core
-- [ ] T004 [P] Initialize package.json for @lspy/client with workspace dependency on @lspy/core
-- [ ] T005 Configure TypeScript with strict mode, composite project references for monorepo
-- [ ] T006 [P] Setup oxlint and oxfmt with .oxlintrc.json and .oxfmtrc.json (2 spaces, single quotes, semicolons)
-- [ ] T007 [P] Configure simple-git-hooks and lint-staged for pre-commit checks
-- [ ] T008 Add size-limit configuration for bundle size enforcement (<100KB core, <50KB server/client gzipped)
-- [ ] T009 Create root tsconfig.json and per-package tsconfig.json with composite references
+- [x] T001 Create monorepo structure: packages/core/, packages/server/, packages/client/, examples/, e2e/, docs/
+- [x] T002 Initialize package.json for @lspeasy/core with TypeScript 5.x, Vitest, oxlint, oxfmt dependencies
+- [x] T003 [P] Initialize package.json for @lspeasy/server with workspace dependency on @lspeasy/core
+- [x] T004 [P] Initialize package.json for @lspeasy/client with workspace dependency on @lspeasy/core
+- [x] T005 Configure TypeScript with strict mode, composite project references for monorepo
+- [x] T006 [P] Setup oxlint and oxfmt with .oxlintrc.json and .oxfmtrc.json (2 spaces, single quotes, semicolons)
+- [x] T007 [P] Configure simple-git-hooks and lint-staged for pre-commit checks
+- [x] T008 Add size-limit configuration for bundle size enforcement (<100KB core, <50KB server/client gzipped)
+- [x] T009 Create root tsconfig.json and per-package tsconfig.json with composite references
 
 ---
 
@@ -36,38 +36,38 @@
 
 ### JSON-RPC 2.0 Implementation (Custom, MCP SDK Pattern)
 
-- [ ] T010 [P] Define JSON-RPC 2.0 message types in packages/core/src/jsonrpc/messages.ts (Message, RequestMessage, ResponseMessage, NotificationMessage) - Reference: @modelcontextprotocol/sdk/types.js Message types
-- [ ] T011 [P] Implement JSON-RPC message framing (Content-Length headers) in packages/core/src/jsonrpc/framing.ts - Pattern: MCP SDK's parseMessage with header parsing
-- [ ] T012 Implement MessageReader class for parsing JSON-RPC messages with framing in packages/core/src/jsonrpc/reader.ts - Pattern: MCP SDK's JSONRPCMessage handling
-- [ ] T013 Implement MessageWriter class for serializing JSON-RPC messages with framing in packages/core/src/jsonrpc/writer.ts - Pattern: MCP SDK's message serialization
-- [ ] T014 [P] Create Zod schemas for JSON-RPC message validation in packages/core/src/jsonrpc/schemas.ts - Pattern: MCP SDK's z.discriminatedUnion for message types
+- [x] T010 [P] Define JSON-RPC 2.0 message types in packages/core/src/jsonrpc/messages.ts (Message, RequestMessage, ResponseMessage, NotificationMessage) - Reference: @modelcontextprotocol/sdk/types.js Message types
+- [x] T011 [P] Implement JSON-RPC message framing (Content-Length headers) in packages/core/src/jsonrpc/framing.ts - Pattern: MCP SDK's parseMessage with header parsing
+- [x] T012 Implement MessageReader class for parsing JSON-RPC messages with framing in packages/core/src/jsonrpc/reader.ts - Pattern: MCP SDK's JSONRPCMessage handling
+- [x] T013 Implement MessageWriter class for serializing JSON-RPC messages with framing in packages/core/src/jsonrpc/writer.ts - Pattern: MCP SDK's message serialization
+- [x] T014 [P] Create Zod schemas for JSON-RPC message validation in packages/core/src/jsonrpc/schemas.ts - Pattern: MCP SDK's z.discriminatedUnion for message types
 
 ### Transport Layer
 
-- [ ] T015 Define Transport interface in packages/core/src/transport/transport.ts (send, onMessage, onError, close, isConnected)
-- [ ] T016 Implement StdioTransport in packages/core/src/transport/stdio.ts (reads from stdin, writes to stdout)
-- [ ] T017 Add Disposable interface and DisposableStore utility in packages/core/src/utils/disposable.ts
-- [ ] T018 [P] Implement connection lifecycle event emitter in packages/core/src/transport/events.ts (Events: 'connect', 'disconnect', 'error', 'message')
+- [x] T015 Define Transport interface in packages/core/src/transport/transport.ts (send, onMessage, onError, close, isConnected)
+- [x] T016 Implement StdioTransport in packages/core/src/transport/stdio.ts (reads from stdin, writes to stdout)
+- [x] T017 Add Disposable interface and DisposableStore utility in packages/core/src/utils/disposable.ts
+- [x] T018 [P] Implement connection lifecycle event emitter in packages/core/src/transport/events.ts (Events: 'connect', 'disconnect', 'error', 'message')
 
 ### Protocol Types Re-export
 
-- [ ] T019 [P] Create hierarchical namespace structure (LSPRequest.*, LSPNotification.*) in packages/core/src/protocol/namespaces.ts - Use type-only imports: import type { HoverParams, Hover } from 'vscode-languageserver-protocol'
-- [ ] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts - Pattern: export type { Position, Range, Location, ... } from 'vscode-languageserver-protocol'
-- [ ] T021 [P] Define InferRequestParams, InferRequestResult, InferNotificationParams type utilities in packages/core/src/protocol/infer.ts - Use conditional types to extract types from namespace structure
-- [ ] T022 [P] Generate Zod schemas for LSP types (Position, Range, Location, etc.) in packages/core/src/protocol/schemas.ts - Runtime validators matching TypeScript types from vscode-languageserver-protocol
+- [x] T019 [P] Create hierarchical namespace structure (LSPRequest.*, LSPNotification.*) in packages/core/src/protocol/namespaces.ts - Use type-only imports: import type { HoverParams, Hover } from 'vscode-languageserver-protocol' - ENHANCED: Added Method const, Options, RegistrationOptions, ClientCapability, ServerCapability to all request namespaces for comprehensive metadata
+- [x] T020 [P] Re-export LSP types from vscode-languageserver-protocol (type-only imports) in packages/core/src/protocol/types.ts - Pattern: export type { Position, Range, Location, ... } from 'vscode-languageserver-protocol'
+- [x] T021 [P] Define InferRequestParams, InferRequestResult, InferNotificationParams type utilities in packages/core/src/protocol/infer.ts - Use conditional types to extract types from namespace structure
+- [x] T022 [P] Generate Zod schemas for LSP types (Position, Range, Location, etc.) in packages/core/src/protocol/schemas.ts - Runtime validators matching TypeScript types from vscode-languageserver-protocol
 
 ### Utilities
 
-- [ ] T023 [P] Implement CancellationToken and CancellationTokenSource in packages/core/src/utils/cancellation.ts
-- [ ] T024 [P] Create Logger interface and ConsoleLogger implementation (MCP SDK pattern) in packages/core/src/utils/logger.ts
-- [ ] T025 [P] Implement error code constants (LSP error codes: -32002, -32602, -32700, etc.) in packages/core/src/utils/errors.ts
+- [x] T023 [P] Implement CancellationToken and CancellationTokenSource in packages/core/src/utils/cancellation.ts
+- [x] T024 [P] Create Logger interface and ConsoleLogger implementation (MCP SDK pattern) in packages/core/src/utils/logger.ts
+- [x] T025 [P] Implement error code constants (LSP error codes: -32002, -32602, -32700, etc.) in packages/core/src/utils/errors.ts
 
 ### Core Package Export
 
-- [ ] T026 Create packages/core/src/index.ts exporting all public APIs (Transport, Message types, Protocol types, utilities)
-- [ ] T027 Write unit tests for JSON-RPC message framing in packages/core/tests/unit/jsonrpc-framing.test.ts
-- [ ] T028 [P] Write unit tests for StdioTransport in packages/core/tests/unit/stdio-transport.test.ts
-- [ ] T029 [P] Write unit tests for CancellationToken in packages/core/tests/unit/cancellation.test.ts
+- [x] T026 Create packages/core/src/index.ts exporting all public APIs (Transport, Message types, Protocol types, utilities)
+- [x] T027 Write unit tests for JSON-RPC message framing in packages/core/tests/unit/jsonrpc-framing.test.ts
+- [x] T028 [P] Write unit tests for StdioTransport in packages/core/tests/unit/stdio-transport.test.ts
+- [x] T029 [P] Write unit tests for CancellationToken in packages/core/tests/unit/cancellation.test.ts
 
 **Checkpoint**: Foundation complete - User story implementation can begin in parallel
 
@@ -81,34 +81,34 @@
 
 ### Implementation for US1
 
-- [ ] T030 [P] [US1] Create LSPServer class skeleton in packages/server/src/server.ts with constructor(options: ServerOptions)
-- [ ] T031 [P] [US1] Define ServerOptions interface (name, version, logger, logLevel, onValidationError) in packages/server/src/types.ts
-- [ ] T032 [P] [US1] Define RequestHandler<Params, Result> and NotificationHandler<Params> types in packages/server/src/types.ts
-- [ ] T033 [US1] Implement handler registration: onRequest<M extends LSPRequestMethod>(method, handler) in packages/server/src/server.ts
-- [ ] T034 [US1] Implement handler registration: onNotification<M extends LSPNotificationMethod>(method, handler) in packages/server/src/server.ts
-- [ ] T035 [US1] Implement setCapabilities(capabilities: ServerCapabilities) method in packages/server/src/server.ts
-- [ ] T036 [US1] Implement listen(transport: Transport) to start server and accept connections in packages/server/src/server.ts
-- [ ] T037 [US1] Create message dispatcher: route incoming requests to registered handlers in packages/server/src/dispatcher.ts
-- [ ] T038 [US1] Implement automatic initialize/initialized handshake handling in packages/server/src/lifecycle.ts
-- [ ] T039 [US1] Add request parameter validation via Zod before calling handlers in packages/server/src/validation.ts
-- [ ] T040 [US1] Implement error response generation (LSP error codes, validation errors) in packages/server/src/errors.ts
-- [ ] T041 [US1] Add cancellation token support: handle $/cancelRequest notifications in packages/server/src/cancellation.ts
-- [ ] T042 [US1] Implement shutdown() and close() methods for graceful/forced shutdown in packages/server/src/server.ts
-- [ ] T043 [US1] Create packages/server/src/index.ts exporting LSPServer, ServerOptions, RequestHandler, NotificationHandler
+- [x] T030 [P] [US1] Create LSPServer class skeleton in packages/server/src/server.ts with constructor(options: ServerOptions)
+- [x] T031 [P] [US1] Define ServerOptions interface (name, version, logger, logLevel, onValidationError) in packages/server/src/types.ts
+- [x] T032 [P] [US1] Define RequestHandler<Params, Result> and NotificationHandler<Params> types in packages/server/src/types.ts
+- [x] T033 [US1] Implement handler registration: onRequest<M extends LSPRequestMethod>(method, handler) in packages/server/src/server.ts
+- [x] T034 [US1] Implement handler registration: onNotification<M extends LSPNotificationMethod>(method, handler) in packages/server/src/server.ts
+- [x] T035 [US1] Implement setCapabilities(capabilities: ServerCapabilities) method in packages/server/src/server.ts
+- [x] T036 [US1] Implement listen(transport: Transport) to start server and accept connections in packages/server/src/server.ts
+- [x] T037 [US1] Create message dispatcher: route incoming requests to registered handlers in packages/server/src/dispatcher.ts
+- [x] T038 [US1] Implement automatic initialize/initialized handshake handling in packages/server/src/lifecycle.ts
+- [x] T039 [US1] Add request parameter validation via Zod before calling handlers in packages/server/src/validation.ts
+- [x] T040 [US1] Implement error response generation (LSP error codes, validation errors) in packages/server/src/errors.ts
+- [x] T041 [US1] Add cancellation token support: handle $/cancelRequest notifications in packages/server/src/cancellation.ts
+- [x] T042 [US1] Implement shutdown() and close() methods for graceful/forced shutdown in packages/server/src/server.ts
+- [x] T043 [US1] Create packages/server/src/index.ts exporting LSPServer, ServerOptions, RequestHandler, NotificationHandler
 
 ### Examples for US1
 
-- [ ] T044 [P] [US1] Create minimal hover server example (<30 lines) in examples/server/minimal-server.ts
-- [ ] T045 [P] [US1] Create hover + completion server example in examples/server/hover-server.ts
+- [x] T044 [P] [US1] Create minimal hover server example (<30 lines) in examples/server/minimal-server.ts
+- [x] T045 [P] [US1] Create hover + completion server example in examples/server/hover-server.ts
 
 ### Tests for US1
 
-- [ ] T046 [P] [US1] Unit test: LSPServer constructor and setCapabilities in packages/server/tests/unit/server.test.ts
-- [ ] T047 [P] [US1] Unit test: Handler registration (onRequest, onNotification) in packages/server/tests/unit/handlers.test.ts
-- [ ] T048 [P] [US1] Unit test: Message dispatcher routing in packages/server/tests/unit/dispatcher.test.ts
-- [ ] T049 [P] [US1] Integration test: Initialize handshake with test client in packages/server/tests/integration/initialize.test.ts
-- [ ] T050 [P] [US1] Integration test: textDocument/hover request/response in packages/server/tests/integration/hover.test.ts
-- [ ] T051 [US1] Integration test: Parameter validation rejection (malformed request) in packages/server/tests/integration/validation.test.ts
+- [x] T046 [P] [US1] Unit test: LSPServer constructor and setCapabilities in packages/server/tests/unit/server.test.ts
+- [x] T047 [P] [US1] Unit test: Handler registration (onRequest, onNotification) in packages/server/tests/unit/handlers.test.ts
+- [x] T048 [P] [US1] Unit test: Message dispatcher routing in packages/server/tests/unit/dispatcher.test.ts
+- [x] T049 [P] [US1] Integration test: Initialize handshake with test client in packages/server/tests/integration/initialize.test.ts
+- [x] T050 [P] [US1] Integration test: textDocument/hover request/response in packages/server/tests/integration/hover.test.ts
+- [x] T051 [US1] Integration test: Parameter validation rejection (malformed request) in packages/server/tests/integration/validation.test.ts
 
 **Checkpoint**: User Story 1 complete - Developers can build working LSP servers with typed handlers
 
@@ -122,34 +122,34 @@
 
 ### Implementation for US2
 
-- [ ] T052 [P] [US2] Create LSPClient class skeleton in packages/client/src/client.ts with constructor(options: ClientOptions)
-- [ ] T053 [P] [US2] Define ClientOptions interface (name, version, capabilities, logger, logLevel, onValidationError) in packages/client/src/types.ts
-- [ ] T054 [US2] Implement connect(transport: Transport): Promise<InitializeResult> with automatic initialization in packages/client/src/client.ts
-- [ ] T055 [US2] Implement disconnect(): Promise<void> with shutdown + exit sequence in packages/client/src/client.ts
-- [ ] T056 [US2] Implement low-level sendRequest<M extends LSPRequestMethod>(method, params) in packages/client/src/client.ts
-- [ ] T057 [US2] Implement low-level sendNotification<M extends LSPNotificationMethod>(method, params) in packages/client/src/client.ts
-- [ ] T058 [US2] Implement sendCancellableRequest<M>(method, params) returning { promise, cancel } in packages/client/src/client.ts
-- [ ] T059 [P] [US2] Create high-level textDocument.* method builders (hover, completion, definition, references, documentSymbol) in packages/client/src/requests/text-document.ts
-- [ ] T060 [P] [US2] Create high-level workspace.* method builders (symbol, didChangeWorkspaceFolders) in packages/client/src/requests/workspace.ts
+- [x] T052 [P] [US2] Create LSPClient class skeleton in packages/client/src/client.ts with constructor(options: ClientOptions)
+- [x] T053 [P] [US2] Define ClientOptions interface (name, version, capabilities, logger, logLevel, onValidationError) in packages/client/src/types.ts
+- [x] T054 [US2] Implement connect(transport: Transport): Promise<InitializeResult> with automatic initialization in packages/client/src/client.ts
+- [x] T055 [US2] Implement disconnect(): Promise<void> with shutdown + exit sequence in packages/client/src/client.ts
+- [x] T056 [US2] Implement low-level sendRequest<M extends LSPRequestMethod>(method, params) in packages/client/src/client.ts
+- [x] T057 [US2] Implement low-level sendNotification<M extends LSPNotificationMethod>(method, params) in packages/client/src/client.ts
+- [x] T058 [US2] Implement sendCancellableRequest<M>(method, params) returning { promise, cancel } in packages/client/src/client.ts
+- [x] T059 [P] [US2] Create high-level textDocument.* method builders (hover, completion, definition, references, documentSymbol) in packages/client/src/requests/text-document.ts
+- [x] T060 [P] [US2] Create high-level workspace.* method builders (symbol, didChangeWorkspaceFolders) in packages/client/src/requests/workspace.ts
 - [ ] T061 [US2] Implement response validation via Zod schemas in packages/client/src/validation.ts
-- [ ] T062 [US2] Implement server-to-client request handling: onRequest<M>(method, handler) in packages/client/src/client.ts
-- [ ] T063 [US2] Add isConnected() method and connection state tracking in packages/client/src/client.ts
-- [ ] T064 [US2] Create packages/client/src/index.ts exporting LSPClient, ClientOptions, high-level methods
+- [x] T062 [US2] Implement server-to-client request handling: onRequest<M>(method, handler) in packages/client/src/client.ts
+- [x] T063 [US2] Add isConnected() method and connection state tracking in packages/client/src/client.ts
+- [x] T064 [US2] Create packages/client/src/index.ts exporting LSPClient, ClientOptions, high-level methods
 
 ### Examples for US2
 
-- [ ] T065 [P] [US2] Create basic client example connecting to typescript-language-server in examples/client/basic-client.ts
-- [ ] T066 [P] [US2] Create test client harness for automated testing in examples/client/test-client.ts
+- [x] T065 [P] [US2] Create basic client example connecting to typescript-language-server in examples/client/basic-client.ts
+- [x] T066 [P] [US2] Create test client harness for automated testing in examples/client/test-client.ts
 
 ### Tests for US2
 
-- [ ] T067 [P] [US2] Unit test: LSPClient constructor and connect/disconnect in packages/client/tests/unit/client.test.ts
-- [ ] T068 [P] [US2] Unit test: sendRequest and sendNotification type inference in packages/client/tests/unit/requests.test.ts
-- [ ] T069 [P] [US2] Unit test: High-level method builders (textDocument.hover, etc.) in packages/client/tests/unit/builders.test.ts
-- [ ] T070 [US2] Integration test: Connect to typescript-language-server and send initialize in packages/client/tests/integration/connect.test.ts
-- [ ] T071 [US2] Integration test: Send textDocument/definition request to real server in packages/client/tests/integration/definition.test.ts
-- [ ] T072 [US2] Integration test: Response validation rejection (malformed server response) in packages/client/tests/integration/validation.test.ts
-- [ ] T073 [US2] Integration test: Graceful shutdown sequence (shutdown → exit) in packages/client/tests/integration/shutdown.test.ts
+- [x] T067 [P] [US2] Unit test: LSPClient constructor and connect/disconnect in packages/client/test/unit/client.test.ts
+- [x] T068 [P] [US2] Unit test: sendRequest and sendNotification type inference in packages/client/test/unit/requests.test.ts
+- [x] T069 [P] [US2] Unit test: High-level method builders (textDocument.hover, etc.) in packages/client/test/unit/builders.test.ts
+- [ ] T070 [US2] Integration test: Connect to typescript-language-server and send initialize in packages/client/test/integration/connect.test.ts
+- [ ] T071 [US2] Integration test: Send textDocument/definition request to real server in packages/client/test/integration/definition.test.ts
+- [ ] T072 [US2] Integration test: Response validation rejection (malformed server response) in packages/client/test/integration/validation.test.ts
+- [ ] T073 [US2] Integration test: Graceful shutdown sequence (shutdown → exit) in packages/client/test/integration/shutdown.test.ts
 
 **Checkpoint**: User Story 2 complete - Clients can connect to and interact with real LSP servers
 
@@ -163,12 +163,12 @@
 
 ### Implementation for US3
 
-- [ ] T074 [P] [US3] Implement WebSocketTransport in packages/core/src/transport/websocket.ts (client + server modes)
-- [ ] T075 [P] [US3] Add WebSocketTransportOptions (url for client, socket for server, reconnect options) in packages/core/src/transport/websocket.ts
-- [ ] T076 [US3] Add reconnection logic for WebSocketTransport (maxReconnectAttempts, reconnectDelay) in packages/core/src/transport/websocket.ts
+- [x] T074 [P] [US3] Implement WebSocketTransport in packages/core/src/transport/websocket.ts (client + server modes)
+- [x] T075 [P] [US3] Add WebSocketTransportOptions (url for client, socket for server, reconnect options) in packages/core/src/transport/websocket.ts
+- [x] T076 [US3] Add reconnection logic for WebSocketTransport (maxReconnectAttempts, reconnectDelay) in packages/core/src/transport/websocket.ts
 - [ ] T077 [US3] Implement transport error handling and resource cleanup in packages/core/src/transport/error-handling.ts
-- [ ] T078 [P] [US3] Update LSPServer.listen() to accept any Transport implementation in packages/server/src/server.ts
-- [ ] T079 [P] [US3] Update LSPClient.connect() to accept any Transport implementation in packages/client/src/client.ts
+- [x] T078 [P] [US3] Update LSPServer.listen() to accept any Transport implementation in packages/server/src/server.ts
+- [x] T079 [P] [US3] Update LSPClient.connect() to accept any Transport implementation in packages/client/src/client.ts
 
 ### Examples for US3
 
@@ -196,24 +196,24 @@
 
 ### Implementation for US4
 
-- [ ] T088 [P] [US4] Add workspace folder support: WorkspaceFoldersChangeEvent types in packages/core/src/protocol/workspace.ts
-- [ ] T089 [P] [US4] Implement file watching types: DidChangeWatchedFilesParams in packages/core/src/protocol/watching.ts
-- [ ] T090 [P] [US4] Add progress reporting: WorkDoneProgress types (begin, report, end) in packages/core/src/protocol/progress.ts
-- [ ] T091 [P] [US4] Implement partial result streaming: PartialResultParams in packages/core/src/protocol/partial.ts
-- [ ] T092 [US4] Add server method createProgressToken() for progress reporting in packages/server/src/progress.ts
-- [ ] T093 [US4] Add client method onProgress(handler) for receiving progress in packages/client/src/progress.ts
-- [ ] T094 [P] [US4] Add capability-aware type filtering: MethodsForCapabilities<Caps> utility type in packages/core/src/protocol/capabilities.ts
+- [x] T088 [P] [US4] Add workspace folder support: WorkspaceFoldersChangeEvent types in packages/core/src/protocol/workspace.ts
+- [x] T089 [P] [US4] Implement file watching types: DidChangeWatchedFilesParams in packages/core/src/protocol/watching.ts
+- [x] T090 [P] [US4] Add progress reporting: WorkDoneProgress types (begin, report, end) in packages/core/src/protocol/progress.ts
+- [x] T091 [P] [US4] Implement partial result streaming: PartialResultParams in packages/core/src/protocol/partial.ts
+- [x] T092 [US4] Add server method createProgressToken() for progress reporting in packages/server/src/progress.ts
+- [x] T093 [US4] Add client method onProgress(handler) for receiving progress in packages/client/src/progress.ts
+- [x] T094 [P] [US4] Add capability-aware type filtering: MethodsForCapabilities<Caps> utility type in packages/core/src/protocol/capabilities.ts
 
 ### Examples for US4
 
-- [ ] T095 [P] [US4] Create advanced server example with workspace folders + progress in examples/server/advanced-server.ts
-- [ ] T096 [P] [US4] Create client example handling progress notifications in examples/client/progress-client.ts
+- [x] T095 [P] [US4] Create advanced server example with workspace folders + progress in examples/server/advanced-server.ts
+- [x] T096 [P] [US4] Create client example handling progress notifications in examples/client/progress-client.ts
 
 ### Tests for US4
 
-- [ ] T097 [P] [US4] Integration test: workspace/didChangeWorkspaceFolders notification in e2e/workspace-folders.spec.ts
-- [ ] T098 [P] [US4] Integration test: Progress reporting (begin → report → end) in e2e/progress-reporting.spec.ts
-- [ ] T099 [P] [US4] Integration test: Partial result streaming for large completion in e2e/partial-results.spec.ts
+- [x] T097 [P] [US4] Integration test: workspace/didChangeWorkspaceFolders notification in e2e/workspace-folders.spec.ts
+- [x] T098 [P] [US4] Integration test: Progress reporting (begin → report → end) in e2e/progress-reporting.spec.ts
+- [x] T099 [P] [US4] Integration test: Partial result streaming for large completion in e2e/partial-results.spec.ts
 
 **Checkpoint**: User Story 4 complete - Advanced LSP features supported
 
@@ -225,35 +225,35 @@
 
 ### Performance & Benchmarks
 
-- [ ] T100 [P] Create benchmark suite in packages/core/tests/benchmarks/message-parse.bench.ts (target: <1ms p95)
-- [ ] T101 [P] Create benchmark suite in packages/server/tests/benchmarks/handler-dispatch.bench.ts (target: <0.1ms p95)
-- [ ] T102 [P] Create benchmark suite for cancellation propagation in packages/core/tests/benchmarks/cancellation.bench.ts (target: <100ms)
-- [ ] T103 Add vitest.benchmark.config.ts for running performance tests
+- [x] T100 [P] Create benchmark suite in packages/core/tests/benchmarks/message-parse.bench.ts (target: <1ms p95)
+- [x] T101 [P] Create benchmark suite in packages/server/tests/benchmarks/handler-dispatch.bench.ts (target: <0.1ms p95)
+- [x] T102 [P] Create benchmark suite for cancellation propagation in packages/core/tests/benchmarks/cancellation.bench.ts (target: <100ms)
+- [x] T103 Add vitest.benchmark.config.ts for running performance tests
 
 ### LSP Compliance
 
-- [ ] T104 [P] Create LSP 3.17 conformance test suite in e2e/lsp-compliance.spec.ts (all message types, error codes)
+- [x] T104 [P] Create LSP 3.17 conformance test suite in e2e/lsp-compliance.spec.ts (all message types, error codes)
 - [ ] T105 [P] Create test against typescript-language-server in e2e/real-servers.spec.ts
 - [ ] T106 [P] Create test against rust-analyzer in e2e/real-servers.spec.ts
 - [ ] T107 [P] Create test against pyright in e2e/real-servers.spec.ts
 
 ### Documentation
 
-- [ ] T108 [P] Write docs/ARCHITECTURE.md explaining package design, JSON-RPC implementation, transport layer
-- [ ] T109 [P] Write docs/API.md with complete API reference for all three packages
-- [ ] T110 [P] Update root README.md with quickstart, installation, examples
-- [ ] T111 [P] Update packages/core/README.md with Transport interface guide
-- [ ] T112 [P] Update packages/server/README.md with server building guide
-- [ ] T113 [P] Update packages/client/README.md with client connection guide
-- [ ] T114 Add JSDoc comments to all public APIs (LSPServer, LSPClient, Transport)
+- [x] T108 [P] Write docs/ARCHITECTURE.md explaining package design, JSON-RPC implementation, transport layer
+- [x] T109 [P] Write docs/API.md with complete API reference for all three packages
+- [x] T110 [P] Update root README.md with quickstart, installation, examples
+- [X] T111 [P] Update packages/core/README.md with Transport interface guide
+- [X] T112 [P] Update packages/server/README.md with server building guide
+- [X] T113 [P] Update packages/client/README.md with client connection guide
+- [x] T114 Add JSDoc comments to all public APIs (LSPServer, LSPClient, Transport)
 
 ### CI/CD & Quality
 
-- [ ] T115 Setup GitHub Actions workflow for linting (oxlint) in .github/workflows/lint.yml
-- [ ] T116 [P] Setup GitHub Actions workflow for type checking in .github/workflows/typecheck.yml
-- [ ] T117 [P] Setup GitHub Actions workflow for unit tests in .github/workflows/test.yml
-- [ ] T118 [P] Setup GitHub Actions workflow for integration tests in .github/workflows/integration.yml
-- [ ] T119 [P] Setup GitHub Actions workflow for bundle size checks (size-limit) in .github/workflows/size.yml
+- [x] T115 Setup GitHub Actions workflow for linting (oxlint) in .github/workflows/lint.yml
+- [x] T116 [P] Setup GitHub Actions workflow for type checking in .github/workflows/typecheck.yml
+- [x] T117 [P] Setup GitHub Actions workflow for unit tests in .github/workflows/test.yml
+- [x] T118 [P] Setup GitHub Actions workflow for integration tests in .github/workflows/integration.yml
+- [x] T119 [P] Setup GitHub Actions workflow for bundle size checks (size-limit) in .github/workflows/size.yml
 - [ ] T120 Add test coverage reporting with minimum 80% threshold
 - [ ] T121 [P] Create performance benchmark suite for load testing (SC-005: 1000 concurrent requests, <100ms p95 latency) in packages/core/tests/benchmark/load.bench.ts
 - [ ] T122 [P] Conduct API similarity audit against MCP SDK patterns (SC-006: document ergonomic differences in docs/MCP_SDK_COMPARISON.md, ensure <10 conceptual differences)
@@ -265,8 +265,8 @@
 
 ### MVP Scope (Phase 1-3 Complete)
 Ship with **User Story 1** complete:
-- @lspy/core with JSON-RPC, Transport, protocol types
-- @lspy/server with handler registration
+- @lspeasy/core with JSON-RPC, Transport, protocol types
+- @lspeasy/server with handler registration
 - StdioTransport only
 - Minimal examples
 - Basic tests

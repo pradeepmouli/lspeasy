@@ -1,6 +1,6 @@
-# API Contract: @lspy/client
+# API Contract: @lspeasy/client
 
-**Package**: @lspy/client
+**Package**: @lspeasy/client
 **Version**: 1.0.0
 **Purpose**: Public API for connecting to LSP servers
 
@@ -218,7 +218,7 @@ interface InitializeResult {
 ### ServerCapabilities
 
 ```typescript
-// Re-exported from @lspy/core/protocol
+// Re-exported from @lspeasy/core/protocol
 interface ServerCapabilities {
   textDocumentSync?: TextDocumentSyncOptions | TextDocumentSyncKind;
   hoverProvider?: boolean | HoverOptions;
@@ -233,8 +233,8 @@ interface ServerCapabilities {
 ## Usage Example
 
 ```typescript
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 
 // Create client
 const client = new LSPClient({

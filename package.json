@@ -1,5 +1,5 @@
 {
-  "name": "lspy",
+  "name": "lspeasy",
   "version": "1.0.0",
   "private": true,
   "description": "TypeScript SDK for building Language Server Protocol clients and servers",
@@ -12,15 +12,15 @@
     "lsp-client",
     "lsp-server"
   ],
-  "homepage": "https://github.com/pradeepmouli/lspy#readme",
+  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
   "bugs": {
-    "url": "https://github.com/pradeepmouli/lspy/issues"
+    "url": "https://github.com/pradeepmouli/lspeasy/issues"
   },
   "license": "MIT",
   "author": "Pradeep Mouli",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pradeepmouli/lspy.git"
+    "url": "https://github.com/pradeepmouli/lspeasy.git"
   },
   "workspaces": [
     "packages/*"
@@ -32,6 +32,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "test:e2e": "vitest run e2e",
+    "test:unit": "vitest run packages",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt .",
@@ -48,6 +50,7 @@
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "changeset:publish": "pnpm run build && changeset publish",
+    "generate:protocol": "tsx scripts/generate-protocol-types.ts && oxfmt packages/core/src/protocol/*.ts",
     "prepare": "simple-git-hooks"
   },
   "devDependencies": {
@@ -57,18 +60,21 @@
     "@typescript/native-preview": "7.0.0-dev.20260208.1",
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "^4.0.18",
+    "camelcase": "^9.0.0",
     "lint-staged": "^16.2.7",
-    "oxfmt": "^0.27.0",
-    "oxlint": "^1.42.0",
+    "oxfmt": "^0.28.0",
+    "oxlint": "^1.43.0",
     "simple-git-hooks": "^2.13.1",
     "size-limit": "^12.0.0",
+    "ts-morph": "^27.0.2",
+    "tsx": "^4.21.0",
     "type-fest": "^5.4.3",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.18"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged && pnpm run type-check"
+    "pre-commit": "pnpm lint-staged"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,md}": [

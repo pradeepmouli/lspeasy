@@ -184,6 +184,108 @@ type OnlyNumbers = PickByType<Mixed, number>;
 // Type: { id: number; age: number; }
 ```
 
+### 5. Generic Constructors and Class Type Patterns
+
+**Purpose:** Create reusable class constructors that preserve generic type parameters through instantiation.
+
+**Problem: Type-Cast Approach Loses Generics:**
+
+```typescript
+// ❌ This doesn't preserve type parameters
+class BaseClient<T> {
+  constructor(public config: T) {}
+}
+
+type Client<T> = BaseClient<T> & SomeOtherType<T>;
+export const Client = BaseClient as any; // Generics lost!
+
+// Usage fails to preserve types
+const client = new Client({ name: 'test' }); // T is unknown
+```
+
+**Solution: Explicit Generic Constructor Signature:**
+
+```typescript
+// ✅ Explicit generic constructor preserves type parameters
+class BaseClient<T extends object> {
+  constructor(public config: T) {}
+}
+
+type Client<T extends object> = BaseClient<T> & SomeOtherType<T>;
+
+// Export with explicit generic constructor signature
+export const Client: new <T extends object>(
+  config: T
+) => Client<T> = BaseClient as any;
+
+// Usage preserves type parameters correctly
+const client = new Client({ name: 'test' }); // T is { name: string }
+```
+
+**Pattern: Separating Implementation from Export:**
+
+```typescript
+// Internal implementation class
+class BaseLSPClient<ClientCaps, ServerCaps> {
+  constructor(options: ClientOptions<ClientCaps>) {
+    // Implementation
+  }
+
+  // Methods use the generic types
+  async request<M extends Method>(
+    method: M,
+    params: ParamsFor<M, ClientCaps>
+  ): Promise<ResultFor<M, ServerCaps>> {
+    // ...
+  }
+}
+
+// Type alias combining base class with mixins/intersections
+export type LSPClient<
+  ClientCaps extends Partial<AllClientCaps> = AllClientCaps,
+  ServerCaps extends Partial<AllServerCaps> = AllServerCaps
+> = BaseLSPClient<ClientCaps, ServerCaps> & DynamicMethods<ClientCaps, ServerCaps>;
+
+// Exported constructor with proper generic signature
+export const LSPClient: new <
+  ClientCaps extends Partial<AllClientCaps> = AllClientCaps,
+  ServerCaps extends Partial<AllServerCaps> = AllServerCaps
+>(
+  options?: ClientOptions<ClientCaps>
+) => LSPClient<ClientCaps, ServerCaps> = BaseLSPClient as any;
+```
+
+**Benefits:**
+
+1. **Type Safety**: Full type parameter inference at call site
+2. **IntelliSense**: Proper autocomplete with narrowed types
+3. **Flexibility**: Supports optional type parameters with defaults
+4. **Composability**: Works with type intersections and mixins
+5. **No Runtime Cost**: Pure type-level transformation
+
+**Declaration Merging Limitation:**
+
+```typescript
+// ❌ Cannot extend type aliases that resolve to intersections
+export interface LSPClient<T, U> extends Client<T, U> {} // Error!
+// Error: An interface can only extend an object type or
+// intersection of object types with statically known members
+
+// ✅ Use type intersection instead
+export type LSPClient<T, U> = BaseLSPClient<T, U> & Client<T, U>;
+```
+
+**Constructor Overloads:**
+
+```typescript
+// Multiple constructor signatures
+export const Client: {
+  new <T>(): Client<T>;
+  new <T>(config: T): Client<T>;
+  new <T>(config: T, logger: Logger): Client<T>;
+} = BaseClient as any;
+```
+
 ### 4. Template Literal Types
 
 **Purpose:** Create string-based types with pattern matching and transformation.
@@ -676,6 +778,8 @@ function processValue(value: unknown) {
 8. **Document complex types**: Add JSDoc comments
 9. **Use strict mode**: Enable all strict compiler options
 10. **Test your types**: Use type tests to verify type behavior
+11. **Use explicit generic constructor signatures**: Preserve type parameters through instantiation
+12. **Separate class implementation from public exports**: Allows for type composition without losing generics
 
 ## Type Testing
 
@@ -704,6 +808,12 @@ type ShouldError = ExpectError<AssertEqual<string, number>>;
 2. **Ignoring strict null checks**: Can lead to runtime errors
 3. **Too complex types**: Can slow down compilation
 4. **Not using discriminated unions**: Misses type narrowing opportunities
+5. **Forgetting readonly modifiers**: Allows unintended mutations
+6. **Circular type references**: Can cause compiler errors
+7. **Not handling edge cases**: Like empty arrays or null values
+8. **Type-casting constructors**: Using `as Constructor<T>` loses generic parameters - use explicit signatures instead
+9. **Extending type aliases with interfaces**: Declaration merging doesn't work with intersection types - use type intersections
+10. **Assuming `as any` is harmless**: Even in library internals, it can break type inference upstream
 5. **Forgetting readonly modifiers**: Allows unintended mutations
 6. **Circular type references**: Can cause compiler errors
 7. **Not handling edge cases**: Like empty arrays or null values

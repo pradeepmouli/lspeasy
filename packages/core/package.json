@@ -1,0 +1,76 @@
+{
+  "name": "@lspeasy/core",
+  "version": "1.0.0",
+  "description": "Core types, transports, and utilities for LSP SDK",
+  "keywords": [
+    "lsp",
+    "language-server-protocol",
+    "jsonrpc",
+    "transport"
+  ],
+  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
+  "bugs": {
+    "url": "https://github.com/pradeepmouli/lspeasy/issues"
+  },
+  "license": "MIT",
+  "author": "Pradeep Mouli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeepmouli/lspeasy.git",
+    "directory": "packages/core"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
+    "./utils/internal": {
+      "types": "./dist/utils/internal.d.ts",
+      "import": "./dist/utils/internal.js"
+    },
+    "./protocol": {
+      "types": "./dist/protocol/index.d.ts",
+      "import": "./dist/protocol/index.js"
+    },
+    "./protocol/enums": {
+      "types": "./dist/protocol/enums.d.ts",
+      "import": "./dist/protocol/enums.js"
+    },
+    "./transport": {
+      "types": "./dist/transport/index.d.ts",
+      "import": "./dist/transport/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsgo --build",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "dev": "tsgo --build --watch",
+    "type-check": "tsgo --noEmit"
+  },
+  "peerDependencies": {
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.9.3",
+    "vscode-languageserver-protocol": "^3.17.5",
+    "zod": "^4.3.6"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.19.0"
+  }
+}

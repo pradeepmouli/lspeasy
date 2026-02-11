@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.env*
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.cache/
+*.tsbuildinfo
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

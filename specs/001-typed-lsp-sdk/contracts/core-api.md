@@ -1,6 +1,6 @@
-# API Contract: @lspy/core
+# API Contract: @lspeasy/core
 
-**Package**: @lspy/core
+**Package**: @lspeasy/core
 **Version**: 1.0.0
 **Purpose**: Shared types, transports, and utilities for LSP SDK
 
@@ -21,58 +21,90 @@ namespace LSPRequest {
 
     export namespace Hover {
       export type Method = 'textDocument/hover';
+      export const Method = 'textDocument/hover';  // Runtime constant
       export type Params = HoverParams;  // Re-exported from vscode-languageserver-protocol (type-only)
       export type Result = Hover | null;  // Re-exported from vscode-languageserver-protocol (type-only)
-      export type Capability = 'hoverProvider';
+      export type ClientCapability = HoverClientCapabilities;  // Client capability type
+      export type ServerCapability = 'hoverProvider';  // Key in ServerCapabilities
+      export type Options = HoverOptions;  // Server options for this capability
+      export type RegistrationOptions = HoverRegistrationOptions;  // Dynamic registration options
     }
 
     export namespace Completion {
       export type Method = 'textDocument/completion';
+      export const Method = 'textDocument/completion';
       export type Params = CompletionParams;
       export type Result = CompletionList | CompletionItem[] | null;
-      export type Capability = 'completionProvider';
+      export type ClientCapability = CompletionClientCapabilities;
+      export type ServerCapability = 'completionProvider';
+      export type Options = CompletionOptions;
+      export type RegistrationOptions = CompletionRegistrationOptions;
     }
 
     export namespace DocumentSymbol {
       export type Method = 'textDocument/documentSymbol';
+      export const Method = 'textDocument/documentSymbol';
       export type Params = DocumentSymbolParams;
       export type Result = DocumentSymbol[] | SymbolInformation[] | null;
-      export type Capability = 'documentSymbolProvider';
+      export type ClientCapability = DocumentSymbolClientCapabilities;
+      export type ServerCapability = 'documentSymbolProvider';
+      export type Options = DocumentSymbolOptions;
+      export type RegistrationOptions = DocumentSymbolRegistrationOptions;
     }
 
     export namespace Definition {
       export type Method = 'textDocument/definition';
+      export const Method = 'textDocument/definition';
       export type Params = DefinitionParams;
       export type Result = Definition | null;
-      export type Capability = 'definitionProvider';
+      export type ClientCapability = DefinitionClientCapabilities;
+      export type ServerCapability = 'definitionProvider';
+      export type Options = DefinitionOptions;
+      export type RegistrationOptions = DefinitionRegistrationOptions;
     }
 
     export namespace References {
       export type Method = 'textDocument/references';
+      export const Method = 'textDocument/references';
       export type Params = ReferenceParams;
       export type Result = Location[] | null;
-      export type Capability = 'referencesProvider';
+      export type ClientCapability = ReferenceClientCapabilities;
+      export type ServerCapability = 'referencesProvider';
+      export type Options = ReferenceOptions;
+      export type RegistrationOptions = ReferenceRegistrationOptions;
     }
 
     export namespace Formatting {
       export type Method = 'textDocument/formatting';
+      export const Method = 'textDocument/formatting';
       export type Params = DocumentFormattingParams;
       export type Result = TextEdit[] | null;
-      export type Capability = 'documentFormattingProvider';
+      export type ClientCapability = DocumentFormattingClientCapabilities;
+      export type ServerCapability = 'documentFormattingProvider';
+      export type Options = DocumentFormattingOptions;
+      export type RegistrationOptions = DocumentFormattingRegistrationOptions;
     }
 
     export namespace CodeAction {
       export type Method = 'textDocument/codeAction';
+      export const Method = 'textDocument/codeAction';
       export type Params = CodeActionParams;
       export type Result = (Command | CodeAction)[] | null;
-      export type Capability = 'codeActionProvider';
+      export type ClientCapability = CodeActionClientCapabilities;
+      export type ServerCapability = 'codeActionProvider';
+      export type Options = CodeActionOptions;
+      export type RegistrationOptions = CodeActionRegistrationOptions;
     }
 
     export namespace Rename {
       export type Method = 'textDocument/rename';
+      export const Method = 'textDocument/rename';
       export type Params = RenameParams;
       export type Result = WorkspaceEdit | null;
-      export type Capability = 'renameProvider';
+      export type ClientCapability = RenameClientCapabilities;
+      export type ServerCapability = 'renameProvider';
+      export type Options = RenameOptions;
+      export type RegistrationOptions = RenameRegistrationOptions;
     }
 
     // ... (all textDocument/* methods)
@@ -84,16 +116,24 @@ namespace LSPRequest {
 
     export namespace Symbol {
       export type Method = 'workspace/symbol';
+      export const Method = 'workspace/symbol';
       export type Params = WorkspaceSymbolParams;
       export type Result = SymbolInformation[] | WorkspaceSymbol[] | null;
-      export type Capability = 'workspaceSymbolProvider';
+      export type ClientCapability = WorkspaceSymbolClientCapabilities;
+      export type ServerCapability = 'workspaceSymbolProvider';
+      export type Options = WorkspaceSymbolOptions;
+      export type RegistrationOptions = WorkspaceSymbolRegistrationOptions;
     }
 
     export namespace ExecuteCommand {
       export type Method = 'workspace/executeCommand';
+      export const Method = 'workspace/executeCommand';
       export type Params = ExecuteCommandParams;
       export type Result = any | null;
-      export type Capability = 'executeCommandProvider';
+      export type ClientCapability = ExecuteCommandClientCapabilities;
+      export type ServerCapability = 'executeCommandProvider';
+      export type Options = ExecuteCommandOptions;
+      export type RegistrationOptions = ExecuteCommandRegistrationOptions;
     }
 
     // ... (all workspace/* methods)
@@ -258,6 +298,44 @@ type LSPNotificationMethod =
 /**
  * Type Inference Benefits:
  *
+ * 1. Zero manual mapping - types inferred directly from namespace definitions
+ * 2. Single source of truth - add a namespace, get automatic type support
+ * 3. No map maintenance - InferRequestParams/Result uses conditional types
+ * 4. Compile-time validation - invalid method names caught by LSPRequestMethod union
+ *
+ * Namespace Structure Metadata:
+ *
+ * Each request method namespace provides comprehensive metadata:
+ * - Method (type & const): String literal for method name (runtime & type-level)
+ * - Params: Request parameter type from LSP spec
+ * - Result: Response result type from LSP spec
+ * - ClientCapability: Client capability interface (e.g., HoverClientCapabilities)
+ * - ServerCapability: Key in ServerCapabilities object (e.g., 'hoverProvider')
+ * - Options: Server options type for the capability (e.g., HoverOptions)
+ * - RegistrationOptions: Dynamic registration options (e.g., HoverRegistrationOptions)
+ *
+ * This structure enables:
+ * - Automatic type inference for handlers
+ * - Runtime method name validation
+ * - Capability negotiation helpers
+ * - Dynamic registration support
+ * - Clear separation of client vs server capabilities
+ *
+ * Example usage:
+ *   type HoverParams = InferRequestParams<'textDocument/hover'>
+ *   // Resolves to: HoverParams from vscode-languageserver-protocol
+ *
+ *   type HoverResult = InferRequestResult<'textDocument/hover'>
+ *   // Resolves to: Hover | null
+ *
+ *   type HoverServerKey = LSPRequest.TextDocument.Hover.ServerCapability
+ *   // Resolves to: 'hoverProvider'
+ *
+ * Adding new methods:
+ *   1. Define namespace with all metadata fields
+ *   2. Add to InferRequestParams/Result conditionals
+ *   3. Add to LSPRequestMethod union
+ *   → Automatically works in onRequest/sendRequest signatures
  * 1. Zero manual mapping - types inferred directly from namespace definitions
  * 2. Single source of truth - add a namespace, get automatic type support
  * 3. No map maintenance - InferRequestParams/Result uses conditional types
@@ -577,7 +655,7 @@ type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error';
 ### Creating Custom Transport
 
 ```typescript
-import { Transport, Message, Disposable } from '@lspy/core';
+import { Transport, Message, Disposable } from '@lspeasy/core';
 import { EventEmitter } from 'events';
 
 class HttpTransport implements Transport {
@@ -620,7 +698,7 @@ class HttpTransport implements Transport {
 ### Using Validation Schemas
 
 ```typescript
-import { HoverParams, HoverParamsSchema } from '@lspy/core/protocol';
+import { HoverParams, HoverParamsSchema } from '@lspeasy/core/protocol';
 
 function validateHoverParams(data: unknown): HoverParams {
   return HoverParamsSchema.parse(data);  // Throws ZodError if invalid

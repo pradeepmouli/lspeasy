@@ -5,9 +5,21 @@ coverage/
 .coverage/
 *.log
 .DS_Store
+Thumbs.db
+*.tmp
 .env
 .env.local
 .env.*.local
 .nyc_output/
 .pnpm-debug.log*
 *.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# Editor swap files
+*.swp
+
+# MetaModel cache
+.cache/

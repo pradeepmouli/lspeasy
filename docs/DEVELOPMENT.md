@@ -86,6 +86,20 @@ export function isValidUrl(str: string): boolean {
 }
 ```
 
+
+### Shared Utilities (Client/Server)
+
+Prefer shared utilities in `@lspeasy/core` for cross-cutting patterns:
+
+```typescript
+import { DisposableEventEmitter, HandlerRegistry } from '@lspeasy/core/utils';
+import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
+
+const events = new DisposableEventEmitter<{ connected: [] }>();
+const handlers = new HandlerRegistry<unknown, unknown>();
+const transportAttachment = new TransportAttachment();
+const pendingRequests = new PendingRequestTracker<unknown>();
+```
 ### 3. Write Tests
 
 ```typescript

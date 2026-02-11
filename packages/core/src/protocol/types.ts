@@ -1,0 +1,23 @@
+/**
+ * LSP Protocol Types
+ *
+ * Auto-generated from metaModel.json
+ * DO NOT EDIT MANUALLY
+ */
+
+export type * from 'vscode-languageserver-protocol';
+
+export type TextDocumentContentParams = unknown;
+export type TextDocumentContent = unknown;
+
+export type TextDocumentContentResult = unknown;
+
+export type TextDocumentContentRegistrationOptions = unknown;
+
+export type TextDocumentContentRefreshParams = unknown;
+
+export type CancelParams = { id: number | string };
+
+export type ProgressParams = {
+  token: string | number;
+};

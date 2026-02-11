@@ -25,7 +25,7 @@
 - [x] Dependencies and assumptions identified
 
 **Notes**:
-- All 15 functional requirements are testable (e.g., FR-001: "SDK MUST provide @lspy/server package" can be verified by checking package.json and exports)
+- All 15 functional requirements are testable (e.g., FR-001: "SDK MUST provide @lspeasy/server package" can be verified by checking package.json and exports)
 - Success criteria include measurable metrics (SC-001: <30 lines, SC-002: 3 servers tested, SC-005: 1000+ requests, SC-006: 95% API similarity, SC-009: <100ms cancellation)
 - Edge cases cover initialization, shutdown, malformed messages, cancellation, buffer overflow, version mismatch
 - Scope bounded to LSP 3.17, server + client packages, MCP SDK ergonomics

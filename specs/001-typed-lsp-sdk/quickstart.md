@@ -8,10 +8,10 @@ Get started building LSP servers and clients in minutes.
 
 ```bash
 # Install packages (choose what you need)
-npm install @lspy/server @lspy/client @lspy/core zod
+npm install @lspeasy/server @lspeasy/client @lspeasy/core zod
 
 # Or with pnpm
-pnpm add @lspy/server @lspy/client @lspy/core zod
+pnpm add @lspeasy/server @lspeasy/client @lspeasy/core zod
 ```
 
 **Note**: `zod` is a peer dependency (v3.25+) required for runtime validation.
@@ -24,9 +24,9 @@ Create a minimal language server that provides hover information.
 
 ```typescript
 // server.ts
-import { LSPServer } from '@lspy/server';
-import { StdioTransport } from '@lspy/core';
-import type { HoverParams, Hover } from '@lspy/core/protocol';
+import { LSPServer } from '@lspeasy/server';
+import { StdioTransport } from '@lspeasy/core';
+import type { HoverParams, Hover } from '@lspeasy/core/protocol';
 
 // Create server
 const server = new LSPServer({
@@ -63,7 +63,7 @@ await server.listen(transport);
 ```bash
 ts-node server.ts
 # Or compile and run
-tsc server.ts && node server.js
+tsgo server.ts && node server.js
 ```
 
 **Test with VS Code**: Configure in `.vscode/settings.json`:
@@ -84,8 +84,8 @@ Connect to a language server programmatically.
 
 ```typescript
 // client.ts
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 
 // Create client
 const client = new LSPClient({
@@ -167,7 +167,7 @@ server.onRequest('textDocument/completion', async (params, token) => {
 ### Custom Error Handling
 
 ```typescript
-import { ResponseError, ErrorCodes } from '@lspy/server';
+import { ResponseError, ErrorCodes } from '@lspeasy/server';
 
 server.onRequest('custom/method', async (params) => {
   if (!isValid(params)) {
@@ -186,7 +186,7 @@ server.onRequest('custom/method', async (params) => {
 
 ```typescript
 // Server side (with 'ws' package)
-import { WebSocketTransport } from '@lspy/core';
+import { WebSocketTransport } from '@lspeasy/core';
 import { WebSocketServer } from 'ws';
 
 const wss = new WebSocketServer({ port: 8080 });
@@ -212,8 +212,8 @@ await client.connect(transport);
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { LSPServer } from '@lspy/server';
-import type { HoverParams } from '@lspy/core/protocol';
+import { LSPServer } from '@lspeasy/server';
+import type { HoverParams } from '@lspeasy/core/protocol';
 
 describe('Hover Handler', () => {
   it('returns hover information', async () => {
@@ -239,8 +239,8 @@ describe('Hover Handler', () => {
 ### Integration Tests
 
 ```typescript
-import { LSPClient } from '@lspy/client';
-import { StdioTransport } from '@lspy/core';
+import { LSPClient } from '@lspeasy/client';
+import { StdioTransport } from '@lspeasy/core';
 
 it('connects to real language server', async () => {
   const client = new LSPClient({ name: 'test-client' });
