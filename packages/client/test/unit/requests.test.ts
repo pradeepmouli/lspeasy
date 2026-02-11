@@ -281,9 +281,6 @@ describe('LSPClient requests and notifications', () => {
       cancel();
 
       await expectation;
-
-      // Wait for any pending process.nextTick callbacks to complete
-      await new Promise((resolve) => setImmediate(resolve));
     });
   });
 
