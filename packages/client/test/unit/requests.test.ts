@@ -7,23 +7,10 @@ import { LSPClient } from '../../src/client.js';
 import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
 import { PassThrough } from 'node:stream';
 
-// Suppress expected unhandled rejections in tests
-const originalListeners = process.listeners('unhandledRejection');
-process.removeAllListeners('unhandledRejection');
-process.on('unhandledRejection', (reason) => {
-  // Expected test rejections - ignore them
-  const isTestRejection =
-    reason instanceof Error &&
-    (reason.message.includes('Invalid request') ||
-      reason.message.includes('Method not found') ||
-      reason.message.includes('Request was cancelled'));
-
-  if (!isTestRejection) {
-    // Re-emit for unexpected rejections
-    originalListeners.forEach((listener) => listener(reason, Promise.reject(reason)));
-  }
-});
-
+// Note: Do not install global `unhandledRejection` handlers here.
+// Tests should handle expected promise rejections explicitly using
+// `await`, `.catch()`, or `expect(...).rejects` so that Vitest can
+// correctly report unexpected unhandled rejections.
 const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } | undefined => {
   const text = chunk.toString('utf8');
   const start = text.indexOf('{');
