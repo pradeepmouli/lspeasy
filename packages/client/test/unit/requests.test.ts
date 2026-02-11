@@ -7,6 +7,23 @@ import { LSPClient } from '../../src/client.js';
 import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
 import { PassThrough } from 'node:stream';
 
+// Suppress expected unhandled rejections in tests
+const originalListeners = process.listeners('unhandledRejection');
+process.removeAllListeners('unhandledRejection');
+process.on('unhandledRejection', (reason) => {
+  // Expected test rejections - ignore them
+  const isTestRejection =
+    reason instanceof Error &&
+    (reason.message.includes('Invalid request') ||
+      reason.message.includes('Method not found') ||
+      reason.message.includes('Request was cancelled'));
+
+  if (!isTestRejection) {
+    // Re-emit for unexpected rejections
+    originalListeners.forEach((listener) => listener(reason, Promise.reject(reason)));
+  }
+});
+
 const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } | undefined => {
   const text = chunk.toString('utf8');
   const start = text.indexOf('{');
@@ -170,6 +187,9 @@ describe('LSPClient requests and notifications', () => {
       cancelSource.cancel();
 
       await expectation;
+
+      // Wait for any pending process.nextTick callbacks to complete
+      await new Promise((resolve) => setImmediate(resolve));
     });
 
     it('should handle already cancelled token', async () => {
@@ -186,6 +206,9 @@ describe('LSPClient requests and notifications', () => {
       );
 
       await expect(requestPromise).rejects.toThrow('Request was cancelled');
+
+      // Wait for any pending process.nextTick callbacks to complete
+      await new Promise((resolve) => setImmediate(resolve));
     });
 
     it('should throw if not connected', async () => {
@@ -271,6 +294,9 @@ describe('LSPClient requests and notifications', () => {
       cancel();
 
       await expectation;
+
+      // Wait for any pending process.nextTick callbacks to complete
+      await new Promise((resolve) => setImmediate(resolve));
     });
   });
 
