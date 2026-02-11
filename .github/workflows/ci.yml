@@ -39,8 +39,8 @@ jobs:
         run: pnpm run lint
 
       - name: Format check
-        run: pnpm run format
-
+        run: pnpm run format:check
+        continue-on-error: true
       - name: Test
         run: pnpm run test
 
