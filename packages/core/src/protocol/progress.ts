@@ -93,3 +93,10 @@ export function createProgressEnd(message?: string): WorkDoneProgressEnd {
 export function createProgressCreateParams(token: ProgressToken): WorkDoneProgressCreateParams {
   return { token };
 }
+
+/**
+ * Generate a unique progress token
+ */
+export function createProgressToken(): ProgressToken {
+  return `progress-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}

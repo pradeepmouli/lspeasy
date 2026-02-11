@@ -6,13 +6,13 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
 import { LSPClient } from '@lspeasy/client';
 import {
-  StdioTransport,
   createProgressToken,
   createProgressBegin,
   createProgressReport,
   createProgressEnd
 } from '@lspeasy/core';
 import type { ProgressToken, WorkDoneProgressValue } from '@lspeasy/core';
+import { createConnectedStdioTransports } from './transport-utils.js';
 
 describe('Progress Reporting Integration', () => {
   let server: LSPServer;
@@ -62,8 +62,7 @@ describe('Progress Reporting Integration', () => {
     });
 
     // Start server and client
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);
@@ -142,8 +141,7 @@ describe('Progress Reporting Integration', () => {
       progressByToken.set(params.token, events);
     });
 
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);
@@ -203,8 +201,7 @@ describe('Progress Reporting Integration', () => {
       progressEvents.push(params.value);
     });
 
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);
@@ -252,8 +249,7 @@ describe('Progress Reporting Integration', () => {
       }
     });
 
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);

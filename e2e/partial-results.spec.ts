@@ -5,8 +5,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
 import { LSPClient } from '@lspeasy/client';
-import { StdioTransport, createPartialResultParams, createProgressToken } from '@lspeasy/core';
+import { createPartialResultParams, createProgressToken } from '@lspeasy/core';
 import type { CompletionItem, CompletionList } from '@lspeasy/core';
+import { createConnectedStdioTransports } from './transport-utils.js';
 
 describe('Partial Result Streaming Integration', () => {
   let server: LSPServer;
@@ -131,8 +132,7 @@ describe('Partial Result Streaming Integration', () => {
       }
     });
 
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);
@@ -191,8 +191,7 @@ describe('Partial Result Streaming Integration', () => {
       };
     });
 
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);
@@ -258,8 +257,7 @@ describe('Partial Result Streaming Integration', () => {
       }
     });
 
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);
