@@ -77,10 +77,16 @@ describe('LSPClient requests and notifications', () => {
     await connectPromise;
 
     // Consume the 'initialized' notification that was sent after connection
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        outputStream.off('data', onData);
+        reject(new Error('Timeout waiting for initialized notification'));
+      }, 1000);
+
       const onData = (chunk: Buffer) => {
         const message = parseMessage(chunk);
         if (message?.method === 'initialized') {
+          clearTimeout(timeout);
           outputStream.off('data', onData);
           resolve();
         }
