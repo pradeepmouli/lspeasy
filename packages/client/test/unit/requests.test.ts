@@ -23,12 +23,18 @@ const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } 
 
 const captureRequestId = (outputStream: PassThrough, method: string): Promise<string | number> => {
   return new Promise((resolve) => {
-    outputStream.on('data', (chunk: Buffer) => {
-      const message = parseMessage(chunk);
+    let buffer = Buffer.alloc(0);
+
+    const onData = (chunk: Buffer) => {
+      buffer = Buffer.concat([buffer, chunk]);
+      const message = parseMessage(buffer);
       if (message?.method === method && message.id !== undefined) {
+        outputStream.off('data', onData);
         resolve(message.id);
       }
-    });
+    };
+
+    outputStream.on('data', onData);
   });
 };
 
