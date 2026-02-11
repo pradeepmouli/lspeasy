@@ -291,6 +291,10 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       throw new Error('Server is not listening');
     }
 
+    if (this.clientCapabilityGuard && !this.clientCapabilityGuard.canSendRequest(method)) {
+      this.logger.warn(`Client capability not declared for request ${method}`);
+    }
+
     const { id, promise } = this.pendingRequests.create(this.options.requestTimeout, method);
 
     const request: RequestMessage = {
@@ -460,6 +464,11 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
 
       this.state = ServerState.Initializing;
       this.clientCapabilities = params.capabilities;
+      this.clientCapabilityGuard = new ClientCapabilityGuard(
+        params.capabilities ?? {},
+        this.logger,
+        this.options.strictCapabilities ?? false
+      );
       if (params.clientInfo) {
         this.clientInfo = params.clientInfo;
       }
