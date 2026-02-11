@@ -272,7 +272,11 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
           this.logger.error('Failed to send cancellation', err);
         });
 
-        this.pendingRequests.reject(id, new Error('Request was cancelled'));
+        // Use process.nextTick to defer rejection slightly
+        // This gives the caller a chance to attach rejection handlers before the rejection occurs
+        process.nextTick(() => {
+          this.pendingRequests.reject(id, new Error('Request was cancelled'));
+        });
       });
     }
 

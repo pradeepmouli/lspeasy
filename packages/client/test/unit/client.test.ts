@@ -23,12 +23,14 @@ const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } 
 
 const captureRequestId = (outputStream: PassThrough, method: string): Promise<string | number> => {
   return new Promise((resolve) => {
-    outputStream.on('data', (chunk: Buffer) => {
+    const onData = (chunk: Buffer) => {
       const message = parseMessage(chunk);
       if (message?.method === method && message.id !== undefined) {
+        outputStream.off('data', onData);
         resolve(message.id);
       }
-    });
+    };
+    outputStream.on('data', onData);
   });
 };
 
@@ -116,14 +118,16 @@ describe('LSPClient', () => {
 
       const outputPromise = new Promise<string>((resolve) => {
         const chunks: Buffer[] = [];
-        outputStream.on('data', (chunk) => {
+        const onData = (chunk: Buffer) => {
           chunks.push(chunk);
           const buffer = Buffer.concat(chunks);
           const str = buffer.toString('utf8');
           if (str.includes('"method":"initialize"')) {
+            outputStream.off('data', onData);
             resolve(str);
           }
-        });
+        };
+        outputStream.on('data', onData);
       });
 
       const connectPromise = client.connect(transport);
@@ -158,21 +162,24 @@ describe('LSPClient', () => {
       const connectPromise = client.connect(transport);
 
       // Simulate server error response
-      initIdPromise.then((id) => {
-        const errorResponse = {
-          jsonrpc: '2.0',
-          id,
-          error: {
-            code: -32600,
-            message: 'Invalid request'
-          }
-        };
-        const responseStr = JSON.stringify(errorResponse);
-        const buffer = Buffer.from(`Content-Length: ${responseStr.length}\r\n\r\n${responseStr}`);
-        inputStream.write(buffer);
-      });
+      const id = await initIdPromise;
 
-      await expect(connectPromise).rejects.toThrow();
+      // Set up the expectation BEFORE sending error to ensure handler is attached
+      const expectation = expect(connectPromise).rejects.toThrow();
+
+      const errorResponse = {
+        jsonrpc: '2.0',
+        id,
+        error: {
+          code: -32600,
+          message: 'Invalid request'
+        }
+      };
+      const responseStr = JSON.stringify(errorResponse);
+      const buffer = Buffer.from(`Content-Length: ${responseStr.length}\r\n\r\n${responseStr}`);
+      inputStream.write(buffer);
+
+      await expectation;
 
       // Client should be cleaned up
       expect(client.isConnected()).toBe(false);
