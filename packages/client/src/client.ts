@@ -2,7 +2,6 @@
  * LSP Client implementation
  */
 
-import EventEmitter from 'node:events';
 import type {
   Transport,
   Message,
@@ -13,7 +12,6 @@ import type {
   Logger,
   CancellationToken,
   LSPRequestMethod,
-  LSPRequest,
   ParamsForRequest,
   ResultForRequest,
   LSPNotificationMethod,
@@ -24,8 +22,11 @@ import type {
   Client
 } from '@lspeasy/core';
 import { ConsoleLogger, LogLevel, CancellationTokenSource } from '@lspeasy/core';
+import { DisposableEventEmitter, HandlerRegistry } from '@lspeasy/core/utils';
+import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
 import type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
 import { initializeCapabilityMethods, updateCapabilityMethods } from './capability-proxy.js';
+import { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
 
 /**
  * Interface for dynamically added namespace methods
@@ -56,53 +57,63 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   private transport?: Transport;
   private connected: boolean;
   private initialized: boolean;
-  private nextRequestId: number;
-  private pendingRequests: Map<
-    number | string,
-    {
-      resolve: (value: any) => void;
-      reject: (error: Error) => void;
-      method: string;
-    }
-  >;
-  private requestHandlers: Map<string, (params: any) => Promise<any> | any>;
-  private notificationHandlers: Map<string, (params: any) => void>;
-  private events: EventEmitter;
+  private pendingRequests: PendingRequestTracker<unknown, string>;
+  private requestHandlers: HandlerRegistry<unknown, unknown>;
+  private notificationHandlers: HandlerRegistry<unknown, void>;
+  private events: DisposableEventEmitter<{
+    connected: [];
+    disconnected: [];
+    error: [Error];
+  }>;
+  private transportAttachment: TransportAttachment;
   private readonly logger: Logger;
-  private readonly options: Required<
-    Omit<ClientOptions<ClientCaps>, 'capabilities' | 'onValidationError'>
-  >;
+  private readonly options: {
+    name: string;
+    version: string;
+    logger: Logger;
+    logLevel: LogLevel;
+    requestTimeout: number | undefined;
+    strictCapabilities: boolean;
+  };
   private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
   private serverInfo?: { name: string; version?: string };
   private readonly onValidationError?: ClientOptions<ClientCaps>['onValidationError'];
-  private transportDisposables: Disposable[];
+  private capabilityGuard?: CapabilityGuard;
+  private clientCapabilityGuard?: ClientCapabilityGuard;
 
   constructor(options: ClientOptions<ClientCaps> = {}) {
     this.connected = false;
     this.initialized = false;
-    this.nextRequestId = 1;
-    this.pendingRequests = new Map();
-    this.requestHandlers = new Map();
-    this.notificationHandlers = new Map();
-    this.events = new EventEmitter();
-    this.transportDisposables = [];
-
     // Set up options with defaults
     this.options = {
       name: options.name ?? 'lspeasy-client',
       version: options.version ?? '1.0.0',
       logger: options.logger ?? new ConsoleLogger(options.logLevel ?? LogLevel.Info),
-      logLevel: options.logLevel ?? LogLevel.Info
+      logLevel: options.logLevel ?? LogLevel.Info,
+      requestTimeout: options.requestTimeout,
+      strictCapabilities: options.strictCapabilities ?? false
     };
 
     this.logger = this.options.logger;
+    this.pendingRequests = new PendingRequestTracker(this.options.requestTimeout);
+    this.requestHandlers = new HandlerRegistry();
+    this.notificationHandlers = new HandlerRegistry();
+    this.events = new DisposableEventEmitter();
+    this.transportAttachment = new TransportAttachment();
     if (options.capabilities) {
       this.capabilities = options.capabilities;
     }
     if (options.onValidationError) {
       this.onValidationError = options.onValidationError;
     }
+
+    // Initialize capability guard for server-to-client handlers
+    this.clientCapabilityGuard = new ClientCapabilityGuard(
+      this.capabilities ?? {},
+      this.logger,
+      this.options.strictCapabilities
+    );
 
     // Initialize capability-aware methods on the client object
     // These will be empty initially and populated after server capabilities are received
@@ -120,12 +131,11 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     this.transport = transport;
     this.connected = true;
 
-    // Set up transport handlers and store disposables
-    this.transportDisposables.push(
-      transport.onMessage((message) => this.handleMessage(message)),
-      transport.onError((error) => this.handleError(error)),
-      transport.onClose(() => this.handleClose())
-    );
+    this.transportAttachment.attach(transport, {
+      onMessage: (message) => this.handleMessage(message),
+      onError: (error) => this.handleError(error),
+      onClose: () => this.handleClose()
+    });
 
     try {
       // Send initialize request
@@ -148,6 +158,13 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
         this.serverInfo = result.serverInfo;
       }
       this.initialized = true;
+
+      // Create capability guard to validate outgoing requests
+      this.capabilityGuard = new CapabilityGuard(
+        result.capabilities,
+        this.logger,
+        this.options.strictCapabilities
+      );
 
       // Update capability-aware methods based on server capabilities
       updateCapabilityMethods(this as unknown as LSPClient<ClientCaps>);
@@ -226,15 +243,20 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       throw new Error('Client is not connected');
     }
 
+    // Validate request against server capabilities
+    if (this.capabilityGuard && !this.capabilityGuard.canSendRequest(method)) {
+      this.logger.warn(`Server does not support request method ${method}`);
+    }
+
     // Check if already cancelled before doing anything
     if (token?.isCancellationRequested) {
       return Promise.reject(new Error('Request was cancelled'));
     }
 
-    const id = this.nextRequestId++;
+    const { id, promise } = this.pendingRequests.create(this.options.requestTimeout, method);
 
-    const request = {
-      jsonrpc: '2.0' as const,
+    const request: RequestMessage = {
+      jsonrpc: '2.0',
       id,
       method,
       params
@@ -242,46 +264,28 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
 
     this.logger.debug(`Sending request ${method}`, { id, params });
 
-    return new Promise((resolve, reject) => {
-      let cancellationDisposable: Disposable | undefined;
+    let cancellationDisposable: Disposable | undefined;
 
-      // Store pending request first before setting up cancellation
-      this.pendingRequests.set(id, {
-        resolve: (value: any) => {
-          // Dispose cancellation listener on success
-          cancellationDisposable?.dispose();
-          resolve(value);
-        },
-        reject: (error: Error) => {
-          // Dispose cancellation listener on failure
-          cancellationDisposable?.dispose();
-          reject(error);
-        },
-        method
-      });
-
-      // Set up cancellation if token provided
-      if (token) {
-        cancellationDisposable = token.onCancellationRequested(() => {
-          // Send cancellation notification
-          this.sendNotification('$/cancelRequest', { id }).catch((err) => {
-            this.logger.error('Failed to send cancellation', err);
-          });
-
-          // Reject the promise and clean up
-          this.pendingRequests.delete(id);
-          cancellationDisposable?.dispose();
-          reject(new Error('Request was cancelled'));
+    if (token) {
+      cancellationDisposable = token.onCancellationRequested(() => {
+        this.sendNotification('$/cancelRequest', { id }).catch((err) => {
+          this.logger.error('Failed to send cancellation', err);
         });
-      }
 
-      // Send request
-      this.transport!.send(request).catch((error) => {
-        this.pendingRequests.delete(id);
-        cancellationDisposable?.dispose();
-        reject(error);
+        this.pendingRequests.reject(id, new Error('Request was cancelled'));
       });
+    }
+
+    void promise.finally(() => {
+      cancellationDisposable?.dispose();
     });
+
+    this.transport.send(request).catch((error) => {
+      const rejection = error instanceof Error ? error : new Error(String(error));
+      this.pendingRequests.reject(id, rejection);
+    });
+
+    return promise as Promise<ResultForRequest<K>>;
   }
 
   /**
@@ -293,6 +297,11 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   ): Promise<void> {
     if (!this.connected || !this.transport) {
       throw new Error('Client is not connected');
+    }
+
+    // Validate notification against server capabilities
+    if (this.capabilityGuard && !this.capabilityGuard.canSendNotification(method)) {
+      this.logger.warn(`Server does not support notification method ${method}`);
     }
 
     const notification: NotificationMessage = {
@@ -330,13 +339,10 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     method: M,
     handler: (params: ParamsForRequest<M>) => Promise<ResultForRequest<M>> | ResultForRequest<M>
   ): Disposable {
-    this.requestHandlers.set(method, handler);
-
-    return {
-      dispose: () => {
-        this.requestHandlers.delete(method);
-      }
-    };
+    if (this.clientCapabilityGuard && !this.clientCapabilityGuard.canRegisterHandler(method)) {
+      this.logger.warn(`Client capability not declared for handler ${method}`);
+    }
+    return this.requestHandlers.register(method, handler as (params: unknown) => unknown);
   }
 
   /**
@@ -346,49 +352,31 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     method: M,
     handler: (params: ParamsForNotification<M>) => void
   ): Disposable {
-    this.notificationHandlers.set(method, handler);
-
-    return {
-      dispose: () => {
-        this.notificationHandlers.delete(method);
-      }
-    };
+    if (this.clientCapabilityGuard && !this.clientCapabilityGuard.canRegisterHandler(method)) {
+      this.logger.warn(`Client capability not declared for handler ${method}`);
+    }
+    return this.notificationHandlers.register(method, handler as (params: unknown) => void);
   }
 
   /**
    * Subscribe to connection events
    */
   onConnected(handler: () => void): Disposable {
-    this.events.on('connected', handler);
-    return {
-      dispose: () => {
-        this.events.off('connected', handler);
-      }
-    };
+    return this.events.on('connected', handler);
   }
 
   /**
    * Subscribe to disconnection events
    */
   onDisconnected(handler: () => void): Disposable {
-    this.events.on('disconnected', handler);
-    return {
-      dispose: () => {
-        this.events.off('disconnected', handler);
-      }
-    };
+    return this.events.on('disconnected', handler);
   }
 
   /**
    * Subscribe to error events
    */
   onError(handler: (error: Error) => void): Disposable {
-    this.events.on('error', handler);
-    return {
-      dispose: () => {
-        this.events.off('error', handler);
-      }
-    };
+    return this.events.on('error', handler);
   }
 
   /**
@@ -410,6 +398,11 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    */
   setCapabilities(capabilities: ClientCaps): void {
     this.capabilities = capabilities;
+    this.clientCapabilityGuard = new ClientCapabilityGuard(
+      capabilities,
+      this.logger,
+      this.options.strictCapabilities
+    );
     // Note: Client capabilities are sent during initialize, so this only affects
     // the local reference. To update server-side, would need client/registerCapability request.
   }
@@ -499,24 +492,29 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    */
   private handleResponse(response: ResponseMessage): void {
     const { id } = response;
-    const pending = this.pendingRequests.get(id);
+    const method = this.pendingRequests.getMetadata(String(id));
 
-    if (!pending) {
+    if (!method) {
       this.logger.warn(`Received response for unknown request ${id}`);
       return;
     }
 
-    this.pendingRequests.delete(id);
-
     if ('error' in response && response.error) {
-      this.logger.error(`Request ${pending.method} failed`, response.error);
-      pending.reject(new Error(`${response.error.message} (code: ${response.error.code})`));
-    } else if ('result' in response) {
-      this.logger.debug(`Request ${pending.method} succeeded`, { id });
-      pending.resolve(response.result);
-    } else {
-      pending.reject(new Error('Invalid response message'));
+      this.logger.error(`Request ${method} failed`, response.error);
+      this.pendingRequests.reject(
+        String(id),
+        new Error(`${response.error.message} (code: ${response.error.code})`)
+      );
+      return;
     }
+
+    if ('result' in response) {
+      this.logger.debug(`Request ${method} succeeded`, { id });
+      this.pendingRequests.resolve(String(id), response.result);
+      return;
+    }
+
+    this.pendingRequests.reject(String(id), new Error('Invalid response message'));
   }
 
   /**
@@ -628,17 +626,8 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     this.initialized = false;
     delete this.transport;
 
-    // Dispose transport event handlers
-    for (const disposable of this.transportDisposables) {
-      disposable.dispose();
-    }
-    this.transportDisposables = [];
-
-    // Reject all pending requests
-    for (const [, pending] of this.pendingRequests.entries()) {
-      pending.reject(new Error('Connection closed'));
-    }
-    this.pendingRequests.clear();
+    this.transportAttachment.detach();
+    this.pendingRequests.clear(new Error('Connection closed'));
 
     this.events.emit('disconnected');
   }

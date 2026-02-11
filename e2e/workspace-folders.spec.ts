@@ -5,12 +5,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
 import { LSPClient } from '@lspeasy/client';
-import {
-  StdioTransport,
-  createWorkspaceFolder,
-  createWorkspaceFoldersChangeEvent
-} from '@lspeasy/core';
+import { createWorkspaceFolder, createWorkspaceFoldersChangeEvent } from '@lspeasy/core';
 import type { WorkspaceFolder, DidChangeWorkspaceFoldersParams } from '@lspeasy/core';
+import { createConnectedStdioTransports } from './transport-utils.js';
 
 describe('Workspace Folders Integration', () => {
   let server: LSPServer;
@@ -80,8 +77,7 @@ describe('Workspace Folders Integration', () => {
     );
 
     // Start server and connect client
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);
@@ -140,8 +136,7 @@ describe('Workspace Folders Integration', () => {
       }
     });
 
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     const initResult = await client.connect(clientTransport);
@@ -165,8 +160,7 @@ describe('Workspace Folders Integration', () => {
       }
     );
 
-    serverTransport = new StdioTransport();
-    clientTransport = new StdioTransport();
+    ({ serverTransport, clientTransport } = createConnectedStdioTransports());
 
     await server.listen(serverTransport);
     await client.connect(clientTransport);

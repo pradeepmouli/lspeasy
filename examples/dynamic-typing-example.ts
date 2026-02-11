@@ -4,20 +4,11 @@
 
 import { LSPClient } from '../packages/client/src/client.js';
 import { LSPServer } from '../packages/server/src/server.js';
-import type { ClientCapabilities, ServerCapabilities } from '../packages/core/src/index.js';
+import type { ClientCapabilities } from '../packages/core/src/index.js';
 
 // ===============================================
 // CLIENT DYNAMIC TYPING EXAMPLE
 // ===============================================
-
-// Define specific server capabilities your client expects
-type MyServerCapabilities = {
-  hoverProvider: true;
-  completionProvider: {
-    triggerCharacters: ['.', ':'];
-  };
-  // Note: definition is NOT included
-};
 
 // Create client with typed capabilities
 const client = new LSPClient<ClientCapabilities>();
@@ -72,7 +63,7 @@ server.onRequest('textDocument/hover', async (params) => {
   };
 });
 
-server.onRequest('textDocument/completion', async (params) => {
+server.onRequest('textDocument/completion', async (_params) => {
   // params is automatically typed as CompletionParams
   return {
     isIncomplete: false,

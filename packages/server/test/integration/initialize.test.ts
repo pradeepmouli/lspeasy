@@ -4,7 +4,8 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
-import type { Transport, InitializeParams } from '@lspeasy/core';
+import { LogLevel } from '@lspeasy/core';
+import type { Transport, InitializeParams, TextDocumentSyncKind } from '@lspeasy/core';
 
 // Mock transport for testing
 class TestTransport implements Transport {
@@ -62,16 +63,17 @@ class TestTransport implements Transport {
 describe('Initialize Handshake Integration', () => {
   let server: LSPServer;
   let transport: TestTransport;
+  const fullSync = 1 as TextDocumentSyncKind;
 
   beforeEach(async () => {
     server = new LSPServer({
       name: 'test-server',
       version: '1.0.0',
-      logLevel: 'error'
+      logLevel: LogLevel.Error
     });
 
     server.setCapabilities({
-      textDocumentSync: 1,
+      textDocumentSync: fullSync,
       hoverProvider: true
     });
 
@@ -116,7 +118,7 @@ describe('Initialize Handshake Integration', () => {
 
     expect(response.result).toBeDefined();
     expect(response.result.capabilities).toEqual({
-      textDocumentSync: 1,
+      textDocumentSync: fullSync,
       hoverProvider: true
     });
     expect(response.result.serverInfo).toEqual({
@@ -156,7 +158,7 @@ describe('Initialize Handshake Integration', () => {
 
   it('should reject requests before initialization', async () => {
     // Create new server without initializing
-    const newServer = new LSPServer({ logLevel: 'error' });
+    const newServer = new LSPServer({ logLevel: LogLevel.Error });
     const newTransport = new TestTransport();
     await newServer.listen(newTransport);
 

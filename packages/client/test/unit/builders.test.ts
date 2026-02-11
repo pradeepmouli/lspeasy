@@ -7,6 +7,31 @@ import { LSPClient } from '../../src/client.js';
 import { StdioTransport } from '@lspeasy/core';
 import { PassThrough } from 'node:stream';
 
+const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } | undefined => {
+  const text = chunk.toString('utf8');
+  const start = text.indexOf('{');
+  if (start === -1) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(text.slice(start)) as { id?: string | number; method?: string };
+  } catch {
+    return undefined;
+  }
+};
+
+const captureRequestId = (outputStream: PassThrough, method: string): Promise<string | number> => {
+  return new Promise((resolve) => {
+    outputStream.on('data', (chunk: Buffer) => {
+      const message = parseMessage(chunk);
+      if (message?.method === method && message.id !== undefined) {
+        resolve(message.id);
+      }
+    });
+  });
+};
+
 describe('High-level method builders', () => {
   let client: LSPClient;
   let inputStream: PassThrough;
@@ -24,29 +49,39 @@ describe('High-level method builders', () => {
     client = new LSPClient();
 
     // Connect and initialize
+    const initIdPromise = captureRequestId(outputStream, 'initialize');
     const connectPromise = client.connect(transport);
 
-    setTimeout(() => {
-      const initResponse = {
-        jsonrpc: '2.0',
-        id: 1,
-        result: {
-          capabilities: {
-            hoverProvider: true,
-            completionProvider: {},
-            definitionProvider: true,
-            referencesProvider: true,
-            documentSymbolProvider: true,
-            workspaceSymbolProvider: true,
-            textDocumentSync: 1
+    const initId = await initIdPromise;
+    const initResponse = {
+      jsonrpc: '2.0',
+      id: initId,
+      result: {
+        capabilities: {
+          hoverProvider: true,
+          completionProvider: {},
+          definitionProvider: true,
+          referencesProvider: true,
+          documentSymbolProvider: true,
+          workspaceSymbolProvider: true,
+          textDocumentSync: {
+            openClose: true,
+            change: 1, // Full sync
+            save: { includeText: true }
           },
-          serverInfo: { name: 'test-server' }
-        }
-      };
-      const responseStr = JSON.stringify(initResponse);
-      const buffer = Buffer.from(`Content-Length: ${responseStr.length}\r\n\r\n${responseStr}`);
-      inputStream.write(buffer);
-    }, 10);
+          workspace: {
+            workspaceFolders: {
+              supported: true,
+              changeNotifications: true
+            }
+          }
+        },
+        serverInfo: { name: 'test-server' }
+      }
+    };
+    const responseStr = JSON.stringify(initResponse);
+    const buffer = Buffer.from(`Content-Length: ${responseStr.length}\r\n\r\n${responseStr}`);
+    inputStream.write(buffer);
 
     await connectPromise;
   });
@@ -54,16 +89,15 @@ describe('High-level method builders', () => {
   describe('textDocument methods', () => {
     describe('hover', () => {
       it('should send hover request', async () => {
+        const hoverIdPromise = captureRequestId(outputStream, 'textDocument/hover');
         const hoverPromise = client.textDocument.hover({
           textDocument: { uri: 'file:///test.ts' },
           position: { line: 0, character: 5 }
         });
-
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        const hoverId = await hoverIdPromise;
         const hoverResponse = {
           jsonrpc: '2.0',
-          id: 2,
+          id: hoverId,
           result: {
             contents: { kind: 'markdown', value: '**test**' }
           }
@@ -81,16 +115,15 @@ describe('High-level method builders', () => {
 
     describe('completion', () => {
       it('should send completion request', async () => {
+        const completionIdPromise = captureRequestId(outputStream, 'textDocument/completion');
         const completionPromise = client.textDocument.completion({
           textDocument: { uri: 'file:///test.ts' },
           position: { line: 0, character: 5 }
         });
-
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        const completionId = await completionIdPromise;
         const completionResponse = {
           jsonrpc: '2.0',
-          id: 2,
+          id: completionId,
           result: {
             isIncomplete: false,
             items: [{ label: 'test1' }, { label: 'test2' }]
@@ -107,16 +140,15 @@ describe('High-level method builders', () => {
 
     describe('definition', () => {
       it('should send definition request', async () => {
+        const definitionIdPromise = captureRequestId(outputStream, 'textDocument/definition');
         const definitionPromise = client.textDocument.definition({
           textDocument: { uri: 'file:///test.ts' },
           position: { line: 0, character: 5 }
         });
-
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        const definitionId = await definitionIdPromise;
         const definitionResponse = {
           jsonrpc: '2.0',
-          id: 2,
+          id: definitionId,
           result: {
             uri: 'file:///test.ts',
             range: {
@@ -136,17 +168,16 @@ describe('High-level method builders', () => {
 
     describe('references', () => {
       it('should send references request', async () => {
+        const referencesIdPromise = captureRequestId(outputStream, 'textDocument/references');
         const referencesPromise = client.textDocument.references({
           textDocument: { uri: 'file:///test.ts' },
           position: { line: 0, character: 5 },
           context: { includeDeclaration: true }
         });
-
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        const referencesId = await referencesIdPromise;
         const referencesResponse = {
           jsonrpc: '2.0',
-          id: 2,
+          id: referencesId,
           result: [
             {
               uri: 'file:///test.ts',
@@ -168,15 +199,14 @@ describe('High-level method builders', () => {
 
     describe('documentSymbol', () => {
       it('should send documentSymbol request', async () => {
+        const symbolIdPromise = captureRequestId(outputStream, 'textDocument/documentSymbol');
         const symbolPromise = client.textDocument.documentSymbol({
           textDocument: { uri: 'file:///test.ts' }
         });
-
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        const symbolId = await symbolIdPromise;
         const symbolResponse = {
           jsonrpc: '2.0',
-          id: 2,
+          id: symbolId,
           result: [
             {
               name: 'test',
@@ -315,15 +345,14 @@ describe('High-level method builders', () => {
   describe('workspace methods', () => {
     describe('symbol', () => {
       it('should send workspace/symbol request', async () => {
+        const symbolIdPromise = captureRequestId(outputStream, 'workspace/symbol');
         const symbolPromise = client.workspace.symbol({
           query: 'test'
         });
-
-        await new Promise((resolve) => setTimeout(resolve, 10));
-
+        const symbolId = await symbolIdPromise;
         const symbolResponse = {
           jsonrpc: '2.0',
-          id: 2,
+          id: symbolId,
           result: [
             {
               name: 'TestClass',

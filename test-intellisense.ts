@@ -12,7 +12,7 @@
 
 import { LSPClient } from './packages/client/src/client.js';
 import { LSPServer } from './packages/server/src/server.js';
-import type { ClientCapabilities, ServerCapabilities } from './packages/core/src/index.js';
+import type { ClientCapabilities } from './packages/core/src/index.js';
 
 // ========================================
 // INTELLISENSE TEST 1: Default Client
@@ -78,13 +78,7 @@ const client1 = new LSPClient();
 // ========================================
 // INTELLISENSE TEST 2: Limited Client
 // ========================================
-type LimitedServerCaps = {
-  hoverProvider: true;
-  completionProvider: { triggerCharacters: ['.'] };
-  // Note: definitionProvider is NOT included
-};
-
-const client2 = new LSPClient<ClientCapabilities, LimitedServerCaps>();
+const client2 = new LSPClient<ClientCapabilities>();
 
 // Try typing: client2.textDocument.
 //

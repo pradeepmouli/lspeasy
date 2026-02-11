@@ -3,7 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { LSPServer } from '@lspeasy/server';
+import { LSPServer } from '../../src/server.js';
+import { LogLevel } from '@lspeasy/core';
 import type { Transport } from '@lspeasy/core';
 
 // Mock transport
@@ -59,7 +60,7 @@ describe('Parameter Validation Integration', () => {
     server = new LSPServer({
       name: 'validation-test-server',
       version: '1.0.0',
-      logLevel: 'error'
+      logLevel: LogLevel.Error
     });
 
     server.setCapabilities({
@@ -187,12 +188,12 @@ describe('Parameter Validation Integration', () => {
   it('should use custom validation error handler', async () => {
     const customServer = new LSPServer({
       name: 'custom-validation-server',
-      logLevel: 'error',
+      logLevel: LogLevel.Error,
       onValidationError: (error, _context) => {
         return {
           code: -32099,
           message: 'Custom validation error',
-          data: { zodErrors: error.errors }
+          data: { zodErrors: error.issues }
         };
       }
     });
@@ -234,6 +235,53 @@ describe('Parameter Validation Integration', () => {
     await customServer.close();
   });
 
+  it('should skip validation when disabled', async () => {
+    const noValidationServer = new LSPServer({
+      name: 'no-validation-server',
+      logLevel: LogLevel.Error,
+      validateParams: false
+    });
+
+    noValidationServer.setCapabilities({ hoverProvider: true });
+    noValidationServer.onRequest('textDocument/hover', async () => {
+      return { contents: 'ok' };
+    });
+
+    const noValidationTransport = new TestTransport();
+    await noValidationServer.listen(noValidationTransport);
+
+    noValidationTransport.simulateMessage({
+      jsonrpc: '2.0',
+      id: 'init',
+      method: 'initialize',
+      params: {
+        processId: null,
+        rootUri: null,
+        capabilities: {}
+      }
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    noValidationTransport.sentMessages = [];
+
+    noValidationTransport.simulateMessage({
+      jsonrpc: '2.0',
+      id: 'hover',
+      method: 'textDocument/hover',
+      params: {
+        position: { line: 0, character: 0 }
+      }
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const response = noValidationTransport.sentMessages[0];
+    expect(response.error).toBeUndefined();
+    expect(response.result).toBeDefined();
+
+    await noValidationServer.close();
+  });
+
   it('should skip validation for methods without schemas', async () => {
     server.onRequest('custom/method', async (params: any) => {
       return { result: params };
@@ -258,7 +306,7 @@ describe('Parameter Validation Integration', () => {
   });
 
   it('should validate initialize params', async () => {
-    const newServer = new LSPServer({ logLevel: 'error' });
+    const newServer = new LSPServer({ logLevel: LogLevel.Error });
     const newTransport = new TestTransport();
     await newServer.listen(newTransport);
 

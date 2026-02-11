@@ -62,7 +62,7 @@ export { LogLevel, ConsoleLogger, NullLogger } from './utils/logger.js';
 export { JSONRPCErrorCode, ErrorMessage, ResponseError } from './utils/errors.js';
 
 // Protocol types (re-exported from vscode-languageserver-protocol)
-export * from './protocol/types.js';
+export type * from './protocol/types.js';
 
 // LSP protocol types and constants (overloaded with same name - type and const)
 // Note: Single export statement exports both the type and const with same name
@@ -139,7 +139,8 @@ export {
   createProgressBegin,
   createProgressReport,
   createProgressEnd,
-  createProgressCreateParams
+  createProgressCreateParams,
+  createProgressToken
 } from './protocol/progress.js';
 
 export type { PartialResultParams } from './protocol/partial.js';

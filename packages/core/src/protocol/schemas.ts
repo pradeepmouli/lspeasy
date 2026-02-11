@@ -114,6 +114,8 @@ export const HoverSchema = z.object({
  * Completion params
  */
 export const CompletionParamsSchema = TextDocumentPositionParamsSchema.extend({
+  workDoneToken: z.union([z.string(), z.number()]).optional(),
+  partialResultToken: z.union([z.string(), z.number()]).optional(),
   context: z
     .object({
       triggerKind: z.number(),

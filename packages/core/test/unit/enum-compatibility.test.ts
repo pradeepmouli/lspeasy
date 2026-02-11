@@ -9,6 +9,12 @@ import type {
   SymbolInformation,
   DocumentHighlight
 } from 'vscode-languageserver-protocol';
+import type {
+  CodeActionClientCapabilities,
+  CodeActionOptions,
+  FoldingRangeClientCapabilities,
+  SemanticTokensClientCapabilities
+} from '../../src/protocol/types.js';
 import {
   CompletionItemKind,
   DiagnosticSeverity,
@@ -17,12 +23,8 @@ import {
   InsertTextFormat,
   CodeActionKind,
   FoldingRangeKind,
-  TokenFormat,
-  type CodeActionClientCapabilities,
-  type CodeActionOptions,
-  type FoldingRangeClientCapabilities,
-  type SemanticTokensClientCapabilities
-} from '../../src/protocol/types.js';
+  TokenFormat
+} from '../../src/protocol/enums.js';
 
 describe('Enum Compatibility with Protocol Types', () => {
   it('should allow enum values in CompletionItem', () => {
@@ -130,13 +132,10 @@ describe('Enum Compatibility with Protocol Types', () => {
       },
       tokenTypes: ['keyword', 'string'],
       tokenModifiers: ['declaration'],
-      formats: [
-        TokenFormat.Relative, // enum value
-        'absolute' // custom format (hypothetical)
-      ]
+      formats: [TokenFormat.Relative] // enum value
     };
 
-    expect(capabilities.formats).toHaveLength(2);
+    expect(capabilities.formats).toHaveLength(1);
     expect(capabilities.formats[0]).toBe('relative');
   });
 });

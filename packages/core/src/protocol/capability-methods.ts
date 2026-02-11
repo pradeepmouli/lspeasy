@@ -13,13 +13,11 @@ import type {
   ConditionalPick,
   ConditionalPickDeep,
   KeyAsString,
-  NonEmptyObject,
   PascalCase,
   Paths,
   Simplify,
   SimplifyDeep
 } from 'type-fest';
-import { request } from 'node:http';
 
 /**
  * Helper type to check if a capability is enabled
@@ -39,6 +37,11 @@ type IsClientCapabilityEnabled<Caps, A = Record<string, any>> = A extends {
     ? true
     : false
   : true /* No capability required */;
+
+type StripNamespaceSuffix<
+  Namespace extends string,
+  Method extends string
+> = Method extends `${infer Prefix}${Namespace}` ? Prefix : Method;
 /**
  * Transform a request type definition into a method signature
  * Only included if the server capability is enabled
@@ -110,11 +113,6 @@ type RemoveNeverFromNamespace<T> = Simplify<{
   [K in keyof T as T[K] extends never ? never : K]: T[K];
 }>;
 
-type RemoveEmptyObject<T> = keyof T extends never ? never : T;
-
-/**
- * Uncapitalize first letter of string
- */
 /**
  * Client methods for sending requests to server
  * Methods are conditionally visible based on ServerCapabilities
@@ -280,7 +278,7 @@ export namespace Client {
     RemoveNever<{
       [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
         [Method in keyof Notifications[Namespace] as CamelCase<
-          Method & string
+          StripNamespaceSuffix<Namespace & string, Method & string>
         >]: IsClientCapabilityEnabled<ClientCaps, Notifications[Namespace][Method]> extends true
           ? Notifications[Namespace][Method]
           : never;
@@ -288,10 +286,6 @@ export namespace Client {
     }>
   >;
 }
-
-type isServerToClient<T> = T extends { Direction: 'serverToClient' | 'both' } ? true : false;
-
-type isClientToServer<T> = T extends { Direction: 'clientToServer' | 'both' } ? true : false;
 
 export namespace Server {
   export type AvailableRequests<
@@ -316,7 +310,7 @@ export namespace Server {
     RemoveNever<{
       [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
         [Method in keyof Notifications[Namespace] as CamelCase<
-          Method & string
+          StripNamespaceSuffix<Namespace & string, Method & string>
         >]: IsServerCapabilityEnabled<ServerCaps, Notifications[Namespace][Method]> extends true
           ? Notifications[Namespace][Method]
           : never;
@@ -366,21 +360,6 @@ export type AvailableMethods<
     >;
   };
 };
-
-type MyServerCaps = {
-  hoverProvider: true;
-  completionProvider: { triggerCharacters: ['.'] };
-};
-
-type MyClientCaps = {
-  textDocument: {
-    hover: { contentFormat: ['markdown'] };
-    completion: { completionItem: { snippetSupport: true } };
-    synchronization: { didSave: true };
-  };
-};
-type path = Paths<MyClientCaps>;
-type test = Client<MyClientCaps, MyServerCaps>;
 
 export type Client<
   ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities,

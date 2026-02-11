@@ -11,7 +11,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
 import { LSPClient } from '@lspeasy/client';
-import { StdioTransport, JSONRPCErrorCode } from '@lspeasy/core';
+import { JSONRPCErrorCode } from '@lspeasy/core';
+import { createConnectedStdioTransports } from './transport-utils.js';
 
 describe('LSP 3.17 Conformance', () => {
   let server: LSPServer;
@@ -53,8 +54,7 @@ describe('LSP 3.17 Conformance', () => {
         hoverProvider: true
       });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
 
@@ -80,8 +80,7 @@ describe('LSP 3.17 Conformance', () => {
     it('should reject requests after shutdown', async () => {
       server.setCapabilities({ hoverProvider: true });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);
@@ -138,8 +137,7 @@ describe('LSP 3.17 Conformance', () => {
         contents: { kind: 'plaintext', value: 'test' }
       }));
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);
@@ -159,8 +157,7 @@ describe('LSP 3.17 Conformance', () => {
         received = true;
       });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);
@@ -184,8 +181,7 @@ describe('LSP 3.17 Conformance', () => {
         contents: { kind: 'markdown', value: '# Success' }
       }));
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);
@@ -203,8 +199,7 @@ describe('LSP 3.17 Conformance', () => {
         throw new Error('Handler error');
       });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);
@@ -245,8 +240,7 @@ describe('LSP 3.17 Conformance', () => {
         });
       });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);
@@ -274,8 +268,7 @@ describe('LSP 3.17 Conformance', () => {
         definitionProvider: true
       });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       const initResult = await client.connect(clientTransport);
@@ -294,8 +287,7 @@ describe('LSP 3.17 Conformance', () => {
         openedUri = params.textDocument.uri;
       });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);
@@ -320,8 +312,7 @@ describe('LSP 3.17 Conformance', () => {
         changedVersion = params.textDocument.version;
       });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);
@@ -342,8 +333,7 @@ describe('LSP 3.17 Conformance', () => {
         closedUri = params.textDocument.uri;
       });
 
-      const serverTransport = new StdioTransport();
-      const clientTransport = new StdioTransport();
+      const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
       await server.listen(serverTransport);
       await client.connect(clientTransport);

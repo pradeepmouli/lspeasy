@@ -115,7 +115,7 @@ for (const fileName of additionalProtocolFiles) {
   try {
     const file = project.addSourceFileAtPath(join(protocolPath, fileName));
     findRequests(file);
-  } catch (e) {
+  } catch {
     // File might not exist in this version
   }
 }
@@ -141,7 +141,7 @@ import type {
   // Collect all type references
   const typeRefs = new Set();
 
-  for (const [name, info] of [...requests, ...notifications]) {
+  for (const [, info] of [...requests, ...notifications]) {
     if (info.params && info.params !== 'void') {
       // Extract type names from params
       const paramTypes = info.params.match(/[A-Z][A-Za-z0-9_]*/g) || [];
@@ -171,7 +171,7 @@ export namespace LSPRequest {
   // Group requests by category
   const categories = new Map();
 
-  for (const [name, info] of requests) {
+  for (const [, info] of requests) {
     // Extract category from method name (e.g., 'textDocument/hover' -> 'TextDocument')
     const parts = info.method.split('/');
     const category = parts[0]
@@ -217,7 +217,7 @@ export namespace LSPNotification {
 
   const notifCategories = new Map();
 
-  for (const [name, info] of notifications) {
+  for (const [, info] of notifications) {
     const parts = info.method.split('/');
     const category = parts[0]
       .replace(/^./, (c) => c.toUpperCase())

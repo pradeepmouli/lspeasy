@@ -3,6 +3,7 @@
  */
 
 export { LSPClient } from './client.js';
+export { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
 export type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
 
 // Re-export commonly used types from core

@@ -3,8 +3,9 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { LSPServer } from '@lspeasy/server';
+import { LSPServer } from '../../src/server.js';
 import { ConsoleLogger, LogLevel } from '@lspeasy/core';
+import type { TextDocumentSyncKind } from '@lspeasy/core';
 
 describe('LSPServer', () => {
   describe('constructor', () => {
@@ -20,7 +21,7 @@ describe('LSPServer', () => {
         name: 'test-server',
         version: '2.0.0',
         logger,
-        logLevel: 'debug'
+        logLevel: LogLevel.Debug
       });
 
       expect(server).toBeDefined();
@@ -34,6 +35,15 @@ describe('LSPServer', () => {
 
       const server = new LSPServer({
         onValidationError
+      });
+
+      expect(server).toBeDefined();
+    });
+
+    it('should accept request timeout and validation toggle', () => {
+      const server = new LSPServer({
+        requestTimeout: 5000,
+        validateParams: false
       });
 
       expect(server).toBeDefined();
@@ -74,15 +84,16 @@ describe('LSPServer', () => {
     });
 
     it('should accept partial capabilities', () => {
+      const fullSync = 1 as TextDocumentSyncKind;
       const capabilities = {
-        textDocumentSync: 1,
+        textDocumentSync: fullSync,
         hoverProvider: true
       };
 
       server.setCapabilities(capabilities);
       const result = server.getServerCapabilities();
 
-      expect(result.textDocumentSync).toBe(1);
+      expect(result.textDocumentSync).toBe(fullSync);
       expect(result.hoverProvider).toBe(true);
     });
   });
@@ -94,29 +105,22 @@ describe('LSPServer', () => {
       server = new LSPServer();
     });
 
-    it('should support chaining onRequest', () => {
-      const result = server
-        .onRequest('textDocument/hover', async () => null)
-        .onRequest('textDocument/completion', async () => ({ items: [] }));
-
-      expect(result).toBe(server);
+    it('should return disposable for request handlers', () => {
+      const disposable = server.onRequest('textDocument/hover', async () => null);
+      expect(disposable.dispose).toBeDefined();
     });
 
-    it('should support chaining onNotification', () => {
-      const result = server
-        .onNotification('textDocument/didOpen', () => {})
-        .onNotification('textDocument/didChange', () => {});
-
-      expect(result).toBe(server);
+    it('should return disposable for notification handlers', () => {
+      const disposable = server.onNotification('textDocument/didOpen', () => {});
+      expect(disposable.dispose).toBeDefined();
     });
 
-    it('should support mixed chaining', () => {
-      const result = server
-        .onRequest('textDocument/hover', async () => null)
-        .onNotification('textDocument/didOpen', () => {})
-        .onRequest('textDocument/completion', async () => ({ items: [] }));
+    it('should register multiple handlers independently', () => {
+      const first = server.onRequest('textDocument/hover', async () => null);
+      const second = server.onNotification('textDocument/didOpen', () => {});
 
-      expect(result).toBe(server);
+      expect(first.dispose).toBeDefined();
+      expect(second.dispose).toBeDefined();
     });
   });
 });

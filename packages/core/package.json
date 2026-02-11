@@ -25,9 +25,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
+    "./utils/internal": {
+      "types": "./dist/utils/internal.d.ts",
+      "import": "./dist/utils/internal.js"
+    },
     "./protocol": {
       "types": "./dist/protocol/index.d.ts",
       "import": "./dist/protocol/index.js"
+    },
+    "./protocol/enums": {
+      "types": "./dist/protocol/enums.d.ts",
+      "import": "./dist/protocol/enums.js"
     },
     "./transport": {
       "types": "./dist/transport/index.d.ts",

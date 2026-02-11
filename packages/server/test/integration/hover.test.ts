@@ -2,6 +2,7 @@
  * Integration test for textDocument/hover request/response
  */
 
+import { LogLevel } from '@lspeasy/core';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
 import type { Transport, HoverParams, Hover } from '@lspeasy/core';
@@ -59,7 +60,7 @@ describe('textDocument/hover Integration', () => {
     server = new LSPServer({
       name: 'hover-test-server',
       version: '1.0.0',
-      logLevel: 'error'
+      logLevel: LogLevel.Error
     });
 
     server.setCapabilities({
@@ -137,7 +138,7 @@ describe('textDocument/hover Integration', () => {
   });
 
   it('should return null for no hover', async () => {
-    const noHoverServer = new LSPServer({ logLevel: 'error' });
+    const noHoverServer = new LSPServer({ logLevel: LogLevel.Error });
     noHoverServer.setCapabilities({ hoverProvider: true });
 
     noHoverServer.onRequest<'textDocument/hover', HoverParams, Hover | null>(
@@ -204,7 +205,7 @@ describe('textDocument/hover Integration', () => {
   });
 
   it('should handle hover with range', async () => {
-    const rangeServer = new LSPServer({ logLevel: 'error' });
+    const rangeServer = new LSPServer({ logLevel: LogLevel.Error });
     rangeServer.setCapabilities({ hoverProvider: true });
 
     rangeServer.onRequest<'textDocument/hover', HoverParams, Hover | null>(
@@ -256,7 +257,7 @@ describe('textDocument/hover Integration', () => {
   });
 
   it('should handle errors in hover handler', async () => {
-    const errorServer = new LSPServer({ logLevel: 'error' });
+    const errorServer = new LSPServer({ logLevel: LogLevel.Error });
     errorServer.setCapabilities({ hoverProvider: true });
 
     errorServer.onRequest('textDocument/hover', async () => {

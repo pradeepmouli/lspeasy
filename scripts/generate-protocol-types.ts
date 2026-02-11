@@ -17,20 +17,15 @@ import {
   IndentationText,
   Project,
   QuoteKind,
-  SourceFile,
   VariableDeclarationKind,
   type CodeBlockWriter
 } from 'ts-morph';
-import * as fs from 'node:fs';
 import * as path from 'node:path';
 import camelCase from 'camelcase';
 import { fetchMetaModel } from './fetch-metamodel.ts';
 import { MetaModelParser } from './lib/metamodel-parser.ts';
 import type {
   MetaModel,
-  Structure,
-  Enumeration,
-  TypeAlias,
   Request,
   Notification,
   Type,
@@ -95,6 +90,7 @@ class ProtocolTypeGenerator {
   // Output paths
   private readonly typesOutputPath: string;
   private readonly namespacesOutputPath: string;
+  private readonly enumsOutputPath: string;
 
   constructor() {
     // Initialize ts-morph project for output generation (import management)
@@ -117,6 +113,7 @@ class ProtocolTypeGenerator {
       process.cwd(),
       'packages/core/src/protocol/namespaces.ts'
     );
+    this.enumsOutputPath = path.join(process.cwd(), 'packages/core/src/protocol/enums.ts');
   }
 
   async generate() {
@@ -129,7 +126,10 @@ class ProtocolTypeGenerator {
     this.extractCategories();
 
     // Step 3: Generate types.ts
-    //await this.generateTypesFile();
+    await this.generateTypesFile();
+
+    // Step 3b: Generate enums.ts
+    await this.generateEnumsFile();
 
     // Step 4: Generate namespaces.ts
     await this.generateNamespacesFile();
@@ -192,14 +192,28 @@ class ProtocolTypeGenerator {
  * DO NOT EDIT MANUALLY
  */
 
-// Re-export all LSP protocol types
-export * from './types.js';`);
+export type * from 'vscode-languageserver-protocol';
+
+export type TextDocumentContentParams = unknown;
+export type TextDocumentContent = unknown;
+
+export type TextDocumentContentResult = unknown;
+
+export type TextDocumentContentRegistrationOptions = unknown;
+
+export type TextDocumentContentRefreshParams = unknown;
+
+export type CancelParams = { id: number | string };
+
+export type ProgressParams = {
+  token: string | number;
+};`);
 
     // Save file (ts-morph will format it)
     await sourceFile.save();
 
     console.log(`   ✅ Generated ${this.typesOutputPath}`);
-    console.log(`   ✅ Re-exporting all types from ./types.js\n`);
+    console.log(`   ✅ Generated protocol type re-exports\n`);
   }
 
   private async generateNamespacesFile() {
@@ -243,9 +257,8 @@ export * from './types.js';`);
 
             writer.write(`${camelCase(categoryName, { pascalCase: true })}: `);
             writer.block(() => {
-              const usedNames = new Set<string>();
               for (const request of categoryInfo.requests) {
-                this.writeRequestType(writer, request, usedNames);
+                this.writeRequestType(writer, request);
               }
             });
             writer.write(';').newLine();
@@ -270,9 +283,8 @@ export * from './types.js';`);
 
             writer.write(`${camelCase(categoryName, { pascalCase: true })}: `);
             writer.block(() => {
-              const usedNames = new Set<string>();
               for (const notification of categoryInfo.notifications) {
-                this.writeNotificationType(writer, notification, usedNames);
+                this.writeNotificationType(writer, notification);
               }
             });
             writer.write(';').newLine();
@@ -300,9 +312,8 @@ export * from './types.js';`);
 
                 writer.write(`${camelCase(categoryName, { pascalCase: true })}: `);
                 writer.block(() => {
-                  const usedNames = new Set<string>();
                   for (const request of categoryInfo.requests) {
-                    this.writeRequestConst(writer, request, usedNames);
+                    this.writeRequestConst(writer, request);
                   }
                 });
                 writer.write(',').newLine();
@@ -344,9 +355,8 @@ export * from './types.js';`);
 
                 writer.write(`${camelCase(categoryName, { pascalCase: true })}: `);
                 writer.block(() => {
-                  const usedNames = new Set<string>();
                   for (const notification of categoryInfo.notifications) {
-                    this.writeNotificationConst(writer, notification, usedNames);
+                    this.writeNotificationConst(writer, notification);
                   }
                 });
                 writer.write(',').newLine();
@@ -400,12 +410,51 @@ export * from './types.js';`);
     console.log(`   ✅ Generated ${this.categories.size} namespaces\n`);
   }
 
+  private async generateEnumsFile() {
+    console.log('📝 Generating enums.ts...');
+
+    const sourceFile = this.outputProject.createSourceFile(this.enumsOutputPath, '', {
+      overwrite: true
+    });
+
+    sourceFile.addStatements(`/**
+ * LSP Protocol Enums
+ *
+ * Auto-generated from metaModel.json
+ * DO NOT EDIT MANUALLY
+ */`);
+
+    const enums = this.parser
+      .getAllEnumerations()
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    for (const enumeration of enums) {
+      const enumDeclaration = sourceFile.addEnum({
+        name: enumeration.name,
+        isExported: true
+      });
+
+      for (const entry of enumeration.values) {
+        enumDeclaration.addMember({
+          name: entry.name,
+          initializer:
+            typeof entry.value === 'string' ? JSON.stringify(entry.value) : String(entry.value)
+        });
+      }
+    }
+
+    sourceFile.formatText();
+    await sourceFile.save();
+
+    console.log(`   ✅ Generated ${this.enumsOutputPath}`);
+    console.log(`   ✅ Generated ${enums.length} enums\n`);
+  }
+
   /**
    * Write a request type definition using ts-morph CodeBlockWriter
    */
-  private writeRequestType(writer: CodeBlockWriter, request: Request, usedNames: Set<string>) {
-    const finalName = this.getUniqueName(request.method, usedNames);
-
+  private writeRequestType(writer: CodeBlockWriter, request: Request) {
     writer.write(`${request.typeName}: `);
     writer.block(() => {
       writer.writeLine(`Method: '${request.method}';`);
@@ -464,13 +513,7 @@ export * from './types.js';`);
   /**
    * Write a notification type definition using ts-morph CodeBlockWriter
    */
-  private writeNotificationType(
-    writer: CodeBlockWriter,
-    notification: Notification,
-    usedNames: Set<string>
-  ) {
-    const finalName = this.getUniqueName(notification.method, usedNames);
-
+  private writeNotificationType(writer: CodeBlockWriter, notification: Notification) {
     writer.write(`${notification.typeName}: `);
     writer.block(() => {
       writer.writeLine(`Method: '${notification.method}';`);
@@ -517,9 +560,7 @@ export * from './types.js';`);
   /**
    * Write a request const definition using ts-morph CodeBlockWriter
    */
-  private writeRequestConst(writer: CodeBlockWriter, request: Request, usedNames: Set<string>) {
-    const finalName = this.getUniqueName(request.method, usedNames);
-
+  private writeRequestConst(writer: CodeBlockWriter, request: Request) {
     writer.write(`${request.typeName}: `);
     writer.block(() => {
       writer.writeLine(`Method: '${request.method}',`);
@@ -546,13 +587,7 @@ export * from './types.js';`);
   /**
    * Write a notification const definition using ts-morph CodeBlockWriter
    */
-  private writeNotificationConst(
-    writer: CodeBlockWriter,
-    notification: Notification,
-    usedNames: Set<string>
-  ) {
-    const finalName = this.getUniqueName(notification.method, usedNames);
-
+  private writeNotificationConst(writer: CodeBlockWriter, notification: Notification) {
     writer.write(`${notification.typeName}: `);
     writer.block(() => {
       writer.writeLine(`Method: '${notification.method}',`);
@@ -574,33 +609,6 @@ export * from './types.js';`);
       }
     });
     writer.write(',').newLine();
-  }
-
-  /**
-   * Get a unique name for a method, handling duplicates
-   */
-  private getUniqueName(method: string, usedNames: Set<string>): string {
-    const methodParts = method.split('/');
-    let constName: string;
-
-    if (methodParts.length > 2) {
-      const secondLast = camelCase(methodParts[methodParts.length - 2], { pascalCase: true });
-      const last = camelCase(methodParts[methodParts.length - 1], { pascalCase: true });
-      constName = secondLast + last;
-    } else {
-      const methodName = methodParts[methodParts.length - 1];
-      constName = camelCase(methodName, { pascalCase: true });
-    }
-
-    let finalName = constName;
-    let counter = 2;
-    while (usedNames.has(finalName)) {
-      finalName = `${constName}${counter}`;
-      counter++;
-    }
-    usedNames.add(finalName);
-
-    return finalName;
   }
 }
 

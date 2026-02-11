@@ -11,7 +11,7 @@ import type {
   ServerCapabilities
 } from '@lspeasy/core';
 import type { ZodError } from 'zod';
-import type { ResponseError as ResponseErrorInterface } from '@lspeasy/core';
+import type { ResponseErrorInterface } from '@lspeasy/core';
 
 /**
  * Re-export Server type for convenience
@@ -45,12 +45,23 @@ export interface ServerOptions<
   logLevel?: LogLevel;
 
   /**
+   * Default request timeout in milliseconds for server-initiated requests
+   */
+  requestTimeout?: number;
+
+  /**
    * Custom validation error handler
    */
   onValidationError?: (
     error: ZodError,
     message: RequestContext | NotificationContext
   ) => ResponseErrorInterface | void;
+
+  /**
+   * Enable parameter validation for requests and notifications
+   * Defaults to true
+   */
+  validateParams?: boolean;
 
   /**
    * Capabilities to declare during initialization

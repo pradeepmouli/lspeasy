@@ -8,23 +8,7 @@
 import type { ServerCapabilities, LSPRequestMethod } from '../packages/core/src/index.js';
 import { getCapabilityForRequestMethod, hasCapability } from '../packages/core/src/index.js';
 
-// Example 1: Define server capabilities
-// ======================================
-
-type MyServerCaps = {
-  hoverProvider: true;
-  completionProvider: { triggerCharacters: ['.'] };
-  definitionProvider: true;
-  // referencesProvider is not defined, so it's not supported
-};
-
-const myCapabilities: MyServerCaps = {
-  hoverProvider: true,
-  completionProvider: { triggerCharacters: ['.'] },
-  definitionProvider: true
-};
-
-// Example 2: Runtime capability checking
+// Example 1: Runtime capability checking
 // =======================================
 
 const serverCapabilities: ServerCapabilities = {
@@ -50,7 +34,7 @@ console.log('Has references capability:', hasReferences); // false
 const hasCompletion = hasCapability(serverCapabilities, 'completionProvider');
 console.log('Has completion capability:', hasCompletion); // true
 
-// Example 3: Dynamic capability filtering
+// Example 2: Dynamic capability filtering
 // ========================================
 
 function checkMethodSupport(method: string, capabilities: ServerCapabilities): boolean {
@@ -75,7 +59,7 @@ for (const method of methods) {
   console.log(`  ${method}: ${supported ? '✓' : '✗'}`);
 }
 
-// Example 4: Type-safe capability checks
+// Example 3: Type-safe capability checks
 // =======================================
 
 function requiresCapability(method: LSPRequestMethod, capabilities: ServerCapabilities): boolean {

@@ -37,7 +37,7 @@ import {
   DiagnosticSeverity,
   CodeActionKind,
   FoldingRangeKind
-} from '@lspeasy/core';
+} from '@lspeasy/core/protocol/enums';
 
 // Use enums instead of magic numbers
 const completion = {

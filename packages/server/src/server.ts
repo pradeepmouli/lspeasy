@@ -2,16 +2,16 @@
  * LSP Server - Main server class for handling LSP connections
  */
 
-import EventEmitter from 'node:events';
 import type {
   Transport,
   Message,
+  RequestMessage,
+  NotificationMessage,
+  ResponseMessage,
   Disposable,
   Logger,
   ServerCapabilities,
   ClientCapabilities,
-  InitializeParams,
-  InitializedParams,
   LSPRequestMethod,
   LSPNotificationMethod,
   ParamsForRequest,
@@ -19,13 +19,21 @@ import type {
   ParamsForNotification,
   Server
 } from '@lspeasy/core';
-import { ConsoleLogger, LogLevel, ResponseError, isRequestMessage } from '@lspeasy/core';
+import {
+  ConsoleLogger,
+  LogLevel,
+  ResponseError,
+  isRequestMessage,
+  isResponseMessage
+} from '@lspeasy/core';
+import { DisposableEventEmitter } from '@lspeasy/core/utils';
+import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
 import type { ServerOptions, RequestHandler, NotificationHandler } from './types.js';
 import { ServerState } from './types.js';
 import { MessageDispatcher } from './dispatcher.js';
 import { LifecycleManager } from './lifecycle.js';
 import { validateParams } from './validation.js';
-import { CapabilityGuard } from './capability-guard.js';
+import { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
 import { initializeServerHandlerMethods, initializeServerSendMethods } from './capability-proxy.js';
 
 /**
@@ -52,20 +60,28 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   private readonly version: string;
   private readonly options: ServerOptions<Capabilities>;
   private capabilityGuard?: CapabilityGuard;
-  private events: EventEmitter;
+  private clientCapabilityGuard?: ClientCapabilityGuard;
+  private events: DisposableEventEmitter<{
+    listening: [];
+    shutdown: [];
+    error: [Error];
+  }>;
+  private transportAttachment: TransportAttachment;
+  private pendingRequests: PendingRequestTracker<unknown, string>;
 
   private transport?: Transport | undefined;
   private state: ServerState = ServerState.Created;
   private cancellationTokens = new Map<number | string, AbortController>();
   private clientCapabilities?: ClientCapabilities;
   private clientInfo?: { name: string; version?: string };
-  private disposables: Disposable[] = [];
 
   constructor(options: ServerOptions<Capabilities> = {}) {
     this.options = options;
     this.name = options.name ?? 'lsp-server';
     this.version = options.version ?? '1.0.0';
-    this.events = new EventEmitter();
+    this.events = new DisposableEventEmitter();
+    this.transportAttachment = new TransportAttachment();
+    this.pendingRequests = new PendingRequestTracker(this.options.requestTimeout);
 
     // Setup logger
     const logLevel = options.logLevel ?? LogLevel.Info;
@@ -120,15 +136,11 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
 
     // Wrap handler with validation
     const wrappedHandler: RequestHandler<Params, Result> = async (params, token, context) => {
-      // Validate params if schema exists
-      const validatedParams = validateParams(
-        method,
-        params,
-        context,
-        this.options.onValidationError
-      ) as Params;
+      const validatedParams =
+        this.options.validateParams === false
+          ? params
+          : (validateParams(method, params, context, this.options.onValidationError) as Params);
 
-      // Call user handler
       return handler(validatedParams, token, context);
     };
 
@@ -180,15 +192,11 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
 
     // Wrap handler with validation
     const wrappedHandler: NotificationHandler<Params> = async (params, context) => {
-      // Validate params if schema exists
-      const validatedParams = validateParams(
-        method,
-        params,
-        context,
-        this.options.onValidationError
-      ) as Params;
+      const validatedParams =
+        this.options.validateParams === false
+          ? params
+          : (validateParams(method, params, context, this.options.onValidationError) as Params);
 
-      // Call user handler
       return handler(validatedParams, context);
     };
 
@@ -273,6 +281,62 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 
   /**
+   * Send a server-to-client request.
+   */
+  async sendRequest<Method extends LSPRequestMethod<'serverToClient'>>(
+    method: Method,
+    params?: ParamsForRequest<Method>
+  ): Promise<ResultForRequest<Method>> {
+    if (!this.transport) {
+      throw new Error('Server is not listening');
+    }
+
+    if (this.clientCapabilityGuard && !this.clientCapabilityGuard.canSendRequest(method)) {
+      this.logger.warn(`Client capability not declared for request ${method}`);
+    }
+
+    const { id, promise } = this.pendingRequests.create(this.options.requestTimeout, method);
+
+    const request: RequestMessage = {
+      jsonrpc: '2.0',
+      id,
+      method,
+      params
+    };
+
+    this.transport.send(request).catch((error) => {
+      const rejection = error instanceof Error ? error : new Error(String(error));
+      this.pendingRequests.reject(id, rejection);
+    });
+
+    return promise as Promise<ResultForRequest<Method>>;
+  }
+
+  /**
+   * Send a server-to-client notification.
+   */
+  async sendNotification<Method extends LSPNotificationMethod<'serverToClient'>>(
+    method: Method,
+    params?: ParamsForNotification<Method>
+  ): Promise<void> {
+    if (!this.transport) {
+      throw new Error('Server is not listening');
+    }
+
+    if (this.clientCapabilityGuard && !this.clientCapabilityGuard.canSendNotification(method)) {
+      this.logger.warn(`Client capability not declared for notification ${method}`);
+    }
+
+    const notification: NotificationMessage = {
+      jsonrpc: '2.0',
+      method,
+      params
+    };
+
+    await this.transport.send(notification);
+  }
+
+  /**
    * Start listening on a transport
    */
   async listen(transport: Transport): Promise<void> {
@@ -283,17 +347,19 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
     this.transport = transport;
     this.logger.info(`Server listening: ${this.name} v${this.version}`);
 
-    // Subscribe to messages
-    const messageDisposable = transport.onMessage(async (message) => {
-      await this.handleMessage(message);
+    this.transportAttachment.attach(transport, {
+      onMessage: (message) => {
+        void this.handleMessage(message);
+      },
+      onError: (error) => {
+        this.logger.error('Transport error:', error);
+        this.events.emit('error', error);
+      },
+      onClose: () => {
+        this.logger.info('Transport closed');
+        void this.close();
+      }
     });
-    this.disposables.push(messageDisposable);
-
-    // Subscribe to errors
-    const errorDisposable = transport.onError((error) => {
-      this.logger.error('Transport error:', error);
-    });
-    this.disposables.push(errorDisposable);
 
     this.events.emit('listening');
   }
@@ -336,11 +402,8 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
     this.logger.info('Server closing...');
     this.state = ServerState.Shutdown;
 
-    // Dispose all subscriptions
-    for (const disposable of this.disposables) {
-      disposable.dispose();
-    }
-    this.disposables = [];
+    this.transportAttachment.detach();
+    this.pendingRequests.clear(new Error('Connection closed'));
 
     // Close transport
     if (this.transport) {
@@ -376,36 +439,21 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
    * Subscribe to listening events
    */
   onListening(handler: () => void): Disposable {
-    this.events.on('listening', handler);
-    return {
-      dispose: () => {
-        this.events.off('listening', handler);
-      }
-    };
+    return this.events.on('listening', handler);
   }
 
   /**
    * Subscribe to shutdown events
    */
   onShutdown(handler: () => void): Disposable {
-    this.events.on('shutdown', handler);
-    return {
-      dispose: () => {
-        this.events.off('shutdown', handler);
-      }
-    };
+    return this.events.on('shutdown', handler);
   }
 
   /**
    * Subscribe to error events
    */
   onError(handler: (error: Error) => void): Disposable {
-    this.events.on('error', handler);
-    return {
-      dispose: () => {
-        this.events.off('error', handler);
-      }
-    };
+    return this.events.on('error', handler);
   }
 
   /**
@@ -420,6 +468,11 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
 
       this.state = ServerState.Initializing;
       this.clientCapabilities = params.capabilities;
+      this.clientCapabilityGuard = new ClientCapabilityGuard(
+        params.capabilities ?? {},
+        this.logger,
+        this.options.strictCapabilities ?? false
+      );
       if (params.clientInfo) {
         this.clientInfo = params.clientInfo;
       }
@@ -474,6 +527,11 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
    */
   private async handleMessage(message: Message): Promise<void> {
     try {
+      if (isResponseMessage(message)) {
+        this.handleResponse(message as ResponseMessage);
+        return;
+      }
+
       // Check if server is initialized for non-lifecycle messages
       if (isRequestMessage(message)) {
         const method = message.method;
@@ -495,6 +553,35 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       this.logger.error('Error handling message:', error);
       this.events.emit('error', error as Error);
     }
+  }
+
+  /**
+   * Handle response messages for server-initiated requests.
+   */
+  private handleResponse(response: ResponseMessage): void {
+    const { id } = response;
+    const method = this.pendingRequests.getMetadata(String(id));
+
+    if (!method) {
+      this.logger.warn(`Received response for unknown request ${id}`);
+      return;
+    }
+
+    if ('error' in response && response.error) {
+      this.logger.error(`Request ${method} failed`, response.error);
+      this.pendingRequests.reject(
+        String(id),
+        new Error(`${response.error.message} (code: ${response.error.code})`)
+      );
+      return;
+    }
+
+    if ('result' in response) {
+      this.pendingRequests.resolve(String(id), response.result);
+      return;
+    }
+
+    this.pendingRequests.reject(String(id), new Error('Invalid response message'));
   }
 }
 

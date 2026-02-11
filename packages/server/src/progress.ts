@@ -5,7 +5,12 @@
  */
 
 import type { ProgressToken } from 'vscode-languageserver-protocol';
-import { createProgressBegin, createProgressReport, createProgressEnd } from '@lspeasy/core';
+import {
+  createProgressBegin,
+  createProgressReport,
+  createProgressEnd,
+  createProgressToken
+} from '@lspeasy/core';
 
 /**
  * Progress reporter for work done progress
@@ -87,6 +92,4 @@ export function createProgressReporter(
 /**
  * Generate a unique progress token
  */
-export function createProgressToken(): ProgressToken {
-  return `progress-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-}
+export { createProgressToken };

@@ -15,7 +15,7 @@
  * Usage: pnpm tsx scripts/generate-protocol-types.ts
  */
 
-import { Project, Node, TypeAliasDeclaration, InterfaceDeclaration, SyntaxKind } from 'ts-morph';
+import { Project, Node, SyntaxKind } from 'ts-morph';
 import * as fs from 'fs';
 import * as path from 'path';
 import camelCase from 'camelcase';
@@ -299,8 +299,6 @@ class ProtocolTypeGenerator {
    */
   private async extractCategories() {
     console.log('   Extracting categories from Request/Notification namespaces...');
-    const sourceFile = this.project.getSourceFile(this.protocolFile)!;
-
     for (const namespaceName of this.allNamespaces) {
       let categoryName: string | null = null;
       let prefix: string | null = null;
@@ -492,7 +490,7 @@ import {LiteralUnion, OverrideProperties} from 'type-fest';
 
     // Only string-based kinds (not numeric)
     const stringKinds = Array.from(this.enumCandidates.entries())
-      .filter(([name, info]) => {
+      .filter(([, info]) => {
         // Must be genuinely string-based (have at least one string member)
         return (
           info.isStringBased && Array.from(info.members.values()).some((v) => typeof v === 'string')

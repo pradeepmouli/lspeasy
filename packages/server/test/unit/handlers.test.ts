@@ -4,13 +4,14 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
+import { LogLevel } from '@lspeasy/core';
 import type { HoverParams } from '@lspeasy/core';
 
 describe('Handler Registration', () => {
   let server: LSPServer;
 
   beforeEach(() => {
-    server = new LSPServer({ logLevel: 'error' });
+    server = new LSPServer({ logLevel: LogLevel.Error });
   });
 
   describe('onRequest', () => {
