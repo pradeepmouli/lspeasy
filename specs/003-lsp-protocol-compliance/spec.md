@@ -161,6 +161,8 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 - **FR-017b**: The SDK MUST provide a `SharedWorkerTransport` that implements the existing `Transport` interface via `MessagePort` for browser-based communication with a Shared Worker-hosted language server.
 - **FR-017c**: Worker transports MUST preserve message ordering and JSON-RPC request/response correlation semantics.
 - **FR-017d**: Worker transports MUST provide clear error and close signaling when the worker or port becomes unavailable.
+- **FR-017e**: `SharedWorkerTransport` MUST isolate routing per client `MessagePort` so concurrent clients cannot receive each other’s responses or notifications.
+- **FR-017f**: If `SharedWorkerTransport` cannot establish or activate a required `MessagePort`, it MUST emit an error, transition to unavailable/closed state, and reject subsequent sends until reinitialized.
 
 #### Partial Result Streaming
 
