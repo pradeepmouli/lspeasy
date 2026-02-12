@@ -44,6 +44,10 @@
     "./transport": {
       "types": "./dist/transport/index.d.ts",
       "import": "./dist/transport/index.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js"
     }
   },
   "main": "./dist/index.js",
@@ -59,7 +63,13 @@
     "type-check": "tsgo --noEmit"
   },
   "peerDependencies": {
+    "ws": "^8.19.0",
     "zod": "^3.25.0"
+  },
+  "peerDependenciesMeta": {
+    "ws": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
@@ -69,8 +79,5 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "dependencies": {
-    "ws": "^8.19.0"
   }
 }

@@ -44,7 +44,32 @@ export { StdioTransport } from './transport/stdio.js';
 export type { StdioTransportOptions } from './transport/stdio.js';
 export { WebSocketTransport } from './transport/websocket.js';
 export type { WebSocketTransportOptions } from './transport/websocket.js';
+export { createWebSocketClient } from './transport/websocket.js';
 export { TransportEventEmitter } from './transport/events.js';
+
+// Middleware
+export type {
+  Middleware,
+  MiddlewareContext,
+  MiddlewareDirection,
+  MiddlewareMessage,
+  MiddlewareMessageType,
+  MiddlewareNext,
+  MiddlewareResult,
+  MethodFilter,
+  ScopedMiddleware,
+  TypedMiddleware,
+  TypedMiddlewareContext,
+  TypedParams,
+  TypedResult,
+  LSPMethod
+} from './middleware/index.js';
+export {
+  composeMiddleware,
+  executeMiddlewarePipeline,
+  createScopedMiddleware,
+  createTypedMiddleware
+} from './middleware/index.js';
 
 // Utilities
 export type { Disposable } from './utils/disposable.js';
@@ -60,6 +85,12 @@ export type { Logger } from './utils/logger.js';
 export { LogLevel, ConsoleLogger, NullLogger } from './utils/logger.js';
 
 export { JSONRPCErrorCode, ErrorMessage, ResponseError } from './utils/errors.js';
+export {
+  DocumentVersionTracker,
+  createFullDidChangeParams,
+  createIncrementalDidChangeParams
+} from './utils/document.js';
+export type { IncrementalChange, VersionSource } from './utils/document.js';
 
 // Protocol types (re-exported from vscode-languageserver-protocol)
 export type * from './protocol/types.js';

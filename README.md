@@ -12,6 +12,11 @@ A modern **TypeScript SDK for building Language Server Protocol (LSP) clients an
 - 🔷 **Strongly-typed**: Full TypeScript support with LSP 3.17 types
 - 🚀 **Modern API**: Clean, promise-based API with async/await
 - 🔌 **Transport-agnostic**: Support for stdio, WebSocket, and custom transports
+- 🧩 **Composable middleware**: Global, scoped, and method-typed middleware pipeline
+- 🌐 **Native WebSocket client**: Uses `globalThis.WebSocket` on Node.js >= 22.4 and browsers
+- ⏱️ **Notification waiting**: Promise-based `waitForNotification` with timeout and filtering
+- ❤️ **Connection health**: State transitions, message timestamps, and optional heartbeat
+- 📝 **Document sync helpers**: Version-tracked didChange helper utilities
 - 📦 **Modular**: Three focused packages (`@lspeasy/core`, `@lspeasy/server`, `@lspeasy/client`)
 - ✅ **Well-tested**: Comprehensive unit and integration tests
 - 📚 **Documented**: Complete API reference and architecture guide
@@ -129,6 +134,8 @@ Core functionality and transport layer:
 - `Transport` interface and `StdioTransport` implementation
 - LSP 3.17 protocol types
 - Utilities (cancellation tokens, logging, disposables)
+- Middleware pipeline and composition helpers (`@lspeasy/core/middleware`)
+- Document change helper utilities (`@lspeasy/core/utils`)
 
 ```typescript
 import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
@@ -155,6 +162,16 @@ LSP client implementation:
 - High-level `textDocument.*` and `workspace.*` APIs
 - Cancellable requests
 - Server-to-client request handling
+- `waitForNotification()` API for one-shot notification listeners
+- Connection health monitoring APIs
+
+### @lspeasy/middleware-pino
+
+Optional package providing pino-compatible middleware logging.
+
+```typescript
+import { createPinoMiddleware } from '@lspeasy/middleware-pino';
+```
 
 ```typescript
 import { LSPClient } from '@lspeasy/client';
@@ -178,6 +195,9 @@ See the [examples](./examples) directory for complete working examples:
 - [Architecture Guide](./docs/ARCHITECTURE.md) - System design and implementation details
 - [API Reference](./docs/API.md) - Complete API documentation
 - [Package READMEs](./packages) - Package-specific guides
+- [Core README](./packages/core/README.md) - Middleware, transport, and document helper APIs
+- [Client README](./packages/client/README.md) - Notification waiting and connection health APIs
+- [Middleware Pino README](./packages/middleware-pino/README.md) - Structured logging middleware
 
 ## Development
 

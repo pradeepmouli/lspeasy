@@ -12,6 +12,12 @@ pnpm add @lspeasy/server @lspeasy/core
 yarn add @lspeasy/server @lspeasy/core
 ```
 
+For WebSocket server transports, install `ws`:
+
+```bash
+pnpm add ws
+```
+
 ## Quick Start
 
 Create a minimal hover server in less than 30 lines:

@@ -11,7 +11,7 @@ import {
   LSPRequest,
   getClientCapabilityForNotificationMethod,
   getClientCapabilityForRequestMethod,
-  hasCapability,
+  hasServerCapability,
   hasClientCapability,
   getCapabilityForNotificationMethod,
   getCapabilityForRequestMethod
@@ -107,7 +107,7 @@ export class CapabilityGuard {
     }
 
     // Check if server declared this capability
-    if (!hasCapability(this.capabilities, capabilityKey)) {
+    if (!hasServerCapability(this.capabilities, capabilityKey)) {
       const error = `Cannot send request ${method}: server capability '${capabilityKey}' not declared`;
       this.logger.warn(error);
 
@@ -164,7 +164,7 @@ export class CapabilityGuard {
     }
 
     // Check if server declared this capability
-    if (!hasCapability(this.capabilities, capabilityKey)) {
+    if (!hasServerCapability(this.capabilities, capabilityKey)) {
       const error = `Cannot send notification ${method}: server capability '${capabilityKey}' not declared`;
       this.logger.warn(error);
 

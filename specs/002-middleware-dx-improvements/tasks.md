@@ -19,12 +19,12 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create middleware directory structure in packages/core/src/middleware/
-- [ ] T002 Create connection health directory in packages/client/src/connection/
-- [ ] T003 Create notifications directory in packages/client/src/notifications/
-- [ ] T004 Create utils directory with document helpers in packages/core/src/utils/
-- [ ] T005 Create new package @lspeasy/middleware-pino with src/ and test/ directories
-- [ ] T006 Add e2e test files: e2e/middleware-integration.spec.ts, e2e/websocket-native.spec.ts, e2e/notification-wait.spec.ts, e2e/connection-health.spec.ts
+- [X] T001 Create middleware directory structure in packages/core/src/middleware/
+- [X] T002 Create connection health directory in packages/client/src/connection/
+- [X] T003 Create notifications directory in packages/client/src/notifications/
+- [X] T004 Create utils directory with document helpers in packages/core/src/utils/
+- [X] T005 Create new package @lspeasy/middleware-pino with src/ and test/ directories
+- [X] T006 Add e2e test files: e2e/middleware-integration.spec.ts, e2e/websocket-native.spec.ts, e2e/notification-wait.spec.ts, e2e/connection-health.spec.ts
 
 ---
 
@@ -34,10 +34,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Define base type system in packages/core/src/middleware/types.ts (JSONRPCMessage, MiddlewareContext, Middleware, MiddlewareNext, MiddlewareResult)
-- [ ] T008 [P] Update packages/core/package.json to mark 'ws' as optional peer dependency
-- [ ] T009 [P] Update packages/client/package.json and packages/server/package.json to depend on updated @lspeasy/core
-- [ ] T010 Create packages/middleware-pino/package.json with peer dependencies on @lspeasy/core and pino
+- [X] T007 Define base type system in packages/core/src/middleware/types.ts (JSONRPCMessage, MiddlewareContext, Middleware, MiddlewareNext, MiddlewareResult)
+- [X] T008 [P] Update packages/core/package.json to mark 'ws' as optional peer dependency
+- [X] T009 [P] Update packages/client/package.json and packages/server/package.json to depend on updated @lspeasy/core
+- [X] T010 Create packages/middleware-pino/package.json with peer dependencies on @lspeasy/core and pino
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -53,33 +53,33 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T011 [P] [US1] Unit test for middleware execution order in packages/core/test/unit/middleware/pipeline.test.ts
-- [ ] T011a [P] [US1] Unit test for compile-time readonly enforcement of context.message.id in packages/core/test/unit/middleware/types.test.ts
-- [ ] T012 [P] [US1] Unit test for middleware context immutability (readonly id) in packages/core/test/unit/middleware/types.test.ts
-- [ ] T013 [P] [US1] Unit test for middleware composition in packages/core/test/unit/middleware/compose.test.ts
-- [ ] T014 [P] [US1] Unit test for method-scoped middleware filtering in packages/core/test/unit/middleware/scoped.test.ts
-- [ ] T015 [P] [US1] Unit test for typed middleware type inference in packages/core/test/unit/middleware/typed.test.ts
-- [ ] T016 [P] [US1] Integration test for client middleware registration in packages/client/test/unit/middleware.test.ts
-- [ ] T017 [P] [US1] Integration test for server middleware registration in packages/server/test/unit/middleware.test.ts
-- [ ] T018 [P] [US1] E2E test for middleware pipeline with multiple middleware in e2e/middleware-integration.spec.ts
-- [ ] T019 [P] [US1] Benchmark test for zero-overhead validation in packages/core/test/unit/middleware/benchmark.test.ts
+- [X] T011 [P] [US1] Unit test for middleware execution order in packages/core/test/unit/middleware/pipeline.test.ts
+- [X] T011a [P] [US1] Unit test for compile-time readonly enforcement of context.message.id in packages/core/test/unit/middleware/types.test.ts
+- [X] T012 [P] [US1] Unit test for middleware context immutability (readonly id) in packages/core/test/unit/middleware/types.test.ts
+- [X] T013 [P] [US1] Unit test for middleware composition in packages/core/test/unit/middleware/compose.test.ts
+- [X] T014 [P] [US1] Unit test for method-scoped middleware filtering in packages/core/test/unit/middleware/scoped.test.ts
+- [X] T015 [P] [US1] Unit test for typed middleware type inference in packages/core/test/unit/middleware/typed.test.ts
+- [X] T016 [P] [US1] Integration test for client middleware registration in packages/client/test/unit/middleware.test.ts
+- [X] T017 [P] [US1] Integration test for server middleware registration in packages/server/test/unit/middleware.test.ts
+- [X] T018 [P] [US1] E2E test for middleware pipeline with multiple middleware in e2e/middleware-integration.spec.ts
+- [X] T019 [P] [US1] Benchmark test for zero-overhead validation in packages/core/test/unit/middleware/benchmark.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Implement MiddlewareContext and Middleware types in packages/core/src/middleware/types.ts
-- [ ] T021 [US1] Implement middleware pipeline execution (onion model) in packages/core/src/middleware/pipeline.ts
-- [ ] T022 [US1] Implement middleware composition utility (composeMiddleware) in packages/core/src/middleware/compose.ts
-- [ ] T023 [US1] Implement MethodFilter and ScopedMiddleware types in packages/core/src/middleware/types.ts
-- [ ] T024 [US1] Implement createScopedMiddleware factory in packages/core/src/middleware/scoped.ts
-- [ ] T025 [US1] Implement TypedMiddleware<M> with type inference in packages/core/src/middleware/typed.ts
-- [ ] T026 [US1] Implement createTypedMiddleware factory with method type inference in packages/core/src/middleware/typed.ts
-- [ ] T027 [US1] Export all middleware types and utilities from packages/core/src/middleware/index.ts
-- [ ] T028 [US1] Add middleware registration to LSPClient constructor options in packages/client/src/client.ts
-- [ ] T029 [US1] Add middleware registration to LSPServer constructor options in packages/server/src/server.ts
-- [ ] T030 [US1] Integrate middleware pipeline into client send(), sendRequest(), and sendNotification() paths in packages/client/src/client.ts
-- [ ] T031 [US1] Integrate middleware pipeline into server send(), sendRequest(), and sendNotification() paths in packages/server/src/server.ts
-- [ ] T032 [US1] Add middleware error handling (catch and emit via error event) in packages/core/src/middleware/pipeline.ts
-- [ ] T033 [US1] Document middleware API in packages/core/README.md with examples
+- [X] T020 [US1] Implement MiddlewareContext and Middleware types in packages/core/src/middleware/types.ts
+- [X] T021 [US1] Implement middleware pipeline execution (onion model) in packages/core/src/middleware/pipeline.ts
+- [X] T022 [US1] Implement middleware composition utility (composeMiddleware) in packages/core/src/middleware/compose.ts
+- [X] T023 [US1] Implement MethodFilter and ScopedMiddleware types in packages/core/src/middleware/types.ts
+- [X] T024 [US1] Implement createScopedMiddleware factory in packages/core/src/middleware/scoped.ts
+- [X] T025 [US1] Implement TypedMiddleware<M> with type inference in packages/core/src/middleware/typed.ts
+- [X] T026 [US1] Implement createTypedMiddleware factory with method type inference in packages/core/src/middleware/typed.ts
+- [X] T027 [US1] Export all middleware types and utilities from packages/core/src/middleware/index.ts
+- [X] T028 [US1] Add middleware registration to LSPClient constructor options in packages/client/src/client.ts
+- [X] T029 [US1] Add middleware registration to LSPServer constructor options in packages/server/src/server.ts
+- [X] T030 [US1] Integrate middleware pipeline into client send(), sendRequest(), and sendNotification() paths in packages/client/src/client.ts
+- [X] T031 [US1] Integrate middleware pipeline into server send(), sendRequest(), and sendNotification() paths in packages/server/src/server.ts
+- [X] T032 [US1] Add middleware error handling (catch and emit via error event) in packages/core/src/middleware/pipeline.ts
+- [X] T033 [US1] Document middleware API in packages/core/README.md with examples
 
 **Checkpoint**: At this point, middleware system is fully functional with global, method-scoped, and typed middleware support. Zero overhead validated.
 
@@ -93,23 +93,23 @@
 
 ### Tests for User Story 2
 
-- [ ] T034 [P] [US2] Unit test for native WebSocket detection in packages/core/test/unit/transport/websocket.test.ts
-- [ ] T035 [P] [US2] Unit test for fallback to `ws` library when native unavailable in packages/core/test/unit/transport/websocket.test.ts
-- [ ] T036 [P] [US2] Unit test for error message when neither native nor `ws` available in packages/core/test/unit/transport/websocket.test.ts
-- [ ] T036a [P] [US2] Unit test for WebSocket error messages (Node.js < 22.4, missing ws) in packages/core/test/unit/transport/websocket.test.ts
-- [ ] T037 [P] [US2] Integration test for WebSocket client reconnection with native WebSocket in packages/client/test/unit/websocket-reconnect.test.ts
-- [ ] T038 [P] [US2] E2E test for native WebSocket client/server message exchange in e2e/websocket-native.spec.ts
+- [X] T034 [P] [US2] Unit test for native WebSocket detection in packages/core/test/unit/transport/websocket.test.ts
+- [X] T035 [P] [US2] Unit test for fallback to `ws` library when native unavailable in packages/core/test/unit/transport/websocket.test.ts
+- [X] T036 [P] [US2] Unit test for error message when neither native nor `ws` available in packages/core/test/unit/transport/websocket.test.ts
+- [X] T036a [P] [US2] Unit test for WebSocket error messages (Node.js < 22.4, missing ws) in packages/core/test/unit/transport/websocket.test.ts
+- [X] T037 [P] [US2] Integration test for WebSocket client reconnection with native WebSocket in packages/client/test/unit/websocket-reconnect.test.ts
+- [X] T038 [P] [US2] E2E test for native WebSocket client/server message exchange in e2e/websocket-native.spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T039 [US2] Implement native WebSocket detection in packages/core/src/transport/websocket.ts
-- [ ] T040 [US2] Implement createWebSocketClient factory with native WebSocket support in packages/core/src/transport/websocket.ts
-- [ ] T041 [US2] Implement fallback to `ws` library for older Node.js versions in packages/core/src/transport/websocket.ts
-- [ ] T042 [US2] Add clear error messages for unavailable WebSocket implementations in packages/core/src/transport/websocket.ts
+- [X] T039 [US2] Implement native WebSocket detection in packages/core/src/transport/websocket.ts
+- [X] T040 [US2] Implement createWebSocketClient factory with native WebSocket support in packages/core/src/transport/websocket.ts
+- [X] T041 [US2] Implement fallback to `ws` library for older Node.js versions in packages/core/src/transport/websocket.ts
+- [X] T042 [US2] Add clear error messages for unavailable WebSocket implementations in packages/core/src/transport/websocket.ts
 - [ ] T043 [US2] Update WebSocket client transport to use new factory in packages/client/src/transports/websocket.ts
 - [ ] T044 [US2] Verify reconnection logic works with native WebSocket in packages/client/src/transports/websocket.ts
-- [ ] T045 [US2] Update WebSocket server transport documentation to clarify `ws` requirement in packages/server/README.md
-- [ ] T046 [US2] Document native WebSocket support and Node.js >= 22.4 requirement in packages/core/README.md
+- [X] T045 [US2] Update WebSocket server transport documentation to clarify `ws` requirement in packages/server/README.md
+- [X] T046 [US2] Document native WebSocket support and Node.js >= 22.4 requirement in packages/core/README.md
 
 **Checkpoint**: Native WebSocket client transport functional, `ws` removed from core dependencies, reconnection preserved.
 
@@ -123,23 +123,23 @@
 
 ### Tests for User Story 3
 
-- [ ] T047 [P] [US3] Unit test for NotificationWaiter promise resolution in packages/client/test/unit/notifications/wait.test.ts
-- [ ] T048 [P] [US3] Unit test for NotificationWaiter with filter function in packages/client/test/unit/notifications/wait.test.ts
-- [ ] T049 [P] [US3] Unit test for NotificationWaiter timeout rejection in packages/client/test/unit/notifications/wait.test.ts
-- [ ] T050 [P] [US3] Unit test for NotificationWaiter cleanup on resolution in packages/client/test/unit/notifications/wait.test.ts
-- [ ] T051 [P] [US3] Unit test for multiple concurrent waitForNotification calls in packages/client/test/unit/notifications/wait.test.ts
-- [ ] T052 [P] [US3] E2E test for waitForNotification with textDocument/publishDiagnostics in e2e/notification-wait.spec.ts
+- [X] T047 [P] [US3] Unit test for NotificationWaiter promise resolution in packages/client/test/unit/notifications/wait.test.ts
+- [X] T048 [P] [US3] Unit test for NotificationWaiter with filter function in packages/client/test/unit/notifications/wait.test.ts
+- [X] T049 [P] [US3] Unit test for NotificationWaiter timeout rejection in packages/client/test/unit/notifications/wait.test.ts
+- [X] T050 [P] [US3] Unit test for NotificationWaiter cleanup on resolution in packages/client/test/unit/notifications/wait.test.ts
+- [X] T051 [P] [US3] Unit test for multiple concurrent waitForNotification calls in packages/client/test/unit/notifications/wait.test.ts
+- [X] T052 [P] [US3] E2E test for waitForNotification with textDocument/publishDiagnostics in e2e/notification-wait.spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T053 [US3] Implement NotificationWaiter class in packages/client/src/notifications/wait.ts
-- [ ] T054 [US3] Implement waitForNotification method on LSPClient in packages/client/src/client.ts
-- [ ] T055 [US3] Add filter function support to NotificationWaiter in packages/client/src/notifications/wait.ts
-- [ ] T056 [US3] Add timeout support (required parameter) to NotificationWaiter in packages/client/src/notifications/wait.ts
-- [ ] T057 [US3] Implement automatic cleanup on resolution/rejection/timeout in packages/client/src/notifications/wait.ts
-- [ ] T058 [US3] Add disconnection handling (reject if client disconnects) in packages/client/src/notifications/wait.ts
-- [ ] T059 [US3] Export NotificationWaiter types from packages/client/src/notifications/index.ts
-- [ ] T060 [US3] Document waitForNotification API with examples in packages/client/README.md
+- [X] T053 [US3] Implement NotificationWaiter class in packages/client/src/notifications/wait.ts
+- [X] T054 [US3] Implement waitForNotification method on LSPClient in packages/client/src/client.ts
+- [X] T055 [US3] Add filter function support to NotificationWaiter in packages/client/src/notifications/wait.ts
+- [X] T056 [US3] Add timeout support (required parameter) to NotificationWaiter in packages/client/src/notifications/wait.ts
+- [X] T057 [US3] Implement automatic cleanup on resolution/rejection/timeout in packages/client/src/notifications/wait.ts
+- [X] T058 [US3] Add disconnection handling (reject if client disconnects) in packages/client/src/notifications/wait.ts
+- [X] T059 [US3] Export NotificationWaiter types from packages/client/src/notifications/index.ts
+- [X] T060 [US3] Document waitForNotification API with examples in packages/client/README.md
 
 **Checkpoint**: waitForNotification fully functional with filtering, timeout, and automatic cleanup. Multiple concurrent calls supported.
 
@@ -153,25 +153,25 @@
 
 ### Tests for User Story 4
 
-- [ ] T061 [P] [US4] Unit test for ConnectionState enum and state transitions in packages/client/test/unit/connection/health.test.ts
-- [ ] T062 [P] [US4] Unit test for ConnectionHealth timestamp tracking in packages/client/test/unit/connection/health.test.ts
-- [ ] T063 [P] [US4] Unit test for HeartbeatStatus (opt-in) in packages/client/test/unit/connection/health.test.ts
-- [ ] T064 [P] [US4] Unit test for state change event emission in packages/client/test/unit/connection/health.test.ts
-- [ ] T065 [P] [US4] E2E test for connection health monitoring with WebSocket in e2e/connection-health.spec.ts
+- [X] T061 [P] [US4] Unit test for ConnectionState enum and state transitions in packages/client/test/unit/connection/health.test.ts
+- [X] T062 [P] [US4] Unit test for ConnectionHealth timestamp tracking in packages/client/test/unit/connection/health.test.ts
+- [X] T063 [P] [US4] Unit test for HeartbeatStatus (opt-in) in packages/client/test/unit/connection/health.test.ts
+- [X] T064 [P] [US4] Unit test for state change event emission in packages/client/test/unit/connection/health.test.ts
+- [X] T065 [P] [US4] E2E test for connection health monitoring with WebSocket in e2e/connection-health.spec.ts
 
 ### Implementation for User Story 4
 
-- [ ] T066 [P] [US4] Define ConnectionState enum in packages/client/src/connection/types.ts
-- [ ] T067 [P] [US4] Define ConnectionHealth interface in packages/client/src/connection/types.ts
-- [ ] T068 [P] [US4] Define HeartbeatStatus interface in packages/client/src/connection/types.ts
-- [ ] T069 [US4] Implement ConnectionHealthTracker class in packages/client/src/connection/health.ts
-- [ ] T070 [US4] Integrate health tracking into LSPClient constructor in packages/client/src/client.ts
-- [ ] T071 [US4] Update timestamps on message send/receive in packages/client/src/client.ts
-- [ ] T072 [US4] Emit state change events on connection state transitions in packages/client/src/client.ts
-- [ ] T073 [US4] Implement optional WebSocket heartbeat monitoring (disabled by default) in packages/client/src/connection/heartbeat.ts
-- [ ] T074 [US4] Add heartbeat configuration to LSPClient options in packages/client/src/client.ts
-- [ ] T075 [US4] Export connection health types from packages/client/src/connection/index.ts
-- [ ] T076 [US4] Document connection health API with examples in packages/client/README.md
+- [X] T066 [P] [US4] Define ConnectionState enum in packages/client/src/connection/types.ts
+- [X] T067 [P] [US4] Define ConnectionHealth interface in packages/client/src/connection/types.ts
+- [X] T068 [P] [US4] Define HeartbeatStatus interface in packages/client/src/connection/types.ts
+- [X] T069 [US4] Implement ConnectionHealthTracker class in packages/client/src/connection/health.ts
+- [X] T070 [US4] Integrate health tracking into LSPClient constructor in packages/client/src/client.ts
+- [X] T071 [US4] Update timestamps on message send/receive in packages/client/src/client.ts
+- [X] T072 [US4] Emit state change events on connection state transitions in packages/client/src/client.ts
+- [X] T073 [US4] Implement optional WebSocket heartbeat monitoring (disabled by default) in packages/client/src/connection/heartbeat.ts
+- [X] T074 [US4] Add heartbeat configuration to LSPClient options in packages/client/src/client.ts
+- [X] T075 [US4] Export connection health types from packages/client/src/connection/index.ts
+- [X] T076 [US4] Document connection health API with examples in packages/client/README.md
 
 **Checkpoint**: Connection health monitoring operational with state tracking, timestamps, and optional heartbeat for WebSocket.
 
@@ -185,18 +185,18 @@
 
 ### Tests for User Story 5
 
-- [ ] T077 [P] [US5] Unit test for typed server-to-client request handler in packages/client/test/unit/server-requests.test.ts
-- [ ] T078 [P] [US5] Unit test for automatic response correlation in packages/client/test/unit/server-requests.test.ts
-- [ ] T079 [P] [US5] Unit test for "method not found" error when no handler registered in packages/client/test/unit/server-requests.test.ts
-- [ ] T080 [P] [US5] Unit test for error response when handler throws in packages/client/test/unit/server-requests.test.ts
+- [X] T077 [P] [US5] Unit test for typed server-to-client request handler in packages/client/test/unit/server-requests.test.ts
+- [X] T078 [P] [US5] Unit test for automatic response correlation in packages/client/test/unit/server-requests.test.ts
+- [X] T079 [P] [US5] Unit test for "method not found" error when no handler registered in packages/client/test/unit/server-requests.test.ts
+- [X] T080 [P] [US5] Unit test for error response when handler throws in packages/client/test/unit/server-requests.test.ts
 
 ### Implementation for User Story 5
 
-- [ ] T081 [US5] Update LSPClient.onRequest to infer parameter types from method name in packages/client/src/client.ts
-- [ ] T082 [US5] Update LSPClient.onRequest to infer return types from method name in packages/client/src/client.ts
-- [ ] T083 [US5] Implement automatic "method not found" error response (JSON-RPC -32601) in packages/client/src/client.ts
-- [ ] T084 [US5] Implement automatic error response with JSON-RPC error object when handler throws in packages/client/src/client.ts
-- [ ] T085 [US5] Document server-to-client request handling with examples in packages/client/README.md
+- [X] T081 [US5] Update LSPClient.onRequest to infer parameter types from method name in packages/client/src/client.ts
+- [X] T082 [US5] Update LSPClient.onRequest to infer return types from method name in packages/client/src/client.ts
+- [X] T083 [US5] Implement automatic "method not found" error response (JSON-RPC -32601) in packages/client/src/client.ts
+- [X] T084 [US5] Implement automatic error response with JSON-RPC error object when handler throws in packages/client/src/client.ts
+- [X] T085 [US5] Document server-to-client request handling with examples in packages/client/README.md
 
 **Checkpoint**: Server-to-client requests ergonomically handled with type safety and automatic response management.
 
@@ -210,18 +210,18 @@
 
 ### Tests for User Story 6
 
-- [ ] T086 [P] [US6] Unit test for DocumentVersionTracker class in packages/core/test/unit/utils/document.test.ts
-- [ ] T087 [P] [US6] Unit test for incremental change helper in packages/core/test/unit/utils/document.test.ts
-- [ ] T088 [P] [US6] Unit test for full document replacement helper in packages/core/test/unit/utils/document.test.ts
-- [ ] T089 [P] [US6] Unit test for version auto-increment in packages/core/test/unit/utils/document.test.ts
+- [X] T086 [P] [US6] Unit test for DocumentVersionTracker class in packages/core/test/unit/utils/document.test.ts
+- [X] T087 [P] [US6] Unit test for incremental change helper in packages/core/test/unit/utils/document.test.ts
+- [X] T088 [P] [US6] Unit test for full document replacement helper in packages/core/test/unit/utils/document.test.ts
+- [X] T089 [P] [US6] Unit test for version auto-increment in packages/core/test/unit/utils/document.test.ts
 
 ### Implementation for User Story 6
 
-- [ ] T090 [P] [US6] Implement DocumentVersionTracker class in packages/core/src/utils/document.ts
-- [ ] T091 [P] [US6] Implement helper for incremental text change (didChangeTextDocument) in packages/core/src/utils/document.ts
-- [ ] T092 [P] [US6] Implement helper for full document replacement in packages/core/src/utils/document.ts
-- [ ] T093 [US6] Export document helpers from packages/core/src/utils/index.ts
-- [ ] T094 [US6] Document document change helpers with examples in packages/core/README.md
+- [X] T090 [P] [US6] Implement DocumentVersionTracker class in packages/core/src/utils/document.ts
+- [X] T091 [P] [US6] Implement helper for incremental text change (didChangeTextDocument) in packages/core/src/utils/document.ts
+- [X] T092 [P] [US6] Implement helper for full document replacement in packages/core/src/utils/document.ts
+- [X] T093 [US6] Export document helpers from packages/core/src/utils/index.ts
+- [X] T094 [US6] Document document change helpers with examples in packages/core/README.md
 
 **Checkpoint**: Document change helpers operational with automatic version tracking for incremental and full-document sync.
 
@@ -235,15 +235,15 @@
 
 ### Tests for Middleware Pino
 
-- [ ] T095 [P] [PINO] Unit test for pino logging middleware in packages/middleware-pino/test/unit/logger.test.ts
-- [ ] T096 [P] [PINO] Unit test for log format customization in packages/middleware-pino/test/unit/logger.test.ts
+- [X] T095 [P] [PINO] Unit test for pino logging middleware in packages/middleware-pino/test/unit/logger.test.ts
+- [X] T096 [P] [PINO] Unit test for log format customization in packages/middleware-pino/test/unit/logger.test.ts
 
 ### Implementation for Middleware Pino
 
-- [ ] T097 [P] [PINO] Implement pino logging middleware in packages/middleware-pino/src/logger.ts
-- [ ] T098 [P] [PINO] Add configurable log levels and formatting in packages/middleware-pino/src/logger.ts
-- [ ] T099 [PINO] Create package.json with peer dependencies on @lspeasy/core and pino in packages/middleware-pino/package.json
-- [ ] T100 [PINO] Document pino middleware usage in packages/middleware-pino/README.md
+- [X] T097 [P] [PINO] Implement pino logging middleware in packages/middleware-pino/src/logger.ts
+- [X] T098 [P] [PINO] Add configurable log levels and formatting in packages/middleware-pino/src/logger.ts
+- [X] T099 [PINO] Create package.json with peer dependencies on @lspeasy/core and pino in packages/middleware-pino/package.json
+- [X] T100 [PINO] Document pino middleware usage in packages/middleware-pino/README.md
 
 **Checkpoint**: Pino middleware package complete and independently usable.
 
@@ -253,15 +253,15 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T101 [P] Update main repository README.md with feature overview and links to package READMEs
-- [ ] T102 [P] Update CHANGELOG.md with all new features
+- [X] T101 [P] Update main repository README.md with feature overview and links to package READMEs
+- [X] T102 [P] Update CHANGELOG.md with all new features
 - [ ] T103 Code cleanup and refactoring across all modified packages
 - [ ] T104 [P] Add TypeScript JSDoc comments to all new public APIs
-- [ ] T105 [P] Run oxlint across all packages to ensure code quality
-- [ ] T106 [P] Run oxfmt to format all source files
-- [ ] T107 Run type-checking (pnpm run type-check) across all packages
-- [ ] T108 Run all unit tests (pnpm test) to verify implementation
-- [ ] T109 Run all e2e tests to verify end-to-end integration
+- [X] T105 [P] Run oxlint across all packages to ensure code quality
+- [X] T106 [P] Run oxfmt to format all source files
+- [X] T107 Run type-checking (pnpm run type-check) across all packages
+- [X] T108 Run all unit tests (pnpm test) to verify implementation
+- [X] T109 Run all e2e tests to verify end-to-end integration
 - [ ] T110 Validate quickstart.md examples (manual or scripted verification)
 - [ ] T111 [P] Create migration guide for users upgrading from previous versions
 - [ ] T112 Performance benchmarking to verify zero-overhead claim

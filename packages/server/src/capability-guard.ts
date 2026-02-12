@@ -11,7 +11,7 @@ import {
   LSPRequest,
   getClientCapabilityForNotificationMethod,
   getClientCapabilityForRequestMethod,
-  hasCapability,
+  hasServerCapability,
   hasClientCapability,
   getCapabilityForNotificationMethod,
   getCapabilityForRequestMethod
@@ -114,7 +114,7 @@ export class CapabilityGuard {
     }
 
     // Check if capability is declared
-    if (!hasCapability(this.capabilities, capabilityKey)) {
+    if (!hasServerCapability(this.capabilities, capabilityKey)) {
       const error = `Cannot register handler for ${method}: server capability '${capabilityKey}' not declared`;
       this.logger.warn(error);
 
