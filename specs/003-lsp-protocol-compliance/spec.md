@@ -7,6 +7,16 @@
 
 ## User Scenarios & Testing *(mandatory)*
 
+## Clarifications
+
+### Session 2026-02-12
+
+- Q: How should TCP server mode handle additional incoming connections while one is active? → A: Accept first connection and reject additional connections until active one closes.
+- Q: Which JSON-RPC error should be returned when `client/unregisterCapability` references an unknown registration ID? → A: `InvalidParams` (`-32602`).
+- Q: How should the client handle `client/registerCapability` when `dynamicRegistration: true` was not declared? → A: Default to strict rejection, with an explicit opt-in compatibility flag to allow acceptance.
+- Q: How should final partial-result aggregation behave? → A: Preserve partial batches in arrival order and append/merge final response payload when present.
+- Q: How should cancellation return partial-result data to callers? → A: Resolve with a structured cancellation result containing accumulated partial results.
+
 ### User Story 1 - Dynamic Capability Registration (Priority: P1)
 
 A developer building an LSP client needs to work with language servers that dynamically register and unregister capabilities after initialization. For example, a multi-language server may add formatting support for Python only after a Python plugin loads, or a TypeScript server may register additional code action capabilities when a specific project configuration is detected. The client must automatically track these dynamic changes and make newly registered capabilities available for use.
@@ -31,7 +41,7 @@ A developer needs to connect their LSP client to a language server that communic
 
 **Why this priority**: TCP is the second most common LSP transport after stdio. Several widely-used language servers support only socket connections, and containerized/remote server deployments often require TCP. This directly expands the set of servers the SDK can communicate with.
 
-**Independent Test**: Can be fully tested by starting a TCP server, connecting a client via TCP transport, completing the LSP initialization handshake, and exchanging requests/responses. Delivers value by enabling connectivity to socket-based language servers.
+**Independent Test**: Can be fully tested by (a) starting a TCP server and completing an LSP initialization handshake over TCP, and (b) running browser-based LSP sessions over Dedicated Worker and Shared Worker transports to validate request/response flow, close/error handling, and ordering guarantees.
 
 **Acceptance Scenarios**:
 
@@ -40,6 +50,9 @@ A developer needs to connect their LSP client to a language server that communic
 3. **Given** a TCP transport with reconnection enabled, **When** the connection drops unexpectedly, **Then** the transport attempts to reconnect using exponential backoff (same behavior as the WebSocket transport).
 4. **Given** a TCP transport, **When** the developer calls `close()`, **Then** the underlying socket is gracefully closed and all resources are released.
 5. **Given** a TCP client transport, **When** the server is not reachable on the specified host and port, **Then** the transport reports a clear connection error.
+6. **Given** a browser client and a language server running in a Dedicated Worker, **When** a developer creates `DedicatedWorkerTransport`, **Then** the client and worker exchange LSP messages correctly with ordered delivery.
+7. **Given** multiple browser clients connected through a Shared Worker `MessagePort`, **When** each client sends LSP requests via `SharedWorkerTransport`, **Then** responses are correlated to the originating client/request without cross-client misrouting.
+8. **Given** a worker-backed transport, **When** the worker is terminated or its port closes unexpectedly, **Then** the transport emits a close/error signal and prevents further sends.
 
 ---
 
@@ -100,12 +113,14 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 ### Edge Cases
 
 - What happens when a server sends `client/registerCapability` with an ID that was already registered? The client must replace the existing registration with the new one (per LSP spec).
-- What happens when a server sends `client/unregisterCapability` with an ID that was never registered? The client must respond with an error.
+- What happens when a server sends `client/unregisterCapability` with an ID that was never registered? The client must respond with `InvalidParams` (`-32602`).
 - What happens when a TCP connection receives a partial LSP message (split across TCP packets)? The transport must buffer and reassemble using Content-Length framing, identical to stdio behavior.
 - What happens when an IPC transport receives a message that is not a valid JSON-RPC message? The transport must report an error via the error handler without crashing.
 - What happens when partial results arrive after the final response for the same request? The late partial results must be ignored.
 - What happens when a notebook `didChange` notification includes both structural changes and content changes in the same message? Both must be processed (the LSP spec allows this).
-- What happens when a TCP transport in server mode receives multiple incoming connections? Only the first connection is accepted; subsequent connections are rejected or queued based on configuration.
+- What happens when a TCP transport in server mode receives multiple incoming connections? Only the first connection is accepted; all subsequent connections are rejected while an active connection exists.
+- What happens when multiple clients send concurrent requests through a Shared Worker transport? Request and response routing must remain isolated per client/port and correlated by request ID without cross-client leakage.
+- What happens when a Shared Worker `MessagePort` handoff or activation fails? The transport must emit a clear error, transition to closed/unavailable state, and reject subsequent sends until reinitialized.
 
 ## Requirements *(mandatory)*
 
@@ -115,16 +130,19 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 
 - **FR-001**: The client MUST handle incoming `client/registerCapability` requests from the server by tracking each registration with its unique ID, method, and registration options.
 - **FR-002**: The client MUST handle incoming `client/unregisterCapability` requests from the server by removing the registration matching the provided ID.
+- **FR-002a**: If `client/unregisterCapability` references an unknown registration ID, the client MUST respond with JSON-RPC `InvalidParams` (`-32602`).
 - **FR-003**: When a capability is dynamically registered, the client MUST make the corresponding method available through the capability-aware API (e.g., a newly registered completion provider makes `textDocument.completion` available).
 - **FR-004**: When a capability is dynamically unregistered, the client MUST remove the corresponding method from the capability-aware API if no other registration covers it.
 - **FR-005**: Dynamic registrations with document selectors MUST scope the capability to documents matching the selector.
 - **FR-006**: The client MUST respond with an error when a `client/registerCapability` request targets a capability for which the client did not declare `dynamicRegistration: true` support.
+- **FR-006a**: The client MUST provide an explicit compatibility option to allow accepting such registrations; this option MUST default to disabled (strict mode).
 - **FR-007**: The client MUST store both static (from initialization) and dynamic registrations and correctly merge them when determining available capabilities.
 
 #### TCP Transport
 
 - **FR-008**: The SDK MUST provide a TCP transport that implements the existing `Transport` interface.
 - **FR-009**: The TCP transport MUST support client mode (connecting to a host and port) and server mode (listening on a port and accepting a connection).
+- **FR-009a**: In TCP server mode, the transport MUST accept only the first connection and reject all additional incoming connections while one connection is active.
 - **FR-010**: The TCP transport MUST use Content-Length header framing for message boundaries, identical to the stdio transport.
 - **FR-011**: The TCP transport MUST support configurable reconnection with exponential backoff in client mode, consistent with the WebSocket transport's reconnection behavior.
 - **FR-012**: The TCP transport MUST gracefully handle partial messages split across TCP packets by buffering until a complete message is received.
@@ -137,12 +155,21 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 - **FR-016**: The IPC transport MUST detect child process exit and fire a close event.
 - **FR-017**: The IPC transport MUST use only built-in Node.js modules (no external dependencies).
 
+#### Worker Transports
+
+- **FR-017a**: The SDK MUST provide a `DedicatedWorkerTransport` that implements the existing `Transport` interface for browser-based 1:1 communication with a Dedicated Worker-hosted language server.
+- **FR-017b**: The SDK MUST provide a `SharedWorkerTransport` that implements the existing `Transport` interface via `MessagePort` for browser-based communication with a Shared Worker-hosted language server.
+- **FR-017c**: Worker transports MUST preserve message ordering and JSON-RPC request/response correlation semantics.
+- **FR-017d**: Worker transports MUST provide clear error and close signaling when the worker or port becomes unavailable.
+
 #### Partial Result Streaming
 
 - **FR-018**: The client MUST support sending a `partialResultToken` with requests that declare partial result support in the protocol.
 - **FR-019**: The client MUST deliver partial results to the caller via a callback as each `$/progress` notification arrives for the corresponding token.
 - **FR-020**: The client MUST combine partial results with the final response when the request completes.
+- **FR-020a**: Partial result aggregation MUST preserve arrival order of partial batches; if the final response contains payload, it MUST be appended/merged into the aggregate result.
 - **FR-021**: When a request with partial results is cancelled, the client MUST make accumulated partial results available to the caller.
+- **FR-021a**: On cancellation, the client MUST resolve with a structured result `{ cancelled: true, partialResults, finalResult?: undefined }` rather than waiting for a final response.
 - **FR-022**: The server MUST provide a helper for sending partial result batches during request handling, abstracting away the `$/progress` notification construction.
 - **FR-023**: The partial result system MUST be backward-compatible — requests sent without a `partialResultToken` must behave identically to the current implementation.
 
@@ -159,6 +186,8 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 - **RegistrationStore**: A collection that tracks all dynamic registrations alongside static capabilities, supporting lookup by method name and document URI.
 - **TCPTransport**: A transport implementation that communicates over TCP sockets with Content-Length framing and optional reconnection.
 - **IPCTransport**: A transport implementation that communicates via Node.js child process IPC channels.
+- **DedicatedWorkerTransport**: A browser-focused transport variant that communicates 1:1 between a page/client context and a Dedicated Worker-hosted language server via `postMessage`.
+- **SharedWorkerTransport**: A browser-focused transport variant that communicates through a Shared Worker `MessagePort`, enabling multiple clients to connect to a shared server host process.
 - **PartialResultCollector**: A client-side accumulator that receives partial result batches for a given token and delivers them to the caller, combining with the final result on completion.
 - **PartialResultSender**: A server-side helper that sends partial result batches via `$/progress` notifications for a given token.
 
@@ -173,10 +202,12 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 - **SC-005**: Developers building notebook-aware language servers can register handlers and send notifications using the same ergonomic patterns as text document methods, with no loss of type safety.
 - **SC-006**: All existing tests continue to pass without modification after these changes (backward compatibility preserved).
 - **SC-007**: The TCP and IPC transports require zero external dependencies beyond Node.js built-in modules.
+- **SC-008**: The SDK can complete a full LSP session over `DedicatedWorkerTransport` and `SharedWorkerTransport` in browser-hosted scenarios.
 
 ## Assumptions
 
 - Dynamic capability registration follows the LSP 3.17 specification strictly, including the requirement that clients declare `dynamicRegistration: true` for each capability that supports it.
+- Dynamic capability registration handling is strict by default; an explicit compatibility option may relax strict rejection for non-conformant servers.
 - TCP transport uses the same Content-Length header framing as stdio, as specified by the LSP base protocol. This is standard across all stream-based LSP transports.
 - The IPC transport is specific to Node.js environments. Browser environments do not have access to `child_process` and will use other transports (WebSocket, stdio).
 - Partial result streaming uses the existing `$/progress` notification infrastructure. No new protocol messages are introduced.
@@ -186,7 +217,6 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 ## Out of Scope
 
 - Named pipe / Unix domain socket transport (can be added later using the same pattern as TCP)
-- Web Worker transport for browser environments (the existing WebSocket transport covers browser use cases)
 - Automatic server process spawning and management (will use `procxy` library separately, as decided in feature 002)
 - Changes to the existing stdio or WebSocket transport implementations
 - Middleware system (covered by feature 002-middleware-dx-improvements)
