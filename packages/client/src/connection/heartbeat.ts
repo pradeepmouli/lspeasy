@@ -1,5 +1,8 @@
 import type { HeartbeatConfig, HeartbeatStatus } from './types.js';
 
+/**
+ * Callback and configuration options for heartbeat monitoring.
+ */
 export interface HeartbeatMonitorOptions {
   config: HeartbeatConfig;
   onPing: () => void;
@@ -7,6 +10,9 @@ export interface HeartbeatMonitorOptions {
   onResponsive?: () => void;
 }
 
+/**
+ * Runs interval-based heartbeat checks for active transports.
+ */
 export class HeartbeatMonitor {
   private timer: NodeJS.Timeout | undefined;
   private status: HeartbeatStatus;
@@ -22,6 +28,9 @@ export class HeartbeatMonitor {
     };
   }
 
+  /**
+   * Starts heartbeat interval checks.
+   */
   start(): void {
     if (!this.status.enabled || this.timer) {
       return;
@@ -47,6 +56,9 @@ export class HeartbeatMonitor {
     }, this.status.interval);
   }
 
+  /**
+   * Stops heartbeat interval checks.
+   */
   stop(): void {
     if (this.timer) {
       clearInterval(this.timer);
@@ -54,6 +66,9 @@ export class HeartbeatMonitor {
     }
   }
 
+  /**
+   * Marks a successful heartbeat response.
+   */
   markPong(): void {
     const wasUnresponsive = !this.status.isResponsive;
     this.status = {
@@ -67,6 +82,9 @@ export class HeartbeatMonitor {
     }
   }
 
+  /**
+   * Returns the latest heartbeat status snapshot.
+   */
   getStatus(): HeartbeatStatus {
     return { ...this.status };
   }

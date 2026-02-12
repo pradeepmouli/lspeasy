@@ -106,8 +106,8 @@
 - [X] T040 [US2] Implement createWebSocketClient factory with native WebSocket support in packages/core/src/transport/websocket.ts
 - [X] T041 [US2] Implement fallback to `ws` library for older Node.js versions in packages/core/src/transport/websocket.ts
 - [X] T042 [US2] Add clear error messages for unavailable WebSocket implementations in packages/core/src/transport/websocket.ts
-- [ ] T043 [US2] Update WebSocket client transport to use new factory in packages/client/src/transports/websocket.ts
-- [ ] T044 [US2] Verify reconnection logic works with native WebSocket in packages/client/src/transports/websocket.ts
+- [X] T043 [US2] Update WebSocket client transport to use new factory in packages/core/src/transport/websocket.ts and client integration in packages/client/src/client.ts
+- [X] T044 [US2] Verify reconnection logic works with native WebSocket in packages/client/test/unit/websocket-reconnect.test.ts
 - [X] T045 [US2] Update WebSocket server transport documentation to clarify `ws` requirement in packages/server/README.md
 - [X] T046 [US2] Document native WebSocket support and Node.js >= 22.4 requirement in packages/core/README.md
 
@@ -255,16 +255,16 @@
 
 - [X] T101 [P] Update main repository README.md with feature overview and links to package READMEs
 - [X] T102 [P] Update CHANGELOG.md with all new features
-- [ ] T103 Code cleanup and refactoring across all modified packages
-- [ ] T104 [P] Add TypeScript JSDoc comments to all new public APIs
+- [X] T103 Code cleanup and refactoring across all modified packages
+- [X] T104 [P] Add TypeScript JSDoc comments to all new public APIs
 - [X] T105 [P] Run oxlint across all packages to ensure code quality
 - [X] T106 [P] Run oxfmt to format all source files
 - [X] T107 Run type-checking (pnpm run type-check) across all packages
 - [X] T108 Run all unit tests (pnpm test) to verify implementation
 - [X] T109 Run all e2e tests to verify end-to-end integration
-- [ ] T110 Validate quickstart.md examples (manual or scripted verification)
+- [X] T110 Validate quickstart.md examples (manual or scripted verification)
 - [X] T111 [P] Create migration guide for users upgrading from previous versions (N/A pre-publication)
-- [ ] T112 Performance benchmarking to verify zero-overhead claim
+- [X] T112 Performance benchmarking to verify zero-overhead claim
 
 ---
 

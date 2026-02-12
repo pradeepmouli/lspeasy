@@ -1,3 +1,6 @@
+/**
+ * Lifecycle state for the client connection.
+ */
 export enum ConnectionState {
   Connecting = 'connecting',
   Connected = 'connected',
@@ -5,12 +8,18 @@ export enum ConnectionState {
   Disconnected = 'disconnected'
 }
 
+/**
+ * Configuration for optional heartbeat monitoring.
+ */
 export interface HeartbeatConfig {
   enabled?: boolean;
   interval: number;
   timeout: number;
 }
 
+/**
+ * Runtime heartbeat status snapshot.
+ */
 export interface HeartbeatStatus {
   enabled: boolean;
   interval: number;
@@ -20,6 +29,9 @@ export interface HeartbeatStatus {
   isResponsive: boolean;
 }
 
+/**
+ * Aggregated connection health details.
+ */
 export interface ConnectionHealth {
   state: ConnectionState;
   lastMessageSent: Date | null;
@@ -27,6 +39,9 @@ export interface ConnectionHealth {
   heartbeat?: HeartbeatStatus;
 }
 
+/**
+ * Event payload emitted when connection state changes.
+ */
 export interface StateChangeEvent {
   previous: ConnectionState;
   current: ConnectionState;

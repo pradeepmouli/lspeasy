@@ -8,8 +8,10 @@ coverage/
 Thumbs.db
 *.tmp
 .env
+.env*
 .env.local
 .env.*.local
+!.env.example
 .nyc_output/
 .pnpm-debug.log*
 *.tsbuildinfo
