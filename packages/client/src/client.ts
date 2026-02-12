@@ -312,9 +312,14 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       });
     }
 
-    void promise.finally(() => {
-      cancellationDisposable?.dispose();
-    });
+    void promise.then(
+      () => {
+        cancellationDisposable?.dispose();
+      },
+      () => {
+        cancellationDisposable?.dispose();
+      }
+    );
 
     this.sendWithMiddleware({
       direction: 'clientToServer',

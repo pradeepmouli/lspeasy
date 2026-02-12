@@ -34,6 +34,8 @@ export class PendingRequestTracker<TResponse, TMeta = undefined> {
       rejectEntry = reject;
     });
 
+    void promise.catch(() => undefined);
+
     const entry: PendingEntry<TResponse, TMeta> = {
       resolve: (value) => {
         this.clearTimeout(id);

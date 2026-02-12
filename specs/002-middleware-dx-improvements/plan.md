@@ -125,7 +125,8 @@ packages/
 │       └── unit/
 │           └── middleware/       # NEW: Server middleware tests
 │
-└── middleware-pino/              # NEW PACKAGE
+└── middleware/
+    └── pino/                     # NEW PACKAGE
     ├── src/
     │   ├── logger.ts             # Pino-based logging middleware
     │   └── index.ts

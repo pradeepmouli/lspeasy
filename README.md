@@ -197,7 +197,7 @@ See the [examples](./examples) directory for complete working examples:
 - [Package READMEs](./packages) - Package-specific guides
 - [Core README](./packages/core/README.md) - Middleware, transport, and document helper APIs
 - [Client README](./packages/client/README.md) - Notification waiting and connection health APIs
-- [Middleware Pino README](./packages/middleware-pino/README.md) - Structured logging middleware
+- [Middleware Pino README](./packages/middleware/pino/README.md) - Structured logging middleware
 
 ## Development
 

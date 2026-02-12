@@ -23,7 +23,8 @@
     "url": "https://github.com/pradeepmouli/lspeasy.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/*/*"
   ],
   "type": "module",
   "scripts": {

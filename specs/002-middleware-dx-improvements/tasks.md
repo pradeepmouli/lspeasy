@@ -37,7 +37,7 @@
 - [X] T007 Define base type system in packages/core/src/middleware/types.ts (JSONRPCMessage, MiddlewareContext, Middleware, MiddlewareNext, MiddlewareResult)
 - [X] T008 [P] Update packages/core/package.json to mark 'ws' as optional peer dependency
 - [X] T009 [P] Update packages/client/package.json and packages/server/package.json to depend on updated @lspeasy/core
-- [X] T010 Create packages/middleware-pino/package.json with peer dependencies on @lspeasy/core and pino
+- [X] T010 Create packages/middleware/pino/package.json with peer dependencies on @lspeasy/core and pino
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -235,15 +235,15 @@
 
 ### Tests for Middleware Pino
 
-- [X] T095 [P] [PINO] Unit test for pino logging middleware in packages/middleware-pino/test/unit/logger.test.ts
-- [X] T096 [P] [PINO] Unit test for log format customization in packages/middleware-pino/test/unit/logger.test.ts
+- [X] T095 [P] [PINO] Unit test for pino logging middleware in packages/middleware/pino/test/unit/logger.test.ts
+- [X] T096 [P] [PINO] Unit test for log format customization in packages/middleware/pino/test/unit/logger.test.ts
 
 ### Implementation for Middleware Pino
 
-- [X] T097 [P] [PINO] Implement pino logging middleware in packages/middleware-pino/src/logger.ts
-- [X] T098 [P] [PINO] Add configurable log levels and formatting in packages/middleware-pino/src/logger.ts
-- [X] T099 [PINO] Create package.json with peer dependencies on @lspeasy/core and pino in packages/middleware-pino/package.json
-- [X] T100 [PINO] Document pino middleware usage in packages/middleware-pino/README.md
+- [X] T097 [P] [PINO] Implement pino logging middleware in packages/middleware/pino/src/logger.ts
+- [X] T098 [P] [PINO] Add configurable log levels and formatting in packages/middleware/pino/src/logger.ts
+- [X] T099 [PINO] Create package.json with peer dependencies on @lspeasy/core and pino in packages/middleware/pino/package.json
+- [X] T100 [PINO] Document pino middleware usage in packages/middleware/pino/README.md
 
 **Checkpoint**: Pino middleware package complete and independently usable.
 
@@ -263,7 +263,7 @@
 - [X] T108 Run all unit tests (pnpm test) to verify implementation
 - [X] T109 Run all e2e tests to verify end-to-end integration
 - [ ] T110 Validate quickstart.md examples (manual or scripted verification)
-- [ ] T111 [P] Create migration guide for users upgrading from previous versions
+- [X] T111 [P] Create migration guide for users upgrading from previous versions (N/A pre-publication)
 - [ ] T112 Performance benchmarking to verify zero-overhead claim
 
 ---
