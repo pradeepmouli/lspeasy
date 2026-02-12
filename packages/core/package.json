@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core types, transports, and utilities for LSP SDK",
   "keywords": [
     "lsp",
