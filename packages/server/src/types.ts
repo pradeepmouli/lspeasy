@@ -8,7 +8,9 @@ import type {
   ClientCapabilities,
   Server,
   LogLevel,
-  ServerCapabilities
+  ServerCapabilities,
+  Middleware,
+  ScopedMiddleware
 } from '@lspeasy/core';
 import type { ZodError } from 'zod';
 import type { ResponseErrorInterface } from '@lspeasy/core';
@@ -74,6 +76,11 @@ export interface ServerOptions<
    * When false, logs warning and allows registration (default: false)
    */
   strictCapabilities?: boolean;
+
+  /**
+   * Optional middleware chain for clientToServer/serverToClient messages.
+   */
+  middleware?: Array<Middleware | ScopedMiddleware>;
 }
 
 /**

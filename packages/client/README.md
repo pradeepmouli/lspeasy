@@ -12,6 +12,8 @@ Connect to Language Server Protocol servers with a simple, type-safe client API.
 - **Cancellation**: Built-in cancellation support for long-running requests
 - **Event Subscriptions**: Subscribe to server notifications and events
 - **Server Requests**: Handle requests from server to client
+- **Notification Waiting**: Promise-based one-shot waiting with timeout and filters
+- **Connection Health**: State transition and message activity monitoring
 - **Type Safety**: Full TypeScript types from LSP protocol definitions
 
 ## Installation
@@ -272,6 +274,53 @@ client.onError((error) => {
 });
 ```
 
+## waitForNotification
+
+Use `waitForNotification` when you need the next matching server notification as a Promise.
+
+```typescript
+const diagnostics = await client.waitForNotification('textDocument/publishDiagnostics', {
+  timeout: 5000,
+  filter: (params) => params.uri === 'file:///example.ts'
+});
+
+console.log(diagnostics.diagnostics);
+```
+
+Notes:
+- `timeout` is required.
+- Waiters are cleaned up automatically on resolve, timeout, or disconnect.
+- Multiple concurrent waiters for the same method are supported.
+
+## Connection Health Monitoring
+
+```typescript
+const client = new LSPClient({
+  name: 'health-aware-client',
+  version: '1.0.0',
+  heartbeat: {
+    enabled: true,
+    interval: 30000,
+    timeout: 10000
+  }
+});
+
+const stateSubscription = client.onConnectionStateChange((event) => {
+  console.log('state', event.previous, '->', event.current, event.reason);
+});
+
+const healthSubscription = client.onConnectionHealthChange((health) => {
+  console.log('last sent', health.lastMessageSent);
+  console.log('last received', health.lastMessageReceived);
+});
+
+const health = client.getConnectionHealth();
+console.log(health.state);
+
+stateSubscription.dispose();
+healthSubscription.dispose();
+```
+
 ### Server Notifications
 
 ```typescript
@@ -319,6 +368,11 @@ client.onRequest('window/showMessageRequest', async (params) => {
 });
 ```
 
+When handling server-to-client requests:
+- The handler parameter and return value are inferred from the method.
+- If no handler exists, client replies with JSON-RPC `-32601` (method not found).
+- If handler throws, client replies with JSON-RPC `-32603` (internal error).
+
 ## WebSocket Client
 
 ```typescript
@@ -360,7 +414,7 @@ class DocumentTracker {
 
   async open(client: LSPClient, uri: string, languageId: string, content: string): Promise<void> {
     this.documents.set(uri, { version: 1, content });
-    
+
     await client.textDocument.didOpen({
       textDocument: {
         uri,
@@ -374,10 +428,10 @@ class DocumentTracker {
   async change(client: LSPClient, uri: string, newContent: string): Promise<void> {
     const doc = this.documents.get(uri);
     if (!doc) return;
-    
+
     const newVersion = doc.version + 1;
     this.documents.set(uri, { version: newVersion, content: newContent });
-    
+
     await client.textDocument.didChange({
       textDocument: { uri, version: newVersion },
       contentChanges: [{ text: newContent }]
@@ -386,7 +440,7 @@ class DocumentTracker {
 
   async close(client: LSPClient, uri: string): Promise<void> {
     this.documents.delete(uri);
-    
+
     await client.textDocument.didClose({
       textDocument: { uri }
     });
@@ -411,7 +465,7 @@ const diagnostics = new Map<string, Diagnostic[]>();
 
 client.onNotification('textDocument/publishDiagnostics', (params) => {
   diagnostics.set(params.uri, params.diagnostics);
-  
+
   // Display diagnostics
   for (const diagnostic of params.diagnostics) {
     console.log(`${params.uri}:${diagnostic.range.start.line + 1}: ${diagnostic.message}`);

@@ -9,7 +9,7 @@ import {
   LSPNotification,
   getDefinitionForRequest,
   getDefinitionForNotification,
-  hasCapability
+  hasServerCapability
 } from '@lspeasy/core';
 import type { LSPClient } from './client.js';
 import camelCase from 'camelcase';
@@ -45,7 +45,10 @@ export function initializeCapabilityMethods<
       // Only add methods if:
       // 1. No capability required (ServerCapability is undefined/null), OR
       // 2. Server has the required capability
-      if (!d.ServerCapability || hasCapability(client.serverCapabilities, d.ServerCapability)) {
+      if (
+        !d.ServerCapability ||
+        hasServerCapability(client.serverCapabilities, d.ServerCapability)
+      ) {
         namespace[camelCase(request)] = (a: any, b: any) => client.sendRequest(d.Method, a, b);
       }
       // If capability is missing, don't add the method at all (runtime matches types)
@@ -65,7 +68,10 @@ export function initializeCapabilityMethods<
     for (const notification in namespaceDefinitions) {
       const d = getDefinitionForNotification(namespaceName as any, notification);
       // Notifications typically don't require capabilities, but check anyway
-      if (!d.ServerCapability || hasCapability(client.serverCapabilities, d.ServerCapability)) {
+      if (
+        !d.ServerCapability ||
+        hasServerCapability(client.serverCapabilities, d.ServerCapability)
+      ) {
         const methodKey = deriveNotificationMethodKey(namespaceName, notification);
         (client as any)[clientPropertyName][camelCase(methodKey)] = (a: any) =>
           client.sendNotification(d.Method, a);

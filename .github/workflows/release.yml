@@ -4,7 +4,7 @@
 # It supports npm Trusted Publishers (OIDC) for secure, token-free publishing.
 #
 # How it works:
-# 1. When you push to main, Changesets creates a "Version Packages" PR
+# 1. When you push to master, Changesets creates a "Version Packages" PR
 # 2. When that PR is merged, packages are automatically published to npm
 # 3. GitHub releases are created automatically
 #
@@ -25,7 +25,7 @@ name: Release
 on:
   push:
     branches:
-      - main
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -88,6 +88,6 @@ jobs:
           body: |
             Release ${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
 
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
           draft: false
           prerelease: ${{ contains(fromJson(steps.changesets.outputs.publishedPackages)[0].version, '-') }}

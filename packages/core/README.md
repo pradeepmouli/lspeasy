@@ -9,10 +9,84 @@ Core transport layer and utilities for the lspeasy Language Server Protocol SDK.
 - **Transport Interface**: Abstract transport layer for message exchange
 - **StdioTransport**: Standard input/output transport implementation
 - **WebSocketTransport**: WebSocket transport with automatic reconnection
+- **Middleware Pipeline**: Composable JSON-RPC interception with method scoping and typing
 - **JSON-RPC 2.0**: Message framing, parsing, and serialization
 - **Type-Safe Enums**: Enums for all LSP kind types with extensibility support
 - **Cancellation**: Token-based cancellation support
-- **Utilities**: Event emitters, disposables, and logging
+- **Utilities**: Event emitters, disposables, logging, and document sync helpers
+
+## Middleware API
+
+Middleware is exported from `@lspeasy/core/middleware`.
+
+```typescript
+import {
+  composeMiddleware,
+  createScopedMiddleware,
+  createTypedMiddleware,
+  type Middleware
+} from '@lspeasy/core/middleware';
+
+const logging: Middleware = async (context, next) => {
+  console.log(`${context.direction} ${context.messageType} ${context.method}`);
+  await next();
+};
+
+const scoped = createScopedMiddleware(
+  { methods: /^textDocument\//, direction: 'clientToServer', messageType: ['request'] },
+  async (context, next) => {
+    context.metadata.startedAt = Date.now();
+    await next();
+  }
+);
+
+const typed = createTypedMiddleware('textDocument/hover', async (context, next) => {
+  console.log(context.params?.position);
+  await next();
+});
+
+export const middleware = composeMiddleware(logging, scoped, typed);
+```
+
+## Native WebSocket Support
+
+- `createWebSocketClient()` and `WebSocketTransport` use native `globalThis.WebSocket` when available.
+- Node.js `>= 22.4` is recommended for native WebSocket client support.
+- For older Node.js versions, install `ws` as an optional peer dependency.
+- WebSocket server mode (`WebSocketServer`) still requires `ws`.
+
+## Document Change Helpers
+
+Use document helpers from `@lspeasy/core/utils` to create typed didChange payloads.
+
+```typescript
+import {
+  DocumentVersionTracker,
+  createIncrementalDidChangeParams,
+  createFullDidChangeParams
+} from '@lspeasy/core/utils';
+
+const tracker = new DocumentVersionTracker();
+tracker.open('file:///demo.ts', 0);
+
+const incremental = createIncrementalDidChangeParams(
+  'file:///demo.ts',
+  [
+    {
+      range: {
+        start: { line: 0, character: 0 },
+        end: { line: 0, character: 5 }
+      },
+      text: 'const'
+    }
+  ],
+  { tracker }
+);
+
+const full = createFullDidChangeParams('file:///demo.ts', 'const value = 1;', {
+  tracker
+});
+```
 
 ## Installation
 
@@ -112,6 +186,12 @@ await transport.send({
   id: 2,
   params: { /* ... */ }
 });
+```
+
+If running on Node.js < 22.4 and using client mode, install `ws`:
+
+```bash
+pnpm add ws
 ```
 
 ### Server Mode WebSocket

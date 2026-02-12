@@ -2,9 +2,17 @@
  * Type definitions for LSP Client
  */
 
-import type { ClientCapabilities, Logger, LogLevel, Client } from '@lspeasy/core';
+import type {
+  Client,
+  ClientCapabilities,
+  Logger,
+  LogLevel,
+  Middleware,
+  ScopedMiddleware
+} from '@lspeasy/core';
 import type { ZodError } from 'zod';
 import type { ResponseMessage } from '@lspeasy/core';
+import type { HeartbeatConfig } from './connection/types.js';
 
 /**
  * Re-export Client type for convenience
@@ -53,6 +61,16 @@ export interface ClientOptions<
    * When false, logs warning and allows registration/sending (default: false)
    */
   strictCapabilities?: boolean;
+
+  /**
+   * Optional middleware chain for clientToServer/serverToClient messages.
+   */
+  middleware?: Array<Middleware | ScopedMiddleware>;
+
+  /**
+   * Optional heartbeat configuration (disabled by default).
+   */
+  heartbeat?: HeartbeatConfig;
 
   /**
    * Callback for response validation errors

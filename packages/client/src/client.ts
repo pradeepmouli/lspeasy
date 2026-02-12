@@ -19,14 +19,25 @@ import type {
   InitializeParams,
   ServerCapabilities,
   ClientCapabilities,
-  Client
+  Client,
+  Middleware,
+  MiddlewareContext,
+  MiddlewareResult,
+  ScopedMiddleware
 } from '@lspeasy/core';
-import { ConsoleLogger, LogLevel, CancellationTokenSource } from '@lspeasy/core';
+import {
+  CancellationTokenSource,
+  ConsoleLogger,
+  executeMiddlewarePipeline,
+  LogLevel
+} from '@lspeasy/core';
 import { DisposableEventEmitter, HandlerRegistry } from '@lspeasy/core/utils';
 import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
 import type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
 import { initializeCapabilityMethods, updateCapabilityMethods } from './capability-proxy.js';
 import { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
+import { ConnectionHealthTracker, ConnectionState, HeartbeatMonitor } from './connection/index.js';
+import type { ConnectionHealth, HeartbeatConfig, StateChangeEvent } from './connection/index.js';
 
 /**
  * Interface for dynamically added namespace methods
@@ -67,6 +78,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }>;
   private transportAttachment: TransportAttachment;
   private readonly logger: Logger;
+  private readonly middlewareRegistrations: Array<Middleware | ScopedMiddleware>;
   private readonly options: {
     name: string;
     version: string;
@@ -74,6 +86,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     logLevel: LogLevel;
     requestTimeout: number | undefined;
     strictCapabilities: boolean;
+    heartbeat: HeartbeatConfig | undefined;
   };
   private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
@@ -81,6 +94,15 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   private readonly onValidationError?: ClientOptions<ClientCaps>['onValidationError'];
   private capabilityGuard?: CapabilityGuard;
   private clientCapabilityGuard?: ClientCapabilityGuard;
+  private readonly healthTracker: ConnectionHealthTracker;
+  private heartbeatMonitor: HeartbeatMonitor | undefined;
+  private notificationWaiters: Set<{
+    method: string;
+    filter?: (params: unknown) => boolean;
+    resolve: (params: unknown) => void;
+    reject: (error: Error) => void;
+    cleanup: () => void;
+  }>;
 
   constructor(options: ClientOptions<ClientCaps> = {}) {
     this.connected = false;
@@ -92,15 +114,19 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       logger: options.logger ?? new ConsoleLogger(options.logLevel ?? LogLevel.Info),
       logLevel: options.logLevel ?? LogLevel.Info,
       requestTimeout: options.requestTimeout,
-      strictCapabilities: options.strictCapabilities ?? false
+      strictCapabilities: options.strictCapabilities ?? false,
+      heartbeat: options.heartbeat
     };
 
     this.logger = this.options.logger;
+    this.middlewareRegistrations = options.middleware ?? [];
     this.pendingRequests = new PendingRequestTracker(this.options.requestTimeout);
     this.requestHandlers = new HandlerRegistry();
     this.notificationHandlers = new HandlerRegistry();
     this.events = new DisposableEventEmitter();
     this.transportAttachment = new TransportAttachment();
+    this.notificationWaiters = new Set();
+    this.healthTracker = new ConnectionHealthTracker();
     if (options.capabilities) {
       this.capabilities = options.capabilities;
     }
@@ -128,6 +154,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       throw new Error('Client is already connected');
     }
 
+    this.healthTracker.setState(ConnectionState.Connecting);
     this.transport = transport;
     this.connected = true;
 
@@ -172,6 +199,9 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       // Send initialized notification
       await this.sendNotification('initialized', {});
 
+      this.healthTracker.setState(ConnectionState.Connected);
+      this.startHeartbeatIfConfigured(this.options.heartbeat);
+
       this.logger.info('Client initialized', {
         serverName: this.serverInfo?.name,
         serverVersion: this.serverInfo?.version
@@ -202,6 +232,8 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     if (!this.connected) {
       return;
     }
+
+    this.healthTracker.setState(ConnectionState.Disconnecting);
 
     try {
       // Send shutdown request
@@ -282,13 +314,30 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       });
     }
 
-    void promise.finally(() => {
-      cancellationDisposable?.dispose();
-    });
+    void promise.then(
+      () => {
+        cancellationDisposable?.dispose();
+      },
+      () => {
+        cancellationDisposable?.dispose();
+      }
+    );
 
-    this.transport.send(request).catch((error) => {
-      const rejection = error instanceof Error ? error : new Error(String(error));
-      this.pendingRequests.reject(id, rejection);
+    this.sendWithMiddleware({
+      direction: 'clientToServer',
+      messageType: 'request',
+      method,
+      message: request,
+      onSend: async () => {
+        this.healthTracker.markMessageSent();
+        await this.transport!.send(request);
+      },
+      onShortCircuit: (result) => {
+        this.resolveShortCircuitRequest(id, result);
+      },
+      onError: (error) => {
+        this.pendingRequests.reject(id, error);
+      }
     });
 
     return promise as Promise<ResultForRequest<K>>;
@@ -318,7 +367,16 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
 
     this.logger.debug(`Sending notification ${method}`, { params });
 
-    await this.transport.send(notification);
+    await this.sendWithMiddleware({
+      direction: 'clientToServer',
+      messageType: 'notification',
+      method,
+      message: notification,
+      onSend: async () => {
+        this.healthTracker.markMessageSent();
+        await this.transport!.send(notification);
+      }
+    });
   }
 
   /**
@@ -365,6 +423,57 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 
   /**
+   * Wait for the next matching server notification.
+   */
+  waitForNotification<M extends LSPNotificationMethod<'serverToClient'>>(
+    method: M,
+    options: {
+      timeout: number;
+      filter?: (params: ParamsForNotification<M>) => boolean;
+    }
+  ): Promise<ParamsForNotification<M>> {
+    return new Promise<ParamsForNotification<M>>((resolve, reject) => {
+      let timeoutHandle: NodeJS.Timeout | undefined;
+
+      const waiter: {
+        method: string;
+        filter?: (params: unknown) => boolean;
+        resolve: (params: unknown) => void;
+        reject: (error: Error) => void;
+        cleanup: () => void;
+      } = {
+        method,
+        resolve: (params: unknown) => {
+          resolve(params as ParamsForNotification<M>);
+        },
+        reject: (error: Error) => {
+          reject(error);
+        },
+        cleanup: () => {
+          if (timeoutHandle) {
+            clearTimeout(timeoutHandle);
+            timeoutHandle = undefined;
+          }
+          this.notificationWaiters.delete(waiter);
+        }
+      };
+
+      if (options.filter) {
+        waiter.filter = options.filter as (params: unknown) => boolean;
+      }
+
+      this.notificationWaiters.add(waiter);
+
+      timeoutHandle = setTimeout(() => {
+        waiter.cleanup();
+        reject(
+          new Error(`Timed out waiting for notification '${method}' after ${options.timeout}ms`)
+        );
+      }, options.timeout);
+    });
+  }
+
+  /**
    * Subscribe to connection events
    */
   onConnected(handler: () => void): Disposable {
@@ -383,6 +492,20 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    */
   onError(handler: (error: Error) => void): Disposable {
     return this.events.on('error', handler);
+  }
+
+  onConnectionStateChange(handler: (event: StateChangeEvent) => void): Disposable {
+    const dispose = this.healthTracker.onStateChange(handler);
+    return { dispose };
+  }
+
+  onConnectionHealthChange(handler: (health: ConnectionHealth) => void): Disposable {
+    const dispose = this.healthTracker.onHealthChange(handler);
+    return { dispose };
+  }
+
+  getConnectionHealth(): ConnectionHealth {
+    return this.healthTracker.getHealth();
   }
 
   /**
@@ -469,9 +592,17 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    * Handle incoming message from transport
    */
   private handleMessage(message: Message): void {
+    this.healthTracker.markMessageReceived();
+    this.heartbeatMonitor?.markPong();
+    if (this.heartbeatMonitor) {
+      this.healthTracker.setHeartbeat(this.heartbeatMonitor.getStatus());
+    }
+
     // Response message
     if ('id' in message && ('result' in message || 'error' in message)) {
-      this.handleResponse(message as ResponseMessage);
+      void this.handleResponse(message as ResponseMessage).catch((error) => {
+        this.logger.error('Error handling response', error);
+      });
       return;
     }
 
@@ -496,7 +627,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   /**
    * Handle response message
    */
-  private handleResponse(response: ResponseMessage): void {
+  private async handleResponse(response: ResponseMessage): Promise<void> {
     const { id } = response;
     const method = this.pendingRequests.getMetadata(String(id));
 
@@ -505,25 +636,117 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       return;
     }
 
-    if ('error' in response && response.error) {
-      this.logger.error(`Request ${method} failed`, response.error);
-      // Defer rejection asynchronously to allow handlers to be attached
-      Promise.resolve().then(() => {
-        this.pendingRequests.reject(
-          String(id),
-          new Error(`${response.error.message} (code: ${response.error.code})`)
-        );
-      });
+    await this.sendWithMiddleware({
+      direction: 'serverToClient',
+      messageType: 'error' in response ? 'error' : 'response',
+      method,
+      message: response,
+      onSend: async () => {
+        if ('error' in response && response.error) {
+          this.logger.error(`Request ${method} failed`, response.error);
+          this.pendingRequests.reject(
+            String(id),
+            new Error(`${response.error.message} (code: ${response.error.code})`)
+          );
+          return;
+        }
+
+        if ('result' in response) {
+          this.logger.debug(`Request ${method} succeeded`, { id });
+          this.pendingRequests.resolve(String(id), response.result);
+          return;
+        }
+
+        this.pendingRequests.reject(String(id), new Error('Invalid response message'));
+      },
+      onShortCircuit: (result) => {
+        this.resolveShortCircuitRequest(String(id), result);
+      },
+      onError: (error) => {
+        this.pendingRequests.reject(String(id), error);
+      }
+    });
+  }
+
+  private resolveShortCircuitRequest(id: string, result: MiddlewareResult): void {
+    if (result.error) {
+      this.pendingRequests.reject(
+        id,
+        new Error(`${result.error.error.message} (code: ${result.error.error.code})`)
+      );
       return;
     }
 
-    if ('result' in response) {
-      this.logger.debug(`Request ${method} succeeded`, { id });
-      this.pendingRequests.resolve(String(id), response.result);
+    if (result.response && 'error' in result.response && result.response.error) {
+      this.pendingRequests.reject(
+        id,
+        new Error(`${result.response.error.message} (code: ${result.response.error.code})`)
+      );
       return;
     }
 
-    this.pendingRequests.reject(String(id), new Error('Invalid response message'));
+    if (result.response && 'result' in result.response) {
+      this.pendingRequests.resolve(id, result.response.result);
+      return;
+    }
+
+    this.pendingRequests.reject(id, new Error('Middleware short-circuit missing response payload'));
+  }
+
+  private buildMiddlewareContext(
+    direction: 'clientToServer' | 'serverToClient',
+    messageType: 'request' | 'response' | 'notification' | 'error',
+    method: string,
+    message: MiddlewareContext['message']
+  ): MiddlewareContext {
+    return {
+      direction,
+      messageType,
+      method,
+      message,
+      metadata: {},
+      transport: this.transport?.constructor.name ?? 'unknown'
+    };
+  }
+
+  private async sendWithMiddleware(options: {
+    direction: 'clientToServer' | 'serverToClient';
+    messageType: 'request' | 'response' | 'notification' | 'error';
+    method: string;
+    message: MiddlewareContext['message'];
+    onSend: () => Promise<void>;
+    onShortCircuit?: (result: MiddlewareResult) => void;
+    onError?: (error: Error) => void;
+  }): Promise<void> {
+    const context = this.buildMiddlewareContext(
+      options.direction,
+      options.messageType,
+      options.method,
+      options.message
+    );
+
+    try {
+      const result = await executeMiddlewarePipeline(
+        this.middlewareRegistrations,
+        context,
+        async () => {
+          await options.onSend();
+          return undefined;
+        }
+      );
+
+      if (result?.shortCircuit && options.onShortCircuit) {
+        options.onShortCircuit(result);
+      }
+    } catch (error) {
+      const normalized = error instanceof Error ? error : new Error(String(error));
+      this.handleError(normalized);
+      if (options.onError) {
+        options.onError(normalized);
+        return;
+      }
+      throw normalized;
+    }
   }
 
   /**
@@ -599,6 +822,25 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    */
   private handleNotification(notification: NotificationMessage): void {
     const { method, params } = notification;
+
+    for (const waiter of Array.from(this.notificationWaiters)) {
+      if (waiter.method !== method) {
+        continue;
+      }
+
+      try {
+        if (waiter.filter && !waiter.filter(params)) {
+          continue;
+        }
+        waiter.cleanup();
+        waiter.resolve(params);
+      } catch (error) {
+        waiter.cleanup();
+        const normalized = error instanceof Error ? error : new Error(String(error));
+        waiter.reject(normalized);
+      }
+    }
+
     const handler = this.notificationHandlers.get(method);
 
     if (!handler) {
@@ -634,11 +876,43 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     this.connected = false;
     this.initialized = false;
     delete this.transport;
+    this.heartbeatMonitor?.stop();
+    this.heartbeatMonitor = undefined;
+    this.healthTracker.setState(ConnectionState.Disconnected);
 
     this.transportAttachment.detach();
     this.pendingRequests.clear(new Error('Connection closed'));
 
+    for (const waiter of Array.from(this.notificationWaiters)) {
+      waiter.cleanup();
+      waiter.reject(new Error('Connection closed before notification was received'));
+    }
+
     this.events.emit('disconnected');
+  }
+
+  private startHeartbeatIfConfigured(config: HeartbeatConfig | undefined): void {
+    if (!config || !config.enabled) {
+      return;
+    }
+
+    this.heartbeatMonitor?.stop();
+
+    this.heartbeatMonitor = new HeartbeatMonitor({
+      config,
+      onPing: () => {
+        this.healthTracker.setHeartbeat(this.heartbeatMonitor!.getStatus());
+      },
+      onUnresponsive: () => {
+        this.healthTracker.setHeartbeat(this.heartbeatMonitor!.getStatus());
+      },
+      onResponsive: () => {
+        this.healthTracker.setHeartbeat(this.heartbeatMonitor!.getStatus());
+      }
+    });
+
+    this.healthTracker.setHeartbeat(this.heartbeatMonitor.getStatus());
+    this.heartbeatMonitor.start();
   }
 }
 

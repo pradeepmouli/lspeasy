@@ -1,0 +1,52 @@
+{
+  "name": "@lspeasy/middleware-pino",
+  "version": "1.0.2",
+  "description": "Pino-based structured logging middleware for lspeasy",
+  "keywords": [
+    "lsp",
+    "language-server-protocol",
+    "middleware",
+    "pino",
+    "logging"
+  ],
+  "license": "MIT",
+  "author": "Pradeep Mouli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeepmouli/lspeasy.git",
+    "directory": "packages/middleware/pino"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsgo --build",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "dev": "tsgo --build --watch",
+    "type-check": "tsgo --noEmit"
+  },
+  "peerDependencies": {
+    "@lspeasy/core": "workspace:^",
+    "pino": "^9.0.0"
+  },
+  "devDependencies": {
+    "@lspeasy/core": "workspace:*",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
