@@ -14,6 +14,7 @@
 - Q: How should document version tracking work for `didChange` helpers? -> A: Provide a `DocumentVersionTracker` utility; helpers accept either a tracker or an explicit version.
 - Q: Should WebSocket heartbeat monitoring be enabled by default or opt-in? -> A: Opt-in (disabled by default).
 - Q: Should there be a limit on the number of middleware that can be registered? -> A: Unlimited middleware supported.
+- Q: Should middleware support method-specific application and strong typing? -> A: Yes, provide both method-scoped middleware registration and typed middleware factory.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -23,11 +24,11 @@ A developer building an LSP-based tool wants to intercept, inspect, and transfor
 
 **Why this priority**: Middleware is the foundational extensibility mechanism. It enables the pino logging package (a separate deliverable), retry logic, telemetry, and any other cross-cutting concern. Without middleware, each of these would require ad-hoc patches to core internals.
 
-**Independent Test**: Can be fully tested by registering a middleware that records all messages, sending a request through the client or server, and verifying the middleware observed the correct inbound and outbound messages. Delivers immediate value for debugging and monitoring without any other feature.
+**Independent Test**: Can be fully tested by registering a middleware that records all messages, sending a request through the client or server, and verifying the middleware observed the correct clientToServer and serverToClient messages. Delivers immediate value for debugging and monitoring without any other feature.
 
 **Acceptance Scenarios**:
 
-1. **Given** a client with a logging middleware registered, **When** the client sends a request and receives a response, **Then** the middleware observes both the outbound request and the inbound response with full message contents.
+1. **Given** a client with a logging middleware registered, **When** the client sends a request and receives a response, **Then** the middleware observes both the clientToServer request and the serverToClient response with full message contents.
 2. **Given** a server with two middleware functions registered in order [A, B], **When** a request arrives, **Then** middleware A processes the message before middleware B (onion/pipeline model), and the response passes through B before A.
 3. **Given** a client with an error-handling middleware, **When** a request fails with a transport error, **Then** the middleware can intercept the error, log it, and optionally transform or suppress it before it reaches the caller.
 4. **Given** a client or server with no middleware registered, **When** messages are sent and received, **Then** behavior is identical to the current implementation with no measurable overhead.
@@ -136,15 +137,17 @@ A developer using the LSP client wants ergonomic helpers for the most common doc
 
 #### Middleware System
 
-- **FR-001**: The SDK MUST provide a composable middleware interface that intercepts JSON-RPC messages at defined hook points (outbound requests/notifications, inbound responses/notifications, errors).
+- **FR-001**: The SDK MUST provide a composable middleware interface that intercepts JSON-RPC messages at defined hook points (clientToServer requests/notifications, serverToClient responses/notifications, errors).
 - **FR-002**: Middleware MUST execute in a deterministic order matching their registration sequence (pipeline/onion model).
 - **FR-003**: Both the client and server MUST accept middleware via their options at construction time.
 - **FR-004**: Middleware MUST be composable — multiple middleware functions can be combined into a single middleware via a composition utility.
 - **FR-005**: The middleware system MUST impose zero overhead when no middleware is registered (no additional function calls, allocations, or async wrapping on the message path).
 - **FR-006**: A separate package (`@lspeasy/middleware-pino`) MUST provide pino-based structured logging as a middleware, with no pino dependency in the core, client, or server packages.
 - **FR-007**: Middleware MUST be able to short-circuit the pipeline (e.g., return a cached response without forwarding to the server).
-- **FR-008**: Middleware MUST receive sufficient context to distinguish message types (request vs. notification, inbound vs. outbound) and access the method name.
+- **FR-008**: Middleware MUST receive sufficient context to distinguish message types (request vs. notification, clientToServer vs. serverToClient) and access the method name.
 - **FR-008a**: Middleware MUST NOT modify a JSON-RPC message `id`; attempts MUST be rejected with a clear error.
+- **FR-008b**: Middleware MUST support method-specific application via a filter or scoped registration (e.g., only apply to `textDocument/hover`).
+- **FR-008c**: The SDK MUST provide a typed middleware factory that infers parameters and response types from the LSP method name.
 
 #### Native WebSocket
 
@@ -183,12 +186,11 @@ A developer using the LSP client wants ergonomic helpers for the most common doc
 
 - **FR-028**: The SDK MUST provide helper functions for constructing `DidChangeTextDocumentParams` for both incremental and full-document sync modes.
 - **FR-029**: Helper functions MUST auto-increment the document version number for successive changes to the same document URI.
-- **FR-030**: Helper functions MUST correctly construct `TextDocumentContentChangeEvent` objects for range-based (incremental) changes.
-- **FR-030a**: Helpers MUST accept either an explicit version or a `DocumentVersionTracker` instance to manage versions.
+- **FR-030**: Helper functions MUST correctly construct `TextDocumentContentChangeEvent` objects for range-based (incremental) changes and accept either an explicit version or a `DocumentVersionTracker` instance to manage versions.
 
 ### Key Entities
 
-- **Middleware**: A composable function that wraps message processing, with access to message content, direction (inbound/outbound), and the ability to pass through, modify, or short-circuit.
+- **Middleware**: A composable function that wraps message processing, with access to message content, direction (clientToServer/serverToClient), and the ability to pass through, modify, or short-circuit.
 - **MiddlewareContext**: Metadata passed to middleware including message direction, method name, message type (request/notification/response), and transport identity.
 - **ConnectionState**: An enumeration of transport connection states (connecting, connected, disconnecting, disconnected) with associated timestamps.
 - **ConnectionHealth**: An aggregate of connection state, last-activity timestamps, and optional heartbeat status.
@@ -211,7 +213,7 @@ A developer using the LSP client wants ergonomic helpers for the most common doc
 
 - Node.js >= 22.4 is the minimum supported version for native WebSocket client usage. Users on older Node.js versions can install `ws` to restore WebSocket client support via the existing transport.
 - The `ws` library will continue to be the standard for WebSocket server support in Node.js, as Node.js has no native `WebSocketServer`.
-- Middleware execution order follows the registration order (first registered = first to process outbound, last to process inbound — onion model).
+- Middleware execution order follows the registration order (first registered = first to process clientToServer, last to process serverToClient — onion model).
 - The `@lspeasy/middleware-pino` package is a separate deliverable that depends on `@lspeasy/core` and `pino`, shipped in the same monorepo but as an independent package.
 - The `procxy` library will be used separately for process spawning/management and is explicitly out of scope for this feature.
 - A separate `@lspeasy/document-manager` package for full document state tracking is out of scope; only helper functions for constructing change notifications are included here.
