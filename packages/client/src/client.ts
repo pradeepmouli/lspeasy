@@ -250,7 +250,10 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
 
     // Check if already cancelled before doing anything
     if (token?.isCancellationRequested) {
-      return Promise.reject(new Error('Request was cancelled'));
+      // Return a promise that rejects asynchronously to allow handlers to attach
+      return Promise.resolve().then(() => {
+        throw new Error('Request was cancelled');
+      });
     }
 
     const { id, promise } = this.pendingRequests.create(this.options.requestTimeout, method);
@@ -272,7 +275,10 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
           this.logger.error('Failed to send cancellation', err);
         });
 
-        this.pendingRequests.reject(id, new Error('Request was cancelled'));
+        // Defer rejection asynchronously to allow handlers to attach
+        Promise.resolve().then(() => {
+          this.pendingRequests.reject(id, new Error('Request was cancelled'));
+        });
       });
     }
 
@@ -501,10 +507,13 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
 
     if ('error' in response && response.error) {
       this.logger.error(`Request ${method} failed`, response.error);
-      this.pendingRequests.reject(
-        String(id),
-        new Error(`${response.error.message} (code: ${response.error.code})`)
-      );
+      // Defer rejection asynchronously to allow handlers to be attached
+      Promise.resolve().then(() => {
+        this.pendingRequests.reject(
+          String(id),
+          new Error(`${response.error.message} (code: ${response.error.code})`)
+        );
+      });
       return;
     }
 
