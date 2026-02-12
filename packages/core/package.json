@@ -57,6 +57,9 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsgo --build",
     "clean": "rm -rf dist *.tsbuildinfo",
