@@ -48,5 +48,5 @@ export type {
 
 export { ResponseError, JSONRPCErrorCode, ConsoleLogger, LogLevel } from '@lspeasy/core';
 
-// Re-export Node.js-specific transport
-export { StdioTransport } from '@lspeasy/core/node';
+// Note: For Node.js-specific transports like StdioTransport, import directly from '@lspeasy/core/node'
+// This keeps @lspeasy/server browser-compatible

@@ -36,7 +36,7 @@ pnpm add @lspeasy/core @lspeasy/server @lspeasy/client
 
 ```typescript
 import { LSPServer } from '@lspeasy/server';
-import { StdioTransport } from '@lspeasy/core';
+import { StdioTransport } from '@lspeasy/core/node';
 
 // Create server
 const server = new LSPServer({
@@ -81,7 +81,7 @@ await server.listen(transport);
 
 ```typescript
 import { LSPClient } from '@lspeasy/client';
-import { StdioTransport } from '@lspeasy/core';
+import { StdioTransport } from '@lspeasy/core/node';
 import { spawn } from 'node:child_process';
 
 // Spawn language server
@@ -138,7 +138,11 @@ Core functionality and transport layer:
 - Document change helper utilities (`@lspeasy/core/utils`)
 
 ```typescript
-import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
+// Browser-compatible imports
+import { WebSocketTransport, CancellationTokenSource } from '@lspeasy/core';
+
+// Node.js-specific imports
+import { StdioTransport } from '@lspeasy/core/node';
 ```
 
 ### @lspeasy/server
