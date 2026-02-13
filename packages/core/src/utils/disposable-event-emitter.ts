@@ -3,6 +3,9 @@
  */
 
 import type { Disposable } from './disposable.js';
+// Type-only import for API parity reference with Node EventEmitter
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Type reference only
+import type { EventEmitter } from 'node:events';
 
 type Listener<TEvents extends Record<string, unknown[]>, K extends keyof TEvents> = (
   ...args: TEvents[K]
@@ -41,6 +44,37 @@ export class DisposableEventEmitter<TEvents extends Record<string, unknown[]>> {
         if (current.size === 0) {
           this.listeners.delete(event);
         }
+      }
+    };
+  }
+
+  /**
+   * Register a one-time listener that automatically unregisters after first emission.
+   */
+  once<K extends keyof TEvents>(event: K, listener: Listener<TEvents, K>): Disposable {
+    if (this.disposed) {
+      return { dispose: () => undefined };
+    }
+
+    let disposed = false;
+    const wrappedListener = (...args: TEvents[K]) => {
+      if (disposed) {
+        return;
+      }
+      disposed = true;
+      disposable.dispose();
+      listener(...args);
+    };
+
+    const disposable = this.on(event, wrappedListener as Listener<TEvents, K>);
+
+    return {
+      dispose: () => {
+        if (disposed) {
+          return;
+        }
+        disposed = true;
+        disposable.dispose();
       }
     };
   }
