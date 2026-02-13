@@ -9,6 +9,9 @@ This document provides examples demonstrating how to use the lspeasy LSP SDK.
 - [Capability-Aware Server](#capability-aware-server)
 - [Capability-Aware Client](#capability-aware-client)
 - [Custom Transport](#custom-transport)
+- [Dynamic Registration](#dynamic-registration)
+- [Worker Transports](#worker-transports)
+- [Notebook Sync](#notebook-sync)
 
 ## Basic Server
 
@@ -189,6 +192,41 @@ chunk('hello', 2);                    // ['he', 'll', 'o']
 ```
 
 ## Core Utilities
+
+## Dynamic Registration
+
+```typescript
+const client = new LSPClient({
+  capabilities: {
+    workspace: {
+      didChangeWatchedFiles: { dynamicRegistration: true }
+    }
+  }
+});
+
+const runtime = client.getRuntimeCapabilities();
+console.log(runtime.dynamicRegistrations);
+```
+
+## Worker Transports
+
+```typescript
+const dedicated = new DedicatedWorkerTransport({ worker });
+const shared = new SharedWorkerTransport({
+  worker: sharedWorker,
+  port: sharedWorker.port,
+  clientId: crypto.randomUUID()
+});
+```
+
+## Notebook Sync
+
+```typescript
+await client.notebookDocument.didOpen(openParams);
+server.notebookDocument.onDidOpen((params) => {
+  // handle notebook open
+});
+```
 
 ### Email Validation
 

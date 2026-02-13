@@ -182,6 +182,27 @@ Check out the [examples directory](../../examples/server/) for complete examples
 
 ## API Reference
 
+## Notebook Namespace Helpers
+
+```typescript
+server.notebookDocument.onDidOpen((params) => {
+  // handle notebook open
+});
+
+server.notebookDocument.onDidChange((params) => {
+  // handle structural/content updates
+});
+```
+
+## Partial Result Sender
+
+```typescript
+import { PartialResultSender } from '@lspeasy/server';
+
+const sender = new PartialResultSender(server);
+await sender.send(token, batch);
+```
+
 ### LSPServer
 
 ```typescript

@@ -17,6 +17,7 @@ This repository is designed for multi-agent collaboration (Copilot, Claude, Gemi
 - Always keep docs current when changing scripts or workflows.
 - When adding dependencies, make sure to use the latest stable versions.
 - Abide by the rules in ./specify/memory/constitution.md
+- If you are copilot, also see .github/agents/copilot-instructions.md
 
 ## Workflow Checklist
 1) Install deps: `pnpm install`

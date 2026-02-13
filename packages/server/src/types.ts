@@ -7,6 +7,10 @@ import type {
   Logger,
   ClientCapabilities,
   Server,
+  DidOpenNotebookDocumentParams,
+  DidChangeNotebookDocumentParams,
+  DidSaveNotebookDocumentParams,
+  DidCloseNotebookDocumentParams,
   LogLevel,
   ServerCapabilities,
   Middleware,
@@ -152,4 +156,11 @@ export enum ServerState {
   Initialized = 'initialized',
   ShuttingDown = 'shutting_down',
   Shutdown = 'shutdown'
+}
+
+export interface NotebookDocumentHandlerNamespace {
+  onDidOpen(handler: NotificationHandler<DidOpenNotebookDocumentParams>): { dispose(): void };
+  onDidChange(handler: NotificationHandler<DidChangeNotebookDocumentParams>): { dispose(): void };
+  onDidSave(handler: NotificationHandler<DidSaveNotebookDocumentParams>): { dispose(): void };
+  onDidClose(handler: NotificationHandler<DidCloseNotebookDocumentParams>): { dispose(): void };
 }

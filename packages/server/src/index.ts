@@ -10,6 +10,7 @@ export type {
   ServerOptions,
   RequestHandler,
   NotificationHandler,
+  NotebookDocumentHandlerNamespace,
   RequestContext,
   NotificationContext,
   Server
@@ -19,6 +20,7 @@ export { ServerState } from './types.js';
 
 // Internal exports for testing
 export { MessageDispatcher } from './dispatcher.js';
+export { PartialResultSender } from './progress/partial-result-sender.js';
 
 // Re-export commonly used types from @lspeasy/core
 export type {

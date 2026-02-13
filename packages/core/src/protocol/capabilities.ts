@@ -215,6 +215,16 @@ export function supportsWorkspaceFolders(
   return capabilities.workspace?.workspaceFolders?.supported === true;
 }
 
+export function supportsNotebookDocumentSync(
+  capabilities: ServerCapabilities
+): capabilities is ServerCapabilities & {
+  notebookDocumentSync: NonNullable<ServerCapabilities['notebookDocumentSync']>;
+} {
+  return (
+    capabilities.notebookDocumentSync !== null && capabilities.notebookDocumentSync !== undefined
+  );
+}
+
 /**
  * Helper to check if file watching is supported
  */

@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Document sync helper utilities (`DocumentVersionTracker`, incremental/full didChange payload builders)
 - `@lspeasy/middleware-pino` package with pino-compatible logging middleware
 - Unit and e2e tests for middleware, websocket behavior, notification waiting, and connection health
+- Dynamic capability registration/unregistration support (`client/registerCapability`, `client/unregisterCapability`) with strict-by-default behavior
+- New transports: TCP, IPC, Dedicated Worker, and Shared Worker
+- Client/server partial-result ergonomics (`sendRequestWithPartialResults`, `PartialResultSender`) and notebook namespace helpers
 
 ### Changed
 - `@lspeasy/core` now treats `ws` as an optional peer dependency for client-native usage

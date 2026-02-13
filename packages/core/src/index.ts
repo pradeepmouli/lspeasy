@@ -42,6 +42,18 @@ export {
 export type { Transport } from './transport/transport.js';
 export { StdioTransport } from './transport/stdio.js';
 export type { StdioTransportOptions } from './transport/stdio.js';
+export { TcpTransport } from './transport/tcp.js';
+export type { TcpTransportOptions, TcpReconnectOptions } from './transport/tcp.js';
+export { IpcTransport } from './transport/ipc.js';
+export type {
+  IpcTransportOptions,
+  IpcParentProcessLike,
+  IpcChildProcessLike
+} from './transport/ipc.js';
+export { DedicatedWorkerTransport } from './transport/dedicated-worker.js';
+export type { DedicatedWorkerTransportOptions } from './transport/dedicated-worker.js';
+export { SharedWorkerTransport } from './transport/shared-worker.js';
+export type { SharedWorkerTransportOptions } from './transport/shared-worker.js';
 export { WebSocketTransport } from './transport/websocket.js';
 export type { WebSocketTransportOptions } from './transport/websocket.js';
 export { createWebSocketClient } from './transport/websocket.js';
@@ -181,5 +193,34 @@ export {
   hasPartialResultToken,
   getPartialResultToken
 } from './protocol/partial.js';
+export type {
+  DynamicRegistration,
+  DynamicRegistrationBehavior,
+  RegisterCapabilityParams,
+  UnregisterCapability,
+  UnregisterCapabilityParams
+} from './protocol/dynamic-registration.js';
+export {
+  dynamicRegistrationSchema,
+  registerCapabilityParamsSchema,
+  unregisterCapabilitySchema,
+  unregisterCapabilityParamsSchema,
+  isRegisterCapabilityParams,
+  isUnregisterCapabilityParams
+} from './protocol/dynamic-registration.js';
+export type {
+  CancelledPartialResult,
+  CompletedPartialResult,
+  PartialRequestOutcome
+} from './protocol/partial-results.js';
+
+export type {
+  WorkerLike,
+  MessagePortLike,
+  SharedWorkerLike,
+  WorkerMessageEventLike,
+  WorkerTransportEnvelope
+} from './transport/worker-types.js';
+export { isMessage, isWorkerTransportEnvelope } from './transport/worker-types.js';
 
 export * from './protocol/capabilities.js';

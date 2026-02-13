@@ -170,6 +170,9 @@ describe('LSPClient requests and notifications', () => {
       cancelSource.cancel();
 
       await expectation;
+
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
 
     it('should handle already cancelled token', async () => {
@@ -186,6 +189,9 @@ describe('LSPClient requests and notifications', () => {
       );
 
       await expect(requestPromise).rejects.toThrow('Request was cancelled');
+
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
 
     it('should throw if not connected', async () => {
@@ -271,6 +277,9 @@ describe('LSPClient requests and notifications', () => {
       cancel();
 
       await expectation;
+
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
   });
 

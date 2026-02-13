@@ -255,6 +255,52 @@ try {
 
 ## Event Subscriptions
 
+## Dynamic Capability Registration
+
+```typescript
+const client = new LSPClient({
+  capabilities: {
+    workspace: {
+      didChangeWatchedFiles: { dynamicRegistration: true }
+    }
+  },
+  dynamicRegistration: {
+    allowUndeclaredDynamicRegistration: false
+  }
+});
+
+const runtime = client.getRuntimeCapabilities();
+console.log(runtime.dynamicRegistrations);
+```
+
+- `client/registerCapability` and `client/unregisterCapability` are handled automatically.
+- Unknown unregister ids return JSON-RPC `-32602`.
+- Set `allowUndeclaredDynamicRegistration: true` for compatibility-mode acceptance.
+
+## Partial Result Streaming
+
+```typescript
+const result = await client.sendRequestWithPartialResults('workspace/symbol', { query: 'My' }, {
+  token: 'symbols-1',
+  onPartial: (batch) => console.log('partial batch', batch)
+});
+
+if (result.cancelled) {
+  console.log(result.partialResults);
+} else {
+  console.log(result.finalResult);
+}
+```
+
+## Notebook Namespace
+
+```typescript
+await client.notebookDocument.didOpen(params);
+await client.notebookDocument.didChange(params);
+await client.notebookDocument.didSave(params);
+await client.notebookDocument.didClose(params);
+```
+
 ### Connection Events
 
 ```typescript

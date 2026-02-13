@@ -79,6 +79,21 @@ interface Transport {
 **Available Transports:**
 - `StdioTransport`: Communicate via stdin/stdout (for CLI tools)
 - `WebSocketTransport`: Communicate via WebSocket; supports persistent connections and optional automatic reconnection when the socket closes unexpectedly
+- `TcpTransport`: Node.js socket transport (client/server mode)
+- `IpcTransport`: Node.js parent/child IPC channel transport
+- `DedicatedWorkerTransport`: Browser dedicated worker transport
+- `SharedWorkerTransport`: Browser shared worker transport with `clientId` envelope routing
+
+### Transport Compatibility Matrix
+
+| Transport | Node.js | Browser | Reconnect | Isolation |
+|---|---|---|---|---|
+| Stdio | ✅ | ❌ | N/A | 1:1 process |
+| WebSocket | ✅ | ✅ | ✅ | connection scoped |
+| TCP | ✅ | ❌ | ✅ | socket scoped |
+| IPC | ✅ | ❌ | ❌ | process channel scoped |
+| Dedicated Worker | ❌ | ✅ | ❌ | worker scoped |
+| Shared Worker | ❌ | ✅ | ❌ | `clientId` + port scoped |
 
 **Design principles:**
 - **Bidirectional**: Both client and server use the same interface
