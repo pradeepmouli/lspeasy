@@ -86,6 +86,7 @@ export {
 // Utilities
 export type { Disposable } from './utils/disposable.js';
 export { DisposableStore } from './utils/disposable.js';
+export { DisposableEventEmitter } from './utils/disposable-event-emitter.js';
 
 export type { CancellationToken } from './utils/cancellation.js';
 export {

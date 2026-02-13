@@ -1,12 +1,16 @@
-import { EventEmitter } from 'node:events';
+import { DisposableEventEmitter } from '@lspeasy/core';
 import type { ConnectionHealth, HeartbeatStatus, StateChangeEvent } from './types.js';
 import { ConnectionState } from './types.js';
+
+type HealthEventMap = {
+  stateChanged: [StateChangeEvent];
+  healthChanged: [ConnectionHealth];
+};
 
 /**
  * Tracks connection state transitions and message activity timestamps.
  */
-export class ConnectionHealthTracker {
-  private readonly events = new EventEmitter();
+export class ConnectionHealthTracker extends DisposableEventEmitter<HealthEventMap> {
   private health: ConnectionHealth = {
     state: ConnectionState.Disconnected,
     lastMessageSent: null,
@@ -50,8 +54,8 @@ export class ConnectionHealthTracker {
 
     const event: StateChangeEvent = reason ? { ...baseEvent, reason } : baseEvent;
 
-    this.events.emit('stateChanged', event);
-    this.events.emit('healthChanged', this.getHealth());
+    this.emit('stateChanged', event);
+    this.emit('healthChanged', this.getHealth());
   }
 
   /**
@@ -62,7 +66,7 @@ export class ConnectionHealthTracker {
       ...this.health,
       lastMessageSent: new Date()
     };
-    this.events.emit('healthChanged', this.getHealth());
+    this.emit('healthChanged', this.getHealth());
   }
 
   /**
@@ -85,7 +89,7 @@ export class ConnectionHealthTracker {
       };
     }
 
-    this.events.emit('healthChanged', this.getHealth());
+    this.emit('healthChanged', this.getHealth());
   }
 
   /**
@@ -96,22 +100,22 @@ export class ConnectionHealthTracker {
       ...this.health,
       heartbeat: status
     };
-    this.events.emit('healthChanged', this.getHealth());
+    this.emit('healthChanged', this.getHealth());
   }
 
   /**
    * Subscribes to connection state transitions.
    */
   onStateChange(handler: (event: StateChangeEvent) => void): () => void {
-    this.events.on('stateChanged', handler);
-    return () => this.events.off('stateChanged', handler);
+    const disposable = this.on('stateChanged', handler);
+    return () => disposable.dispose();
   }
 
   /**
    * Subscribes to health snapshot updates.
    */
   onHealthChange(handler: (health: ConnectionHealth) => void): () => void {
-    this.events.on('healthChanged', handler);
-    return () => this.events.off('healthChanged', handler);
+    const disposable = this.on('healthChanged', handler);
+    return () => disposable.dispose();
   }
 }
