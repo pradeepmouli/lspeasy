@@ -929,35 +929,37 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       return false;
     }
 
-    if (method.startsWith('workspace/')) {
-      const workspace = capabilities['workspace'] as Record<string, unknown> | undefined;
-      if (!workspace) {
-        return false;
-      }
-
-      if (method === 'workspace/didChangeWatchedFiles') {
-        const watched = workspace['didChangeWatchedFiles'] as Record<string, unknown> | undefined;
-        return watched?.['dynamicRegistration'] === true;
-      }
-
-      if (method === 'workspace/symbol') {
-        const symbol = workspace['symbol'] as Record<string, unknown> | undefined;
-        return symbol?.['dynamicRegistration'] === true;
-      }
+    // Methods are of the form "<root>/<subKey>", e.g. "textDocument/hover".
+    const separatorIndex = method.indexOf('/');
+    if (separatorIndex === -1) {
+      return false;
     }
 
-    if (method.startsWith('textDocument/')) {
-      const textDocument = capabilities['textDocument'] as Record<string, unknown> | undefined;
-      if (!textDocument) {
-        return false;
-      }
-
-      const key = method.slice('textDocument/'.length);
-      const capability = textDocument[key] as Record<string, unknown> | undefined;
-      return capability?.['dynamicRegistration'] === true;
+    const root = method.slice(0, separatorIndex);
+    const subKey = method.slice(separatorIndex + 1);
+    if (!root || !subKey) {
+      return false;
     }
 
-    return false;
+    const rootCapabilities = capabilities[root] as Record<string, unknown> | undefined;
+    if (!rootCapabilities || typeof rootCapabilities !== 'object') {
+      return false;
+    }
+
+    // Map method names to capability keys when they differ or need special handling.
+    const methodToCapabilityKey: Record<string, string> = {
+      // Current known methods follow the "<root>/<propertyKey>" pattern, so this
+      // map is empty for now. It can be extended in the future for any special cases.
+    };
+
+    const capabilityKey = methodToCapabilityKey[method] ?? subKey;
+    const capability = rootCapabilities[capabilityKey] as Record<string, unknown> | undefined;
+
+    if (!capability || typeof capability !== 'object') {
+      return false;
+    }
+
+    return capability['dynamicRegistration'] === true;
   }
 
   private async sendResponseMessage(response: ResponseMessage): Promise<void> {
