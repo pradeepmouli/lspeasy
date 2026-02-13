@@ -46,10 +46,7 @@ export type {
   ParamsForNotification
 } from '@lspeasy/core';
 
-export {
-  ResponseError,
-  JSONRPCErrorCode,
-  StdioTransport,
-  ConsoleLogger,
-  LogLevel
-} from '@lspeasy/core';
+export { ResponseError, JSONRPCErrorCode, ConsoleLogger, LogLevel } from '@lspeasy/core';
+
+// Note: For Node.js-specific transports like StdioTransport, import directly from '@lspeasy/core/node'
+// This keeps @lspeasy/server browser-compatible

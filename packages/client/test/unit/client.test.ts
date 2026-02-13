@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { LSPClient } from '../../src/client.js';
-import { StdioTransport } from '@lspeasy/core';
+import { StdioTransport } from '@lspeasy/core/node';
 import { PassThrough } from 'node:stream';
 
 const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } | undefined => {
