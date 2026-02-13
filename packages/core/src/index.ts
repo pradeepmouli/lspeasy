@@ -220,9 +220,7 @@ export type {
   SharedWorkerLike,
   WorkerMessageEventLike,
   WorkerTransportEnvelope
-} from './worker-types.js';
-export {
-  isMessage,
-  isWorkerTransportEnvelope
-} from './worker-types.js';
+} from './transport/worker-types.js';
+export { isMessage, isWorkerTransportEnvelope } from './transport/worker-types.js';
+
 export * from './protocol/capabilities.js';

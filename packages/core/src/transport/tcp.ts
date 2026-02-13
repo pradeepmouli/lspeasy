@@ -53,16 +53,44 @@ export class TcpTransport implements Transport {
   }
 
   private connectClient(): void {
+    // Clean up old socket and listeners before reconnecting
+    if (this.socket) {
+      this.socket.removeAllListeners();
+      this.socket.destroy();
+    }
+    if (this.reader) {
+      this.reader.removeAllListeners();
+      this.reader.close();
+    }
+    if (this.writer) {
+      this.writer.removeAllListeners();
+      this.writer.close();
+    }
+
     const socket = connectTcp({ host: this.options.host, port: this.options.port });
     this.attachSocket(socket);
   }
 
   private listenServer(): void {
     this.listener = createServer((socket) => {
-      if (this.socket && this.connected) {
-        this.emitError(new Error('TCP transport already has an active connection'));
-        socket.destroy();
-        return;
+      // Clean up old socket if it exists but is no longer connected
+      if (this.socket) {
+        if (this.connected) {
+          this.emitError(new Error('TCP transport already has an active connection'));
+          socket.destroy();
+          return;
+        }
+        // Clean up stale socket reference
+        this.socket.removeAllListeners();
+        this.socket.destroy();
+        if (this.reader) {
+          this.reader.removeAllListeners();
+          this.reader.close();
+        }
+        if (this.writer) {
+          this.writer.removeAllListeners();
+          this.writer.close();
+        }
       }
 
       this.attachSocket(socket);
