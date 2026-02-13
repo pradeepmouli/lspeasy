@@ -35,11 +35,11 @@ A developer building an LSP client needs to work with language servers that dyna
 
 ---
 
-### User Story 2 - TCP Socket Transport (Priority: P2)
+### User Story 2 - Transport Breadth (TCP + Worker) (Priority: P2)
 
-A developer needs to connect their LSP client to a language server that communicates over a TCP socket rather than stdio. This is common for language servers like `clangd`, Eclipse JDT LS, and servers running in containerized environments where stdio is not available. They need a TCP transport that implements the same interface as the existing stdio and WebSocket transports, with support for both connecting to a server and accepting incoming connections.
+A developer needs to connect their LSP client to language servers running in non-stdio environments: over TCP sockets (e.g., `clangd`, Eclipse JDT LS, containerized servers) and in browser workers (Dedicated Worker and Shared Worker). They need transports that implement the same interface as existing transports while preserving JSON-RPC/LSP semantics.
 
-**Why this priority**: TCP is the second most common LSP transport after stdio. Several widely-used language servers support only socket connections, and containerized/remote server deployments often require TCP. This directly expands the set of servers the SDK can communicate with.
+**Why this priority**: TCP is the second most common LSP transport after stdio for server and containerized deployments, and worker-hosted servers are a core browser deployment pattern. Supporting both directly expands interoperability across desktop, remote, and browser-hosted LSP environments.
 
 **Independent Test**: Can be fully tested by (a) starting a TCP server and completing an LSP initialization handshake over TCP, and (b) running browser-based LSP sessions over Dedicated Worker and Shared Worker transports to validate request/response flow, close/error handling, and ordering guarantees.
 
@@ -169,7 +169,7 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 - **FR-018**: The client MUST support sending a `partialResultToken` with requests that declare partial result support in the protocol.
 - **FR-019**: The client MUST deliver partial results to the caller via a callback as each `$/progress` notification arrives for the corresponding token.
 - **FR-020**: The client MUST combine partial results with the final response when the request completes.
-- **FR-020a**: Partial result aggregation MUST preserve arrival order of partial batches; if the final response contains payload, it MUST be appended/merged into the aggregate result.
+- **FR-020a**: Partial result aggregation MUST preserve arrival order of partial batches; if the final response contains payload, it MUST be appended as the last aggregate element (no structural merge).
 - **FR-021**: When a request with partial results is cancelled, the client MUST make accumulated partial results available to the caller.
 - **FR-021a**: On cancellation, the client MUST resolve with a structured result `{ cancelled: true, partialResults, finalResult?: undefined }` rather than waiting for a final response.
 - **FR-022**: The server MUST provide a helper for sending partial result batches during request handling, abstracting away the `$/progress` notification construction.
@@ -211,7 +211,7 @@ A developer building an LSP server for a notebook environment (e.g., Jupyter not
 - Dynamic capability registration follows the LSP 3.17 specification strictly, including the requirement that clients declare `dynamicRegistration: true` for each capability that supports it.
 - Dynamic capability registration handling is strict by default; an explicit compatibility option may relax strict rejection for non-conformant servers.
 - TCP transport uses the same Content-Length header framing as stdio, as specified by the LSP base protocol. This is standard across all stream-based LSP transports.
-- The IPC transport is specific to Node.js environments. Browser environments do not have access to `child_process` and will use other transports (WebSocket, stdio).
+- The IPC transport is specific to Node.js environments. Browser environments do not have access to `child_process` and will use browser-capable transports (WebSocket, Dedicated Worker, Shared Worker).
 - Partial result streaming uses the existing `$/progress` notification infrastructure. No new protocol messages are introduced.
 - Notebook document sync follows the LSP 3.17 specification. The protocol method definitions and types already exist in the codebase via `vscode-languageserver-protocol` re-exports.
 - The TCP transport in server mode accepts a single connection at a time (one language server per transport instance), consistent with how LSP operates as a 1:1 client-server protocol.

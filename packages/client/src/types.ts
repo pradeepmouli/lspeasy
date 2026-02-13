@@ -5,6 +5,12 @@
 import type {
   Client,
   ClientCapabilities,
+  DynamicRegistrationBehavior,
+  DidOpenNotebookDocumentParams,
+  DidChangeNotebookDocumentParams,
+  DidSaveNotebookDocumentParams,
+  DidCloseNotebookDocumentParams,
+  PartialRequestOutcome,
   Logger,
   LogLevel,
   Middleware,
@@ -73,6 +79,11 @@ export interface ClientOptions<
   heartbeat?: HeartbeatConfig;
 
   /**
+   * Behavior controls for server-driven dynamic registration.
+   */
+  dynamicRegistration?: DynamicRegistrationBehavior;
+
+  /**
    * Callback for response validation errors
    */
   onValidationError?: (error: ZodError, response: ResponseMessage) => void;
@@ -102,4 +113,24 @@ export interface CancellableRequest<T> {
    * Function to cancel the request
    */
   cancel: () => void;
+}
+
+/**
+ * Options for sending a request with partial-result streaming.
+ */
+export interface PartialRequestOptions<TPartial> {
+  token?: string | number;
+  onPartial: (partial: TPartial) => void;
+}
+
+/**
+ * Result returned by partial-result enabled requests.
+ */
+export type PartialRequestResult<TPartial, TResult> = PartialRequestOutcome<TPartial, TResult>;
+
+export interface NotebookDocumentNamespace {
+  didOpen(params: DidOpenNotebookDocumentParams): Promise<void>;
+  didChange(params: DidChangeNotebookDocumentParams): Promise<void>;
+  didSave(params: DidSaveNotebookDocumentParams): Promise<void>;
+  didClose(params: DidCloseNotebookDocumentParams): Promise<void>;
 }

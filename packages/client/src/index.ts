@@ -4,7 +4,14 @@
 
 export { LSPClient } from './client.js';
 export { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
-export type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
+export type {
+  ClientOptions,
+  InitializeResult,
+  CancellableRequest,
+  NotebookDocumentNamespace,
+  PartialRequestOptions,
+  PartialRequestResult
+} from './types.js';
 export { ConnectionState, ConnectionHealthTracker, HeartbeatMonitor } from './connection/index.js';
 export type {
   ConnectionHealth,

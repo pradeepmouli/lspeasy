@@ -21,12 +21,21 @@ function deriveNotificationMethodKey(namespaceName: string, notificationKey: str
   return notificationKey;
 }
 
+function getRuntimeRegisteredMethods<
+  ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>
+>(client: LSPClient<ClientCaps>): Set<string> {
+  const runtime = client.getRuntimeCapabilities();
+  return new Set(runtime.dynamicRegistrations.map((registration) => registration.method));
+}
+
 /**
  * Initializes capability-aware methods on the client object based on LSPRequest definitions
  */
 export function initializeCapabilityMethods<
   ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>
 >(client: LSPClient<ClientCaps>): void {
+  const runtimeRegisteredMethods = getRuntimeRegisteredMethods(client);
+
   if (!client.serverCapabilities) {
     // Server capabilities not yet known; cannot initialize methods
     return;
@@ -47,7 +56,8 @@ export function initializeCapabilityMethods<
       // 2. Server has the required capability
       if (
         !d.ServerCapability ||
-        hasServerCapability(client.serverCapabilities, d.ServerCapability)
+        hasServerCapability(client.serverCapabilities, d.ServerCapability) ||
+        runtimeRegisteredMethods.has(d.Method)
       ) {
         namespace[camelCase(request)] = (a: any, b: any) => client.sendRequest(d.Method, a, b);
       }
@@ -70,7 +80,8 @@ export function initializeCapabilityMethods<
       // Notifications typically don't require capabilities, but check anyway
       if (
         !d.ServerCapability ||
-        hasServerCapability(client.serverCapabilities, d.ServerCapability)
+        hasServerCapability(client.serverCapabilities, d.ServerCapability) ||
+        runtimeRegisteredMethods.has(d.Method)
       ) {
         const methodKey = deriveNotificationMethodKey(namespaceName, notification);
         (client as any)[clientPropertyName][camelCase(methodKey)] = (a: any) =>

@@ -33,7 +33,12 @@ import {
 } from '@lspeasy/core';
 import { DisposableEventEmitter } from '@lspeasy/core/utils';
 import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
-import type { ServerOptions, RequestHandler, NotificationHandler } from './types.js';
+import type {
+  ServerOptions,
+  RequestHandler,
+  NotificationHandler,
+  NotebookDocumentHandlerNamespace
+} from './types.js';
 import { ServerState } from './types.js';
 import { MessageDispatcher } from './dispatcher.js';
 import { LifecycleManager } from './lifecycle.js';
@@ -80,6 +85,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   private cancellationTokens = new Map<number | string, AbortController>();
   private clientCapabilities?: ClientCapabilities;
   private clientInfo?: { name: string; version?: string };
+  public readonly notebookDocument: NotebookDocumentHandlerNamespace;
 
   constructor(options: ServerOptions<Capabilities> = {}) {
     this.options = options;
@@ -97,6 +103,12 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
     // Create dispatcher and lifecycle manager
     this.dispatcher = new MessageDispatcher(this.logger);
     this.lifecycleManager = new LifecycleManager(this.name, this.version, this.logger);
+    this.notebookDocument = {
+      onDidOpen: (handler) => this.onNotification('notebookDocument/didOpen', handler),
+      onDidChange: (handler) => this.onNotification('notebookDocument/didChange', handler),
+      onDidSave: (handler) => this.onNotification('notebookDocument/didSave', handler),
+      onDidClose: (handler) => this.onNotification('notebookDocument/didClose', handler)
+    };
 
     // Register built-in handlers
     this.registerBuiltinHandlers();

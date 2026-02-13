@@ -11,6 +11,8 @@ import type {
   Disposable,
   Logger,
   CancellationToken,
+  DynamicRegistration,
+  DynamicRegistrationBehavior,
   LSPRequestMethod,
   ParamsForRequest,
   ResultForRequest,
@@ -29,15 +31,26 @@ import {
   CancellationTokenSource,
   ConsoleLogger,
   executeMiddlewarePipeline,
+  isRegisterCapabilityParams,
+  isUnregisterCapabilityParams,
   LogLevel
 } from '@lspeasy/core';
 import { DisposableEventEmitter, HandlerRegistry } from '@lspeasy/core/utils';
 import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
-import type { ClientOptions, InitializeResult, CancellableRequest } from './types.js';
+import type {
+  ClientOptions,
+  InitializeResult,
+  CancellableRequest,
+  NotebookDocumentNamespace,
+  PartialRequestOptions,
+  PartialRequestResult
+} from './types.js';
 import { initializeCapabilityMethods, updateCapabilityMethods } from './capability-proxy.js';
 import { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
 import { ConnectionHealthTracker, ConnectionState, HeartbeatMonitor } from './connection/index.js';
 import type { ConnectionHealth, HeartbeatConfig, StateChangeEvent } from './connection/index.js';
+import { RegistrationStore } from './connection/registration-store.js';
+import { PartialResultCollector } from './connection/partial-result-collector.js';
 
 /**
  * Interface for dynamically added namespace methods
@@ -87,6 +100,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     requestTimeout: number | undefined;
     strictCapabilities: boolean;
     heartbeat: HeartbeatConfig | undefined;
+    dynamicRegistration: DynamicRegistrationBehavior;
   };
   private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
@@ -96,6 +110,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   private clientCapabilityGuard?: ClientCapabilityGuard;
   private readonly healthTracker: ConnectionHealthTracker;
   private heartbeatMonitor: HeartbeatMonitor | undefined;
+  private readonly registrationStore: RegistrationStore;
   private notificationWaiters: Set<{
     method: string;
     filter?: (params: unknown) => boolean;
@@ -103,6 +118,9 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     reject: (error: Error) => void;
     cleanup: () => void;
   }>;
+  private readonly partialCollectors: Map<string | number, unknown[]>;
+  private readonly partialCollector: PartialResultCollector;
+  public readonly notebookDocument: NotebookDocumentNamespace;
 
   constructor(options: ClientOptions<ClientCaps> = {}) {
     this.connected = false;
@@ -115,7 +133,10 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       logLevel: options.logLevel ?? LogLevel.Info,
       requestTimeout: options.requestTimeout,
       strictCapabilities: options.strictCapabilities ?? false,
-      heartbeat: options.heartbeat
+      heartbeat: options.heartbeat,
+      dynamicRegistration: options.dynamicRegistration ?? {
+        allowUndeclaredDynamicRegistration: false
+      }
     };
 
     this.logger = this.options.logger;
@@ -126,6 +147,15 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     this.events = new DisposableEventEmitter();
     this.transportAttachment = new TransportAttachment();
     this.notificationWaiters = new Set();
+    this.registrationStore = new RegistrationStore();
+    this.partialCollectors = new Map();
+    this.partialCollector = new PartialResultCollector();
+    this.notebookDocument = {
+      didOpen: async (params) => this.sendNotification('notebookDocument/didOpen', params),
+      didChange: async (params) => this.sendNotification('notebookDocument/didChange', params),
+      didSave: async (params) => this.sendNotification('notebookDocument/didSave', params),
+      didClose: async (params) => this.sendNotification('notebookDocument/didClose', params)
+    };
     this.healthTracker = new ConnectionHealthTracker();
     if (options.capabilities) {
       this.capabilities = options.capabilities;
@@ -393,6 +423,71 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     return {
       promise,
       cancel: () => cancelSource.cancel()
+    };
+  }
+
+  /**
+   * Send a request with partial-result streaming support.
+   */
+  async sendRequestWithPartialResults<
+    M extends LSPRequestMethod<'clientToServer'>,
+    TPartial = unknown
+  >(
+    method: M,
+    params: ParamsForRequest<M>,
+    options: PartialRequestOptions<TPartial>,
+    token?: CancellationToken
+  ): Promise<PartialRequestResult<TPartial, ResultForRequest<M>>> {
+    const partialToken = options.token ?? `${Date.now()}-${Math.random()}`;
+    const partials: TPartial[] = [];
+    this.partialCollectors.set(partialToken, partials as unknown[]);
+    this.partialCollector.start(partialToken, (value: TPartial) => {
+      partials.push(value);
+      options.onPartial(value);
+    });
+
+    try {
+      const requestParams =
+        params && typeof params === 'object'
+          ? ({
+              ...(params as object),
+              partialResultToken: partialToken
+            } as ParamsForRequest<M>)
+          : params;
+
+      const finalResult = await this.sendRequest(method, requestParams, token);
+      return {
+        cancelled: false,
+        partialResults: partials,
+        finalResult
+      };
+    } catch (error) {
+      const isCancelled = error instanceof Error && error.message.includes('cancel');
+      if (isCancelled) {
+        return {
+          cancelled: true,
+          partialResults: partials,
+          finalResult: undefined
+        };
+      }
+
+      throw error;
+    } finally {
+      this.partialCollectors.delete(partialToken);
+      this.partialCollector.abort(partialToken);
+    }
+  }
+
+  /**
+   * Return static server capabilities plus dynamic registrations seen at runtime.
+   */
+  getRuntimeCapabilities(): {
+    staticCapabilities: ServerCapabilities | undefined;
+    dynamicRegistrations: DynamicRegistration[];
+  } {
+    return {
+      staticCapabilities: this.serverCapabilities,
+      dynamicRegistrations: this.registrationStore.getAll()
     };
   }
 
@@ -754,6 +849,17 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    */
   private async handleRequest(request: RequestMessage): Promise<void> {
     const { id, method, params } = request;
+
+    if (method === 'client/registerCapability') {
+      await this.handleDynamicRegister(id, params);
+      return;
+    }
+
+    if (method === 'client/unregisterCapability') {
+      await this.handleDynamicUnregister(id, params);
+      return;
+    }
+
     const handler = this.requestHandlers.get(method);
 
     if (!handler) {
@@ -817,11 +923,146 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     }
   }
 
+  private supportsDynamicRegistration(method: string): boolean {
+    const capabilities = this.capabilities as Record<string, unknown> | undefined;
+    if (!capabilities) {
+      return false;
+    }
+
+    if (method.startsWith('workspace/')) {
+      const workspace = capabilities['workspace'] as Record<string, unknown> | undefined;
+      if (!workspace) {
+        return false;
+      }
+
+      if (method === 'workspace/didChangeWatchedFiles') {
+        const watched = workspace['didChangeWatchedFiles'] as Record<string, unknown> | undefined;
+        return watched?.['dynamicRegistration'] === true;
+      }
+
+      if (method === 'workspace/symbol') {
+        const symbol = workspace['symbol'] as Record<string, unknown> | undefined;
+        return symbol?.['dynamicRegistration'] === true;
+      }
+    }
+
+    if (method.startsWith('textDocument/')) {
+      const textDocument = capabilities['textDocument'] as Record<string, unknown> | undefined;
+      if (!textDocument) {
+        return false;
+      }
+
+      const key = method.slice('textDocument/'.length);
+      const capability = textDocument[key] as Record<string, unknown> | undefined;
+      return capability?.['dynamicRegistration'] === true;
+    }
+
+    return false;
+  }
+
+  private async sendResponseMessage(response: ResponseMessage): Promise<void> {
+    if (!this.transport) {
+      return;
+    }
+
+    await this.transport.send(response);
+  }
+
+  private async handleDynamicRegister(id: string | number, params: unknown): Promise<void> {
+    if (!isRegisterCapabilityParams(params)) {
+      await this.sendResponseMessage({
+        jsonrpc: '2.0',
+        id,
+        error: {
+          code: -32602,
+          message: 'Invalid params for client/registerCapability'
+        }
+      });
+      return;
+    }
+
+    const unsupported = params.registrations.find(
+      (registration) =>
+        !this.supportsDynamicRegistration(registration.method) &&
+        !this.options.dynamicRegistration.allowUndeclaredDynamicRegistration
+    );
+
+    if (unsupported) {
+      await this.sendResponseMessage({
+        jsonrpc: '2.0',
+        id,
+        error: {
+          code: -32602,
+          message: `Dynamic registration not declared for ${unsupported.method}`
+        }
+      });
+      return;
+    }
+
+    for (const registration of params.registrations) {
+      this.registrationStore.upsert(registration);
+    }
+
+    updateCapabilityMethods(this as unknown as LSPClient<ClientCaps>);
+
+    await this.sendResponseMessage({
+      jsonrpc: '2.0',
+      id,
+      result: null
+    });
+  }
+
+  private async handleDynamicUnregister(id: string | number, params: unknown): Promise<void> {
+    if (!isUnregisterCapabilityParams(params)) {
+      await this.sendResponseMessage({
+        jsonrpc: '2.0',
+        id,
+        error: {
+          code: -32602,
+          message: 'Invalid params for client/unregisterCapability'
+        }
+      });
+      return;
+    }
+
+    const unknownIds: string[] = [];
+    for (const unregister of params.unregisterations) {
+      const removed = this.registrationStore.remove(unregister.id);
+      if (!removed) {
+        unknownIds.push(unregister.id);
+      }
+    }
+
+    if (unknownIds.length > 0) {
+      await this.sendResponseMessage({
+        jsonrpc: '2.0',
+        id,
+        error: {
+          code: -32602,
+          message: `Unknown registration id(s): ${unknownIds.join(', ')}`
+        }
+      });
+      return;
+    }
+
+    updateCapabilityMethods(this as unknown as LSPClient<ClientCaps>);
+
+    await this.sendResponseMessage({
+      jsonrpc: '2.0',
+      id,
+      result: null
+    });
+  }
+
   /**
    * Handle notification message from server
    */
   private handleNotification(notification: NotificationMessage): void {
     const { method, params } = notification;
+
+    if (method === '$/progress') {
+      this.handleProgressNotification(params);
+    }
 
     for (const waiter of Array.from(this.notificationWaiters)) {
       if (waiter.method !== method) {
@@ -855,6 +1096,21 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     }
   }
 
+  private handleProgressNotification(params: unknown): void {
+    if (typeof params !== 'object' || params === null) {
+      return;
+    }
+
+    const candidate = params as Record<string, unknown>;
+    const token = candidate['token'];
+
+    if (typeof token !== 'string' && typeof token !== 'number') {
+      return;
+    }
+
+    this.partialCollector.push(token, candidate['value']);
+  }
+
   /**
    * Handle transport error
    */
@@ -882,6 +1138,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
 
     this.transportAttachment.detach();
     this.pendingRequests.clear(new Error('Connection closed'));
+    this.partialCollector.clear();
 
     for (const waiter of Array.from(this.notificationWaiters)) {
       waiter.cleanup();

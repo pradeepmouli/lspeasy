@@ -6,18 +6,42 @@ Core transport layer and utilities for the lspeasy Language Server Protocol SDK.
 
 `@lspeasy/core` provides the foundational building blocks for LSP communication:
 
-- **Transport Interface**: Abstract transport layer for message exchange
-- **StdioTransport**: Standard input/output transport implementation
-- **WebSocketTransport**: WebSocket transport with automatic reconnection
-- **Middleware Pipeline**: Composable JSON-RPC interception with method scoping and typing
-- **JSON-RPC 2.0**: Message framing, parsing, and serialization
-- **Type-Safe Enums**: Enums for all LSP kind types with extensibility support
-- **Cancellation**: Token-based cancellation support
-- **Utilities**: Event emitters, disposables, logging, and document sync helpers
 
 ## Middleware API
+ - `TcpTransport`: Node.js TCP sockets for client/server mode with optional reconnect backoff
+ - `IpcTransport`: Node.js parent/child IPC transport for process-channel communication
+ - `DedicatedWorkerTransport`: Browser dedicated worker postMessage bridge
+ - `SharedWorkerTransport`: Browser shared worker transport with clientId envelope routing
 
-Middleware is exported from `@lspeasy/core/middleware`.
+### TCP Transport
+
+```typescript
+import { TcpTransport } from '@lspeasy/core';
+
+const transport = new TcpTransport({
+  mode: 'client',
+  host: '127.0.0.1',
+  port: 2087,
+  reconnect: {
+    enabled: true,
+    initialDelayMs: 250,
+    maxDelayMs: 5000,
+    multiplier: 2,
+    maxAttempts: 5
+  }
+});
+```
+
+### IPC Transport (Node.js)
+
+```typescript
+import { IpcTransport } from '@lspeasy/core';
+
+const transport = new IpcTransport({ role: 'parent', process: childProcess });
+```
+
+- Use IPC only in Node.js environments.
+- No new external runtime dependency is required; it relies on Node built-ins.
 
 ```typescript
 import {
