@@ -1,6 +1,6 @@
 # Data Model: LSP Protocol Compliance Gaps
 
-**Date**: 2026-02-12  
+**Date**: 2026-02-12
 **Spec**: [spec.md](./spec.md)
 
 ## 1) DynamicRegistration

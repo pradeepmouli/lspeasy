@@ -11,14 +11,14 @@ Implement protocol-compliance enhancements across the SDK: dynamic capability re
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x (strict), ESM, Node.js >= 20 for Node-side runtime; modern browsers for worker transports  
-**Primary Dependencies**: `vscode-languageserver-protocol`, Node built-ins (`net`, `child_process`, `worker_threads` where applicable), existing internal transport/middleware utilities  
-**Storage**: N/A (in-memory protocol/session state only)  
-**Testing**: Vitest (`unit`, `integration`, `e2e`) + protocol-oriented transport tests  
-**Target Platform**: Node.js (TCP/IPC/stdin/stdout/websocket) + Browser (Dedicated Worker / Shared Worker / websocket)  
-**Project Type**: pnpm monorepo TypeScript SDK (`packages/core`, `packages/client`, `packages/server`, optional middleware packages)  
-**Performance Goals**: Preserve non-blocking behavior; no regression in message dispatch throughput; ordered partial-result delivery with low overhead  
-**Constraints**: Strict LSP compliance, no `any` in public APIs, backward compatibility for existing APIs, worker and TCP edge-case safety, async-first design  
+**Language/Version**: TypeScript 5.x (strict), ESM, Node.js >= 20 for Node-side runtime; modern browsers for worker transports
+**Primary Dependencies**: `vscode-languageserver-protocol`, Node built-ins (`net`, `child_process`, `worker_threads` where applicable), existing internal transport/middleware utilities
+**Storage**: N/A (in-memory protocol/session state only)
+**Testing**: Vitest (`unit`, `integration`, `e2e`) + protocol-oriented transport tests
+**Target Platform**: Node.js (TCP/IPC/stdin/stdout/websocket) + Browser (Dedicated Worker / Shared Worker / websocket)
+**Project Type**: pnpm monorepo TypeScript SDK (`packages/core`, `packages/client`, `packages/server`, optional middleware packages)
+**Performance Goals**: Preserve non-blocking behavior; no regression in message dispatch throughput; ordered partial-result delivery with low overhead
+**Constraints**: Strict LSP compliance, no `any` in public APIs, backward compatibility for existing APIs, worker and TCP edge-case safety, async-first design
 **Scale/Scope**: Multi-package feature touching core transport layer, client capability/runtime registry, server helpers, and typed convenience APIs
 
 ## Constitution Check
