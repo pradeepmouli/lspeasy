@@ -214,15 +214,4 @@ export type {
   PartialRequestOutcome
 } from './protocol/partial-results.js';
 
-export type {
-  WorkerLike,
-  MessagePortLike,
-  SharedWorkerLike,
-  WorkerMessageEventLike,
-  WorkerTransportEnvelope
-} from './worker-types.js';
-export {
-  isMessage,
-  isWorkerTransportEnvelope
-} from './worker-types.js';
 export * from './protocol/capabilities.js';

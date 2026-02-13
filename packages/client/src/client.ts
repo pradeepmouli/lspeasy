@@ -118,7 +118,6 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     reject: (error: Error) => void;
     cleanup: () => void;
   }>;
-  private readonly partialCollectors: Map<string | number, unknown[]>;
   private readonly partialCollector: PartialResultCollector;
   public readonly notebookDocument: NotebookDocumentNamespace;
 
@@ -148,7 +147,6 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     this.transportAttachment = new TransportAttachment();
     this.notificationWaiters = new Set();
     this.registrationStore = new RegistrationStore();
-    this.partialCollectors = new Map();
     this.partialCollector = new PartialResultCollector();
     this.notebookDocument = {
       didOpen: async (params) => this.sendNotification('notebookDocument/didOpen', params),
@@ -439,10 +437,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     token?: CancellationToken
   ): Promise<PartialRequestResult<TPartial, ResultForRequest<M>>> {
     const partialToken = options.token ?? `${Date.now()}-${Math.random()}`;
-    const partials: TPartial[] = [];
-    this.partialCollectors.set(partialToken, partials as unknown[]);
     this.partialCollector.start(partialToken, (value: TPartial) => {
-      partials.push(value);
       options.onPartial(value);
     });
 
@@ -456,25 +451,25 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
           : params;
 
       const finalResult = await this.sendRequest(method, requestParams, token);
+      const partialResults = this.partialCollector.finish<TPartial>(partialToken);
       return {
         cancelled: false,
-        partialResults: partials,
+        partialResults,
         finalResult
       };
     } catch (error) {
       const isCancelled = error instanceof Error && error.message.includes('cancel');
       if (isCancelled) {
+        const partialResults = this.partialCollector.finish<TPartial>(partialToken);
         return {
           cancelled: true,
-          partialResults: partials,
+          partialResults,
           finalResult: undefined
         };
       }
 
-      throw error;
-    } finally {
-      this.partialCollectors.delete(partialToken);
       this.partialCollector.abort(partialToken);
+      throw error;
     }
   }
 
