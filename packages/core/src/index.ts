@@ -25,8 +25,6 @@ export {
 } from './jsonrpc/messages.js';
 
 export { parseMessage, serializeMessage } from './jsonrpc/framing.js';
-export { MessageReader } from './jsonrpc/reader.js';
-export { MessageWriter } from './jsonrpc/writer.js';
 
 export {
   requestMessageSchema,
@@ -39,17 +37,10 @@ export {
 } from './jsonrpc/schemas.js';
 
 // Transport interface and implementations
+// Note: Node.js-specific transports (StdioTransport, TcpTransport, IpcTransport)
+// and stream-based utilities (MessageReader, MessageWriter) are exported from
+// '@lspeasy/core/node' to avoid importing Node.js modules in browser environments.
 export type { Transport } from './transport/transport.js';
-export { StdioTransport } from './transport/stdio.js';
-export type { StdioTransportOptions } from './transport/stdio.js';
-export { TcpTransport } from './transport/tcp.js';
-export type { TcpTransportOptions, TcpReconnectOptions } from './transport/tcp.js';
-export { IpcTransport } from './transport/ipc.js';
-export type {
-  IpcTransportOptions,
-  IpcParentProcessLike,
-  IpcChildProcessLike
-} from './transport/ipc.js';
 export { DedicatedWorkerTransport } from './transport/dedicated-worker.js';
 export type { DedicatedWorkerTransportOptions } from './transport/dedicated-worker.js';
 export { SharedWorkerTransport } from './transport/shared-worker.js';
