@@ -191,4 +191,46 @@ describe('partial results', () => {
 
     await expect(pending).resolves.toEqual([{ name: 'symbol' }]);
   });
+
+  it('discards partial results and throws error on non-cancellation errors', async () => {
+    const transport = new MockTransport();
+    const client = new LSPClient();
+    await client.connect(transport);
+
+    const onPartial = vi.fn<(value: string) => void>();
+    const pending = client.sendRequestWithPartialResults(
+      'workspace/symbol',
+      { query: 'error-test' },
+      { token: 'p4', onPartial }
+    );
+
+    const request = findRequest(transport, 'workspace/symbol');
+    expect(request).toBeDefined();
+
+    // Send some partial results before the error
+    transport.emit({
+      jsonrpc: '2.0',
+      method: '$/progress',
+      params: { token: 'p4', value: 'partial1' }
+    });
+    transport.emit({
+      jsonrpc: '2.0',
+      method: '$/progress',
+      params: { token: 'p4', value: 'partial2' }
+    });
+
+    // Send an error response (not cancellation)
+    transport.emit({
+      jsonrpc: '2.0',
+      id: request!.id,
+      error: { code: -32603, message: 'Internal error' }
+    });
+
+    // Verify the error is thrown
+    await expect(pending).rejects.toThrow('Internal error');
+
+    // Verify partial callbacks were called during collection
+    expect(onPartial).toHaveBeenCalledTimes(2);
+    expect(onPartial.mock.calls.map((args) => args[0])).toEqual(['partial1', 'partial2']);
+  });
 });
