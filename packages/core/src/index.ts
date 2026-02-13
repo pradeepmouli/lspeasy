@@ -215,3 +215,9 @@ export type {
 } from './protocol/partial-results.js';
 
 export * from './protocol/capabilities.js';
+
+export type {
+  WorkerLike,
+  MessagePortLike,
+  SharedWorkerLike
+} from './transports/worker.js';
