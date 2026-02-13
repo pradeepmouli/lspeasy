@@ -47,8 +47,8 @@ export class CancellationTokenSource {
           callback();
           return { dispose: () => {} };
         } else {
-          // Use the disposable returned by DisposableEventEmitter
-          return this.emitter.on('cancelled', callback);
+          // Use the disposable returned by DisposableEventEmitter (once-only)
+          return this.emitter.once('cancelled', callback);
         }
       }
     };
