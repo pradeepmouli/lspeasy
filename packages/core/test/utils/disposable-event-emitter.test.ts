@@ -84,4 +84,63 @@ describe('DisposableEventEmitter', () => {
 
     expect(handler).not.toHaveBeenCalled();
   });
+
+  it('calls once listener only on first emission', () => {
+    const emitter = new DisposableEventEmitter<{ data: [number] }>();
+    const handler = vi.fn();
+
+    emitter.once('data', handler);
+    emitter.emit('data', 1);
+    emitter.emit('data', 2);
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(handler).toHaveBeenCalledWith(1);
+  });
+
+  it('allows manual disposal of once listener before emission', () => {
+    const emitter = new DisposableEventEmitter<{ data: [string] }>();
+    const handler = vi.fn();
+
+    const disposable = emitter.once('data', handler);
+    disposable.dispose();
+    emitter.emit('data', 'value');
+
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('handles multiple once listeners independently', () => {
+    const emitter = new DisposableEventEmitter<{ tick: [] }>();
+    const first = vi.fn();
+    const second = vi.fn();
+
+    emitter.once('tick', first);
+    emitter.once('tick', second);
+    emitter.emit('tick');
+
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores once listener after disposal', () => {
+    const emitter = new DisposableEventEmitter<{ data: [number] }>();
+    const handler = vi.fn();
+
+    emitter.dispose();
+    emitter.once('data', handler);
+    emitter.emit('data', 1);
+
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('allows disposing once listener multiple times', () => {
+    const emitter = new DisposableEventEmitter<{ data: [string] }>();
+    const handler = vi.fn();
+    const disposable = emitter.once('data', handler);
+
+    disposable.dispose();
+    disposable.dispose();
+    emitter.emit('data', 'value');
+
+    expect(handler).not.toHaveBeenCalled();
+  });
 });

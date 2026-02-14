@@ -125,6 +125,54 @@ const transport = new StdioTransport({
 
 ---
 
+### Additional Transports
+
+```typescript
+class TcpTransport implements Transport {
+  constructor(options: TcpTransportOptions);
+}
+
+class IpcTransport implements Transport {
+  constructor(options: IpcTransportOptions);
+}
+
+class DedicatedWorkerTransport implements Transport {
+  constructor(options: DedicatedWorkerTransportOptions);
+}
+
+class SharedWorkerTransport implements Transport {
+  constructor(options: SharedWorkerTransportOptions);
+}
+```
+
+---
+
+### Dynamic Registration
+
+```typescript
+interface DynamicRegistrationBehavior {
+  allowUndeclaredDynamicRegistration?: boolean;
+}
+
+interface RegisterCapabilityParams {
+  registrations: Array<{ id: string; method: string; registerOptions?: unknown }>;
+}
+
+interface UnregisterCapabilityParams {
+  unregisterations: Array<{ id: string; method: string }>;
+}
+```
+
+---
+
+### Partial Results
+
+```typescript
+type PartialRequestResult<TPartial, TResult> =
+  | { cancelled: true; partialResults: TPartial[]; finalResult?: undefined }
+  | { cancelled: false; partialResults: TPartial[]; finalResult: TResult };
+```
+
 ### Message Types
 
 ```typescript

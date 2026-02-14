@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/client",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Connect to LSP servers with typed client API",
   "keywords": [
     "lsp",
@@ -32,6 +32,9 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsgo --build",
     "clean": "rm -rf dist *.tsbuildinfo",

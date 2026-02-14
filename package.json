@@ -23,14 +23,16 @@
     "url": "https://github.com/pradeepmouli/lspeasy.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/*/*"
   ],
   "type": "module",
   "scripts": {
     "build": "pnpm -r run build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --coverage.include=packages/core/src/**/*.ts",
+    "test:coverage:all": "vitest run --config vitest.coverage-all.config.ts --coverage",
     "test:ui": "vitest --ui",
     "test:e2e": "vitest run e2e",
     "test:unit": "vitest run packages",

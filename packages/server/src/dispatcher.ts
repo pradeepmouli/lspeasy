@@ -129,10 +129,14 @@ export class MessageDispatcher {
       });
 
       // Send success response
+      // Normalize undefined → null per JSON-RPC 2.0 spec:
+      // a response MUST contain either "result" or "error" — omitting
+      // "result" (which happens when JSON.stringify drops undefined)
+      // produces an invalid message the client can never resolve.
       await transport.send({
         jsonrpc: '2.0',
         id,
-        result
+        result: result ?? null
       });
     } catch (error) {
       // Send error response

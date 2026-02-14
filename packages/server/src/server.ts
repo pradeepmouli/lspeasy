@@ -17,10 +17,15 @@ import type {
   ParamsForRequest,
   ResultForRequest,
   ParamsForNotification,
-  Server
+  Server,
+  Middleware,
+  MiddlewareContext,
+  MiddlewareResult,
+  ScopedMiddleware
 } from '@lspeasy/core';
 import {
   ConsoleLogger,
+  executeMiddlewarePipeline,
   LogLevel,
   ResponseError,
   isRequestMessage,
@@ -28,7 +33,12 @@ import {
 } from '@lspeasy/core';
 import { DisposableEventEmitter } from '@lspeasy/core/utils';
 import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
-import type { ServerOptions, RequestHandler, NotificationHandler } from './types.js';
+import type {
+  ServerOptions,
+  RequestHandler,
+  NotificationHandler,
+  NotebookDocumentHandlerNamespace
+} from './types.js';
 import { ServerState } from './types.js';
 import { MessageDispatcher } from './dispatcher.js';
 import { LifecycleManager } from './lifecycle.js';
@@ -54,6 +64,7 @@ import { initializeServerHandlerMethods, initializeServerSendMethods } from './c
  */
 export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = ServerCapabilities> {
   private readonly logger: Logger;
+  private readonly middlewareRegistrations: Array<Middleware | ScopedMiddleware>;
   private readonly dispatcher: MessageDispatcher;
   private readonly lifecycleManager: LifecycleManager;
   private readonly name: string;
@@ -74,6 +85,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   private cancellationTokens = new Map<number | string, AbortController>();
   private clientCapabilities?: ClientCapabilities;
   private clientInfo?: { name: string; version?: string };
+  public readonly notebookDocument: NotebookDocumentHandlerNamespace;
 
   constructor(options: ServerOptions<Capabilities> = {}) {
     this.options = options;
@@ -86,10 +98,17 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
     // Setup logger
     const logLevel = options.logLevel ?? LogLevel.Info;
     this.logger = options.logger ?? new ConsoleLogger(logLevel);
+    this.middlewareRegistrations = options.middleware ?? [];
 
     // Create dispatcher and lifecycle manager
     this.dispatcher = new MessageDispatcher(this.logger);
     this.lifecycleManager = new LifecycleManager(this.name, this.version, this.logger);
+    this.notebookDocument = {
+      onDidOpen: (handler) => this.onNotification('notebookDocument/didOpen', handler),
+      onDidChange: (handler) => this.onNotification('notebookDocument/didChange', handler),
+      onDidSave: (handler) => this.onNotification('notebookDocument/didSave', handler),
+      onDidClose: (handler) => this.onNotification('notebookDocument/didClose', handler)
+    };
 
     // Register built-in handlers
     this.registerBuiltinHandlers();
@@ -304,9 +323,20 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       params
     };
 
-    this.transport.send(request).catch((error) => {
-      const rejection = error instanceof Error ? error : new Error(String(error));
-      this.pendingRequests.reject(id, rejection);
+    void this.sendWithMiddleware({
+      direction: 'serverToClient',
+      messageType: 'request',
+      method,
+      message: request,
+      onSend: async () => {
+        await this.transport!.send(request);
+      },
+      onShortCircuit: (result) => {
+        this.resolveShortCircuitRequest(String(id), result);
+      },
+      onError: (error) => {
+        this.pendingRequests.reject(String(id), error);
+      }
     });
 
     return promise as Promise<ResultForRequest<Method>>;
@@ -333,7 +363,15 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       params
     };
 
-    await this.transport.send(notification);
+    await this.sendWithMiddleware({
+      direction: 'serverToClient',
+      messageType: 'notification',
+      method,
+      message: notification,
+      onSend: async () => {
+        await this.transport!.send(notification);
+      }
+    });
   }
 
   /**
@@ -528,7 +566,22 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   private async handleMessage(message: Message): Promise<void> {
     try {
       if (isResponseMessage(message)) {
-        this.handleResponse(message as ResponseMessage);
+        const method = this.pendingRequests.getMetadata(String(message.id)) ?? 'unknown';
+        await this.sendWithMiddleware({
+          direction: 'clientToServer',
+          messageType: 'error' in message ? 'error' : 'response',
+          method,
+          message,
+          onSend: async () => {
+            this.handleResponse(message as ResponseMessage);
+          },
+          onShortCircuit: (result) => {
+            this.resolveShortCircuitRequest(String(message.id), result);
+          },
+          onError: (error) => {
+            this.pendingRequests.reject(String(message.id), error);
+          }
+        });
         return;
       }
 
@@ -547,11 +600,137 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
         }
       }
 
-      // Dispatch to handlers
-      await this.dispatcher.dispatch(message, this.transport!, this.cancellationTokens);
+      await this.sendWithMiddleware({
+        direction: 'clientToServer',
+        messageType: this.getMessageType(message),
+        method: this.getMessageMethod(message),
+        message,
+        onSend: async () => {
+          await this.dispatcher.dispatch(message, this.transport!, this.cancellationTokens);
+        },
+        onShortCircuit: async (result) => {
+          if (!this.transport || !isRequestMessage(message)) {
+            return;
+          }
+
+          if (result.error) {
+            await this.transport.send(result.error);
+            return;
+          }
+
+          if (result.response && 'id' in result.response) {
+            await this.transport.send(result.response);
+          }
+        }
+      });
     } catch (error) {
       this.logger.error('Error handling message:', error);
       this.events.emit('error', error as Error);
+    }
+  }
+
+  private getMessageType(message: Message): 'request' | 'response' | 'notification' | 'error' {
+    if (isResponseMessage(message)) {
+      return 'error' in message ? 'error' : 'response';
+    }
+
+    if (isRequestMessage(message)) {
+      return 'request';
+    }
+
+    return 'notification';
+  }
+
+  private getMessageMethod(message: Message): string {
+    if ('method' in message) {
+      return message.method;
+    }
+
+    if ('id' in message) {
+      return this.pendingRequests.getMetadata(String(message.id)) ?? 'unknown';
+    }
+
+    return 'unknown';
+  }
+
+  private resolveShortCircuitRequest(id: string, result: MiddlewareResult): void {
+    if (result.error) {
+      this.pendingRequests.reject(
+        id,
+        new Error(`${result.error.error.message} (code: ${result.error.error.code})`)
+      );
+      return;
+    }
+
+    if (result.response && 'error' in result.response && result.response.error) {
+      this.pendingRequests.reject(
+        id,
+        new Error(`${result.response.error.message} (code: ${result.response.error.code})`)
+      );
+      return;
+    }
+
+    if (result.response && 'result' in result.response) {
+      this.pendingRequests.resolve(id, result.response.result);
+      return;
+    }
+
+    this.pendingRequests.reject(id, new Error('Middleware short-circuit missing response payload'));
+  }
+
+  private buildMiddlewareContext(
+    direction: 'clientToServer' | 'serverToClient',
+    messageType: 'request' | 'response' | 'notification' | 'error',
+    method: string,
+    message: MiddlewareContext['message']
+  ): MiddlewareContext {
+    return {
+      direction,
+      messageType,
+      method,
+      message,
+      metadata: {},
+      transport: this.transport?.constructor.name ?? 'unknown'
+    };
+  }
+
+  private async sendWithMiddleware(options: {
+    direction: 'clientToServer' | 'serverToClient';
+    messageType: 'request' | 'response' | 'notification' | 'error';
+    method: string;
+    message: MiddlewareContext['message'];
+    onSend: () => Promise<void>;
+    onShortCircuit?: (result: MiddlewareResult) => void | Promise<void>;
+    onError?: (error: Error) => void;
+  }): Promise<void> {
+    const context = this.buildMiddlewareContext(
+      options.direction,
+      options.messageType,
+      options.method,
+      options.message
+    );
+
+    try {
+      const result = await executeMiddlewarePipeline(
+        this.middlewareRegistrations,
+        context,
+        async () => {
+          await options.onSend();
+          return undefined;
+        }
+      );
+
+      if (result?.shortCircuit && options.onShortCircuit) {
+        await options.onShortCircuit(result);
+      }
+    } catch (error) {
+      const normalized = error instanceof Error ? error : new Error(String(error));
+      this.events.emit('error', normalized);
+      if (options.onError) {
+        options.onError(normalized);
+        return;
+      }
+      throw normalized;
     }
   }
 

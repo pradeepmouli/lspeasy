@@ -1,7 +1,8 @@
 {
   "name": "@lspeasy/core",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Core types, transports, and utilities for LSP SDK",
+  "private": false,
   "keywords": [
     "lsp",
     "language-server-protocol",
@@ -25,6 +26,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/node.js"
+    },
     "./utils": {
       "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.js"
@@ -44,6 +49,10 @@
     "./transport": {
       "types": "./dist/transport/index.d.ts",
       "import": "./dist/transport/index.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware/index.d.ts",
+      "import": "./dist/middleware/index.js"
     }
   },
   "main": "./dist/index.js",
@@ -52,6 +61,9 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsgo --build",
     "clean": "rm -rf dist *.tsbuildinfo",
@@ -59,7 +71,13 @@
     "type-check": "tsgo --noEmit"
   },
   "peerDependencies": {
+    "ws": "^8.19.0",
     "zod": "^3.25.0"
+  },
+  "peerDependenciesMeta": {
+    "ws": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
@@ -69,8 +87,5 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "dependencies": {
-    "ws": "^8.19.0"
   }
 }

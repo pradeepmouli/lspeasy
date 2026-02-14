@@ -12,6 +12,12 @@ pnpm add @lspeasy/server @lspeasy/core
 yarn add @lspeasy/server @lspeasy/core
 ```
 
+For WebSocket server transports, install `ws`:
+
+```bash
+pnpm add ws
+```
+
 ## Quick Start
 
 Create a minimal hover server in less than 30 lines:
@@ -175,6 +181,27 @@ Check out the [examples directory](../../examples/server/) for complete examples
 - [hover-server.ts](../../examples/server/hover-server.ts) - Hover + completion with document tracking
 
 ## API Reference
+
+## Notebook Namespace Helpers
+
+```typescript
+server.notebookDocument.onDidOpen((params) => {
+  // handle notebook open
+});
+
+server.notebookDocument.onDidChange((params) => {
+  // handle structural/content updates
+});
+```
+
+## Partial Result Sender
+
+```typescript
+import { PartialResultSender } from '@lspeasy/server';
+
+const sender = new PartialResultSender(server);
+await sender.send(token, batch);
+```
 
 ### LSPServer
 

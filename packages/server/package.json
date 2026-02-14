@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/server",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Build LSP servers with simple, typed API",
   "keywords": [
     "lsp",
@@ -32,6 +32,9 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsgo --build",
     "clean": "rm -rf dist *.tsbuildinfo",

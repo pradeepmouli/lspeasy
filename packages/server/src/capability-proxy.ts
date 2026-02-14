@@ -7,7 +7,7 @@
 
 import type { LSPServer } from './server.js';
 import type { ServerCapabilities } from '@lspeasy/core';
-import { LSPRequest, LSPNotification, hasCapability } from '@lspeasy/core';
+import { LSPRequest, LSPNotification, hasServerCapability } from '@lspeasy/core';
 import camelCase from 'camelcase';
 
 /**
@@ -35,7 +35,7 @@ export function initializeServerHandlerMethods<Capabilities extends Partial<Serv
       // Check if capability is satisfied
       if (def.ServerCapability) {
         // Skip if capability is not set
-        if (!hasCapability(capabilities, def.ServerCapability)) {
+        if (!hasServerCapability(capabilities, def.ServerCapability)) {
           continue;
         }
       }
@@ -70,7 +70,7 @@ export function initializeServerHandlerMethods<Capabilities extends Partial<Serv
       }
 
       // Check if notification requires capability
-      if (def.ServerCapability && !hasCapability(capabilities, def.ServerCapability)) {
+      if (def.ServerCapability && !hasServerCapability(capabilities, def.ServerCapability)) {
         continue;
       }
 

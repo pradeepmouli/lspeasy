@@ -3,7 +3,7 @@
  * Pattern: MCP SDK's CancellationToken and CancellationTokenSource
  */
 
-import { EventEmitter } from 'node:events';
+import { DisposableEventEmitter } from './disposable-event-emitter.js';
 import type { Disposable } from './disposable.js';
 
 /**
@@ -22,16 +22,20 @@ export interface CancellationToken {
   onCancellationRequested(callback: () => void): Disposable;
 }
 
+type CancellationEventMap = {
+  cancelled: [];
+};
+
 /**
  * Source that controls a CancellationToken
  */
 export class CancellationTokenSource {
-  private emitter: EventEmitter;
+  private emitter: DisposableEventEmitter<CancellationEventMap>;
   private cancelled: boolean;
   private readonly _token: CancellationToken;
 
   constructor() {
-    this.emitter = new EventEmitter();
+    this.emitter = new DisposableEventEmitter();
     this.cancelled = false;
 
     // Create token with proper arrow function binding
@@ -43,12 +47,8 @@ export class CancellationTokenSource {
           callback();
           return { dispose: () => {} };
         } else {
-          this.emitter.once('cancelled', callback);
-          return {
-            dispose: () => {
-              this.emitter.off('cancelled', callback);
-            }
-          };
+          // Use the disposable returned by DisposableEventEmitter (once-only)
+          return this.emitter.once('cancelled', callback);
         }
       }
     };
@@ -84,7 +84,7 @@ export class CancellationTokenSource {
    * Dispose the source
    */
   dispose(): void {
-    this.emitter.removeAllListeners();
+    this.emitter.dispose();
   }
 }
 

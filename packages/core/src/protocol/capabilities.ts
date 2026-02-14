@@ -81,67 +81,73 @@ export function serverSupportsRequest<M extends LSPRequestMethod<'clientToServer
   return value !== null && value !== undefined && value !== false;
 }
 
-export function serverSupportsNotification<M extends LSPNotificationMethod<'clientToServer'>>(
+export function serverSupportsNotification<
+  M extends LSPNotificationMethod<'clientToServer'>,
+  T extends Partial<ServerCapabilities>
+>(
   method: M,
-  capabilities: ServerCapabilities
-): capabilities is ServerCapabilities &
-  PickDeep<ServerCapabilities, ServerCapabilityForNotification<M>> {
+  capabilities: T
+): capabilities is T & PickDeep<ServerCapabilities, ServerCapabilityForNotification<M>> {
   const capabilityKey = getCapabilityForNotificationMethod(method);
   if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
     return true;
   }
-  const value = getProperty(capabilities, capabilityKey);
+  const value = getProperty(capabilities, capabilityKey as any);
   return value !== null && value !== undefined && value !== false;
 }
 
 /**
  * Check if a method is supported by the given client capabilities
  */
-export function clientSupportsRequest<M extends LSPRequestMethod<'serverToClient'>>(
+export function clientSupportsRequest<
+  M extends LSPRequestMethod<'serverToClient'>,
+  T extends Partial<ClientCapabilities>
+>(
   method: M,
-  capabilities: ClientCapabilities
-): capabilities is ClientCapabilities &
-  PickDeep<ClientCapabilities, ClientCapabilityForRequest<M>> {
+  capabilities: T
+): capabilities is T & PickDeep<ClientCapabilities, ClientCapabilityForRequest<M>> {
   const capabilityKey = getClientCapabilityForRequestMethod(method);
   if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
     return true;
   }
-  const value = getProperty(capabilities, capabilityKey);
+  const value = getProperty(capabilities, capabilityKey as any);
   return value !== null && value !== undefined && value !== false;
 }
 
-export function clientSupportsNotification<M extends LSPNotificationMethod<'serverToClient'>>(
+export function clientSupportsNotification<
+  M extends LSPNotificationMethod<'serverToClient'>,
+  T extends Partial<ClientCapabilities>
+>(
   method: M,
-  capabilities: ClientCapabilities
-): capabilities is ClientCapabilities &
-  PickDeep<ClientCapabilities, ClientCapabilityForNotification<M>> {
+  capabilities: T
+): capabilities is T & PickDeep<ClientCapabilities, ClientCapabilityForNotification<M>> {
   const capabilityKey = getClientCapabilityForNotificationMethod(method);
   if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
     return true;
   }
-  const value = getProperty(capabilities, capabilityKey);
+  const value = getProperty(capabilities, capabilityKey as any);
   return value !== null && value !== undefined && value !== false;
 }
 
 /**
  * Check if a server capability is enabled
  */
-export function hasCapability<K extends Paths<ServerCapabilities>>(
-  capabilities: ServerCapabilities,
-  capability: K
-): capabilities is ServerCapabilities & PickDeep<ServerCapabilities, K> {
-  const value = getProperty(capabilities, capability);
+export function hasServerCapability<
+  K extends Paths<ServerCapabilities>,
+  T extends Partial<ServerCapabilities>
+>(capabilities: T, capability: K): capabilities is T & PickDeep<ServerCapabilities, K> {
+  const value = getProperty(capabilities, capability as any);
   return value !== null && value !== undefined && value !== false;
 }
 
 /**
  * Check if a client capability is enabled
  */
-export function hasClientCapability<K extends Paths<ClientCapabilities>>(
-  capabilities: ClientCapabilities,
-  capability: K
-): capabilities is ClientCapabilities & PickDeep<ClientCapabilities, K> {
-  const value = getProperty(capabilities, capability);
+export function hasClientCapability<
+  K extends Paths<ClientCapabilities>,
+  T extends Partial<ClientCapabilities>
+>(capabilities: T, capability: K): capabilities is T & PickDeep<ClientCapabilities, K> {
+  const value = getProperty(capabilities, capability as any);
   return value !== null && value !== undefined && value !== false;
 }
 
@@ -207,6 +213,16 @@ export function supportsWorkspaceFolders(
   capabilities: ServerCapabilities
 ): capabilities is ServerCapabilities & { workspace: { workspaceFolders: { supported: true } } } {
   return capabilities.workspace?.workspaceFolders?.supported === true;
+}
+
+export function supportsNotebookDocumentSync(
+  capabilities: ServerCapabilities
+): capabilities is ServerCapabilities & {
+  notebookDocumentSync: NonNullable<ServerCapabilities['notebookDocumentSync']>;
+} {
+  return (
+    capabilities.notebookDocumentSync !== null && capabilities.notebookDocumentSync !== undefined
+  );
 }
 
 /**

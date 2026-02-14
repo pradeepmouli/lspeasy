@@ -2,8 +2,6 @@
  * Pending request tracker for correlating request/response lifecycles.
  */
 
-import { randomUUID } from 'node:crypto';
-
 type PendingEntry<TResponse, TMeta> = {
   resolve: (value: TResponse) => void;
   reject: (error: Error) => void;
@@ -23,7 +21,7 @@ export class PendingRequestTracker<TResponse, TMeta = undefined> {
    * Create a new pending request.
    */
   create(timeout?: number, metadata?: TMeta): { id: string; promise: Promise<TResponse> } {
-    const id = randomUUID();
+    const id = crypto.randomUUID();
     const effectiveTimeout = timeout ?? this.defaultTimeout;
 
     let resolveEntry: (value: TResponse) => void;
@@ -33,6 +31,8 @@ export class PendingRequestTracker<TResponse, TMeta = undefined> {
       resolveEntry = resolve;
       rejectEntry = reject;
     });
+
+    void promise.catch(() => undefined);
 
     const entry: PendingEntry<TResponse, TMeta> = {
       resolve: (value) => {

@@ -14,7 +14,7 @@ on:
           - major
         default: auto
       base_ref:
-        description: 'Base reference to compare against (default: last tag or main)'
+        description: 'Base reference to compare against (default: last tag or master)'
         required: false
         type: string
 
@@ -49,7 +49,7 @@ jobs:
           if [ -n "${{ inputs.base_ref }}" ]; then
             BASE_REF="${{ inputs.base_ref }}"
           else
-            BASE_REF=$(git describe --tags --abbrev=0 2>/dev/null || echo "main")
+            BASE_REF=$(git describe --tags --abbrev=0 2>/dev/null || echo "master")
           fi
 
           echo "Analyzing commits since: $BASE_REF"
@@ -127,8 +127,10 @@ jobs:
 
           cat <<EOF > .changeset/${TIMESTAMP}.md
           ---
-          "@company/core": ${CHANGE_TYPE}
-          "@company/utils": ${CHANGE_TYPE}
+          "@lspeasy/core": ${CHANGE_TYPE}
+          "@lspeasy/client": ${CHANGE_TYPE}
+          "@lspeasy/server": ${CHANGE_TYPE}
+          "@lspeasy/middleware-pino": ${CHANGE_TYPE}
           ---
 
           $(cat /tmp/changelog_content.txt)
