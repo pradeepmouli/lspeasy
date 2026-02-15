@@ -2,15 +2,16 @@
 
 ## Issue Summary
 
-The release workflow (GitHub Actions run #22026627902) failed during the "Create Release Pull Request or Publish" step.
+The release workflow (GitHub Actions run #22026627902) failed during the "Create Release Pull Request or Publish" step when attempting to publish version 1.0.2.
 
 ### Root Cause
 
-The workflow attempted to publish packages to npm using OIDC (OpenID Connect) Trusted Publishing, but:
+The workflow attempted to publish packages to npm but authentication failed. The packages already exist on npm (v1.0.1 was manually published), but the workflow cannot authenticate to publish v1.0.2.
 
-1. **The packages have never been published before** - All four packages (`@lspeasy/client`, `@lspeasy/core`, `@lspeasy/middleware-pino`, `@lspeasy/server`) returned 404 errors from npm registry
-2. **OIDC cannot be used for initial publish** - npm requires at least one successful manual publish before OIDC trusted publishing can be configured
-3. **No authentication was available** - Neither NPM_TOKEN nor OIDC was properly configured, resulting in "Access token expired or revoked" error
+**Likely causes:**
+1. **OIDC not configured** - npm Trusted Publishers (OIDC) is not set up on npmjs.com for these packages
+2. **Invalid/expired NPM_TOKEN** - If NPM_TOKEN secret exists, it may be expired, revoked, or have insufficient permissions
+3. **NPM_TOKEN blocking OIDC** - If both NPM_TOKEN and OIDC are configured, NPM_TOKEN takes precedence and may be invalid
 
 ### Error Details
 
@@ -20,13 +21,15 @@ E404 Not Found - PUT https://registry.npmjs.org/@lspeasy%2f<package-name>
 npm notice Access token expired or revoked. Please try logging in again.
 ```
 
+Note: npm returns 404 errors for authentication failures, not just missing packages.
+
 ## Solution: Choose Your Publishing Method
 
-You have two options for npm authentication. **Option 1 is recommended for the initial publish.**
+You have two options for npm authentication. Since packages already exist, either option will work.
 
-### Option 1: Token-Based Publishing (Recommended for First Publish)
+### Option 1: Token-Based Publishing
 
-This is the traditional method using a long-lived npm token.
+This method uses a long-lived npm token. Use this if you prefer traditional token-based auth or need to publish quickly.
 
 #### Steps:
 
@@ -58,12 +61,9 @@ This is the traditional method using a long-lived npm token.
    - After successful publish, you can switch to OIDC (see Option 2)
    - OIDC is more secure and doesn't require managing tokens
 
-### Option 2: OIDC Trusted Publishing (Recommended After First Publish)
+### Option 2: OIDC Trusted Publishing (Recommended)
 
-OIDC provides passwordless, token-free publishing with better security and supply chain attestation.
-
-#### Prerequisites:
-- Packages must already be published at least once (use Option 1 first, or publish manually)
+OIDC provides passwordless, token-free publishing with better security and supply chain attestation. Since your packages already exist on npm, you can configure OIDC directly.
 
 #### Steps:
 
@@ -84,18 +84,21 @@ OIDC provides passwordless, token-free publishing with better security and suppl
    Repeat for:
    - https://www.npmjs.com/settings/pradeepmouli/packages/@lspeasy/client/access
    - https://www.npmjs.com/settings/pradeepmouli/packages/@lspeasy/server/access
-   - https://www.npmjs.com/settings/pradeepmouli/packages/@lspeasy/middleware-pino/access
+   - https://www.npmjs.com/settings/pradeepmouli/packages/@lspeasy/middleware-pino/access (if it exists)
 
-2. **Remove NPM_TOKEN Secret** (Important!)
+2. **Remove NPM_TOKEN Secret** (Critical!)
    - Go to: https://github.com/pradeepmouli/lspeasy/settings/secrets/actions
-   - Find `NPM_TOKEN`
-   - Click "Remove"
-   - **Why?** NPM_TOKEN takes precedence over OIDC. If NPM_TOKEN is set (even to empty), npm won't use OIDC.
+   - If `NPM_TOKEN` exists, click "Remove"
+   - **Why?** NPM_TOKEN takes precedence over OIDC. Even an invalid/expired NPM_TOKEN will prevent OIDC from working.
 
-3. **Verify OIDC Publishing**
-   - Merge a PR that bumps package versions
-   - The release workflow will automatically publish using OIDC
-   - Packages will have provenance attestation for supply chain security
+3. **Re-run the Workflow**
+   - Go to: https://github.com/pradeepmouli/lspeasy/actions/runs/22026627902
+   - Click "Re-run failed jobs"
+   - The workflow will now publish using OIDC
+
+4. **Verify OIDC Publishing**
+   - Packages will be published with provenance attestation
+   - Check package pages on npm for the provenance badge
 
 ## Workflow Details
 
@@ -115,18 +118,20 @@ The release workflow (`.github/workflows/release.yml`) now includes:
 ## Troubleshooting
 
 ### "Access token expired or revoked"
-- **If using tokens**: Check that NPM_TOKEN secret is set and valid
-- **If using OIDC**: Ensure NPM_TOKEN secret is removed and OIDC is configured on npmjs.com
+- **If using tokens**: Check that NPM_TOKEN secret is set and valid (not expired/revoked)
+- **If using OIDC**: Ensure NPM_TOKEN secret is completely removed from repository settings
 
 ### "404 Not Found" during publish
-- Packages must be published at least once before OIDC works
-- Use Option 1 (token-based) for first publish, then switch to OIDC
+- npm returns 404 for authentication failures, not just missing packages
+- Check authentication configuration (NPM_TOKEN validity or OIDC setup)
+- Verify the package exists on npm and you have publish permissions
 
 ### "OIDC not working"
 - Verify NPM_TOKEN secret is completely removed (not just set to empty)
-- Verify trusted publisher is configured on npmjs.com
+- Verify trusted publisher is configured on npmjs.com for ALL packages
 - Verify workflow filename matches exactly: `release.yml`
 - Verify repository name matches exactly: `pradeepmouli/lspeasy`
+- Check that packages already exist on npm (OIDC requires one prior publish)
 
 ## References
 
@@ -136,6 +141,8 @@ The release workflow (`.github/workflows/release.yml`) now includes:
 
 ## Summary
 
-**For immediate fix**: Use Option 1 (token-based) to complete the initial publish.
+**For immediate fix**: 
+- Option 1 (token-based): Quick setup with NPM_TOKEN secret
+- Option 2 (OIDC): More secure, requires configuration on npmjs.com
 
-**For long-term security**: After first publish, migrate to Option 2 (OIDC) for better security and automatic provenance attestation.
+**Recommendation**: Use OIDC (Option 2) for better security and automatic provenance attestation. Since packages already exist on npm, you can configure OIDC directly.

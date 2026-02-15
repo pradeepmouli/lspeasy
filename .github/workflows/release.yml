@@ -8,15 +8,17 @@
 # 2. When that PR is merged, packages are automatically published to npm
 # 3. GitHub releases are created automatically
 #
-# Publishing Authentication:
-# 1. INITIAL PUBLISH (First Time):
-#    - Packages must be published manually first OR use NPM_TOKEN
-#    - Set NPM_TOKEN in repository secrets (Settings > Secrets > Actions)
+# Publishing Authentication (Choose ONE):
+#
+# OPTION 1: Token-Based Publishing
 #    - Create a token at: https://www.npmjs.com/settings/YOUR_USERNAME/tokens
 #    - Use "Automation" token type with "Read and write" permission
+#    - Add as repository secret: NPM_TOKEN
+#    - Simpler setup, but less secure (long-lived token)
 #
-# 2. SUBSEQUENT PUBLISHES (After Setting Up OIDC):
-#    - After initial publish, configure npm Trusted Publishers (OIDC)
+# OPTION 2: OIDC Trusted Publishing (Recommended)
+#    - More secure: no tokens, uses short-lived credentials
+#    - Requires configuration on npmjs.com for each package
 #    - Go to: https://www.npmjs.com/settings/YOUR_USERNAME/packages/PACKAGE_NAME/access
 #    - Enable "Trusted Publishers" under Publishing Access
 #    - Add GitHub Actions as a trusted publisher:
@@ -24,9 +26,9 @@
 #      * Repository: pradeepmouli/lspeasy
 #      * Workflow: release.yml
 #      * Environment: (leave empty)
-#    - IMPORTANT: Remove NPM_TOKEN secret (NPM_TOKEN takes precedence over OIDC)
+#    - CRITICAL: Remove NPM_TOKEN secret if it exists (NPM_TOKEN takes precedence)
 #
-# Note: If NPM_TOKEN is set, it will be used instead of OIDC.
+# Note: If NPM_TOKEN secret is set, it will be used instead of OIDC.
 
 name: Release
 
@@ -74,19 +76,18 @@ jobs:
       #
       # This step requires authentication to publish to npm. Choose ONE option:
       #
-      # OPTION 1: Token-Based Publishing (for first-time publish)
+      # OPTION 1: Token-Based Publishing
       #   - Create NPM token: https://www.npmjs.com/settings/YOUR_USERNAME/tokens
       #   - Add as repository secret: Settings > Secrets > Actions > NPM_TOKEN
-      #   - Token will be used for publishing
+      #   - Simpler but less secure (long-lived token)
       #
-      # OPTION 2: OIDC Trusted Publishing (recommended after first publish)
-      #   - First publish packages manually OR use Option 1
+      # OPTION 2: OIDC Trusted Publishing (Recommended)
       #   - Configure trusted publisher: https://www.npmjs.com/settings/YOUR_USERNAME/packages/PACKAGE_NAME/access
       #   - Provider: GitHub Actions
       #   - Repository: pradeepmouli/lspeasy  
       #   - Workflow: release.yml
       #   - Environment: (leave empty)
-      #   - Remove NPM_TOKEN secret (OIDC won't work if NPM_TOKEN is set!)
+      #   - CRITICAL: Remove NPM_TOKEN secret (even invalid tokens block OIDC!)
       #
       # Note: NPM_TOKEN takes precedence over OIDC if both are configured
       - name: Create Release Pull Request or Publish
