@@ -72,10 +72,7 @@ jobs:
           title: 'chore: version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_TOKEN is optional when using trusted publishers
-          # If not using trusted publishers, set NPM_TOKEN in repository secrets
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
 
       - name: Create GitHub Release
         if: steps.changesets.outputs.published == 'true'
