@@ -1,24 +1,32 @@
 # Release Workflow with Changesets
 #
 # This workflow uses Changesets to automate versioning and publishing to npm.
-# It supports npm Trusted Publishers (OIDC) for secure, token-free publishing.
+# It supports both traditional token-based auth and npm Trusted Publishers (OIDC).
 #
 # How it works:
 # 1. When you push to master, Changesets creates a "Version Packages" PR
 # 2. When that PR is merged, packages are automatically published to npm
 # 3. GitHub releases are created automatically
 #
-# Setup Instructions for npm Trusted Publishers (OIDC):
-# 1. Go to https://www.npmjs.com/settings/{your-username}/packages/{package-name}/access
-# 2. Enable "Trusted Publishers" under Publishing Access
-# 3. Add GitHub Actions as a trusted publisher:
-#    - Provider: GitHub Actions
-#    - Repository: your-org/your-repo
-#    - Workflow: release.yml
-#    - Environment: (leave empty)
+# Publishing Authentication:
+# 1. INITIAL PUBLISH (First Time):
+#    - Packages must be published manually first OR use NPM_TOKEN
+#    - Set NPM_TOKEN in repository secrets (Settings > Secrets > Actions)
+#    - Create a token at: https://www.npmjs.com/settings/YOUR_USERNAME/tokens
+#    - Use "Automation" token type with "Read and write" permission
 #
-# With trusted publishers, no NPM_TOKEN secret is needed!
-# For token-based auth fallback, set NPM_TOKEN in repository secrets.
+# 2. SUBSEQUENT PUBLISHES (After Setting Up OIDC):
+#    - After initial publish, configure npm Trusted Publishers (OIDC)
+#    - Go to: https://www.npmjs.com/settings/YOUR_USERNAME/packages/PACKAGE_NAME/access
+#    - Enable "Trusted Publishers" under Publishing Access
+#    - Add GitHub Actions as a trusted publisher:
+#      * Provider: GitHub Actions
+#      * Repository: pradeepmouli/lspeasy
+#      * Workflow: release.yml
+#      * Environment: (leave empty)
+#    - IMPORTANT: Remove NPM_TOKEN secret (NPM_TOKEN takes precedence over OIDC)
+#
+# Note: If NPM_TOKEN is set, it will be used instead of OIDC.
 
 name: Release
 
@@ -62,6 +70,25 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # ⚠️ AUTHENTICATION REQUIRED ⚠️
+      #
+      # This step requires authentication to publish to npm. Choose ONE option:
+      #
+      # OPTION 1: Token-Based Publishing (for first-time publish)
+      #   - Create NPM token: https://www.npmjs.com/settings/YOUR_USERNAME/tokens
+      #   - Add as repository secret: Settings > Secrets > Actions > NPM_TOKEN
+      #   - Token will be used for publishing
+      #
+      # OPTION 2: OIDC Trusted Publishing (recommended after first publish)
+      #   - First publish packages manually OR use Option 1
+      #   - Configure trusted publisher: https://www.npmjs.com/settings/YOUR_USERNAME/packages/PACKAGE_NAME/access
+      #   - Provider: GitHub Actions
+      #   - Repository: pradeepmouli/lspeasy  
+      #   - Workflow: release.yml
+      #   - Environment: (leave empty)
+      #   - Remove NPM_TOKEN secret (OIDC won't work if NPM_TOKEN is set!)
+      #
+      # Note: NPM_TOKEN takes precedence over OIDC if both are configured
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
@@ -72,6 +99,10 @@ jobs:
           title: 'chore: version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # For token-based: NPM_TOKEN secret must be set
+          # For OIDC: NPM_TOKEN secret must NOT be set (remove it after first publish)
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Provenance adds supply chain security attestation
           NPM_CONFIG_PROVENANCE: true
 
       - name: Create GitHub Release
