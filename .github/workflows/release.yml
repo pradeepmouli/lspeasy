@@ -67,7 +67,7 @@ jobs:
         uses: changesets/action@v1.7.0
         with: 
           version: pnpm changeset:version
-          publish: pnpm changeset:publish
+          publish: npm run changeset:publish
           commit: 'chore: version packages'
           title: 'chore: version packages'
         env:
