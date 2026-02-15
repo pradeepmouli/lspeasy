@@ -62,29 +62,63 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Create Release Pull Request or Publish
-        id: changesets
-        uses: changesets/action@v1.7.0
-        with: 
-          version: pnpm changeset:version
-          publish: npm run changeset:publish
-          commit: 'chore: version packages'
-          title: 'chore: version packages'
+      - name: Configure npm for publishing
+        run: |
+          # Delete _authToken to force OIDC
+          npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
+          echo "NPM configuration:"
+          npm config list
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Debug npm authentication
+        run: |
+          echo "=== npm config ==="
+          npm config get registry
+          echo "=== .npmrc content ==="
+          USERCONFIG=$(npm config get userconfig)
+          if [ -f "$USERCONFIG" ]; then
+            cat "$USERCONFIG"
+          else
+            echo "No user .npmrc found at $USERCONFIG"
+          fi
+          echo "=== npm whoami ==="
+          npm whoami 2>&1 || echo "npm whoami expected to fail with OIDC in PROVENANCE mode"
+
+      - name: Version packages and publish
+        run: |
+          # Check if there are any changesets
+          CHANGESET_COUNT=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l)
+          
+          if [ "$CHANGESET_COUNT" -gt 0 ]; then
+            echo "Found $CHANGESET_COUNT changesets, proceeding with publishing..."
+            
+            # Version packages
+            pnpm changeset:version
+            
+            # Commit version changes
+            git add -A
+            git commit -m "chore: version packages" || echo "No version changes to commit"
+            git push origin master
+            
+            # Determine packages to publish and use npm directly (avoid pnpm publish)
+            pnpm changeset status --output .changeset/status.json
+            RELEASES=$(node -e "const s=require('./.changeset/status.json'); console.log((s.releases||[]).map(r=>r.name).join(' '));")
+            if [ -n "$RELEASES" ]; then
+              FILTER_ARGS=""
+              for name in $RELEASES; do
+                FILTER_ARGS="$FILTER_ARGS --filter $name"
+              done
+              pnpm -r $FILTER_ARGS exec npm publish --provenance --access public
+            else
+              echo "No packages to publish after versioning"
+            fi
+          else
+            echo "No changesets found, skipping publication"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-
-      - name: Create GitHub Release
-        if: steps.changesets.outputs.published == 'true'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
-          release_name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
-          body: |
-            Release ${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
-
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
-          draft: false
-          prerelease: ${{ contains(fromJson(steps.changesets.outputs.publishedPackages)[0].version, '-') }}
