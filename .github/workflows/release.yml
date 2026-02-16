@@ -92,23 +92,23 @@ jobs:
         run: |
           # Check if there are any changesets
           CHANGESET_COUNT=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l)
-          
+
           if [ "$CHANGESET_COUNT" -gt 0 ]; then
             echo "Found $CHANGESET_COUNT changesets, proceeding with publishing..."
-            
+
             # Check status BEFORE versioning to know what will be published
             pnpm changeset status --output .changeset/status.json
             PACKAGES_TO_PUBLISH=$(node -e "const s=require('./.changeset/status.json'); console.log((s.releases||[]).map(r=>r.name).join(' '));")
             echo "Packages to publish: $PACKAGES_TO_PUBLISH"
-            
+
             # Version packages (consumes changesets)
             pnpm changeset:version
-            
+
             # Commit version changes
             git add -A
             git commit -m "chore: version packages" || echo "No version changes to commit"
             git push origin master
-            
+
             # Publish the packages we identified earlier
             if [ -n "$PACKAGES_TO_PUBLISH" ]; then
               echo "Publishing packages: $PACKAGES_TO_PUBLISH"
