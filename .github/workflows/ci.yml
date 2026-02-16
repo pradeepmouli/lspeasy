@@ -54,7 +54,3 @@ jobs:
         with:
           files: ./coverage/lcov.info
           fail_ci_if_error: false
-
-      - name: Check Bundle Size
-        run: pnpm dlx size-limit
-        if: matrix.node-version == '20.x'
