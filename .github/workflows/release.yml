@@ -63,14 +63,9 @@ jobs:
 
       - name: Configure npm for publishing
         run: |
-          if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "Using NPM_TOKEN for authentication"
-            npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          else
-            echo "Using OIDC for authentication"
-            # Delete _authToken to force OIDC
-            npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
-          fi
+          echo "Using OIDC for authentication"
+          # Delete any existing _authToken to force OIDC
+          npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
           echo "NPM configuration:"
           npm config list
 
@@ -130,5 +125,4 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
