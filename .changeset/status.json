@@ -7,46 +7,50 @@
           "type": "patch"
         },
         {
+          "name": "@lspeasy/client",
+          "type": "patch"
+        },
+        {
           "name": "@lspeasy/server",
           "type": "patch"
         },
         {
-          "name": "@lspeasy/client",
+          "name": "@lspeasy/middleware-pino",
           "type": "patch"
         }
       ],
-      "summary": "Publish renamed lspeasy packages to npm",
-      "id": "publish-lspeasy-rename"
+      "summary": "### Features\\n\\n• add find-skills documentation to assist users in discovering and installing agent skills\n• enhance project constitution with workflow-specific quality gates and templates\n• implement partial result sender for progress notifications\n• add requirements for SharedWorkerTransport error handling and client isolation\n• add feature spec for LSP protocol compliance gaps\\n\\n### Bug Fixes\\n\\n• support NPM_TOKEN authentication fallback for publishing\n• retain manual publish step, only remove registry-url for OIDC\n• remove registry-url from setup-node and use changesets action for OIDC publishing\n• update release workflow to support OIDC and improve npm publishing process\n• configure OIDC properly for npm trusted publishing in release workflow\n• remove StdioTransport re-export from server to maintain browser compatibility\n• correct worker-types export path and add error path test coverage\n• clean up TCP socket listeners and remove redundant partialCollectors Map\n• update coverage threshold for branches to 64\n• remove trailing spaces in date fields for consistency\\n\\n### Code Refactoring\\n\\n• separate Node-dependent modules into @lspeasy/core/node export\n• remove Node dependencies from CancellationTokenSource, TransportEventEmitter, and PendingRequestTracker\n• use DisposableEventEmitter in ConnectionHealthTracker for browser compatibility\\n\\n### Documentation\\n\\n• clarify coverage thresholds in vitest.coverage-all.config.ts\n• add clarifications and enhance user scenarios for LSP protocol compliance\\n\\n### Other Changes\\n\\nInitial plan\nchore: version packages\nchore: add changeset for lspeasy rename publication\nchore: add check for changesets before versioning and publishing\nchore: enhance release workflow to check package status before versioning\nchore: version packages\nchore: add auto-generated changeset for patch release\nUpdate documentation to reflect removal of bundle size limits\nRemove bundle size limit configuration\nInitial plan\nUpdate publish command in release workflow\nUpdate pnpm and changesets action versions\nInitial plan\nAdd once method to DisposableEventEmitter with API parity to Node EventEmitter\nInitial plan\nUpdate cancellation.ts\nInitial plan\nUpdate index.ts\nInitial plan\nUpdate index.ts\nUpdate client.ts\nchore(spec): close remaining middleware DX tasks\nchore: update package versions to 1.0.2 and enhance changelogs for all packages\nchore(release): set scoped package publish access to public\nFix root cause: defer promise rejections to allow handler attachment\nUpdate requests.test.ts\nUpdate requests.test.ts\nUpdate client.test.ts\nFix unhandled promise rejections in client tests\nInitial plan\\n\\n",
+      "id": "1771215443"
     }
   ],
   "releases": [
     {
       "name": "@lspeasy/core",
       "type": "patch",
-      "oldVersion": "1.0.3",
-      "changesets": ["publish-lspeasy-rename"],
-      "newVersion": "1.0.4"
-    },
-    {
-      "name": "@lspeasy/server",
-      "type": "patch",
-      "oldVersion": "1.0.3",
-      "changesets": ["publish-lspeasy-rename"],
-      "newVersion": "1.0.4"
+      "oldVersion": "1.0.4",
+      "changesets": ["1771215443"],
+      "newVersion": "1.0.5"
     },
     {
       "name": "@lspeasy/client",
       "type": "patch",
-      "oldVersion": "1.0.3",
-      "changesets": ["publish-lspeasy-rename"],
-      "newVersion": "1.0.4"
+      "oldVersion": "1.0.4",
+      "changesets": ["1771215443"],
+      "newVersion": "1.0.5"
+    },
+    {
+      "name": "@lspeasy/server",
+      "type": "patch",
+      "oldVersion": "1.0.4",
+      "changesets": ["1771215443"],
+      "newVersion": "1.0.5"
     },
     {
       "name": "@lspeasy/middleware-pino",
-      "type": "none",
+      "type": "patch",
       "oldVersion": "1.0.3",
-      "changesets": [],
-      "newVersion": "1.0.3"
+      "changesets": ["1771215443"],
+      "newVersion": "1.0.4"
     }
   ]
 }
