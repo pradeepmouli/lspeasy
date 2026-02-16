@@ -51,7 +51,7 @@
     "update:deps": "pnpm update -r --latest",
     "changeset": "changeset",
     "changeset:version": "changeset version",
-    "changeset:publish": "pnpm run build && changeset publish",
+    "changeset:publish": "pnpm run build && changeset publish --provenance",
     "generate:protocol": "tsx scripts/generate-protocol-types.ts && oxfmt packages/core/src/protocol/*.ts",
     "prepare": "simple-git-hooks"
   },
