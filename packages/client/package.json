@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/client",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Connect to LSP servers with typed client API",
   "keywords": [
     "lsp",

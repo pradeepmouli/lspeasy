@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/middleware-pino",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Pino-based structured logging middleware for lspeasy",
   "keywords": [
     "lsp",
