@@ -1,5 +1,11 @@
 # @lspeasy/core
 
+## 1.0.4
+
+### Patch Changes
+
+- 2666498: Publish renamed lspeasy packages to npm
+
 ## 1.0.3
 
 ### Patch Changes

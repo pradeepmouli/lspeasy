@@ -1,0 +1,52 @@
+{
+  "changesets": [
+    {
+      "releases": [
+        {
+          "name": "@lspeasy/core",
+          "type": "patch"
+        },
+        {
+          "name": "@lspeasy/server",
+          "type": "patch"
+        },
+        {
+          "name": "@lspeasy/client",
+          "type": "patch"
+        }
+      ],
+      "summary": "Publish renamed lspeasy packages to npm",
+      "id": "publish-lspeasy-rename"
+    }
+  ],
+  "releases": [
+    {
+      "name": "@lspeasy/core",
+      "type": "patch",
+      "oldVersion": "1.0.3",
+      "changesets": ["publish-lspeasy-rename"],
+      "newVersion": "1.0.4"
+    },
+    {
+      "name": "@lspeasy/server",
+      "type": "patch",
+      "oldVersion": "1.0.3",
+      "changesets": ["publish-lspeasy-rename"],
+      "newVersion": "1.0.4"
+    },
+    {
+      "name": "@lspeasy/client",
+      "type": "patch",
+      "oldVersion": "1.0.3",
+      "changesets": ["publish-lspeasy-rename"],
+      "newVersion": "1.0.4"
+    },
+    {
+      "name": "@lspeasy/middleware-pino",
+      "type": "none",
+      "oldVersion": "1.0.3",
+      "changesets": [],
+      "newVersion": "1.0.3"
+    }
+  ]
+}

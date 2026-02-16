@@ -1,5 +1,13 @@
 # @lspeasy/server
 
+## 1.0.4
+
+### Patch Changes
+
+- 2666498: Publish renamed lspeasy packages to npm
+- Updated dependencies [2666498]
+  - @lspeasy/core@1.0.4
+
 ## 1.0.3
 
 ### Patch Changes
