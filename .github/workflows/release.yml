@@ -4,9 +4,9 @@
 # It uses npm Trusted Publishers (OIDC) for secure, token-free publishing.
 #
 # How it works:
-# 1. When you push to master, Changesets creates a "Version Packages" PR
-# 2. When that PR is merged, packages are automatically published to npm
-# 3. GitHub releases are created automatically
+# 1. When you push to master, Changesets identifies packages to publish
+# 2. Versions are bumped and committed automatically
+# 3. Packages are published to npm with provenance
 #
 # Setup Instructions for npm Trusted Publishers (OIDC):
 # 1. Go to https://www.npmjs.com/settings/{your-username}/packages/{package-name}/access
@@ -15,10 +15,10 @@
 #    - Provider: GitHub Actions
 #    - Repository: your-org/your-repo
 #    - Workflow: release.yml
-#    - Environment: (leave empty or set to match environment in job)
+#    - Environment: (leave empty)
 #
 # IMPORTANT: Do NOT set registry-url in actions/setup-node as it creates NODE_AUTH_TOKEN
-# which overrides OIDC authentication. The changesets action handles this correctly.
+# which overrides OIDC authentication.
 
 name: Release
 
@@ -61,13 +61,67 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Create Release PR or Publish
-        uses: changesets/action@v1
-        with:
-          publish: pnpm changeset:publish
-          version: pnpm changeset:version
-          title: 'chore: version packages'
-          commit: 'chore: version packages'
+      - name: Configure npm for publishing
+        run: |
+          # Delete _authToken to force OIDC
+          npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
+          echo "NPM configuration:"
+          npm config list
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Debug npm authentication
+        run: |
+          echo "=== npm config ==="
+          npm config get registry
+          echo "=== .npmrc content ==="
+          USERCONFIG=$(npm config get userconfig)
+          if [ -f "$USERCONFIG" ]; then
+            cat "$USERCONFIG"
+          else
+            echo "No user .npmrc found at $USERCONFIG"
+          fi
+          echo "=== npm whoami ==="
+          npm whoami 2>&1 || echo "npm whoami expected to fail with OIDC in PROVENANCE mode"
+
+      - name: Version packages and publish
+        run: |
+          # Check if there are any changesets
+          CHANGESET_COUNT=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l)
+
+          if [ "$CHANGESET_COUNT" -gt 0 ]; then
+            echo "Found $CHANGESET_COUNT changesets, proceeding with publishing..."
+
+            # Check status BEFORE versioning to know what will be published
+            pnpm changeset status --output .changeset/status.json
+            PACKAGES_TO_PUBLISH=$(node -e "const s=require('./.changeset/status.json'); console.log((s.releases||[]).map(r=>r.name).join(' '));")
+            echo "Packages to publish: $PACKAGES_TO_PUBLISH"
+
+            # Version packages (consumes changesets)
+            pnpm changeset:version
+
+            # Commit version changes
+            git add -A
+            git commit -m "chore: version packages" || echo "No version changes to commit"
+            git push origin master
+
+            # Publish the packages we identified earlier
+            if [ -n "$PACKAGES_TO_PUBLISH" ]; then
+              echo "Publishing packages: $PACKAGES_TO_PUBLISH"
+              FILTER_ARGS=""
+              for name in $PACKAGES_TO_PUBLISH; do
+                FILTER_ARGS="$FILTER_ARGS --filter $name"
+              done
+              pnpm -r $FILTER_ARGS exec npm publish --provenance --access public
+            else
+              echo "No packages to publish"
+            fi
+          else
+            echo "No changesets found, skipping publication"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
