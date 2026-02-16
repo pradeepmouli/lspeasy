@@ -23,7 +23,7 @@
 - [x] T005 Configure TypeScript with strict mode, composite project references for monorepo
 - [x] T006 [P] Setup oxlint and oxfmt with .oxlintrc.json and .oxfmtrc.json (2 spaces, single quotes, semicolons)
 - [x] T007 [P] Configure simple-git-hooks and lint-staged for pre-commit checks
-- [x] T008 Add size-limit configuration for bundle size enforcement (<100KB core, <50KB server/client gzipped)
+- [x] T008 ~~Add size-limit configuration for bundle size enforcement (<100KB core, <50KB server/client gzipped)~~ (Removed)
 - [x] T009 Create root tsconfig.json and per-package tsconfig.json with composite references
 
 ---
@@ -253,7 +253,7 @@
 - [x] T116 [P] Setup GitHub Actions workflow for type checking in .github/workflows/typecheck.yml
 - [x] T117 [P] Setup GitHub Actions workflow for unit tests in .github/workflows/test.yml
 - [x] T118 [P] Setup GitHub Actions workflow for integration tests in .github/workflows/integration.yml
-- [x] T119 [P] Setup GitHub Actions workflow for bundle size checks (size-limit) in .github/workflows/size.yml
+- [x] T119 [P] ~~Setup GitHub Actions workflow for bundle size checks (size-limit) in .github/workflows/size.yml~~ (Removed)
 - [ ] T120 Add test coverage reporting with minimum 80% threshold
 - [ ] T121 [P] Create performance benchmark suite for load testing (SC-005: 1000 concurrent requests, <100ms p95 latency) in packages/core/tests/benchmark/load.bench.ts
 - [ ] T122 [P] Conduct API similarity audit against MCP SDK patterns (SC-006: document ergonomic differences in docs/MCP_SDK_COMPARISON.md, ensure <10 conceptual differences)

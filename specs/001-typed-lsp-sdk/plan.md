@@ -32,8 +32,8 @@ Build a strongly-typed TypeScript SDK for LSP (Language Server Protocol) clients
 - Must maintain 100% LSP 3.17 spec compliance
 - Zero `any` types in public APIs
 - Minimum 80% test coverage for core packages
-- Bundle size: @lspeasy/core <100KB, @lspeasy/server <50KB, @lspeasy/client <50KB (all gzipped)
-- CI-enforced via size-limit package
+- ~~Bundle size: @lspeasy/core <100KB, @lspeasy/server <50KB, @lspeasy/client <50KB (all gzipped)~~ (Removed)
+- ~~CI-enforced via size-limit package~~ (Removed)
 
 **Scale/Scope**:
 - Support all LSP 3.17 core capabilities (10+ request types minimum)
