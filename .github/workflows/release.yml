@@ -17,8 +17,10 @@
 #    - Workflow: release.yml
 #    - Environment: (leave empty)
 #
-# IMPORTANT: Do NOT set registry-url in actions/setup-node as it creates NODE_AUTH_TOKEN
-# which overrides OIDC authentication.
+# IMPORTANT:
+# - Do NOT set registry-url in actions/setup-node as it creates NODE_AUTH_TOKEN
+#   which overrides OIDC authentication.
+# - npm CLI v11.5.1+ is REQUIRED for OIDC trusted publishing to work.
 
 name: Release
 
@@ -55,6 +57,9 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
+      - name: Update npm for OIDC support
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -76,6 +81,8 @@ jobs:
 
       - name: Debug npm authentication
         run: |
+          echo "=== npm version ==="
+          npm --version
           echo "=== npm config ==="
           npm config get registry
           echo "=== .npmrc content ==="
