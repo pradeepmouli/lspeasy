@@ -1,12 +1,12 @@
 # Release Workflow with Changesets
 #
 # This workflow uses Changesets to automate versioning and publishing to npm.
-# It supports npm Trusted Publishers (OIDC) for secure, token-free publishing.
+# It uses npm Trusted Publishers (OIDC) for secure, token-free publishing.
 #
 # How it works:
-# 1. When you push to master, Changesets creates a "Version Packages" PR
-# 2. When that PR is merged, packages are automatically published to npm
-# 3. GitHub releases are created automatically
+# 1. When you push to master, Changesets identifies packages to publish
+# 2. Versions are bumped and committed automatically
+# 3. Packages are published to npm with provenance
 #
 # Setup Instructions for npm Trusted Publishers (OIDC):
 # 1. Go to https://www.npmjs.com/settings/{your-username}/packages/{package-name}/access
@@ -17,8 +17,8 @@
 #    - Workflow: release.yml
 #    - Environment: (leave empty)
 #
-# With trusted publishers, no NPM_TOKEN secret is needed!
-# For token-based auth fallback, set NPM_TOKEN in repository secrets.
+# IMPORTANT: Do NOT set registry-url in actions/setup-node as it creates NODE_AUTH_TOKEN
+# which overrides OIDC authentication.
 
 name: Release
 
@@ -54,7 +54,6 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
