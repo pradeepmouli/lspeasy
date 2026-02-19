@@ -1,5 +1,15 @@
 # @lspeasy/core
 
+## 2.0.0
+
+### Major Changes
+
+- 93ebf66: BREAKING CHANGE: Move Zod from peer dependency to optional dependency
+
+  - Upgraded Zod from v3 to v4
+  - Changed from `peerDependencies` to `optionalDependencies`
+  - Zod is now completely optional - install it only if you need schema validation
+
 ## 1.1.0
 
 ### Minor Changes
