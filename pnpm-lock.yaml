@@ -69,6 +69,7 @@ importers:
       vscode-languageserver-protocol:
         specifier: ^3.17.5
         version: 3.17.5
+    optionalDependencies:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -88,6 +89,7 @@ importers:
       vscode-languageserver-protocol:
         specifier: ^3.17.5
         version: 3.17.5
+    optionalDependencies:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -117,6 +119,7 @@ importers:
       vscode-languageserver-protocol:
         specifier: ^3.17.5
         version: 3.17.5
+    optionalDependencies:
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -3220,4 +3223,5 @@ snapshots:
 
   yaml@2.8.2: {}
 
-  zod@4.3.6: {}
+  zod@4.3.6:
+    optional: true

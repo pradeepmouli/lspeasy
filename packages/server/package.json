@@ -44,8 +44,8 @@
   "dependencies": {
     "@lspeasy/core": "workspace:*"
   },
-  "peerDependencies": {
-    "zod": "^3.25.0"
+  "optionalDependencies": {
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

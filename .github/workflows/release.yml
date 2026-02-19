@@ -66,9 +66,6 @@ jobs:
         # This step updates npm from the default v10.x (bundled with Node.js 20)
         # to the latest version which supports OIDC authentication.
 
-      - name: Install npm v11 (OIDC fix)
-        run: npm install -g npm@11
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
