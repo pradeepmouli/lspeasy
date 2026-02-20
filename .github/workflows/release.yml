@@ -129,7 +129,7 @@ jobs:
               for name in $PACKAGES_TO_PUBLISH; do
                 FILTER_ARGS="$FILTER_ARGS --filter $name"
               done
-              pnpm -r $FILTER_ARGS exec npm publish --provenance --access public
+              pnpm -r $FILTER_ARGS publish --provenance --access public --no-git-checks
             else
               echo "No packages to publish"
             fi
