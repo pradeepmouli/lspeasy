@@ -74,15 +74,8 @@
     "vitest": "^4.0.18"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,md}": [
-      "oxfmt . --no-error-on-unmatched-pattern"
-    ],
-    "*.{ts,tsx,js,jsx}": [
-      "oxlint --fix"
-    ]
+    "pre-commit": "pnpm lint-staged",
+    "pre-push": "pnpm run type-check"
   },
   "engines": {
     "node": ">=20.0.0",
