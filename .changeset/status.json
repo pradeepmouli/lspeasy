@@ -3,50 +3,32 @@
     {
       "releases": [
         {
-          "name": "@lspeasy/core",
-          "type": "major"
-        },
-        {
           "name": "@lspeasy/client",
-          "type": "major"
+          "type": "patch"
         },
         {
           "name": "@lspeasy/server",
-          "type": "major"
+          "type": "patch"
         }
       ],
-      "summary": "BREAKING CHANGE: Move Zod from peer dependency to optional dependency\n\n- Upgraded Zod from v3 to v4\n- Changed from `peerDependencies` to `optionalDependencies`\n- Zod is now completely optional - install it only if you need schema validation",
-      "id": "zod-optional-dep"
+      "summary": "Fix workspace dependency resolution in published packages",
+      "id": "fix-workspace-deps"
     }
   ],
   "releases": [
     {
-      "name": "@lspeasy/core",
-      "type": "major",
-      "oldVersion": "1.1.0",
-      "changesets": ["zod-optional-dep"],
-      "newVersion": "2.0.0"
-    },
-    {
       "name": "@lspeasy/client",
-      "type": "major",
-      "oldVersion": "1.1.0",
-      "changesets": ["zod-optional-dep"],
-      "newVersion": "2.0.0"
+      "type": "patch",
+      "oldVersion": "2.0.0",
+      "changesets": ["fix-workspace-deps"],
+      "newVersion": "2.0.1"
     },
     {
       "name": "@lspeasy/server",
-      "type": "major",
-      "oldVersion": "1.1.0",
-      "changesets": ["zod-optional-dep"],
-      "newVersion": "2.0.0"
-    },
-    {
-      "name": "@lspeasy/middleware-pino",
-      "type": "major",
+      "type": "patch",
       "oldVersion": "2.0.0",
-      "changesets": [],
-      "newVersion": "3.0.0"
+      "changesets": ["fix-workspace-deps"],
+      "newVersion": "2.0.1"
     }
   ]
 }

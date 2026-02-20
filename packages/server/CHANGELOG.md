@@ -1,5 +1,11 @@
 # @lspeasy/server
 
+## 2.0.1
+
+### Patch Changes
+
+- 32b3113: Fix workspace dependency resolution in published packages
+
 ## 2.0.0
 
 ### Major Changes
