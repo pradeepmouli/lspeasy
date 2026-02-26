@@ -139,6 +139,9 @@ jobs:
           echo "Created changeset:"
           cat .changeset/${TIMESTAMP}.md
 
+      - name: Disable git hooks
+        run: git config core.hooksPath /dev/null
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
