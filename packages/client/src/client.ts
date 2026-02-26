@@ -613,17 +613,29 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 
   /**
-   * Set client capabilities
+   * Declare client capabilities and return this instance narrowed to those capabilities.
+   * The returned reference is the same object — use it to access capability-aware
+   * send namespaces (e.g. `client.textDocument.hover`).
+   *
+   * Note: Client capabilities are sent during `connect()`. Call this before connecting
+   * to declare capabilities up-front, or after to update the local type reference.
+   *
+   * @template C - The capabilities shape to declare
+   * @param capabilities - The client capabilities to declare
+   * @returns The same client instance typed with the declared capabilities
+   *
+   * @example
+   * const client = new LSPClient()
+   *   .registerCapabilities({ textDocument: { hover: {} } });
    */
-  setCapabilities(capabilities: ClientCaps): void {
-    this.capabilities = capabilities;
+  registerCapabilities<C extends Partial<ClientCapabilities>>(capabilities: C): LSPClient<C> {
+    this.capabilities = capabilities as unknown as ClientCaps;
     this.clientCapabilityGuard = new ClientCapabilityGuard(
-      capabilities,
+      capabilities as ClientCapabilities,
       this.logger,
       this.options.strictCapabilities
     );
-    // Note: Client capabilities are sent during initialize, so this only affects
-    // the local reference. To update server-side, would need client/registerCapability request.
+    return this as unknown as LSPClient<C>;
   }
 
   /**
@@ -631,34 +643,6 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    */
   getClientCapabilities(): ClientCaps | undefined {
     return this.capabilities;
-  }
-
-  /**
-   * Register a single client capability, returning a new typed reference via intersection.
-   * The returned reference is the same instance, with a narrowed type that includes
-   * the newly registered capability.
-   *
-   * Note: This updates the local capability reference. To notify the server of capability
-   * changes, the LSP 3.17 client/registerCapability request should be used separately.
-   *
-   * @template K - The capability key to register
-   * @param key - The client capability key
-   * @param value - The capability value
-   * @returns The same client instance with an expanded capability type
-   *
-   * @example
-   * const client = new LSPClient();
-   * const withWorkspace = client.registerCapability('workspace', { workspaceFolders: true });
-   * // withWorkspace is typed as LSPClient<ClientCaps & Pick<ClientCapabilities, 'workspace'>>
-   */
-  registerCapability<K extends keyof ClientCapabilities>(
-    key: K,
-    value: ClientCapabilities[K]
-  ): LSPClient<ClientCaps & Pick<ClientCapabilities, K>> {
-    const current = this.capabilities ?? ({} as ClientCaps);
-    const updated = { ...current, [key]: value } as ClientCaps & Pick<ClientCapabilities, K>;
-    this.setCapabilities(updated);
-    return this as unknown as LSPClient<ClientCaps & Pick<ClientCapabilities, K>>;
   }
 
   /**

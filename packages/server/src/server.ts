@@ -59,8 +59,6 @@ import { initializeServerHandlerMethods, initializeServerSendMethods } from './c
  * type MyCaps = { hoverProvider: true; completionProvider: { triggerCharacters: ['.'] } };
  * const server = new LSPServer<MyCaps>();
  * server.registerCapabilities({ hoverProvider: true, completionProvider: { triggerCharacters: ['.'] } });
- * // server.textDocument.onHover is available for registration
- * // server.textDocument.onCompletion is available for registration
  */
 export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = ServerCapabilities> {
   private readonly logger: Logger;
@@ -228,9 +226,20 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 
   /**
-   * Set server capabilities
+   * Declare server capabilities and return this instance narrowed to those capabilities.
+   * The returned reference is the same object — use it to access capability-aware
+   * handler namespaces (e.g. `server.textDocument.onHover`).
+   *
+   * @template C - The capabilities shape to declare
+   * @param capabilities - The server capabilities to declare
+   * @returns The same server instance typed with the declared capabilities
+   *
+   * @example
+   * const server = new LSPServer()
+   *   .registerCapabilities({ hoverProvider: true });
+   * server.textDocument.onHover(async (params) => { ... });
    */
-  registerCapabilities(capabilities: Capabilities): void {
+  registerCapabilities<C extends Partial<ServerCapabilities>>(capabilities: C): LSPServer<C> {
     this.lifecycleManager.registerCapabilities(capabilities as ServerCapabilities);
     // Create capability guard with the new capabilities
     this.capabilityGuard = new CapabilityGuard(
@@ -242,6 +251,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
     // Initialize capability-aware handler methods based on declared capabilities
     initializeServerHandlerMethods(this as any);
     initializeServerSendMethods(this as any);
+    return this as unknown as LSPServer<C>;
   }
 
   /**
@@ -256,31 +266,6 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
    */
   getClientCapabilities(): ClientCapabilities | undefined {
     return this.clientCapabilities;
-  }
-
-  /**
-   * Register a single capability, returning a new typed reference via intersection.
-   * The returned reference is the same instance, with a narrowed type that includes
-   * the newly registered capability.
-   *
-   * @template K - The capability key to register
-   * @param key - The server capability key (e.g. 'hoverProvider')
-   * @param value - The capability value
-   * @returns The same server instance with an expanded capability type
-   *
-   * @example
-   * const server = new LSPServer();
-   * const withHover = server.registerCapability('hoverProvider', true);
-   * // withHover is typed as LSPServer<Capabilities & Pick<ServerCapabilities, 'hoverProvider'>>
-   */
-  registerCapability<K extends keyof ServerCapabilities>(
-    key: K,
-    value: ServerCapabilities[K]
-  ): LSPServer<Capabilities & Pick<ServerCapabilities, K>> {
-    const current = this.getServerCapabilities();
-    const updated = { ...current, [key]: value } as Capabilities & Pick<ServerCapabilities, K>;
-    this.registerCapabilities(updated);
-    return this as unknown as LSPServer<Capabilities & Pick<ServerCapabilities, K>>;
   }
 
   /**

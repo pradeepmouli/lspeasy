@@ -6,10 +6,10 @@ import { describe, it, expect } from 'vitest';
 import type { ClientCapabilities } from '@lspeasy/core';
 import { LSPServer } from '../../src/server.js';
 
-describe('Server.registerCapability()', () => {
-  it('should add a capability and return a typed server', () => {
+describe('Server.registerCapabilities()', () => {
+  it('should return the same instance typed with capabilities', () => {
     const server = new LSPServer();
-    const withHover = server.registerCapability('hoverProvider', true);
+    const withHover = server.registerCapabilities({ hoverProvider: true });
 
     // The returned value is the same instance
     expect(withHover).toBe(server);
@@ -19,12 +19,13 @@ describe('Server.registerCapability()', () => {
     expect(caps.hoverProvider).toBe(true);
   });
 
-  it('should support chaining multiple registerCapability calls', () => {
+  it('should support declaring multiple capabilities at once', () => {
     const server = new LSPServer();
-    const typed = server
-      .registerCapability('hoverProvider', true)
-      .registerCapability('completionProvider', { triggerCharacters: ['.'] })
-      .registerCapability('definitionProvider', true);
+    const typed = server.registerCapabilities({
+      hoverProvider: true,
+      completionProvider: { triggerCharacters: ['.'] },
+      definitionProvider: true
+    });
 
     const caps = typed.getServerCapabilities();
     expect(caps.hoverProvider).toBe(true);
@@ -32,15 +33,14 @@ describe('Server.registerCapability()', () => {
     expect(caps.definitionProvider).toBe(true);
   });
 
-  it('should re-inject handler methods after registerCapability', () => {
+  it('should inject handler methods after registerCapabilities', () => {
     const server = new LSPServer();
 
     // Initially no capabilities
-    server.registerCapabilities({});
     expect((server as any).textDocument?.onHover).toBeUndefined();
 
     // Register hover capability
-    const withHover = server.registerCapability('hoverProvider', true);
+    const withHover = server.registerCapabilities({ hoverProvider: true });
 
     // Now onHover should be available
     expect((withHover as any).textDocument.onHover).toBeDefined();

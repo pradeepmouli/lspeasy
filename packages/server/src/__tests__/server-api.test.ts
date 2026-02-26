@@ -1,27 +1,26 @@
 /**
- * Tests for LSPServer new APIs: registerCapability() and expect()
+ * Tests for LSPServer APIs: registerCapabilities() and expect()
  */
 import { describe, it, expect } from 'vitest';
 import type { ClientCapabilities } from '@lspeasy/core';
 import { LSPServer } from '../server.js';
 
-describe('LSPServer.registerCapability()', () => {
-  it('should add a capability and return the same instance', () => {
+describe('LSPServer.registerCapabilities()', () => {
+  it('should return the same instance', () => {
     const server = new LSPServer();
-    server.registerCapabilities({});
-    const withHover = server.registerCapability('hoverProvider', true);
+    const withHover = server.registerCapabilities({ hoverProvider: true });
 
     expect(withHover).toBe(server);
     expect(withHover.getServerCapabilities().hoverProvider).toBe(true);
   });
 
-  it('should support chaining multiple registerCapability calls', () => {
+  it('should support fluent declaration of multiple capabilities', () => {
     const server = new LSPServer();
-    server.registerCapabilities({});
-    const typed = server
-      .registerCapability('hoverProvider', true)
-      .registerCapability('completionProvider', { triggerCharacters: ['.'] })
-      .registerCapability('definitionProvider', true);
+    const typed = server.registerCapabilities({
+      hoverProvider: true,
+      completionProvider: { triggerCharacters: ['.'] },
+      definitionProvider: true
+    });
 
     const caps = typed.getServerCapabilities();
     expect(caps.hoverProvider).toBe(true);
@@ -29,10 +28,10 @@ describe('LSPServer.registerCapability()', () => {
     expect(caps.definitionProvider).toBe(true);
   });
 
-  it('should preserve existing capabilities when adding new ones', () => {
+  it('should replace capabilities on a second call', () => {
     const server = new LSPServer();
     server.registerCapabilities({ hoverProvider: true });
-    server.registerCapability('completionProvider', {});
+    server.registerCapabilities({ hoverProvider: true, completionProvider: {} });
 
     const caps = server.getServerCapabilities();
     expect(caps.hoverProvider).toBe(true);

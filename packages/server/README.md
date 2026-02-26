@@ -26,29 +26,23 @@ Create a minimal hover server in less than 30 lines:
 import { LSPServer, StdioTransport } from '@lspeasy/server';
 import type { HoverParams, Hover } from '@lspeasy/server';
 
-// Create server
+// Create server with capabilities (fluent, returns narrowed type)
 const server = new LSPServer({
   name: 'my-language-server',
   version: '1.0.0'
-});
-
-// Set capabilities
-server.setCapabilities({
+}).registerCapabilities({
   hoverProvider: true
 });
 
-// Register hover handler
-server.onRequest<'textDocument/hover', HoverParams, Hover | null>(
-  'textDocument/hover',
-  async (params, token) => {
-    return {
-      contents: {
-        kind: 'markdown',
-        value: `# Hover\nLine ${params.position.line}`
-      }
-    };
-  }
-);
+// Register hover handler via capability-aware namespace
+server.textDocument.onHover(async (params) => {
+  return {
+    contents: {
+      kind: 'markdown',
+      value: `# Hover\nLine ${params.position.line}`
+    }
+  };
+});
 
 // Start server
 const transport = new StdioTransport();
