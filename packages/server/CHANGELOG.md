@@ -1,5 +1,38 @@
 # @lspeasy/server
 
+## 4.0.0
+
+### Major Changes
+
+- [`c30becc`](https://github.com/pradeepmouli/lspeasy/commit/c30becc8835b03d96ed6e75202fba1ee0aed2a70) Thanks [@pradeepmouli](https://github.com/pradeepmouli)! - BREAKING CHANGE: Unified, fluent capability registration API
+
+  **Server** — `setCapabilities` → `registerCapabilities` (now fluent, returns narrowed type):
+
+  ```ts
+  // Before
+  server.setCapabilities({ hoverProvider: true });
+  server.onRequest("textDocument/hover", handler);
+
+  // After
+  const server = new LSPServer().registerCapabilities({ hoverProvider: true });
+  server.textDocument.onHover(handler);
+  ```
+
+  **Client** — `setCapabilities` → `registerCapabilities` (now fluent, returns narrowed type):
+
+  ```ts
+  // Before
+  client.setCapabilities({ textDocument: { hover: {} } });
+
+  // After
+  const client = new LSPClient().registerCapabilities({
+    textDocument: { hover: {} },
+  });
+  ```
+
+  **Removed** — `registerCapability(key, value)` (singular) on both server and client.
+  Use `registerCapabilities({ [key]: value })` instead.
+
 ## 3.0.0
 
 ### Major Changes

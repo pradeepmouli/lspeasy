@@ -5,18 +5,29 @@
         {
           "name": "@lspeasy/server",
           "type": "major"
+        },
+        {
+          "name": "@lspeasy/client",
+          "type": "major"
         }
       ],
-      "summary": "BREAKING CHANGE: Rename `setCapabilities` to `registerCapabilities` on `LSPServer`\n\n**Before:**\n```ts\nserver.setCapabilities({ hoverProvider: true });\n```\n\n**After:**\n```ts\nserver.registerCapabilities({ hoverProvider: true });\n```",
-      "id": "rename-set-to-register-capabilities"
+      "summary": "BREAKING CHANGE: Unified, fluent capability registration API\n\n**Server** — `setCapabilities` → `registerCapabilities` (now fluent, returns narrowed type):\n```ts\n// Before\nserver.setCapabilities({ hoverProvider: true });\nserver.onRequest('textDocument/hover', handler);\n\n// After\nconst server = new LSPServer()\n  .registerCapabilities({ hoverProvider: true });\nserver.textDocument.onHover(handler);\n```\n\n**Client** — `setCapabilities` → `registerCapabilities` (now fluent, returns narrowed type):\n```ts\n// Before\nclient.setCapabilities({ textDocument: { hover: {} } });\n\n// After\nconst client = new LSPClient()\n  .registerCapabilities({ textDocument: { hover: {} } });\n```\n\n**Removed** — `registerCapability(key, value)` (singular) on both server and client.\nUse `registerCapabilities({ [key]: value })` instead.",
+      "id": "fluent-register-capabilities"
     }
   ],
   "releases": [
     {
       "name": "@lspeasy/server",
       "type": "major",
+      "oldVersion": "3.0.0",
+      "changesets": ["fluent-register-capabilities"],
+      "newVersion": "4.0.0"
+    },
+    {
+      "name": "@lspeasy/client",
+      "type": "major",
       "oldVersion": "2.1.0",
-      "changesets": ["rename-set-to-register-capabilities"],
+      "changesets": ["fluent-register-capabilities"],
       "newVersion": "3.0.0"
     }
   ]
