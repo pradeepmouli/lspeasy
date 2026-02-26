@@ -58,7 +58,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.8",
-    "@types/node": "^25.2.0",
+    "@types/node": "^25.3.0",
     "@typescript/native-preview": "7.0.0-dev.20260223.1",
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "^4.0.18",
