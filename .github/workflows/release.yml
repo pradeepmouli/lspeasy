@@ -88,41 +88,29 @@ jobs:
           echo "=== npm whoami ==="
           npm whoami 2>&1 || echo "npm whoami expected to fail with OIDC in PROVENANCE mode"
 
-      - name: Version packages and publish
+      - name: Version packages
         run: |
           # Check if there are any changesets
           CHANGESET_COUNT=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l)
 
           if [ "$CHANGESET_COUNT" -gt 0 ]; then
-            echo "Found $CHANGESET_COUNT changesets, proceeding with publishing..."
-
-            # Check status BEFORE versioning to know what will be published
-            pnpm changeset status --output .changeset/status.json
-            PACKAGES_TO_PUBLISH=$(node -e "const s=require('./.changeset/status.json'); console.log((s.releases||[]).map(r=>r.name).join(' '));")
-            echo "Packages to publish: $PACKAGES_TO_PUBLISH"
-
-            # Version packages (consumes changesets)
+            echo "Found $CHANGESET_COUNT changesets, running pnpm changeset version..."
             pnpm changeset:version
-
-            # Commit version changes
             git add -A
             git commit -m "chore: version packages" || echo "No version changes to commit"
             git push origin master
-
-            # Publish the packages we identified earlier
-            if [ -n "$PACKAGES_TO_PUBLISH" ]; then
-              echo "Publishing packages: $PACKAGES_TO_PUBLISH"
-              FILTER_ARGS=""
-              for name in $PACKAGES_TO_PUBLISH; do
-                FILTER_ARGS="$FILTER_ARGS --filter $name"
-              done
-              pnpm -r $FILTER_ARGS exec npm publish --provenance --access public
-            else
-              echo "No packages to publish"
-            fi
           else
-            echo "No changesets found, skipping publication"
+            echo "No changesets found, skipping version step"
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish packages
+        run: |
+          # pnpm changeset publish compares local version to npm and only publishes newer packages.
+          # This handles both: (a) packages just versioned above, and (b) packages that were
+          # already bumped in a prior commit but failed to publish.
+          pnpm changeset publish --access public
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
