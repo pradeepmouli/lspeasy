@@ -1,12 +1,12 @@
 # Release Workflow with Changesets
 #
 # This workflow uses Changesets to automate versioning and publishing to npm.
-# It supports npm Trusted Publishers (OIDC) for secure, token-free publishing.
+# It uses npm Trusted Publishers (OIDC) for secure, token-free publishing.
 #
 # How it works:
-# 1. When you push to master, Changesets creates a "Version Packages" PR
-# 2. When that PR is merged, packages are automatically published to npm
-# 3. GitHub releases are created automatically
+# 1. When you push to master, Changesets identifies packages to publish
+# 2. Versions are bumped and committed automatically
+# 3. Packages are published to npm with provenance
 #
 # Setup Instructions for npm Trusted Publishers (OIDC):
 # 1. Go to https://www.npmjs.com/settings/{your-username}/packages/{package-name}/access
@@ -17,8 +17,10 @@
 #    - Workflow: release.yml
 #    - Environment: (leave empty)
 #
-# With trusted publishers, no NPM_TOKEN secret is needed!
-# For token-based auth fallback, set NPM_TOKEN in repository secrets.
+# IMPORTANT:
+# - Do NOT set registry-url in actions/setup-node as it creates NODE_AUTH_TOKEN
+#   which overrides OIDC authentication.
+# - npm CLI v11.5.1+ is REQUIRED for OIDC trusted publishing to work.
 
 name: Release
 
@@ -54,7 +56,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          # Do NOT set registry-url here — it writes NODE_AUTH_TOKEN to .npmrc and breaks OIDC
+          # Note: actions/setup-node does not have an npm-version parameter.
+          # Node.js 20 ships with npm 10.x by default.
+          # We must update npm separately (see next step).
+
+      - name: Update npm for OIDC support
+        run: npm install -g npm@latest
+        # npm CLI v11.5.1+ is required for OIDC trusted publishing.
+        # This step updates npm from the default v10.x (bundled with Node.js 20)
+        # to the latest version which supports OIDC authentication.
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -64,9 +74,10 @@ jobs:
 
       - name: Configure npm for publishing
         run: |
-          # Write .npmrc with registry — no token, OIDC is handled automatically via id-token: write
-          echo 'registry=https://registry.npmjs.org/' >> ~/.npmrc
-          echo 'provenance=true' >> ~/.npmrc
+          echo "Using OIDC for authentication"
+          # Delete any existing _authToken to force OIDC
+          npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
+          echo "NPM configuration:"
           npm config list
 
       - name: Configure git
@@ -76,6 +87,8 @@ jobs:
 
       - name: Debug npm authentication
         run: |
+          echo "=== npm version ==="
+          npm --version
           echo "=== npm config ==="
           npm config get registry
           echo "=== .npmrc content ==="
@@ -88,29 +101,42 @@ jobs:
           echo "=== npm whoami ==="
           npm whoami 2>&1 || echo "npm whoami expected to fail with OIDC in PROVENANCE mode"
 
-      - name: Version packages
+      - name: Version packages and publish
         run: |
           # Check if there are any changesets
           CHANGESET_COUNT=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l)
 
           if [ "$CHANGESET_COUNT" -gt 0 ]; then
-            echo "Found $CHANGESET_COUNT changesets, running pnpm changeset version..."
+            echo "Found $CHANGESET_COUNT changesets, proceeding with publishing..."
+
+            # Check status BEFORE versioning to know what will be published
+            pnpm changeset status --output .changeset/status.json
+            PACKAGES_TO_PUBLISH=$(node -e "const s=require('./.changeset/status.json'); console.log((s.releases||[]).map(r=>r.name).join(' '));")
+            echo "Packages to publish: $PACKAGES_TO_PUBLISH"
+
+            # Version packages (consumes changesets)
             pnpm changeset:version
+
+            # Commit version changes
             git add -A
             git commit -m "chore: version packages" || echo "No version changes to commit"
             git push origin master
-          else
-            echo "No changesets found, skipping version step"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish packages
-        run: |
-          # pnpm changeset publish compares local version to npm and only publishes newer packages.
-          # This handles both: (a) packages just versioned above, and (b) packages that were
-          # already bumped in a prior commit but failed to publish.
-          pnpm changeset publish --access public
+            # Publish the packages we identified earlier
+            if [ -n "$PACKAGES_TO_PUBLISH" ]; then
+              echo "Publishing packages: $PACKAGES_TO_PUBLISH"
+              FILTER_ARGS=""
+              for name in $PACKAGES_TO_PUBLISH; do
+                FILTER_ARGS="$FILTER_ARGS --filter $name"
+              done
+              pnpm -r $FILTER_ARGS publish --provenance --access public --no-git-checks
+            else
+              echo "No packages to publish"
+            fi
+          else
+            echo "No changesets found — checking for already-bumped unpublished packages..."
+            pnpm changeset publish --access public || echo "Nothing new to publish"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
