@@ -58,7 +58,7 @@ import { initializeServerHandlerMethods, initializeServerSendMethods } from './c
  * // Create a server with specific capabilities
  * type MyCaps = { hoverProvider: true; completionProvider: { triggerCharacters: ['.'] } };
  * const server = new LSPServer<MyCaps>();
- * server.setCapabilities({ hoverProvider: true, completionProvider: { triggerCharacters: ['.'] } });
+ * server.registerCapabilities({ hoverProvider: true, completionProvider: { triggerCharacters: ['.'] } });
  * // server.textDocument.onHover is available for registration
  * // server.textDocument.onCompletion is available for registration
  */
@@ -230,8 +230,8 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   /**
    * Set server capabilities
    */
-  setCapabilities(capabilities: Capabilities): void {
-    this.lifecycleManager.setCapabilities(capabilities as ServerCapabilities);
+  registerCapabilities(capabilities: Capabilities): void {
+    this.lifecycleManager.registerCapabilities(capabilities as ServerCapabilities);
     // Create capability guard with the new capabilities
     this.capabilityGuard = new CapabilityGuard(
       capabilities as ServerCapabilities,
@@ -279,7 +279,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   ): LSPServer<Capabilities & Pick<ServerCapabilities, K>> {
     const current = this.getServerCapabilities();
     const updated = { ...current, [key]: value } as Capabilities & Pick<ServerCapabilities, K>;
-    this.setCapabilities(updated);
+    this.registerCapabilities(updated);
     return this as unknown as LSPServer<Capabilities & Pick<ServerCapabilities, K>>;
   }
 

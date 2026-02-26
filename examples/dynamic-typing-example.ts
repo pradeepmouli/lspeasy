@@ -37,14 +37,14 @@ type MyImplementedCapabilities = {
 const server = new LSPServer<MyImplementedCapabilities>();
 
 // Set capabilities (this initializes dynamic methods)
-server.setCapabilities({
+server.registerCapabilities({
   hoverProvider: true,
   completionProvider: {
     triggerCharacters: ['.']
   }
 });
 
-// After setCapabilities(), the server has dynamically typed handler methods:
+// After registerCapabilities(), the server has dynamically typed handler methods:
 // ✅ These handler registration methods ARE available:
 // server.textDocument.onHover((params) => { ... })
 // server.textDocument.onCompletion((params) => { ... })

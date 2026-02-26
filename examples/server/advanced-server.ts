@@ -29,7 +29,7 @@ const server = new LSPServer({
 });
 
 // Set server capabilities
-server.setCapabilities({
+server.registerCapabilities({
   textDocumentSync: 1, // Full sync
   hoverProvider: true,
   completionProvider: {

@@ -63,7 +63,7 @@ describe('textDocument/hover Integration', () => {
       logLevel: LogLevel.Error
     });
 
-    server.setCapabilities({
+    server.registerCapabilities({
       hoverProvider: true
     });
 
@@ -139,7 +139,7 @@ describe('textDocument/hover Integration', () => {
 
   it('should return null for no hover', async () => {
     const noHoverServer = new LSPServer({ logLevel: LogLevel.Error });
-    noHoverServer.setCapabilities({ hoverProvider: true });
+    noHoverServer.registerCapabilities({ hoverProvider: true });
 
     noHoverServer.onRequest<'textDocument/hover', HoverParams, Hover | null>(
       'textDocument/hover',
@@ -206,7 +206,7 @@ describe('textDocument/hover Integration', () => {
 
   it('should handle hover with range', async () => {
     const rangeServer = new LSPServer({ logLevel: LogLevel.Error });
-    rangeServer.setCapabilities({ hoverProvider: true });
+    rangeServer.registerCapabilities({ hoverProvider: true });
 
     rangeServer.onRequest<'textDocument/hover', HoverParams, Hover | null>(
       'textDocument/hover',
@@ -258,7 +258,7 @@ describe('textDocument/hover Integration', () => {
 
   it('should handle errors in hover handler', async () => {
     const errorServer = new LSPServer({ logLevel: LogLevel.Error });
-    errorServer.setCapabilities({ hoverProvider: true });
+    errorServer.registerCapabilities({ hoverProvider: true });
 
     errorServer.onRequest('textDocument/hover', async () => {
       throw new Error('Hover error');

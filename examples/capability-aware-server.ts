@@ -38,7 +38,7 @@ const server = new LSPServer({
 });
 
 // Set capabilities before registering handlers
-server.setCapabilities(capabilities);
+server.registerCapabilities(capabilities);
 
 // ✅ This works - hover capability is declared
 server.onRequest('textDocument/hover', async (params: any) => {

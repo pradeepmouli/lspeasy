@@ -36,7 +36,7 @@ describe('Server.registerCapability()', () => {
     const server = new LSPServer();
 
     // Initially no capabilities
-    server.setCapabilities({});
+    server.registerCapabilities({});
     expect((server as any).textDocument?.onHover).toBeUndefined();
 
     // Register hover capability
@@ -51,7 +51,7 @@ describe('Server.registerCapability()', () => {
 describe('Server.expect()', () => {
   it('should return the same instance', () => {
     const server = new LSPServer();
-    server.setCapabilities({ hoverProvider: true });
+    server.registerCapabilities({ hoverProvider: true });
 
     const typed = server.expect<{ textDocument: { hover: {} } }>();
     expect(typed).toBe(server);
@@ -59,7 +59,7 @@ describe('Server.expect()', () => {
 
   it('should be callable with no runtime cost', () => {
     const server = new LSPServer();
-    server.setCapabilities({ hoverProvider: true });
+    server.registerCapabilities({ hoverProvider: true });
 
     // expect<> is zero-cost - it just casts the type
     const typed = server.expect<ClientCapabilities>();
@@ -72,7 +72,7 @@ describe('Runtime Capability Checking - Server', () => {
     const server = new LSPServer();
 
     // Set limited capabilities
-    server.setCapabilities({
+    server.registerCapabilities({
       hoverProvider: true
       // No completionProvider
     });
@@ -94,7 +94,7 @@ describe('Runtime Capability Checking - Server', () => {
   it('should add all handler methods when full capabilities declared', () => {
     const server = new LSPServer();
 
-    server.setCapabilities({
+    server.registerCapabilities({
       hoverProvider: true,
       completionProvider: { triggerCharacters: ['.'] },
       definitionProvider: true,
@@ -111,7 +111,7 @@ describe('Runtime Capability Checking - Server', () => {
   it('should not add methods for capabilities that are false or null', () => {
     const server = new LSPServer();
 
-    server.setCapabilities({
+    server.registerCapabilities({
       hoverProvider: true,
       completionProvider: false, // Explicitly disabled
       definitionProvider: null // Also disabled
@@ -128,7 +128,7 @@ describe('Runtime Capability Checking - Server', () => {
   it('should handle nested capability paths correctly', () => {
     const server = new LSPServer();
 
-    server.setCapabilities({
+    server.registerCapabilities({
       completionProvider: {
         triggerCharacters: ['.', ':'],
         resolveProvider: true

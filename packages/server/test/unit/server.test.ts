@@ -1,5 +1,5 @@
 /**
- * Unit tests for LSPServer constructor and setCapabilities
+ * Unit tests for LSPServer constructor and registerCapabilities
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -50,7 +50,7 @@ describe('LSPServer', () => {
     });
   });
 
-  describe('setCapabilities', () => {
+  describe('registerCapabilities', () => {
     let server: LSPServer;
 
     beforeEach(() => {
@@ -65,13 +65,13 @@ describe('LSPServer', () => {
         }
       };
 
-      server.setCapabilities(capabilities);
+      server.registerCapabilities(capabilities);
       expect(server.getServerCapabilities()).toEqual(capabilities);
     });
 
     it('should override previous capabilities', () => {
-      server.setCapabilities({ hoverProvider: true });
-      server.setCapabilities({ completionProvider: {} });
+      server.registerCapabilities({ hoverProvider: true });
+      server.registerCapabilities({ completionProvider: {} });
 
       expect(server.getServerCapabilities()).toEqual({
         completionProvider: {}
@@ -79,7 +79,7 @@ describe('LSPServer', () => {
     });
 
     it('should accept empty capabilities', () => {
-      server.setCapabilities({});
+      server.registerCapabilities({});
       expect(server.getServerCapabilities()).toEqual({});
     });
 
@@ -90,7 +90,7 @@ describe('LSPServer', () => {
         hoverProvider: true
       };
 
-      server.setCapabilities(capabilities);
+      server.registerCapabilities(capabilities);
       const result = server.getServerCapabilities();
 
       expect(result.textDocumentSync).toBe(fullSync);

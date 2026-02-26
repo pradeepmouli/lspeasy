@@ -47,7 +47,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v4.2.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -56,37 +56,80 @@ jobs:
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install npm v11 (OIDC fix)
-        run: npm install -g npm@11
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build
 
-      - name: Create Release Pull Request or Publish
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          version: pnpm changeset:version
-          publish: pnpm changeset:publish
-          commit: 'chore: version packages'
-          title: 'chore: version packages'
+      - name: Configure npm for publishing
+        run: |
+          if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
+            echo "Using NPM_TOKEN for authentication"
+            npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          else
+            echo "Using OIDC for authentication"
+            # Delete _authToken to force OIDC
+            npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
+          fi
+          echo "NPM configuration:"
+          npm config list
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Debug npm authentication
+        run: |
+          echo "=== npm config ==="
+          npm config get registry
+          echo "=== .npmrc content ==="
+          USERCONFIG=$(npm config get userconfig)
+          if [ -f "$USERCONFIG" ]; then
+            cat "$USERCONFIG"
+          else
+            echo "No user .npmrc found at $USERCONFIG"
+          fi
+          echo "=== npm whoami ==="
+          npm whoami 2>&1 || echo "npm whoami expected to fail with OIDC in PROVENANCE mode"
+
+      - name: Version packages and publish
+        run: |
+          # Check if there are any changesets
+          CHANGESET_COUNT=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l)
+
+          if [ "$CHANGESET_COUNT" -gt 0 ]; then
+            echo "Found $CHANGESET_COUNT changesets, proceeding with publishing..."
+
+            # Check status BEFORE versioning to know what will be published
+            pnpm changeset status --output .changeset/status.json
+            PACKAGES_TO_PUBLISH=$(node -e "const s=require('./.changeset/status.json'); console.log((s.releases||[]).map(r=>r.name).join(' '));")
+            echo "Packages to publish: $PACKAGES_TO_PUBLISH"
+
+            # Version packages (consumes changesets)
+            pnpm changeset:version
+
+            # Commit version changes
+            git add -A
+            git commit -m "chore: version packages" || echo "No version changes to commit"
+            git push origin master
+
+            # Publish the packages we identified earlier
+            if [ -n "$PACKAGES_TO_PUBLISH" ]; then
+              echo "Publishing packages: $PACKAGES_TO_PUBLISH"
+              FILTER_ARGS=""
+              for name in $PACKAGES_TO_PUBLISH; do
+                FILTER_ARGS="$FILTER_ARGS --filter $name"
+              done
+              pnpm -r $FILTER_ARGS exec npm publish --provenance --access public
+            else
+              echo "No packages to publish"
+            fi
+          else
+            echo "No changesets found, skipping publication"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create GitHub Release
-        if: steps.changesets.outputs.published == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
-          name: v${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
-          body: |
-            Release ${{ fromJson(steps.changesets.outputs.publishedPackages)[0].version }}
-
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
-          draft: false
-          prerelease: ${{ contains(fromJson(steps.changesets.outputs.publishedPackages)[0].version, '-') }}
+          NPM_CONFIG_PROVENANCE: true

@@ -35,9 +35,10 @@ import { StdioTransport } from '@lspeasy/core/node';
 
 const server = new LSPServer({ name: 'my-server', version: '1.0.0' });
 
-server.setCapabilities({ hoverProvider: true });
+server.registerCapabilities({ hoverProvider: true });
 
-server.onRequest('textDocument/hover', async (params) => {
+// Capability-aware namespace API — only available after registerCapabilities()
+server.textDocument.onHover(async (params) => {
   return {
     contents: { kind: 'markdown', value: `Line ${params.position.line}` }
   };

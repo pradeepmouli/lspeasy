@@ -63,7 +63,7 @@ describe('Parameter Validation Integration', () => {
       logLevel: LogLevel.Error
     });
 
-    server.setCapabilities({
+    server.registerCapabilities({
       hoverProvider: true
     });
 
@@ -198,7 +198,7 @@ describe('Parameter Validation Integration', () => {
       }
     });
 
-    customServer.setCapabilities({ hoverProvider: true });
+    customServer.registerCapabilities({ hoverProvider: true });
     customServer.onRequest('textDocument/hover', async () => ({ contents: 'test' }));
 
     const customTransport = new TestTransport();
@@ -242,7 +242,7 @@ describe('Parameter Validation Integration', () => {
       validateParams: false
     });
 
-    noValidationServer.setCapabilities({ hoverProvider: true });
+    noValidationServer.registerCapabilities({ hoverProvider: true });
     noValidationServer.onRequest('textDocument/hover', async () => {
       return { contents: 'ok' };
     });

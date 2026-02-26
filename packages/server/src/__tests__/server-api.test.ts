@@ -8,7 +8,7 @@ import { LSPServer } from '../server.js';
 describe('LSPServer.registerCapability()', () => {
   it('should add a capability and return the same instance', () => {
     const server = new LSPServer();
-    server.setCapabilities({});
+    server.registerCapabilities({});
     const withHover = server.registerCapability('hoverProvider', true);
 
     expect(withHover).toBe(server);
@@ -17,7 +17,7 @@ describe('LSPServer.registerCapability()', () => {
 
   it('should support chaining multiple registerCapability calls', () => {
     const server = new LSPServer();
-    server.setCapabilities({});
+    server.registerCapabilities({});
     const typed = server
       .registerCapability('hoverProvider', true)
       .registerCapability('completionProvider', { triggerCharacters: ['.'] })
@@ -31,7 +31,7 @@ describe('LSPServer.registerCapability()', () => {
 
   it('should preserve existing capabilities when adding new ones', () => {
     const server = new LSPServer();
-    server.setCapabilities({ hoverProvider: true });
+    server.registerCapabilities({ hoverProvider: true });
     server.registerCapability('completionProvider', {});
 
     const caps = server.getServerCapabilities();
@@ -43,7 +43,7 @@ describe('LSPServer.registerCapability()', () => {
 describe('LSPServer.expect()', () => {
   it('should return the same instance', () => {
     const server = new LSPServer();
-    server.setCapabilities({ hoverProvider: true });
+    server.registerCapabilities({ hoverProvider: true });
 
     const typed = server.expect<ClientCapabilities>();
     expect(typed).toBe(server);
@@ -51,7 +51,7 @@ describe('LSPServer.expect()', () => {
 
   it('should not alter runtime behavior', () => {
     const server = new LSPServer();
-    server.setCapabilities({ hoverProvider: true });
+    server.registerCapabilities({ hoverProvider: true });
 
     const typed = server.expect<ClientCapabilities>();
     expect(typed.getServerCapabilities().hoverProvider).toBe(true);

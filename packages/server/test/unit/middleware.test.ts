@@ -50,7 +50,7 @@ describe('server middleware', () => {
       ]
     });
 
-    server.setCapabilities({});
+    server.registerCapabilities({});
     await server.listen(transport);
 
     transport.emit({

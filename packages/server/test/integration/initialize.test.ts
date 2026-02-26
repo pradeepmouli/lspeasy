@@ -72,7 +72,7 @@ describe('Initialize Handshake Integration', () => {
       logLevel: LogLevel.Error
     });
 
-    server.setCapabilities({
+    server.registerCapabilities({
       textDocumentSync: fullSync,
       hoverProvider: true
     });

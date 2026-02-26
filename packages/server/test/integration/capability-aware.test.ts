@@ -20,7 +20,7 @@ describe('Capability-Aware Runtime', () => {
         hoverProvider: true
         // definitionProvider NOT declared
       };
-      server.setCapabilities(capabilities);
+      server.registerCapabilities(capabilities);
 
       // Should NOT throw in non-strict mode
       expect(() => {
@@ -45,7 +45,7 @@ describe('Capability-Aware Runtime', () => {
         hoverProvider: true
         // definitionProvider NOT declared
       };
-      server.setCapabilities(capabilities);
+      server.registerCapabilities(capabilities);
 
       // Hover should work
       expect(() => {
@@ -66,7 +66,7 @@ describe('Capability-Aware Runtime', () => {
         strictCapabilities: true
       });
 
-      server.setCapabilities({}); // Empty capabilities
+      server.registerCapabilities({}); // Empty capabilities
 
       // These should all work
       expect(() => {
