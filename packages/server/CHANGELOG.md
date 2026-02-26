@@ -1,5 +1,23 @@
 # @lspeasy/server
 
+## 3.0.0
+
+### Major Changes
+
+- [`b52ae63`](https://github.com/pradeepmouli/lspeasy/commit/b52ae631350a5a35ca38cfc18f2c79fedf955b8a) Thanks [@pradeepmouli](https://github.com/pradeepmouli)! - BREAKING CHANGE: Rename `setCapabilities` to `registerCapabilities` on `LSPServer`
+
+  **Before:**
+
+  ```ts
+  server.setCapabilities({ hoverProvider: true });
+  ```
+
+  **After:**
+
+  ```ts
+  server.registerCapabilities({ hoverProvider: true });
+  ```
+
 ## 2.1.0
 
 ### Minor Changes
