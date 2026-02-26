@@ -54,7 +54,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
+          # Do NOT set registry-url here — it writes NODE_AUTH_TOKEN to .npmrc and breaks OIDC
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -64,15 +64,9 @@ jobs:
 
       - name: Configure npm for publishing
         run: |
-          if [ -n "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "Using NPM_TOKEN for authentication"
-            npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          else
-            echo "Using OIDC for authentication"
-            # Delete _authToken to force OIDC
-            npm config delete //registry.npmjs.org/:_authToken 2>/dev/null || true
-          fi
-          echo "NPM configuration:"
+          # Write .npmrc with registry — no token, OIDC is handled automatically via id-token: write
+          echo 'registry=https://registry.npmjs.org/' >> ~/.npmrc
+          echo 'provenance=true' >> ~/.npmrc
           npm config list
 
       - name: Configure git
@@ -131,5 +125,4 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
