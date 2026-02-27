@@ -38,9 +38,10 @@
   },
   "scripts": {
     "build": "tsgo --build",
-    "clean": "rm -rf dist *.tsbuildinfo",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit"
+    "type-check": "tsgo --noEmit",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
     "@lspeasy/core": "workspace:*"
