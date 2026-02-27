@@ -45,8 +45,8 @@ jobs:
         id: audit
         run: |
           # Run audit and capture output
-          pnpm audit --audit-level moderate --json > audit-report.json
-          audit_exit_code=$?
+          pnpm audit --audit-level moderate --json > audit-report.json || audit_exit_code=$?
+          audit_exit_code=${audit_exit_code:-0}
 
           # If pnpm audit failed for reasons other than "vulnerabilities found",
           # fail the step instead of silently ignoring the error.
