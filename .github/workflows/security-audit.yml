@@ -98,7 +98,7 @@ jobs:
 
       - name: Upload audit report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: security-audit-report
           path: audit-report.json
@@ -149,7 +149,7 @@ jobs:
 
       - name: Upload outdated report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: outdated-dependencies-report
           path: outdated.json
