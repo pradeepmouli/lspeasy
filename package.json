@@ -56,7 +56,7 @@
     "prepare": "simple-git-hooks"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.5.1",
+    "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.29.8",
     "@types/node": "^25.3.0",
     "@typescript/native-preview": "7.0.0-dev.20260223.1",

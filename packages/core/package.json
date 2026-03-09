@@ -68,8 +68,7 @@
     "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit",
-    "prepublishOnly": "npm run clean && npm run build"
+    "type-check": "tsgo --noEmit"
   },
   "peerDependencies": {
     "ws": "^8.19.0"
