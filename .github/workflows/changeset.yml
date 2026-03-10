@@ -1,22 +1,17 @@
-name: Create Changeset
+name: Auto-generate Changeset
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [master]
   workflow_dispatch:
     inputs:
       type:
-        description: 'Change type (leave empty for auto-detection)'
+        description: 'Change type (auto = detect from commits)'
         required: false
         type: choice
-        options:
-          - auto
-          - patch
-          - minor
-          - major
+        options: [auto, patch, minor, major]
         default: auto
-      base_ref:
-        description: 'Base reference to compare against (default: last tag)'
-        required: false
-        type: string
 
 permissions:
   contents: write
@@ -24,78 +19,99 @@ permissions:
 
 jobs:
   changeset:
+    name: Generate changeset
     runs-on: ubuntu-latest
+    if: |
+      github.actor != 'github-actions[bot]' &&
+      !startsWith(github.head_ref, 'changeset-release/') &&
+      !startsWith(github.head_ref, 'changeset/') &&
+      !startsWith(github.head_ref, 'dependabot/') &&
+      !startsWith(github.head_ref, 'renovate/')
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Detect change type and create changeset
-        id: generate
+      - name: Resolve branch name
+        id: branch
         run: |
-          BASE_REF="${{ inputs.base_ref }}"
-          if [ -z "$BASE_REF" ]; then
-            BASE_REF=$(git describe --tags --abbrev=0 2>/dev/null || echo "master")
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "name=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
-          COMMITS=$(git log ${BASE_REF}..HEAD --pretty=format:"%s" --no-merges)
-          echo "Commits since $BASE_REF:"
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.branch.outputs.name }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for existing changeset
+        id: check
+        run: |
+          COUNT=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "Existing changesets: $COUNT"
+
+      - name: Generate and commit changeset
+        if: steps.check.outputs.count == '0'
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE=$(git merge-base origin/master HEAD)
+          else
+            BASE=$(git describe --tags --abbrev=0 2>/dev/null || echo "master")
+          fi
+
+          COMMITS=$(git log ${BASE}..HEAD --pretty=format:"%s" --no-merges)
+          echo "Commits since base:"
           echo "$COMMITS"
 
-          CHANGE_TYPE="${{ inputs.type }}"
-          if [ "$CHANGE_TYPE" = "auto" ]; then
+          TYPE="${{ inputs.type }}"
+          if [ -z "$TYPE" ] || [ "$TYPE" = "auto" ]; then
             if echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.+\))?!:|BREAKING.CHANGE"; then
-              CHANGE_TYPE="major"
+              TYPE="major"
             elif echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.+\))?:"; then
-              CHANGE_TYPE="minor"
+              TYPE="minor"
             else
-              CHANGE_TYPE="patch"
+              TYPE="patch"
+            fi
+          fi
+          echo "Change type: $TYPE"
+
+          # Build frontmatter from packages/*/package.json, fallback to root package.json
+          FRONTMATTER=""
+          for pkg_json in packages/*/package.json; do
+            [ -f "$pkg_json" ] || continue
+            PRIVATE=$(jq -r '.private // false' "$pkg_json" 2>/dev/null || echo 'false')
+            NAME=$(jq -r '.name // ""' "$pkg_json" 2>/dev/null || echo '')
+            if [ "$PRIVATE" != "true" ] && [ -n "$NAME" ] && [ "$NAME" != "null" ]; then
+              FRONTMATTER="${FRONTMATTER}  \"${NAME}\": ${TYPE}\n"
+            fi
+          done
+
+          # Fallback to root package.json for single-package repos
+          if [ -z "$FRONTMATTER" ] && [ -f "package.json" ]; then
+            PRIVATE=$(jq -r '.private // false' "package.json" 2>/dev/null || echo 'false')
+            NAME=$(jq -r '.name // ""' "package.json" 2>/dev/null || echo '')
+            if [ "$PRIVATE" != "true" ] && [ -n "$NAME" ] && [ "$NAME" != "null" ]; then
+              FRONTMATTER="  \"${NAME}\": ${TYPE}\n"
             fi
           fi
 
-          echo "type=$CHANGE_TYPE" >> $GITHUB_OUTPUT
+          if [ -z "$FRONTMATTER" ]; then
+            echo "No publishable packages found — skipping changeset"
+            exit 0
+          fi
 
-          SUMMARY=$(echo "$COMMITS" | head -5 | sed 's/^/- /')
+          SUMMARY=$(echo "$COMMITS" | head -5 | sed 's/^/- /' | tr -d '\r')
+
           TIMESTAMP=$(date +%s)
+          printf -- '---\n%b---\n\n%s\n' "$FRONTMATTER" "$SUMMARY" > ".changeset/${TIMESTAMP}.md"
 
-          mkdir -p .changeset
-          cat > .changeset/${TIMESTAMP}.md << CHANGESET_EOF
-          ---
-          "@lspeasy/core": $CHANGE_TYPE
-          ---
+          echo "Created .changeset/${TIMESTAMP}.md:"
+          cat ".changeset/${TIMESTAMP}.md"
 
-          $SUMMARY
-          CHANGESET_EOF
-
-          echo "Created changeset ($CHANGE_TYPE):"
-          cat .changeset/${TIMESTAMP}.md
-
-      - name: Disable git hooks
-        run: git config core.hooksPath /dev/null
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v8
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'chore: add changeset for ${{ steps.generate.outputs.type }} release'
-          title: 'chore: add changeset (${{ steps.generate.outputs.type }})'
-          body: |
-            Auto-generated changeset from commits since last tag.
-            `@changesets/changelog-github` will generate the full changelog with PR links on version.
-          branch: changeset/auto-${{ github.run_number }}
-          delete-branch: true
-          labels: |
-            changelog
-            automated
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config core.hooksPath /dev/null
+          git add ".changeset/${TIMESTAMP}.md"
+          git commit -m "chore: add auto-generated changeset (${TYPE})"
+          git push origin HEAD:${{ steps.branch.outputs.name }}
