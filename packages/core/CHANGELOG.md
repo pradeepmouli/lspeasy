@@ -1,5 +1,11 @@
 # @lspeasy/core
 
+## 2.1.1
+
+### Patch Changes
+
+- [#61](https://github.com/pradeepmouli/lspeasy/pull/61) [`b6ccbcc`](https://github.com/pradeepmouli/lspeasy/commit/b6ccbcc6bb97253d27586ccc43960af910935394) Thanks [@pradeepmouli](https://github.com/pradeepmouli)! - - test: trigger CI pipeline
+
 ## 2.1.0
 
 ### Minor Changes
