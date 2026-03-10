@@ -36,29 +36,32 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const sep = '---';
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `@copilot Please evaluate this dependency update and determine whether a new version of this package should be published.
-
-**Your job:**
-1. Check the updated package's changelog for breaking changes, new APIs, or behavioral differences
-2. Examine how this package uses the dependency — does it re-export types, rely on specific behaviors, or expose it in its public API?
-3. Determine the impact on consumers of **this** package:
-   - **Major**: breaking change in behavior or types that consumers depend on
-   - **Minor**: new capability now exposed to consumers
-   - **Patch**: internal fix that consumers benefit from but don't need to adapt to
-   - **No changeset**: purely internal — no consumer-visible change
-
-**If a changeset is warranted**, create \`.changeset/<descriptive-slug>.md\`:
-\`\`\`markdown
----
-"<package-name>": patch|minor|major
----
-
-<One-line summary of the consumer-visible impact>
-\`\`\`
-
-**If no changeset is needed**, leave a comment explaining why consumers are unaffected.`
+              body: [
+                '@copilot Please evaluate this dependency update and determine whether a new version of this package should be published.',
+                '',
+                '**Your job:**',
+                '1. Check the updated package\'s changelog for breaking changes, new APIs, or behavioral differences',
+                '2. Examine how this package uses the dependency — does it re-export types, rely on specific behaviors, or expose it in its public API?',
+                '3. Determine the impact on consumers of **this** package:',
+                '   - **Major**: breaking change in behavior or types that consumers depend on',
+                '   - **Minor**: new capability now exposed to consumers',
+                '   - **Patch**: internal fix that consumers benefit from but don\'t need to adapt to',
+                '   - **No changeset**: purely internal — no consumer-visible change',
+                '',
+                '**If a changeset is warranted**, create `.changeset/<descriptive-slug>.md`:',
+                '````markdown',
+                sep,
+                '"<package-name>": patch|minor|major',
+                sep,
+                '',
+                '<One-line summary of the consumer-visible impact>',
+                '````',
+                '',
+                '**If no changeset is needed**, leave a comment explaining why consumers are unaffected.',
+              ].join('\n')
             });
