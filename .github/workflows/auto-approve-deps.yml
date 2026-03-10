@@ -10,13 +10,18 @@ permissions:
 
 jobs:
   triage:
-    name: Assign Copilot review
+    name: Auto-approve and request Copilot triage
     runs-on: ubuntu-latest
     if: |
       github.actor == 'dependabot[bot]' ||
       github.actor == 'renovate[bot]'
 
     steps:
+      - name: Auto-approve
+        uses: hmarr/auto-approve-action@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Request Copilot as reviewer
         continue-on-error: true
         env:
@@ -26,13 +31,11 @@ jobs:
             --repo "${{ github.repository }}" \
             --add-reviewer "copilot"
 
-      - name: Post Copilot instructions
+      - name: Post Copilot triage instructions
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const pr = context.payload.pull_request;
-
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -57,25 +60,5 @@ jobs:
 <One-line summary of the consumer-visible impact>
 \`\`\`
 
-**If no changeset is needed**, approve the PR with a brief explanation of why consumers are unaffected.
-
-Once CI passes and you've approved, this PR will auto-merge.`
+**If no changeset is needed**, leave a comment explaining why consumers are unaffected.`
             });
-
-      - name: Enable auto-merge
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            await github.graphql(`
-              mutation($pullRequestId: ID!) {
-                enablePullRequestAutoMerge(input: {
-                  pullRequestId: $pullRequestId,
-                  mergeMethod: SQUASH
-                }) {
-                  pullRequest {
-                    autoMergeRequest { enabledAt }
-                  }
-                }
-              }
-            `, { pullRequestId: context.payload.pull_request.node_id });
