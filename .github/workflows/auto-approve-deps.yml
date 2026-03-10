@@ -1,93 +1,72 @@
-name: Auto-approve Dependency Updates
+name: Triage Dependency Updates
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+    types: [opened, reopened]
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  auto-approve:
-    name: Auto-approve trusted dependency updates
+  triage:
+    name: Assign Copilot review
     runs-on: ubuntu-latest
-    # Only run for dependency PRs from trusted bots
     if: |
-      (github.actor == 'dependabot[bot]' ||
-       github.actor == 'renovate[bot]' ||
-       github.actor == 'github-actions[bot]') &&
-      contains(github.event.pull_request.labels.*.name, 'dependencies')
+      github.actor == 'dependabot[bot]' ||
+      github.actor == 'renovate[bot]'
 
     steps:
-      - name: Check PR details
-        id: pr-details
-        uses: actions/github-script@v8
+      - name: Request Copilot as reviewer
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr edit "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --add-reviewer "copilot"
+
+      - name: Post Copilot instructions
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
-            const title = pr.title.toLowerCase();
-            const labels = pr.labels.map(l => l.name);
 
-            // Determine if this is a minor/patch update
-            const isMinorOrPatch =
-              labels.includes('minor') ||
-              labels.includes('patch') ||
-              title.includes('patch') ||
-              title.includes('minor') ||
-              (!title.includes('major') && !labels.includes('major'));
-
-            // Check if it's not a major update or security vulnerability
-            const isMajorUpdate = labels.includes('major') || title.includes('major');
-            const isSecurityUpdate = labels.includes('security');
-
-            core.setOutput('is_minor_or_patch', isMinorOrPatch);
-            core.setOutput('is_major_update', isMajorUpdate);
-            core.setOutput('is_security_update', isSecurityUpdate);
-
-            console.log(`PR Title: ${title}`);
-            console.log(`Labels: ${labels.join(', ')}`);
-            console.log(`Is minor/patch: ${isMinorOrPatch}`);
-            console.log(`Is major: ${isMajorUpdate}`);
-
-      - name: Auto-approve minor and patch updates
-        if: |
-          steps.pr-details.outputs.is_minor_or_patch == 'true' &&
-          steps.pr-details.outputs.is_major_update == 'false'
-        uses: hmarr/auto-approve-action@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          review-message: |
-            Auto-approving this minor/patch dependency update from a trusted bot.
-
-            Please ensure CI passes before merging.
-
-      - name: Comment on major updates
-        if: steps.pr-details.outputs.is_major_update == 'true'
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '⚠️ **Major Update Detected**\n\n' +
-                    'This PR contains a major version update which may include breaking changes.\n\n' +
-                    'Please review the changelog and test thoroughly before merging.'
+              body: `@copilot Please evaluate this dependency update and determine whether a new version of this package should be published.
+
+**Your job:**
+1. Check the updated package's changelog for breaking changes, new APIs, or behavioral differences
+2. Examine how this package uses the dependency — does it re-export types, rely on specific behaviors, or expose it in its public API?
+3. Determine the impact on consumers of **this** package:
+   - **Major**: breaking change in behavior or types that consumers depend on
+   - **Minor**: new capability now exposed to consumers
+   - **Patch**: internal fix that consumers benefit from but don't need to adapt to
+   - **No changeset**: purely internal — no consumer-visible change
+
+**If a changeset is warranted**, create \`.changeset/<descriptive-slug>.md\`:
+\`\`\`markdown
+---
+"<package-name>": patch|minor|major
+---
+
+<One-line summary of the consumer-visible impact>
+\`\`\`
+
+**If no changeset is needed**, approve the PR with a brief explanation of why consumers are unaffected.
+
+Once CI passes and you've approved, this PR will auto-merge.`
             });
 
-      - name: Enable auto-merge for approved updates
-        if: |
-          steps.pr-details.outputs.is_minor_or_patch == 'true' &&
-          steps.pr-details.outputs.is_major_update == 'false' &&
-          steps.pr-details.outputs.is_security_update == 'false'
-        uses: actions/github-script@v8
+      - name: Enable auto-merge
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Enable auto-merge for this PR
             await github.graphql(`
               mutation($pullRequestId: ID!) {
                 enablePullRequestAutoMerge(input: {
@@ -95,74 +74,8 @@ jobs:
                   mergeMethod: SQUASH
                 }) {
                   pullRequest {
-                    autoMergeRequest {
-                      enabledAt
-                    }
+                    autoMergeRequest { enabledAt }
                   }
                 }
               }
-            `, {
-              pullRequestId: context.payload.pull_request.node_id
-            });
-
-            console.log('Auto-merge enabled for this PR');
-
-  report:
-    name: Report dependency update
-    runs-on: ubuntu-latest
-    if: |
-      (github.actor == 'dependabot[bot]' ||
-       github.actor == 'renovate[bot]') &&
-      contains(github.event.pull_request.labels.*.name, 'dependencies')
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 2
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 20
-
-      - name: Generate dependency diff
-        id: diff
-        run: |
-          git diff HEAD^1 HEAD -- package.json packages/*/package.json > deps.diff
-
-          if [ -s deps.diff ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Comment with dependency changes
-        if: steps.diff.outputs.has_changes == 'true'
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const diff = fs.readFileSync('deps.diff', 'utf8');
-
-            const comment = `## 📦 Dependency Changes
-
-            <details>
-            <summary>View dependency diff</summary>
-
-            \`\`\`diff
-            ${diff}
-            \`\`\`
-
-            </details>`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+            `, { pullRequestId: context.payload.pull_request.node_id });
