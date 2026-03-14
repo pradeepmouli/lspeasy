@@ -1,5 +1,12 @@
 # @lspeasy/core
 
+## 2.1.2
+
+### Patch Changes
+
+- [#63](https://github.com/pradeepmouli/lspeasy/pull/63) [`55b8573`](https://github.com/pradeepmouli/lspeasy/commit/55b857348a19535edc37d94b97bc3afe20934ddb) Thanks [@pradeepmouli](https://github.com/pradeepmouli)! - - refactor: extract shared capability guard logic into @lspeasy/core
+  - fix: improve CI workflow quality and consistency
+
 ## 2.1.1
 
 ### Patch Changes
