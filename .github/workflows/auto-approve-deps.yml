@@ -37,7 +37,7 @@ jobs:
           script: |
             // Skip if we already posted triage instructions (e.g. on reopen)
             const marker = '@copilot Please evaluate this dependency update';
-            const { data: comments } = await github.rest.issues.listComments({
+            const comments = await github.paginate(github.rest.issues.listComments, {
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,

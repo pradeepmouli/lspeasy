@@ -1,7 +1,7 @@
 name: Security Audit
 
 on:
-  # Run on every push to main and PRs
+  # Run on every push to master and PRs
   push:
     branches:
       - master

@@ -43,7 +43,7 @@ export const CLIENT_METHODS = buildMethodSets('ClientCapability');
 export interface CheckMethodOptions {
   method: string;
   methodSets: { all: Set<string>; alwaysAllowed: Set<string> };
-  getCapabilityKey: (method: string) => string | null;
+  getCapabilityKey: (method: string) => string | null | undefined;
   hasCapability: (key: string) => boolean;
   actionLabel: string;
   capabilityLabel: string;

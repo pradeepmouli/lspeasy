@@ -225,4 +225,3 @@ export {
   checkMethod
 } from './utils/capability-guard.js';
 export type { CheckMethodOptions } from './utils/capability-guard.js';
-// test
