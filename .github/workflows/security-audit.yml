@@ -4,10 +4,10 @@ on:
   # Run on every push to main and PRs
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
   # Run weekly on Monday at 3am UTC
   schedule:
     - cron: '0 3 * * 1'
@@ -89,7 +89,7 @@ jobs:
 
             Run \`pnpm audit\` locally for detailed information.`;
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
