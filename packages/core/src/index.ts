@@ -216,4 +216,12 @@ export type {
 export { isMessage, isWorkerTransportEnvelope } from './transport/worker-types.js';
 
 export * from './protocol/capabilities.js';
-// test
+
+// Capability guard utilities (shared by client and server)
+export {
+  buildMethodSets,
+  SERVER_METHODS,
+  CLIENT_METHODS,
+  checkMethod
+} from './utils/capability-guard.js';
+export type { CheckMethodOptions } from './utils/capability-guard.js';
