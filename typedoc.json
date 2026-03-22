@@ -1,22 +1,20 @@
 {
-  "entryPoints": ["packages/*/src/index.ts"],
+  "entryPointStrategy": "packages",
+  "entryPoints": [
+    "packages/*"
+  ],
+  "tsconfig": "tsconfig.typedoc.json",
   "out": "docs/api",
-  "plugin": ["typedoc-plugin-markdown"],
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-plugin-to-skills"
+  ],
+  "skipErrorChecking": true,
   "includeVersion": true,
   "readme": "none",
   "githubPages": false,
-  "globalsOrder": "alphabetical",
-  "membersOrder": "alphabetical",
-  "parametersOrder": "alphabetical",
-  "enumMembersOrder": "alphabetical",
   "treatWarningsAsErrors": false,
-  "disableSources": false,
   "excludePrivate": true,
-  "excludeProtected": false,
-  "hideGenerator": true,
-  "maxTypeConversionDepth": 4,
-  "stripInternal": true,
-  "navigation": {
-    "includeCategories": true
-  }
+  "excludeInternal": true,
+  "hideGenerator": true
 }

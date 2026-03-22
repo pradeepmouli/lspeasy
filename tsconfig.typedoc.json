@@ -1,0 +1,15 @@
+{
+    "extends": "./tsconfig.json",
+    "include": [],
+    "references": [
+        {
+            "path": "packages/client/tsconfig.json"
+        },
+        {
+            "path": "packages/core/tsconfig.json"
+        },
+        {
+            "path": "packages/server/tsconfig.json"
+        }
+    ]
+}
