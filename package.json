@@ -53,7 +53,9 @@
     "changeset:version": "changeset version",
     "changeset:publish": "pnpm run build && changeset publish",
     "generate:protocol": "tsx scripts/generate-protocol-types.ts && oxfmt packages/core/src/protocol/*.ts",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "docs": "typedoc --out docs/html --plugin typedoc-plugin-to-skills",
+    "docs:md": "typedoc"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
