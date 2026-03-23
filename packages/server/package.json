@@ -37,10 +37,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsgo --build --watch",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsgo --noEmit"
   },
   "dependencies": {
     "@lspeasy/core": "workspace:*"
