@@ -34,10 +34,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsgo --build",
+    "build": "tsc --build",
     "clean": "rm -rf dist *.tsbuildinfo",
     "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit"
+    "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
     "@lspeasy/core": "workspace:^",
