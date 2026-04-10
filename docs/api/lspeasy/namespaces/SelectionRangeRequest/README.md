@@ -1,0 +1,22 @@
+[**lspeasy v1.0.0**](../../../README.md)
+
+***
+
+[lspeasy](../../../README.md) / SelectionRangeRequest
+
+# SelectionRangeRequest
+
+A request to provide selection ranges in a document. The request's
+parameter is of type [SelectionRangeParams](../../../interfaces/SelectionRangeParams.md), the
+response is of type [SelectionRange\[\]](../../../interfaces/SelectionRange.md) or a Thenable
+that resolves to such.
+
+## Type Aliases
+
+- [HandlerSignature](type-aliases/HandlerSignature.md)
+
+## Variables
+
+- [messageDirection](variables/messageDirection.md)
+- [method](variables/method.md)
+- [type](variables/type.md)

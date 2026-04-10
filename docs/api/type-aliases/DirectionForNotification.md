@@ -1,0 +1,17 @@
+[**lspeasy v1.0.0**](../README.md)
+
+***
+
+[lspeasy](../README.md) / DirectionForNotification
+
+# Type Alias: DirectionForNotification\<M\>
+
+> **DirectionForNotification**\<`M`\> = `M` *extends* [`LSPNotificationMethod`](LSPNotificationMethod.md) ? `FlatNotificationMap`\[`M`\] *extends* `object` ? `D` : `never` : `never`
+
+Defined in: [packages/core/src/protocol/infer.ts:122](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/infer.ts#L122)
+
+## Type Parameters
+
+### M
+
+`M` *extends* `string`
