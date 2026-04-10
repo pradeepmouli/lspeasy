@@ -8,7 +8,7 @@
 
 > **LSPRequest**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:10](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/namespaces.ts#L10)
+Defined in: [packages/core/src/protocol/namespaces.ts:10](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/namespaces.ts#L10)
 
 LSP Request methods organized by namespace
 

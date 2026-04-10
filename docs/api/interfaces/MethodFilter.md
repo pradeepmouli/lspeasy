@@ -6,7 +6,7 @@
 
 # Interface: MethodFilter
 
-Defined in: [packages/core/src/middleware/types.ts:69](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L69)
+Defined in: [packages/core/src/middleware/types.ts:69](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L69)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/middleware/types.ts:69](https://github.com/pradee
 
 > `optional` **direction?**: `"both"` \| [`MiddlewareDirection`](../type-aliases/MiddlewareDirection.md)
 
-Defined in: [packages/core/src/middleware/types.ts:71](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L71)
+Defined in: [packages/core/src/middleware/types.ts:71](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L71)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/core/src/middleware/types.ts:71](https://github.com/pradee
 
 > `optional` **messageType?**: [`MiddlewareMessageType`](../type-aliases/MiddlewareMessageType.md)[]
 
-Defined in: [packages/core/src/middleware/types.ts:72](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L72)
+Defined in: [packages/core/src/middleware/types.ts:72](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L72)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [packages/core/src/middleware/types.ts:72](https://github.com/pradee
 
 > **methods**: `RegExp` \| `string`[]
 
-Defined in: [packages/core/src/middleware/types.ts:70](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L70)
+Defined in: [packages/core/src/middleware/types.ts:70](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L70)

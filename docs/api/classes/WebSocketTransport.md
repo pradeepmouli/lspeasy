@@ -6,7 +6,7 @@
 
 # Class: WebSocketTransport
 
-Defined in: [packages/core/src/transport/websocket.ts:150](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L150)
+Defined in: [packages/core/src/transport/websocket.ts:150](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L150)
 
 WebSocket-based transport for LSP communication
 
@@ -24,7 +24,7 @@ Supports both client and server modes:
 
 > **new WebSocketTransport**(`options`): `WebSocketTransport`
 
-Defined in: [packages/core/src/transport/websocket.ts:169](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L169)
+Defined in: [packages/core/src/transport/websocket.ts:169](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L169)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/core/src/transport/websocket.ts:169](https://github.com/pr
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/transport/websocket.ts:395](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L395)
+Defined in: [packages/core/src/transport/websocket.ts:395](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L395)
 
 Close the WebSocket connection
 
@@ -60,7 +60,7 @@ Close the WebSocket connection
 
 > **getReconnectAttempts**(): `number`
 
-Defined in: [packages/core/src/transport/websocket.ts:435](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L435)
+Defined in: [packages/core/src/transport/websocket.ts:435](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L435)
 
 Get the current reconnection attempt count
 
@@ -74,7 +74,7 @@ Get the current reconnection attempt count
 
 > **isConnected**(): `boolean`
 
-Defined in: [packages/core/src/transport/websocket.ts:428](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L428)
+Defined in: [packages/core/src/transport/websocket.ts:428](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L428)
 
 Check if the transport is currently connected
 
@@ -92,7 +92,7 @@ Check if the transport is currently connected
 
 > **isReconnectEnabled**(): `boolean`
 
-Defined in: [packages/core/src/transport/websocket.ts:442](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L442)
+Defined in: [packages/core/src/transport/websocket.ts:442](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L442)
 
 Check if reconnection is enabled
 
@@ -106,7 +106,7 @@ Check if reconnection is enabled
 
 > **onClose**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/websocket.ts:382](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L382)
+Defined in: [packages/core/src/transport/websocket.ts:382](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L382)
 
 Register a handler for transport closure
 
@@ -130,7 +130,7 @@ Register a handler for transport closure
 
 > **onError**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/websocket.ts:369](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L369)
+Defined in: [packages/core/src/transport/websocket.ts:369](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L369)
 
 Register a handler for transport errors
 
@@ -154,7 +154,7 @@ Register a handler for transport errors
 
 > **onMessage**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/websocket.ts:356](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L356)
+Defined in: [packages/core/src/transport/websocket.ts:356](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L356)
 
 Register a handler for incoming messages
 
@@ -178,7 +178,7 @@ Register a handler for incoming messages
 
 > **send**(`message`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/transport/websocket.ts:324](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/websocket.ts#L324)
+Defined in: [packages/core/src/transport/websocket.ts:324](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/websocket.ts#L324)
 
 Send a message through the WebSocket
 

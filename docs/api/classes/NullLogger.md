@@ -6,7 +6,7 @@
 
 # Class: NullLogger
 
-Defined in: [packages/core/src/utils/logger.ts:68](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/logger.ts#L68)
+Defined in: [packages/core/src/utils/logger.ts:68](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/logger.ts#L68)
 
 No-op logger that discards all messages
 
@@ -30,7 +30,7 @@ No-op logger that discards all messages
 
 > **debug**(): `void`
 
-Defined in: [packages/core/src/utils/logger.ts:72](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/logger.ts#L72)
+Defined in: [packages/core/src/utils/logger.ts:72](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/logger.ts#L72)
 
 #### Returns
 
@@ -46,7 +46,7 @@ Defined in: [packages/core/src/utils/logger.ts:72](https://github.com/pradeepmou
 
 > **error**(): `void`
 
-Defined in: [packages/core/src/utils/logger.ts:69](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/logger.ts#L69)
+Defined in: [packages/core/src/utils/logger.ts:69](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/logger.ts#L69)
 
 #### Returns
 
@@ -62,7 +62,7 @@ Defined in: [packages/core/src/utils/logger.ts:69](https://github.com/pradeepmou
 
 > **info**(): `void`
 
-Defined in: [packages/core/src/utils/logger.ts:71](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/logger.ts#L71)
+Defined in: [packages/core/src/utils/logger.ts:71](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/logger.ts#L71)
 
 #### Returns
 
@@ -78,7 +78,7 @@ Defined in: [packages/core/src/utils/logger.ts:71](https://github.com/pradeepmou
 
 > **trace**(): `void`
 
-Defined in: [packages/core/src/utils/logger.ts:73](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/logger.ts#L73)
+Defined in: [packages/core/src/utils/logger.ts:73](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/logger.ts#L73)
 
 #### Returns
 
@@ -94,7 +94,7 @@ Defined in: [packages/core/src/utils/logger.ts:73](https://github.com/pradeepmou
 
 > **warn**(): `void`
 
-Defined in: [packages/core/src/utils/logger.ts:70](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/logger.ts#L70)
+Defined in: [packages/core/src/utils/logger.ts:70](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/logger.ts#L70)
 
 #### Returns
 

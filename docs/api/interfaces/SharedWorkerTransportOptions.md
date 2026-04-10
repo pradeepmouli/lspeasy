@@ -6,7 +6,7 @@
 
 # Interface: SharedWorkerTransportOptions
 
-Defined in: [packages/core/src/transport/shared-worker.ts:13](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/shared-worker.ts#L13)
+Defined in: [packages/core/src/transport/shared-worker.ts:13](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L13)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/transport/shared-worker.ts:13](https://github.com
 
 > **clientId**: `string`
 
-Defined in: [packages/core/src/transport/shared-worker.ts:16](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/shared-worker.ts#L16)
+Defined in: [packages/core/src/transport/shared-worker.ts:16](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L16)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/core/src/transport/shared-worker.ts:16](https://github.com
 
 > `optional` **port?**: [`MessagePortLike`](MessagePortLike.md)
 
-Defined in: [packages/core/src/transport/shared-worker.ts:14](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/shared-worker.ts#L14)
+Defined in: [packages/core/src/transport/shared-worker.ts:14](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L14)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [packages/core/src/transport/shared-worker.ts:14](https://github.com
 
 > `optional` **worker?**: [`SharedWorkerLike`](SharedWorkerLike.md)
 
-Defined in: [packages/core/src/transport/shared-worker.ts:15](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/shared-worker.ts#L15)
+Defined in: [packages/core/src/transport/shared-worker.ts:15](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L15)

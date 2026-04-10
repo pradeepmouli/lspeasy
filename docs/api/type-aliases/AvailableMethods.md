@@ -8,7 +8,7 @@
 
 > **AvailableMethods**\<`ClientCaps`, `ServerCaps`\> = `object`
 
-Defined in: [packages/core/src/protocol/capability-methods.ts:322](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/capability-methods.ts#L322)
+Defined in: [packages/core/src/protocol/capability-methods.ts:326](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/capability-methods.ts#L326)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [packages/core/src/protocol/capability-methods.ts:322](https://githu
 
 > **client**: `object`
 
-Defined in: [packages/core/src/protocol/capability-methods.ts:326](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/capability-methods.ts#L326)
+Defined in: [packages/core/src/protocol/capability-methods.ts:330](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/capability-methods.ts#L330)
 
 #### notificationHandlers
 
@@ -50,7 +50,7 @@ Defined in: [packages/core/src/protocol/capability-methods.ts:326](https://githu
 
 > **server**: `object`
 
-Defined in: [packages/core/src/protocol/capability-methods.ts:344](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/capability-methods.ts#L344)
+Defined in: [packages/core/src/protocol/capability-methods.ts:348](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/capability-methods.ts#L348)
 
 #### notificationHandlers
 

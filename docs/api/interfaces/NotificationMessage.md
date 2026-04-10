@@ -6,7 +6,7 @@
 
 # Interface: NotificationMessage
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:25](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/messages.ts#L25)
+Defined in: [packages/core/src/jsonrpc/messages.ts:25](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/jsonrpc/messages.ts#L25)
 
 JSON-RPC 2.0 Notification Message (no response expected)
 
@@ -20,7 +20,7 @@ JSON-RPC 2.0 Notification Message (no response expected)
 
 > **jsonrpc**: `"2.0"`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:10](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/messages.ts#L10)
+Defined in: [packages/core/src/jsonrpc/messages.ts:10](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/jsonrpc/messages.ts#L10)
 
 #### Inherited from
 
@@ -32,7 +32,7 @@ Defined in: [packages/core/src/jsonrpc/messages.ts:10](https://github.com/pradee
 
 > **method**: `string`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:26](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/messages.ts#L26)
+Defined in: [packages/core/src/jsonrpc/messages.ts:26](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/jsonrpc/messages.ts#L26)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/core/src/jsonrpc/messages.ts:26](https://github.com/pradee
 
 > `optional` **params?**: `unknown`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:27](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/messages.ts#L27)
+Defined in: [packages/core/src/jsonrpc/messages.ts:27](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/jsonrpc/messages.ts#L27)

@@ -8,7 +8,7 @@
 
 > **isMessage**(`value`): `value is Message`
 
-Defined in: [packages/core/src/transport/worker-types.ts:43](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/worker-types.ts#L43)
+Defined in: [packages/core/src/transport/worker-types.ts:43](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L43)
 
 Runtime guard for JSON-RPC message envelopes.
 

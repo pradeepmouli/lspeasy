@@ -6,7 +6,7 @@
 
 # Interface: ScopedMiddleware
 
-Defined in: [packages/core/src/middleware/types.ts:75](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L75)
+Defined in: [packages/core/src/middleware/types.ts:75](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L75)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/middleware/types.ts:75](https://github.com/pradee
 
 > **filter**: [`MethodFilter`](MethodFilter.md)
 
-Defined in: [packages/core/src/middleware/types.ts:76](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L76)
+Defined in: [packages/core/src/middleware/types.ts:76](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L76)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [packages/core/src/middleware/types.ts:76](https://github.com/pradee
 
 > **middleware**: [`Middleware`](../type-aliases/Middleware.md)
 
-Defined in: [packages/core/src/middleware/types.ts:77](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L77)
+Defined in: [packages/core/src/middleware/types.ts:77](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L77)

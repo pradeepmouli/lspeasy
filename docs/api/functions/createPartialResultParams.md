@@ -8,7 +8,7 @@
 
 > **createPartialResultParams**(`token`): [`PartialResultParams`](../interfaces/PartialResultParams.md)
 
-Defined in: [packages/core/src/protocol/partial.ts:23](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/partial.ts#L23)
+Defined in: [packages/core/src/protocol/partial.ts:23](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/partial.ts#L23)
 
 Helper to create partial result params
 

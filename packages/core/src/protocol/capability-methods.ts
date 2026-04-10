@@ -256,6 +256,7 @@ export type ToNotificationHandlerSignature<T> = T extends {
   : never;
 
 export namespace Client {
+  /** Mapped type of all available LSP request methods and their handler signatures */
   export type AvailableRequests<
     ClientCaps extends Partial<ClientCapabilities>,
     Requests extends Partial<LSPRequest> = LSPRequest
@@ -271,6 +272,7 @@ export namespace Client {
     }>
   >;
 
+  /** Mapped type of all available LSP notification methods and their handler signatures */
   export type AvailableNotifications<
     ClientCaps extends Partial<ClientCapabilities>,
     Notifications extends Partial<LSPNotification> = LSPNotification
@@ -288,6 +290,7 @@ export namespace Client {
 }
 
 export namespace Server {
+  /** Mapped type of all available LSP request methods and their handler signatures */
   export type AvailableRequests<
     ServerCaps extends Partial<ServerCapabilities>,
     Requests extends Partial<LSPRequest> = LSPRequest
@@ -303,6 +306,7 @@ export namespace Server {
     }>
   >;
 
+  /** Mapped type of all available LSP notification methods and their handler signatures */
   export type AvailableNotifications<
     ServerCaps extends Partial<ServerCapabilities>,
     Notifications extends Partial<LSPNotification> = LSPNotification
