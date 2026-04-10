@@ -57,8 +57,8 @@ importers:
         specifier: ^4.11.0
         version: 4.11.0(typedoc@0.28.17(typescript@5.9.3))
       typedoc-plugin-to-skills:
-        specifier: ^0.5.0
-        version: 0.5.0(typedoc@0.28.17(typescript@5.9.3))
+        specifier: ^0.5.1
+        version: 0.5.1(typedoc@0.28.17(typescript@5.9.3))
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -1071,8 +1071,8 @@ packages:
   '@to-skills/core@0.7.0':
     resolution: {integrity: sha512-u5H48TdWPd7CrNoMNN58bqKZ+sq5F5QHYzkWZc7aHGE55crkGGS38cwvMldc0Pq3MOoa29TaA3IGFY/f6jTMIg==}
 
-  '@to-skills/typedoc@0.8.0':
-    resolution: {integrity: sha512-5eWMWtQbfCreJbCSuRFafWsuGwDILicYMiVuLLMB3COe2YrBok6Chezl5eqNB7f4bmo8Y8qJk8jwipvwqwP2cQ==}
+  '@to-skills/typedoc@0.8.1':
+    resolution: {integrity: sha512-Kddy+xXzKJ3iSpORA6bn/sIa26LZ0mXG7PhSBvmZfp1re5oUI4Wbv8OoZOuUXtc1YQqCcuksIfOkV8aF5vIvaA==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -1952,8 +1952,8 @@ packages:
     peerDependencies:
       typedoc: 0.28.x
 
-  typedoc-plugin-to-skills@0.5.0:
-    resolution: {integrity: sha512-FfX+zIdPY96NA3WZ9ZMyLv2fCapwqq0cOFDMIYtCqKVXBC/nwy4SgYEh7WDO0tAfMJBEgS6iYf8xuM2OumSnmQ==}
+  typedoc-plugin-to-skills@0.5.1:
+    resolution: {integrity: sha512-B6PwT11Om6BXKEwKmgayFoEh2/YblnmrasguqEp+uucup3vli8VmlJTaw7EjcNHMWDZX+MM/Poh7WXvid6HfnQ==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -2828,7 +2828,7 @@ snapshots:
 
   '@to-skills/core@0.7.0': {}
 
-  '@to-skills/typedoc@0.8.0(typedoc@0.28.17(typescript@5.9.3))':
+  '@to-skills/typedoc@0.8.1(typedoc@0.28.17(typescript@5.9.3))':
     dependencies:
       '@to-skills/core': 0.7.0
       typedoc: 0.28.17(typescript@5.9.3)
@@ -3741,9 +3741,9 @@ snapshots:
     dependencies:
       typedoc: 0.28.17(typescript@5.9.3)
 
-  typedoc-plugin-to-skills@0.5.0(typedoc@0.28.17(typescript@5.9.3)):
+  typedoc-plugin-to-skills@0.5.1(typedoc@0.28.17(typescript@5.9.3)):
     dependencies:
-      '@to-skills/typedoc': 0.8.0(typedoc@0.28.17(typescript@5.9.3))
+      '@to-skills/typedoc': 0.8.1(typedoc@0.28.17(typescript@5.9.3))
       typedoc: 0.28.17(typescript@5.9.3)
 
   typedoc@0.28.17(typescript@5.9.3):

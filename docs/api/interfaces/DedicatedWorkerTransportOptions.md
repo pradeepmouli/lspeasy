@@ -6,7 +6,7 @@
 
 # Interface: DedicatedWorkerTransportOptions
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:7](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L7)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:7](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L7)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/transport/dedicated-worker.ts:7](https://github.c
 
 > `optional` **terminateOnClose?**: `boolean`
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:9](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L9)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:9](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L9)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [packages/core/src/transport/dedicated-worker.ts:9](https://github.c
 
 > **worker**: [`WorkerLike`](WorkerLike.md)
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:8](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L8)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:8](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L8)

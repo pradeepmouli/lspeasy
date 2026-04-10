@@ -6,7 +6,7 @@
 
 # Class: DedicatedWorkerTransport
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:13](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L13)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:13](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L13)
 
 JSON-RPC transport backed by a Dedicated Worker instance.
 
@@ -20,7 +20,7 @@ JSON-RPC transport backed by a Dedicated Worker instance.
 
 > **new DedicatedWorkerTransport**(`options`): `DedicatedWorkerTransport`
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:38](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L38)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:38](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L38)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [packages/core/src/transport/dedicated-worker.ts:38](https://github.
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:81](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L81)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:81](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L81)
 
 Close the transport connection
 
@@ -56,7 +56,7 @@ Close the transport connection
 
 > **isConnected**(): `boolean`
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:103](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L103)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:103](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L103)
 
 Check if transport is connected
 
@@ -74,7 +74,7 @@ Check if transport is connected
 
 > **onClose**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:72](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L72)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:72](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L72)
 
 Subscribe to connection close
 
@@ -100,7 +100,7 @@ Disposable to unsubscribe
 
 > **onError**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:63](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L63)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:63](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L63)
 
 Subscribe to transport errors
 
@@ -126,7 +126,7 @@ Disposable to unsubscribe
 
 > **onMessage**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:54](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L54)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:54](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L54)
 
 Subscribe to incoming messages
 
@@ -152,7 +152,7 @@ Disposable to unsubscribe
 
 > **send**(`message`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/transport/dedicated-worker.ts:46](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/dedicated-worker.ts#L46)
+Defined in: [packages/core/src/transport/dedicated-worker.ts:46](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/dedicated-worker.ts#L46)
 
 Send a message to the remote peer
 

@@ -6,7 +6,7 @@
 
 # Interface: SharedWorkerLike
 
-Defined in: [packages/core/src/transport/worker-types.ts:32](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/worker-types.ts#L32)
+Defined in: [packages/core/src/transport/worker-types.ts:32](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/worker-types.ts#L32)
 
 Shared worker wrapper exposing a message port.
 
@@ -16,4 +16,4 @@ Shared worker wrapper exposing a message port.
 
 > **port**: [`MessagePortLike`](MessagePortLike.md)
 
-Defined in: [packages/core/src/transport/worker-types.ts:33](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/worker-types.ts#L33)
+Defined in: [packages/core/src/transport/worker-types.ts:33](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/worker-types.ts#L33)

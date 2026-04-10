@@ -6,7 +6,7 @@
 
 # Interface: UnregisterCapability
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:20](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/dynamic-registration.ts#L20)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:20](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/dynamic-registration.ts#L20)
 
 Entry used by `client/unregisterCapability`.
 
@@ -16,7 +16,7 @@ Entry used by `client/unregisterCapability`.
 
 > **id**: `string`
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:21](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/dynamic-registration.ts#L21)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:21](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/dynamic-registration.ts#L21)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/core/src/protocol/dynamic-registration.ts:21](https://gith
 
 > **method**: `string`
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:22](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/dynamic-registration.ts#L22)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:22](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/dynamic-registration.ts#L22)

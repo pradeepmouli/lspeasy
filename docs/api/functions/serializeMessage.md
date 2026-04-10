@@ -8,7 +8,7 @@
 
 > **serializeMessage**(`message`): `Buffer`
 
-Defined in: [packages/core/src/jsonrpc/framing.ts:103](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/framing.ts#L103)
+Defined in: [packages/core/src/jsonrpc/framing.ts:103](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/framing.ts#L103)
 
 Serialize a message to buffer with headers
 

@@ -6,7 +6,7 @@
 
 # Class: DisposableStore
 
-Defined in: [packages/core/src/utils/disposable.ts:16](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable.ts#L16)
+Defined in: [packages/core/src/utils/disposable.ts:16](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable.ts#L16)
 
 Store for managing multiple disposables
 
@@ -30,7 +30,7 @@ Store for managing multiple disposables
 
 > **add**\<`T`\>(`disposable`): `T`
 
-Defined in: [packages/core/src/utils/disposable.ts:23](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable.ts#L23)
+Defined in: [packages/core/src/utils/disposable.ts:23](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable.ts#L23)
 
 Add a disposable to the store
 
@@ -56,7 +56,7 @@ Add a disposable to the store
 
 > **clear**(): `void`
 
-Defined in: [packages/core/src/utils/disposable.ts:63](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable.ts#L63)
+Defined in: [packages/core/src/utils/disposable.ts:63](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable.ts#L63)
 
 Clear all disposables without disposing them
 
@@ -70,7 +70,7 @@ Clear all disposables without disposing them
 
 > **dispose**(): `void`
 
-Defined in: [packages/core/src/utils/disposable.ts:35](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable.ts#L35)
+Defined in: [packages/core/src/utils/disposable.ts:35](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable.ts#L35)
 
 Dispose all resources in the store
 
@@ -88,7 +88,7 @@ Dispose all resources in the store
 
 > **isDisposed**(): `boolean`
 
-Defined in: [packages/core/src/utils/disposable.ts:56](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable.ts#L56)
+Defined in: [packages/core/src/utils/disposable.ts:56](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable.ts#L56)
 
 Check if store is disposed
 

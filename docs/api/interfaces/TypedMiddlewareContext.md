@@ -6,7 +6,7 @@
 
 # Interface: TypedMiddlewareContext\<M\>
 
-Defined in: [packages/core/src/middleware/types.ts:45](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L45)
+Defined in: [packages/core/src/middleware/types.ts:45](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L45)
 
 ## Extends
 
@@ -24,7 +24,7 @@ Defined in: [packages/core/src/middleware/types.ts:45](https://github.com/pradee
 
 > **direction**: [`MiddlewareDirection`](../type-aliases/MiddlewareDirection.md)
 
-Defined in: [packages/core/src/middleware/types.ts:25](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L25)
+Defined in: [packages/core/src/middleware/types.ts:25](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L25)
 
 #### Inherited from
 
@@ -36,7 +36,7 @@ Defined in: [packages/core/src/middleware/types.ts:25](https://github.com/pradee
 
 > **message**: [`MiddlewareMessage`](../type-aliases/MiddlewareMessage.md)
 
-Defined in: [packages/core/src/middleware/types.ts:28](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L28)
+Defined in: [packages/core/src/middleware/types.ts:28](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L28)
 
 #### Inherited from
 
@@ -48,7 +48,7 @@ Defined in: [packages/core/src/middleware/types.ts:28](https://github.com/pradee
 
 > **messageType**: [`MiddlewareMessageType`](../type-aliases/MiddlewareMessageType.md)
 
-Defined in: [packages/core/src/middleware/types.ts:26](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L26)
+Defined in: [packages/core/src/middleware/types.ts:26](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L26)
 
 #### Inherited from
 
@@ -60,7 +60,7 @@ Defined in: [packages/core/src/middleware/types.ts:26](https://github.com/pradee
 
 > **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/middleware/types.ts:29](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L29)
+Defined in: [packages/core/src/middleware/types.ts:29](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L29)
 
 #### Inherited from
 
@@ -72,7 +72,7 @@ Defined in: [packages/core/src/middleware/types.ts:29](https://github.com/pradee
 
 > **method**: `M`
 
-Defined in: [packages/core/src/middleware/types.ts:46](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L46)
+Defined in: [packages/core/src/middleware/types.ts:46](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L46)
 
 #### Overrides
 
@@ -84,7 +84,7 @@ Defined in: [packages/core/src/middleware/types.ts:46](https://github.com/pradee
 
 > **params**: [`TypedParams`](../type-aliases/TypedParams.md)\<`M`\>
 
-Defined in: [packages/core/src/middleware/types.ts:47](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L47)
+Defined in: [packages/core/src/middleware/types.ts:47](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L47)
 
 ***
 
@@ -92,7 +92,7 @@ Defined in: [packages/core/src/middleware/types.ts:47](https://github.com/pradee
 
 > `optional` **result?**: [`TypedResult`](../type-aliases/TypedResult.md)\<`M`\>
 
-Defined in: [packages/core/src/middleware/types.ts:48](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L48)
+Defined in: [packages/core/src/middleware/types.ts:48](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L48)
 
 ***
 
@@ -100,7 +100,7 @@ Defined in: [packages/core/src/middleware/types.ts:48](https://github.com/pradee
 
 > **transport**: `string`
 
-Defined in: [packages/core/src/middleware/types.ts:30](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/middleware/types.ts#L30)
+Defined in: [packages/core/src/middleware/types.ts:30](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/middleware/types.ts#L30)
 
 #### Inherited from
 

@@ -6,7 +6,7 @@
 
 # Interface: ResponseErrorInterface
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:33](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L33)
+Defined in: [packages/core/src/jsonrpc/messages.ts:33](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/messages.ts#L33)
 
 JSON-RPC 2.0 Response Error
 
@@ -16,7 +16,7 @@ JSON-RPC 2.0 Response Error
 
 > **code**: `number`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:34](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L34)
+Defined in: [packages/core/src/jsonrpc/messages.ts:34](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/messages.ts#L34)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/core/src/jsonrpc/messages.ts:34](https://github.com/pradee
 
 > `optional` **data?**: `unknown`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:36](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L36)
+Defined in: [packages/core/src/jsonrpc/messages.ts:36](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/messages.ts#L36)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/core/src/jsonrpc/messages.ts:36](https://github.com/pradee
 
 > **message**: `string`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:35](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L35)
+Defined in: [packages/core/src/jsonrpc/messages.ts:35](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/jsonrpc/messages.ts#L35)

@@ -6,7 +6,7 @@
 
 # Interface: IncrementalChange
 
-Defined in: [packages/core/src/utils/document.ts:57](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L57)
+Defined in: [packages/core/src/utils/document.ts:57](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L57)
 
 Represents a single incremental text document change.
 
@@ -16,7 +16,7 @@ Represents a single incremental text document change.
 
 > **range**: [`Range`](Range.md)
 
-Defined in: [packages/core/src/utils/document.ts:58](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L58)
+Defined in: [packages/core/src/utils/document.ts:58](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L58)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/core/src/utils/document.ts:58](https://github.com/pradeepm
 
 > `optional` **rangeLength?**: `number`
 
-Defined in: [packages/core/src/utils/document.ts:60](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L60)
+Defined in: [packages/core/src/utils/document.ts:60](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L60)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/core/src/utils/document.ts:60](https://github.com/pradeepm
 
 > **text**: `string`
 
-Defined in: [packages/core/src/utils/document.ts:59](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L59)
+Defined in: [packages/core/src/utils/document.ts:59](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L59)

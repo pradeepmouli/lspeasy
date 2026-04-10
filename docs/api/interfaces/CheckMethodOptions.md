@@ -6,7 +6,7 @@
 
 # Interface: CheckMethodOptions
 
-Defined in: [packages/core/src/utils/capability-guard.ts:43](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L43)
+Defined in: [packages/core/src/utils/capability-guard.ts:43](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L43)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/utils/capability-guard.ts:43](https://github.com/
 
 > **actionLabel**: `string`
 
-Defined in: [packages/core/src/utils/capability-guard.ts:48](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L48)
+Defined in: [packages/core/src/utils/capability-guard.ts:48](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L48)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/core/src/utils/capability-guard.ts:48](https://github.com/
 
 > **capabilityLabel**: `string`
 
-Defined in: [packages/core/src/utils/capability-guard.ts:49](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L49)
+Defined in: [packages/core/src/utils/capability-guard.ts:49](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L49)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [packages/core/src/utils/capability-guard.ts:49](https://github.com/
 
 > **getCapabilityKey**: (`method`) => `string` \| `null` \| `undefined`
 
-Defined in: [packages/core/src/utils/capability-guard.ts:46](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L46)
+Defined in: [packages/core/src/utils/capability-guard.ts:46](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L46)
 
 #### Parameters
 
@@ -48,7 +48,7 @@ Defined in: [packages/core/src/utils/capability-guard.ts:46](https://github.com/
 
 > **hasCapability**: (`key`) => `boolean`
 
-Defined in: [packages/core/src/utils/capability-guard.ts:47](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L47)
+Defined in: [packages/core/src/utils/capability-guard.ts:47](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L47)
 
 #### Parameters
 
@@ -66,7 +66,7 @@ Defined in: [packages/core/src/utils/capability-guard.ts:47](https://github.com/
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [packages/core/src/utils/capability-guard.ts:50](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L50)
+Defined in: [packages/core/src/utils/capability-guard.ts:50](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L50)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [packages/core/src/utils/capability-guard.ts:50](https://github.com/
 
 > **method**: `string`
 
-Defined in: [packages/core/src/utils/capability-guard.ts:44](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L44)
+Defined in: [packages/core/src/utils/capability-guard.ts:44](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L44)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [packages/core/src/utils/capability-guard.ts:44](https://github.com/
 
 > **methodSets**: `object`
 
-Defined in: [packages/core/src/utils/capability-guard.ts:45](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L45)
+Defined in: [packages/core/src/utils/capability-guard.ts:45](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L45)
 
 #### all
 
@@ -98,4 +98,4 @@ Defined in: [packages/core/src/utils/capability-guard.ts:45](https://github.com/
 
 > **strict**: `boolean`
 
-Defined in: [packages/core/src/utils/capability-guard.ts:51](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/capability-guard.ts#L51)
+Defined in: [packages/core/src/utils/capability-guard.ts:51](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/capability-guard.ts#L51)

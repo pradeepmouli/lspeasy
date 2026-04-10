@@ -6,7 +6,7 @@
 
 # Class: TransportEventEmitter
 
-Defined in: [packages/core/src/transport/events.ts:18](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/events.ts#L18)
+Defined in: [packages/core/src/transport/events.ts:18](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/events.ts#L18)
 
 Transport event emitter
 
@@ -34,7 +34,7 @@ Transport event emitter
 
 > **dispose**(): `void`
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:103](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable-event-emitter.ts#L103)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:103](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable-event-emitter.ts#L103)
 
 Dispose all listeners and prevent further registrations.
 
@@ -52,7 +52,7 @@ Dispose all listeners and prevent further registrations.
 
 > **emit**\<`K`\>(`event`, ...`args`): `void`
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:85](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable-event-emitter.ts#L85)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:85](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable-event-emitter.ts#L85)
 
 Emit an event to all registered listeners in registration order.
 
@@ -86,7 +86,7 @@ Emit an event to all registered listeners in registration order.
 
 > **emitConnect**(): `void`
 
-Defined in: [packages/core/src/transport/events.ts:22](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/events.ts#L22)
+Defined in: [packages/core/src/transport/events.ts:22](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/events.ts#L22)
 
 Emit connect event
 
@@ -100,7 +100,7 @@ Emit connect event
 
 > **emitDisconnect**(): `void`
 
-Defined in: [packages/core/src/transport/events.ts:29](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/events.ts#L29)
+Defined in: [packages/core/src/transport/events.ts:29](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/events.ts#L29)
 
 Emit disconnect event
 
@@ -114,7 +114,7 @@ Emit disconnect event
 
 > **emitError**(`error`): `void`
 
-Defined in: [packages/core/src/transport/events.ts:36](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/events.ts#L36)
+Defined in: [packages/core/src/transport/events.ts:36](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/events.ts#L36)
 
 Emit error event
 
@@ -134,7 +134,7 @@ Emit error event
 
 > **emitMessage**(`message`): `void`
 
-Defined in: [packages/core/src/transport/events.ts:43](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/events.ts#L43)
+Defined in: [packages/core/src/transport/events.ts:43](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/transport/events.ts#L43)
 
 Emit message event
 
@@ -154,7 +154,7 @@ Emit message event
 
 > **on**\<`K`\>(`event`, `listener`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:24](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable-event-emitter.ts#L24)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:24](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable-event-emitter.ts#L24)
 
 Register a listener and receive a disposable to unregister it.
 
@@ -188,7 +188,7 @@ Register a listener and receive a disposable to unregister it.
 
 > **once**\<`K`\>(`event`, `listener`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:54](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/disposable-event-emitter.ts#L54)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:54](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/disposable-event-emitter.ts#L54)
 
 Register a one-time listener that automatically unregisters after first emission.
 

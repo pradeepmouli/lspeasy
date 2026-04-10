@@ -8,7 +8,7 @@
 
 > **clientSupportsRequest**\<`M`, `T`\>(`method`, `capabilities`): capabilities is T & \{ \[KeyType in string \| number \| symbol\]: UnionToIntersection\<\{ \[P in "window.showMessage" \| "workspace.codeLens" \| "workspace.applyEdit" \| "window.workDoneProgress" \| "window.showDocument.support" \| "workspace.workspaceFolders" \| "workspace.configuration" \| "workspace.semanticTokens.refreshSupport" \| "workspace.inlineValue.refreshSupport" \| "workspace.inlayHint.refreshSupport" \| "workspace.diagnostics.refreshSupport"\]: \{ \[KeyType in string \| number \| symbol\]: PickDeepObject\<ClientCapabilities, P\>\[KeyType\] \} \}\[ClientCapabilityForRequest\<M\>\]\>\[KeyType\] \}
 
-Defined in: [packages/core/src/protocol/capabilities.ts:102](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/capabilities.ts#L102)
+Defined in: [packages/core/src/protocol/capabilities.ts:102](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/capabilities.ts#L102)
 
 Check if a method is supported by the given client capabilities
 

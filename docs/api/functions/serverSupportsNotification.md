@@ -8,7 +8,7 @@
 
 > **serverSupportsNotification**\<`M`, `T`\>(`method`, `capabilities`): capabilities is T & \{ \[KeyType in string \| number \| symbol\]: UnionToIntersection\<\{ \[P in "textDocumentSync" \| "textDocumentSync.openClose" \| "textDocumentSync.willSave" \| "textDocumentSync.save" \| "workspace.workspaceFolders.changeNotifications" \| "workspace.fileOperations.didCreate" \| "workspace.fileOperations.didRename" \| "workspace.fileOperations.didDelete"\]: \{ \[KeyType in string \| number \| symbol\]: PickDeepObject\<ServerCapabilities\<any\>, P\>\[KeyType\] \} \}\[ServerCapabilityForNotification\<M\>\]\>\[KeyType\] \}
 
-Defined in: [packages/core/src/protocol/capabilities.ts:84](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/capabilities.ts#L84)
+Defined in: [packages/core/src/protocol/capabilities.ts:84](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/capabilities.ts#L84)
 
 ## Type Parameters
 

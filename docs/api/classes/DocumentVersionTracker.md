@@ -6,7 +6,7 @@
 
 # Class: DocumentVersionTracker
 
-Defined in: [packages/core/src/utils/document.ts:11](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L11)
+Defined in: [packages/core/src/utils/document.ts:11](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L11)
 
 Tracks per-document versions for change notifications.
 
@@ -26,7 +26,7 @@ Tracks per-document versions for change notifications.
 
 > **close**(`uri`): `void`
 
-Defined in: [packages/core/src/utils/document.ts:41](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L41)
+Defined in: [packages/core/src/utils/document.ts:41](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L41)
 
 Stops tracking a document URI.
 
@@ -46,7 +46,7 @@ Stops tracking a document URI.
 
 > **currentVersion**(`uri`): `number` \| `undefined`
 
-Defined in: [packages/core/src/utils/document.ts:34](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L34)
+Defined in: [packages/core/src/utils/document.ts:34](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L34)
 
 Returns the current tracked version, if any.
 
@@ -66,7 +66,7 @@ Returns the current tracked version, if any.
 
 > **nextVersion**(`uri`): `number`
 
-Defined in: [packages/core/src/utils/document.ts:24](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L24)
+Defined in: [packages/core/src/utils/document.ts:24](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L24)
 
 Increments and returns the next document version.
 
@@ -86,7 +86,7 @@ Increments and returns the next document version.
 
 > **open**(`uri`, `initialVersion?`): `void`
 
-Defined in: [packages/core/src/utils/document.ts:17](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/document.ts#L17)
+Defined in: [packages/core/src/utils/document.ts:17](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/document.ts#L17)
 
 Starts tracking a document URI with an optional initial version.
 

@@ -8,7 +8,7 @@
 
 > **ServerHandlers**\<`ServerCaps`\> = `Simplify`\<`RemoveNever`\<`` { [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof LSPRequest[Namespace] as `on${Method & string}`]: TransformToServerHandler<LSPRequest[Namespace][Method], ServerCaps> }> } ``\>\>
 
-Defined in: [packages/core/src/protocol/capability-methods.ts:165](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/capability-methods.ts#L165)
+Defined in: [packages/core/src/protocol/capability-methods.ts:165](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/protocol/capability-methods.ts#L165)
 
 Server handler registration methods (for requests from client)
 Handlers are conditionally visible based on ServerCapabilities

@@ -6,7 +6,7 @@
 
 # Interface: CancellationToken
 
-Defined in: [packages/core/src/utils/cancellation.ts:12](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/cancellation.ts#L12)
+Defined in: [packages/core/src/utils/cancellation.ts:12](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/cancellation.ts#L12)
 
 Token that can be used to signal cancellation
 
@@ -16,7 +16,7 @@ Token that can be used to signal cancellation
 
 > `readonly` **isCancellationRequested**: `boolean`
 
-Defined in: [packages/core/src/utils/cancellation.ts:16](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/cancellation.ts#L16)
+Defined in: [packages/core/src/utils/cancellation.ts:16](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/cancellation.ts#L16)
 
 Check if cancellation has been requested
 
@@ -26,7 +26,7 @@ Check if cancellation has been requested
 
 > **onCancellationRequested**(`callback`): [`Disposable`](Disposable.md)
 
-Defined in: [packages/core/src/utils/cancellation.ts:22](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/cancellation.ts#L22)
+Defined in: [packages/core/src/utils/cancellation.ts:22](https://github.com/pradeepmouli/lspeasy/blob/376bc5f0c5c131f9052829a682564c2344e71fd6/packages/core/src/utils/cancellation.ts#L22)
 
 Register callback to be called when cancellation is requested
 
