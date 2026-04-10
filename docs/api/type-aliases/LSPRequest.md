@@ -8,7 +8,7 @@
 
 > **LSPRequest** = `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:10](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L10)
+Defined in: [packages/core/src/protocol/namespaces.ts:10](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L10)
 
 LSP Request type definitions organized by namespace
 
@@ -18,7 +18,7 @@ LSP Request type definitions organized by namespace
 
 > **CallHierarchy**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:11](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L11)
+Defined in: [packages/core/src/protocol/namespaces.ts:11](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L11)
 
 #### IncomingCalls
 
@@ -82,7 +82,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:11](https://github.com/pra
 
 > **Client**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:29](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L29)
+Defined in: [packages/core/src/protocol/namespaces.ts:29](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L29)
 
 #### Registration
 
@@ -130,7 +130,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:29](https://github.com/pra
 
 > **CodeAction**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:43](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L43)
+Defined in: [packages/core/src/protocol/namespaces.ts:43](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L43)
 
 #### Resolve
 
@@ -166,7 +166,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:43](https://github.com/pra
 
 > **CodeLens**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:53](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L53)
+Defined in: [packages/core/src/protocol/namespaces.ts:53](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L53)
 
 #### Resolve
 
@@ -202,7 +202,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:53](https://github.com/pra
 
 > **CompletionItem**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:63](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L63)
+Defined in: [packages/core/src/protocol/namespaces.ts:63](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L63)
 
 #### CompletionResolve
 
@@ -238,7 +238,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:63](https://github.com/pra
 
 > **DocumentLink**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:73](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L73)
+Defined in: [packages/core/src/protocol/namespaces.ts:73](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L73)
 
 #### Resolve
 
@@ -274,7 +274,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:73](https://github.com/pra
 
 > **InlayHint**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:83](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L83)
+Defined in: [packages/core/src/protocol/namespaces.ts:83](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L83)
 
 #### Resolve
 
@@ -314,7 +314,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:83](https://github.com/pra
 
 > **Lifecycle**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:94](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L94)
+Defined in: [packages/core/src/protocol/namespaces.ts:94](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L94)
 
 #### Initialize
 
@@ -366,7 +366,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:94](https://github.com/pra
 
 > **TextDocument**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:109](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L109)
+Defined in: [packages/core/src/protocol/namespaces.ts:109](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L109)
 
 #### CallHierarchyPrepare
 
@@ -1650,7 +1650,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:109](https://github.com/pr
 
 > **TypeHierarchy**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:465](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L465)
+Defined in: [packages/core/src/protocol/namespaces.ts:465](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L465)
 
 #### Subtypes
 
@@ -1714,7 +1714,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:465](https://github.com/pr
 
 > **Window**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:483](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L483)
+Defined in: [packages/core/src/protocol/namespaces.ts:483](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L483)
 
 #### ShowDocument
 
@@ -1798,7 +1798,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:483](https://github.com/pr
 
 > **Workspace**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:507](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L507)
+Defined in: [packages/core/src/protocol/namespaces.ts:507](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L507)
 
 #### ApplyWorkspaceEdit
 
@@ -2342,7 +2342,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:507](https://github.com/pr
 
 > **WorkspaceSymbol**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:660](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L660)
+Defined in: [packages/core/src/protocol/namespaces.ts:660](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L660)
 
 #### Resolve
 

@@ -6,7 +6,7 @@
 
 # Class: CancellationTokenSource
 
-Defined in: [packages/core/src/utils/cancellation.ts:32](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/cancellation.ts#L32)
+Defined in: [packages/core/src/utils/cancellation.ts:32](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/cancellation.ts#L32)
 
 Source that controls a CancellationToken
 
@@ -16,7 +16,7 @@ Source that controls a CancellationToken
 
 > **new CancellationTokenSource**(): `CancellationTokenSource`
 
-Defined in: [packages/core/src/utils/cancellation.ts:37](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/cancellation.ts#L37)
+Defined in: [packages/core/src/utils/cancellation.ts:37](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/cancellation.ts#L37)
 
 #### Returns
 
@@ -30,7 +30,7 @@ Defined in: [packages/core/src/utils/cancellation.ts:37](https://github.com/prad
 
 > **get** **token**(): [`CancellationToken`](../type-aliases/CancellationToken.md)
 
-Defined in: [packages/core/src/utils/cancellation.ts:67](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/cancellation.ts#L67)
+Defined in: [packages/core/src/utils/cancellation.ts:67](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/cancellation.ts#L67)
 
 Get the token
 
@@ -44,7 +44,7 @@ Get the token
 
 > **cancel**(): `void`
 
-Defined in: [packages/core/src/utils/cancellation.ts:74](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/cancellation.ts#L74)
+Defined in: [packages/core/src/utils/cancellation.ts:74](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/cancellation.ts#L74)
 
 Signal cancellation
 
@@ -58,7 +58,7 @@ Signal cancellation
 
 > **dispose**(): `void`
 
-Defined in: [packages/core/src/utils/cancellation.ts:86](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/cancellation.ts#L86)
+Defined in: [packages/core/src/utils/cancellation.ts:86](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/cancellation.ts#L86)
 
 Dispose the source
 

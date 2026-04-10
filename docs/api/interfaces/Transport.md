@@ -6,7 +6,7 @@
 
 # Interface: Transport
 
-Defined in: [packages/core/src/transport/transport.ts:11](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/transport.ts#L11)
+Defined in: [packages/core/src/transport/transport.ts:11](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/transport.ts#L11)
 
 Transport interface for sending/receiving JSON-RPC messages
 
@@ -16,7 +16,7 @@ Transport interface for sending/receiving JSON-RPC messages
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/transport/transport.ts:38](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/transport.ts#L38)
+Defined in: [packages/core/src/transport/transport.ts:38](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/transport.ts#L38)
 
 Close the transport connection
 
@@ -30,7 +30,7 @@ Close the transport connection
 
 > **isConnected**(): `boolean`
 
-Defined in: [packages/core/src/transport/transport.ts:43](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/transport.ts#L43)
+Defined in: [packages/core/src/transport/transport.ts:43](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/transport.ts#L43)
 
 Check if transport is connected
 
@@ -44,7 +44,7 @@ Check if transport is connected
 
 > **onClose**(`handler`): [`Disposable`](Disposable.md)
 
-Defined in: [packages/core/src/transport/transport.ts:33](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/transport.ts#L33)
+Defined in: [packages/core/src/transport/transport.ts:33](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/transport.ts#L33)
 
 Subscribe to connection close
 
@@ -66,7 +66,7 @@ Disposable to unsubscribe
 
 > **onError**(`handler`): [`Disposable`](Disposable.md)
 
-Defined in: [packages/core/src/transport/transport.ts:27](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/transport.ts#L27)
+Defined in: [packages/core/src/transport/transport.ts:27](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/transport.ts#L27)
 
 Subscribe to transport errors
 
@@ -88,7 +88,7 @@ Disposable to unsubscribe
 
 > **onMessage**(`handler`): [`Disposable`](Disposable.md)
 
-Defined in: [packages/core/src/transport/transport.ts:21](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/transport.ts#L21)
+Defined in: [packages/core/src/transport/transport.ts:21](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/transport.ts#L21)
 
 Subscribe to incoming messages
 
@@ -110,7 +110,7 @@ Disposable to unsubscribe
 
 > **send**(`message`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/transport/transport.ts:15](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/transport.ts#L15)
+Defined in: [packages/core/src/transport/transport.ts:15](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/transport.ts#L15)
 
 Send a message to the remote peer
 

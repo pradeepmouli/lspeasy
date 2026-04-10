@@ -6,7 +6,7 @@
 
 # Interface: WorkerTransportEnvelope
 
-Defined in: [packages/core/src/transport/worker-types.ts:37](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/worker-types.ts#L37)
+Defined in: [packages/core/src/transport/worker-types.ts:37](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/worker-types.ts#L37)
 
 Envelope used by shared worker transport to preserve client isolation.
 
@@ -16,7 +16,7 @@ Envelope used by shared worker transport to preserve client isolation.
 
 > **clientId**: `string`
 
-Defined in: [packages/core/src/transport/worker-types.ts:38](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/worker-types.ts#L38)
+Defined in: [packages/core/src/transport/worker-types.ts:38](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/worker-types.ts#L38)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/core/src/transport/worker-types.ts:38](https://github.com/
 
 > **message**: [`Message`](../type-aliases/Message.md)
 
-Defined in: [packages/core/src/transport/worker-types.ts:39](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/worker-types.ts#L39)
+Defined in: [packages/core/src/transport/worker-types.ts:39](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/worker-types.ts#L39)

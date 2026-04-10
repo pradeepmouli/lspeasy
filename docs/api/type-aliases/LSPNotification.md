@@ -8,7 +8,7 @@
 
 > **LSPNotification** = `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:673](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L673)
+Defined in: [packages/core/src/protocol/namespaces.ts:673](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L673)
 
 LSP Notification type definitions organized by namespace
 
@@ -18,7 +18,7 @@ LSP Notification type definitions organized by namespace
 
 > **General**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:674](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L674)
+Defined in: [packages/core/src/protocol/namespaces.ts:674](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L674)
 
 #### Cancel
 
@@ -90,7 +90,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:674](https://github.com/pr
 
 > **Lifecycle**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:696](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L696)
+Defined in: [packages/core/src/protocol/namespaces.ts:696](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L696)
 
 #### Exit
 
@@ -130,7 +130,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:696](https://github.com/pr
 
 > **NotebookDocument**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:708](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L708)
+Defined in: [packages/core/src/protocol/namespaces.ts:708](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L708)
 
 #### DidChangeNotebookDocument
 
@@ -246,7 +246,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:708](https://github.com/pr
 
 > **Telemetry**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:741](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L741)
+Defined in: [packages/core/src/protocol/namespaces.ts:741](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L741)
 
 #### Event
 
@@ -270,7 +270,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:741](https://github.com/pr
 
 > **TextDocument**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:748](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L748)
+Defined in: [packages/core/src/protocol/namespaces.ts:748](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L748)
 
 #### DidChangeTextDocument
 
@@ -438,7 +438,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:748](https://github.com/pr
 
 > **Window**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:796](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L796)
+Defined in: [packages/core/src/protocol/namespaces.ts:796](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L796)
 
 #### LogMessage
 
@@ -498,7 +498,7 @@ Defined in: [packages/core/src/protocol/namespaces.ts:796](https://github.com/pr
 
 > **Workspace**: `object`
 
-Defined in: [packages/core/src/protocol/namespaces.ts:814](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/namespaces.ts#L814)
+Defined in: [packages/core/src/protocol/namespaces.ts:814](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/namespaces.ts#L814)
 
 #### DidChangeConfiguration
 

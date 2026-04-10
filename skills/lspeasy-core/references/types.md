@@ -1,6 +1,6 @@
 # Types & Enums
 
-## Types
+## capability-methods
 
 ### `AvailableRequests`
 ```ts

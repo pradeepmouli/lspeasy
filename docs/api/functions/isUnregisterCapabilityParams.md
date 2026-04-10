@@ -8,7 +8,7 @@
 
 > **isUnregisterCapabilityParams**(`value`): `value is UnregisterCapabilityParams`
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:55](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/dynamic-registration.ts#L55)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:55](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/dynamic-registration.ts#L55)
 
 Runtime guard for unregister-capability params.
 

@@ -1,18 +1,21 @@
 ---
 name: lspeasy-core
-description: "API reference for @lspeasy/core Keywords: lsp, language-server-protocol, sdk, language-server, lsp-client, lsp-server."
+description: "TypeScript SDK for building Language Server Protocol clients and servers Use when working with lsp, language-server-protocol, sdk, language-server, lsp-client, lsp-server."
 license: MIT
 ---
 
 # @lspeasy/core
 
+TypeScript SDK for building Language Server Protocol clients and servers
+
 ## When to Use
 
-- Typing with `AvailableRequests`, `AvailableNotifications`, `AvailableRequests`, `AvailableNotifications`
+- Working with lsp, language-server-protocol, sdk, language-server, lsp-client, lsp-server
+- API surface: 4 types
 
 ## Quick Reference
 
-**4 types** — `AvailableRequests`, `AvailableNotifications`, `AvailableRequests`, `AvailableNotifications`
+**capability-methods:** `AvailableRequests`, `AvailableNotifications`, `AvailableRequests`, `AvailableNotifications`
 
 ## Links
 

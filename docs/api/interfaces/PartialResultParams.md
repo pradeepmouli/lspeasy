@@ -6,7 +6,7 @@
 
 # Interface: PartialResultParams
 
-Defined in: [packages/core/src/protocol/partial.ts:12](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/partial.ts#L12)
+Defined in: [packages/core/src/protocol/partial.ts:12](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/partial.ts#L12)
 
 A parameter literal used to pass a partial result token.
 
@@ -16,7 +16,7 @@ A parameter literal used to pass a partial result token.
 
 > `optional` **partialResultToken?**: [`ProgressToken`](../type-aliases/ProgressToken.md)
 
-Defined in: [packages/core/src/protocol/partial.ts:17](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/partial.ts#L17)
+Defined in: [packages/core/src/protocol/partial.ts:17](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/partial.ts#L17)
 
 An optional token that a server can use to report partial results
 (e.g., streaming) to the client.

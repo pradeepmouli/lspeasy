@@ -8,7 +8,7 @@
 
 > **clientSupportsNotification**\<`M`, `T`\>(`method`, `capabilities`): capabilities is T & \{ \[KeyType in string \| number \| symbol\]: UnionToIntersection\<\{ \[P in "window.showMessage" \| "textDocument.publishDiagnostics"\]: \{ \[KeyType in string \| number \| symbol\]: PickDeepObject\<ClientCapabilities, P\>\[KeyType\] \} \}\[ClientCapabilityForNotification\<M\>\]\>\[KeyType\] \}
 
-Defined in: [packages/core/src/protocol/capabilities.ts:117](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/capabilities.ts#L117)
+Defined in: [packages/core/src/protocol/capabilities.ts:117](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/capabilities.ts#L117)
 
 ## Type Parameters
 

@@ -8,7 +8,7 @@
 
 > **getCapabilityForNotificationMethod**\<`M`, `D`\>(`method`, `_direction?`): `InternalPaths`\<`Required`\<[`ServerCapabilities`](../interfaces/ServerCapabilities.md)\<`any`\>\>, \{ `bracketNotation`: `false`; `depth`: `number`; `leavesOnly`: `false`; `maxRecursionDepth`: `5`; \}, `0`\> \| `"alwaysOn"`
 
-Defined in: [packages/core/src/protocol/infer.ts:189](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/infer.ts#L189)
+Defined in: [packages/core/src/protocol/infer.ts:189](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/infer.ts#L189)
 
 Get the capability key for a given notification method at runtime
 

@@ -6,7 +6,7 @@
 
 # Class: ResponseError
 
-Defined in: [packages/core/src/utils/errors.ts:47](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L47)
+Defined in: [packages/core/src/utils/errors.ts:47](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L47)
 
 LSP Response Error
 
@@ -20,7 +20,7 @@ LSP Response Error
 
 > **new ResponseError**(`code`, `message`, `data?`): `ResponseError`
 
-Defined in: [packages/core/src/utils/errors.ts:48](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L48)
+Defined in: [packages/core/src/utils/errors.ts:48](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L48)
 
 #### Parameters
 
@@ -62,7 +62,7 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > `readonly` **code**: `number`
 
-Defined in: [packages/core/src/utils/errors.ts:49](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L49)
+Defined in: [packages/core/src/utils/errors.ts:49](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L49)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [packages/core/src/utils/errors.ts:49](https://github.com/pradeepmou
 
 > `readonly` `optional` **data?**: `unknown`
 
-Defined in: [packages/core/src/utils/errors.ts:51](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L51)
+Defined in: [packages/core/src/utils/errors.ts:51](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L51)
 
 ***
 
@@ -136,7 +136,7 @@ not capture any frames.
 
 > **toJSON**(): `object`
 
-Defined in: [packages/core/src/utils/errors.ts:60](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L60)
+Defined in: [packages/core/src/utils/errors.ts:60](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L60)
 
 Convert to JSON-RPC error object
 
@@ -232,7 +232,7 @@ a();
 
 > `static` **internalError**(`message?`, `data?`): `ResponseError`
 
-Defined in: [packages/core/src/utils/errors.ts:111](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L111)
+Defined in: [packages/core/src/utils/errors.ts:111](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L111)
 
 Create an internal error
 
@@ -256,7 +256,7 @@ Create an internal error
 
 > `static` **invalidParams**(`message?`, `data?`): `ResponseError`
 
-Defined in: [packages/core/src/utils/errors.ts:100](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L100)
+Defined in: [packages/core/src/utils/errors.ts:100](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L100)
 
 Create an invalid params error
 
@@ -280,7 +280,7 @@ Create an invalid params error
 
 > `static` **invalidRequest**(`message?`, `data?`): `ResponseError`
 
-Defined in: [packages/core/src/utils/errors.ts:82](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L82)
+Defined in: [packages/core/src/utils/errors.ts:82](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L82)
 
 Create an invalid request error
 
@@ -304,7 +304,7 @@ Create an invalid request error
 
 > `static` **methodNotFound**(`method`, `data?`): `ResponseError`
 
-Defined in: [packages/core/src/utils/errors.ts:93](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L93)
+Defined in: [packages/core/src/utils/errors.ts:93](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L93)
 
 Create a method not found error
 
@@ -328,7 +328,7 @@ Create a method not found error
 
 > `static` **parseError**(`message?`, `data?`): `ResponseError`
 
-Defined in: [packages/core/src/utils/errors.ts:71](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L71)
+Defined in: [packages/core/src/utils/errors.ts:71](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L71)
 
 Create a parse error
 
@@ -382,7 +382,7 @@ https://v8.dev/docs/stack-trace-api#customizing-stack-traces
 
 > `static` **requestCancelled**(`data?`): `ResponseError`
 
-Defined in: [packages/core/src/utils/errors.ts:133](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L133)
+Defined in: [packages/core/src/utils/errors.ts:133](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L133)
 
 Create a request cancelled error
 
@@ -402,7 +402,7 @@ Create a request cancelled error
 
 > `static` **serverNotInitialized**(`data?`): `ResponseError`
 
-Defined in: [packages/core/src/utils/errors.ts:122](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/errors.ts#L122)
+Defined in: [packages/core/src/utils/errors.ts:122](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/errors.ts#L122)
 
 Create a server not initialized error
 

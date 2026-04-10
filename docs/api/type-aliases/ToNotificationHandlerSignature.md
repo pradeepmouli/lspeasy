@@ -8,7 +8,7 @@
 
 > **ToNotificationHandlerSignature**\<`T`\> = `T` *extends* `object` ? (`handler`) => `void` : `never`
 
-Defined in: [packages/core/src/protocol/capability-methods.ts:251](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/capability-methods.ts#L251)
+Defined in: [packages/core/src/protocol/capability-methods.ts:251](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/capability-methods.ts#L251)
 
 ## Type Parameters
 

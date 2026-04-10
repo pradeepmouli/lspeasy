@@ -6,7 +6,7 @@
 
 # Enumeration: LogLevel
 
-Defined in: [packages/core/src/utils/logger.ts:9](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/logger.ts#L9)
+Defined in: [packages/core/src/utils/logger.ts:9](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/logger.ts#L9)
 
 Log levels
 
@@ -16,7 +16,7 @@ Log levels
 
 > **Debug**: `3`
 
-Defined in: [packages/core/src/utils/logger.ts:13](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/logger.ts#L13)
+Defined in: [packages/core/src/utils/logger.ts:13](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/logger.ts#L13)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/core/src/utils/logger.ts:13](https://github.com/pradeepmou
 
 > **Error**: `0`
 
-Defined in: [packages/core/src/utils/logger.ts:10](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/logger.ts#L10)
+Defined in: [packages/core/src/utils/logger.ts:10](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/logger.ts#L10)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/core/src/utils/logger.ts:10](https://github.com/pradeepmou
 
 > **Info**: `2`
 
-Defined in: [packages/core/src/utils/logger.ts:12](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/logger.ts#L12)
+Defined in: [packages/core/src/utils/logger.ts:12](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/logger.ts#L12)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/core/src/utils/logger.ts:12](https://github.com/pradeepmou
 
 > **Trace**: `4`
 
-Defined in: [packages/core/src/utils/logger.ts:14](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/logger.ts#L14)
+Defined in: [packages/core/src/utils/logger.ts:14](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/logger.ts#L14)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/core/src/utils/logger.ts:14](https://github.com/pradeepmou
 
 > **Warn**: `1`
 
-Defined in: [packages/core/src/utils/logger.ts:11](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/utils/logger.ts#L11)
+Defined in: [packages/core/src/utils/logger.ts:11](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/utils/logger.ts#L11)

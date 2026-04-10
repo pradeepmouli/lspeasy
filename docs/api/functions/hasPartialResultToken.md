@@ -8,7 +8,7 @@
 
 > **hasPartialResultToken**(`params`): `params is PartialResultParams`
 
-Defined in: [packages/core/src/protocol/partial.ts:30](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/protocol/partial.ts#L30)
+Defined in: [packages/core/src/protocol/partial.ts:30](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/protocol/partial.ts#L30)
 
 Type guard to check if params support partial results
 

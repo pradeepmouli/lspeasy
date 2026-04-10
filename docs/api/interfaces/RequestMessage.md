@@ -6,7 +6,7 @@
 
 # Interface: RequestMessage
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:16](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/jsonrpc/messages.ts#L16)
+Defined in: [packages/core/src/jsonrpc/messages.ts:16](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L16)
 
 JSON-RPC 2.0 Request Message
 
@@ -20,7 +20,7 @@ JSON-RPC 2.0 Request Message
 
 > **id**: `string` \| `number`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:17](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/jsonrpc/messages.ts#L17)
+Defined in: [packages/core/src/jsonrpc/messages.ts:17](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L17)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [packages/core/src/jsonrpc/messages.ts:17](https://github.com/pradee
 
 > **jsonrpc**: `"2.0"`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:10](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/jsonrpc/messages.ts#L10)
+Defined in: [packages/core/src/jsonrpc/messages.ts:10](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L10)
 
 #### Inherited from
 
@@ -40,7 +40,7 @@ Defined in: [packages/core/src/jsonrpc/messages.ts:10](https://github.com/pradee
 
 > **method**: `string`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:18](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/jsonrpc/messages.ts#L18)
+Defined in: [packages/core/src/jsonrpc/messages.ts:18](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L18)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [packages/core/src/jsonrpc/messages.ts:18](https://github.com/pradee
 
 > `optional` **params?**: `unknown`
 
-Defined in: [packages/core/src/jsonrpc/messages.ts:19](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/jsonrpc/messages.ts#L19)
+Defined in: [packages/core/src/jsonrpc/messages.ts:19](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/jsonrpc/messages.ts#L19)

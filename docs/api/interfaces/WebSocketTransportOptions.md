@@ -6,7 +6,7 @@
 
 # Interface: WebSocketTransportOptions
 
-Defined in: [packages/core/src/transport/websocket.ts:32](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/websocket.ts#L32)
+Defined in: [packages/core/src/transport/websocket.ts:32](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/websocket.ts#L32)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/transport/websocket.ts:32](https://github.com/pra
 
 > `optional` **enableReconnect?**: `boolean`
 
-Defined in: [packages/core/src/transport/websocket.ts:46](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/websocket.ts#L46)
+Defined in: [packages/core/src/transport/websocket.ts:46](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/websocket.ts#L46)
 
 Enable automatic reconnection (client mode only)
 
@@ -24,7 +24,7 @@ Enable automatic reconnection (client mode only)
 
 > `optional` **maxReconnectAttempts?**: `number`
 
-Defined in: [packages/core/src/transport/websocket.ts:52](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/websocket.ts#L52)
+Defined in: [packages/core/src/transport/websocket.ts:52](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/websocket.ts#L52)
 
 Maximum number of reconnection attempts
 
@@ -40,7 +40,7 @@ Maximum number of reconnection attempts
 
 > `optional` **maxReconnectDelay?**: `number`
 
-Defined in: [packages/core/src/transport/websocket.ts:64](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/websocket.ts#L64)
+Defined in: [packages/core/src/transport/websocket.ts:64](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/websocket.ts#L64)
 
 Maximum delay between reconnection attempts in milliseconds
 
@@ -56,7 +56,7 @@ Maximum delay between reconnection attempts in milliseconds
 
 > `optional` **reconnectBackoffMultiplier?**: `number`
 
-Defined in: [packages/core/src/transport/websocket.ts:70](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/websocket.ts#L70)
+Defined in: [packages/core/src/transport/websocket.ts:70](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/websocket.ts#L70)
 
 Multiplier for exponential backoff
 
@@ -72,7 +72,7 @@ Multiplier for exponential backoff
 
 > `optional` **reconnectDelay?**: `number`
 
-Defined in: [packages/core/src/transport/websocket.ts:58](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/websocket.ts#L58)
+Defined in: [packages/core/src/transport/websocket.ts:58](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/websocket.ts#L58)
 
 Initial delay between reconnection attempts in milliseconds
 
@@ -88,7 +88,7 @@ Initial delay between reconnection attempts in milliseconds
 
 > `optional` **socket?**: `WebSocketLike`
 
-Defined in: [packages/core/src/transport/websocket.ts:41](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/websocket.ts#L41)
+Defined in: [packages/core/src/transport/websocket.ts:41](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/websocket.ts#L41)
 
 Existing WebSocket instance for server mode
 
@@ -98,6 +98,6 @@ Existing WebSocket instance for server mode
 
 > `optional` **url?**: `string`
 
-Defined in: [packages/core/src/transport/websocket.ts:36](https://github.com/pradeepmouli/lspeasy/blob/90e5dd09e9abc1eaec4942c3ce2bc68117367562/packages/core/src/transport/websocket.ts#L36)
+Defined in: [packages/core/src/transport/websocket.ts:36](https://github.com/pradeepmouli/lspeasy/blob/74eda4ce2eb3e9f9d51dc27652e0acfc319327d4/packages/core/src/transport/websocket.ts#L36)
 
 WebSocket URL for client mode (e.g., 'ws://localhost:3000')
