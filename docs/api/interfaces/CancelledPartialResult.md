@@ -6,7 +6,7 @@
 
 # Interface: CancelledPartialResult\<TPartial\>
 
-Defined in: [packages/core/src/protocol/partial-results.ts:2](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/partial-results.ts#L2)
+Defined in: [packages/core/src/protocol/partial-results.ts:2](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/partial-results.ts#L2)
 
 Structured response when a partial-enabled request is cancelled.
 
@@ -22,7 +22,7 @@ Structured response when a partial-enabled request is cancelled.
 
 > **cancelled**: `true`
 
-Defined in: [packages/core/src/protocol/partial-results.ts:3](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/partial-results.ts#L3)
+Defined in: [packages/core/src/protocol/partial-results.ts:3](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/partial-results.ts#L3)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [packages/core/src/protocol/partial-results.ts:3](https://github.com
 
 > `optional` **finalResult?**: `undefined`
 
-Defined in: [packages/core/src/protocol/partial-results.ts:5](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/partial-results.ts#L5)
+Defined in: [packages/core/src/protocol/partial-results.ts:5](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/partial-results.ts#L5)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [packages/core/src/protocol/partial-results.ts:5](https://github.com
 
 > **partialResults**: `TPartial`[]
 
-Defined in: [packages/core/src/protocol/partial-results.ts:4](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/partial-results.ts#L4)
+Defined in: [packages/core/src/protocol/partial-results.ts:4](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/partial-results.ts#L4)

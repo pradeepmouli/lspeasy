@@ -8,7 +8,7 @@
 
 > **getClientCapabilityForRequestMethod**\<`M`, `D`\>(`method`, `_direction?`): `"alwaysOn"` \| `InternalPaths`\<`Required`\<[`ClientCapabilities`](../interfaces/ClientCapabilities.md)\>, \{ `bracketNotation`: `false`; `depth`: `number`; `leavesOnly`: `false`; `maxRecursionDepth`: `5`; \}, `0`\>
 
-Defined in: [packages/core/src/protocol/infer.ts:178](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/infer.ts#L178)
+Defined in: [packages/core/src/protocol/infer.ts:178](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/infer.ts#L178)
 
 Get the client capability key for a given request method at runtime
 

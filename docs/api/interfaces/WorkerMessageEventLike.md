@@ -6,7 +6,7 @@
 
 # Interface: WorkerMessageEventLike
 
-Defined in: [packages/core/src/transport/worker-types.ts:4](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L4)
+Defined in: [packages/core/src/transport/worker-types.ts:4](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L4)
 
 Lightweight event shape shared by worker and message port adapters.
 
@@ -16,4 +16,4 @@ Lightweight event shape shared by worker and message port adapters.
 
 > **data**: `unknown`
 
-Defined in: [packages/core/src/transport/worker-types.ts:5](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L5)
+Defined in: [packages/core/src/transport/worker-types.ts:5](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L5)

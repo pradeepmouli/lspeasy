@@ -6,7 +6,7 @@
 
 # Interface: MiddlewareResult
 
-Defined in: [packages/core/src/middleware/types.ts:51](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L51)
+Defined in: [packages/core/src/middleware/types.ts:51](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/middleware/types.ts#L51)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/middleware/types.ts:51](https://github.com/pradee
 
 > `optional` **error?**: [`ErrorResponseMessage`](ErrorResponseMessage.md)
 
-Defined in: [packages/core/src/middleware/types.ts:54](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L54)
+Defined in: [packages/core/src/middleware/types.ts:54](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/middleware/types.ts#L54)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/core/src/middleware/types.ts:54](https://github.com/pradee
 
 > `optional` **response?**: [`RequestMessage`](RequestMessage.md) \| [`NotificationMessage`](NotificationMessage.md) \| [`ResponseMessage`](../type-aliases/ResponseMessage.md)
 
-Defined in: [packages/core/src/middleware/types.ts:53](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L53)
+Defined in: [packages/core/src/middleware/types.ts:53](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/middleware/types.ts#L53)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [packages/core/src/middleware/types.ts:53](https://github.com/pradee
 
 > `optional` **shortCircuit?**: `boolean`
 
-Defined in: [packages/core/src/middleware/types.ts:52](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/middleware/types.ts#L52)
+Defined in: [packages/core/src/middleware/types.ts:52](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/middleware/types.ts#L52)

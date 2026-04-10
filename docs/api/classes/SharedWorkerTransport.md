@@ -6,7 +6,7 @@
 
 # Class: SharedWorkerTransport
 
-Defined in: [packages/core/src/transport/shared-worker.ts:20](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L20)
+Defined in: [packages/core/src/transport/shared-worker.ts:20](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/shared-worker.ts#L20)
 
 JSON-RPC transport for Shared Worker environments with per-client envelope routing.
 
@@ -20,7 +20,7 @@ JSON-RPC transport for Shared Worker environments with per-client envelope routi
 
 > **new SharedWorkerTransport**(`options`): `SharedWorkerTransport`
 
-Defined in: [packages/core/src/transport/shared-worker.ts:73](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L73)
+Defined in: [packages/core/src/transport/shared-worker.ts:73](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/shared-worker.ts#L73)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [packages/core/src/transport/shared-worker.ts:73](https://github.com
 
 > **close**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/transport/shared-worker.ts:128](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L128)
+Defined in: [packages/core/src/transport/shared-worker.ts:128](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/shared-worker.ts#L128)
 
 Close the transport connection
 
@@ -56,7 +56,7 @@ Close the transport connection
 
 > **isConnected**(): `boolean`
 
-Defined in: [packages/core/src/transport/shared-worker.ts:148](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L148)
+Defined in: [packages/core/src/transport/shared-worker.ts:148](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/shared-worker.ts#L148)
 
 Check if transport is connected
 
@@ -74,7 +74,7 @@ Check if transport is connected
 
 > **onClose**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/shared-worker.ts:119](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L119)
+Defined in: [packages/core/src/transport/shared-worker.ts:119](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/shared-worker.ts#L119)
 
 Subscribe to connection close
 
@@ -100,7 +100,7 @@ Disposable to unsubscribe
 
 > **onError**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/shared-worker.ts:110](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L110)
+Defined in: [packages/core/src/transport/shared-worker.ts:110](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/shared-worker.ts#L110)
 
 Subscribe to transport errors
 
@@ -126,7 +126,7 @@ Disposable to unsubscribe
 
 > **onMessage**(`handler`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/transport/shared-worker.ts:101](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L101)
+Defined in: [packages/core/src/transport/shared-worker.ts:101](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/shared-worker.ts#L101)
 
 Subscribe to incoming messages
 
@@ -152,7 +152,7 @@ Disposable to unsubscribe
 
 > **send**(`message`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/transport/shared-worker.ts:88](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/shared-worker.ts#L88)
+Defined in: [packages/core/src/transport/shared-worker.ts:88](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/shared-worker.ts#L88)
 
 Send a message to the remote peer
 

@@ -8,7 +8,7 @@
 
 > **getPartialResultToken**(`params`): [`ProgressToken`](../type-aliases/ProgressToken.md) \| `undefined`
 
-Defined in: [packages/core/src/protocol/partial.ts:37](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/partial.ts#L37)
+Defined in: [packages/core/src/protocol/partial.ts:37](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/partial.ts#L37)
 
 Helper to extract partial result token from params
 

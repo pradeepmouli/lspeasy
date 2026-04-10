@@ -6,7 +6,7 @@
 
 # Class: DisposableEventEmitter\<TEvents\>
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:17](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/disposable-event-emitter.ts#L17)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:17](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/utils/disposable-event-emitter.ts#L17)
 
 Event emitter that returns disposables and can dispose all listeners at once.
 
@@ -36,7 +36,7 @@ Event emitter that returns disposables and can dispose all listeners at once.
 
 > **dispose**(): `void`
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:103](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/disposable-event-emitter.ts#L103)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:103](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/utils/disposable-event-emitter.ts#L103)
 
 Dispose all listeners and prevent further registrations.
 
@@ -50,7 +50,7 @@ Dispose all listeners and prevent further registrations.
 
 > **emit**\<`K`\>(`event`, ...`args`): `void`
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:85](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/disposable-event-emitter.ts#L85)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:85](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/utils/disposable-event-emitter.ts#L85)
 
 Emit an event to all registered listeners in registration order.
 
@@ -80,7 +80,7 @@ Emit an event to all registered listeners in registration order.
 
 > **on**\<`K`\>(`event`, `listener`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:24](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/disposable-event-emitter.ts#L24)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:24](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/utils/disposable-event-emitter.ts#L24)
 
 Register a listener and receive a disposable to unregister it.
 
@@ -110,7 +110,7 @@ Register a listener and receive a disposable to unregister it.
 
 > **once**\<`K`\>(`event`, `listener`): [`Disposable`](../interfaces/Disposable.md)
 
-Defined in: [packages/core/src/utils/disposable-event-emitter.ts:54](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/disposable-event-emitter.ts#L54)
+Defined in: [packages/core/src/utils/disposable-event-emitter.ts:54](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/utils/disposable-event-emitter.ts#L54)
 
 Register a one-time listener that automatically unregisters after first emission.
 

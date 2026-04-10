@@ -6,7 +6,7 @@
 
 # Interface: MessagePortLike
 
-Defined in: [packages/core/src/transport/worker-types.ts:19](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L19)
+Defined in: [packages/core/src/transport/worker-types.ts:19](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L19)
 
 Minimal message port contract required by shared worker transport.
 
@@ -18,7 +18,7 @@ Minimal message port contract required by shared worker transport.
 
 > **addEventListener**(`event`, `handler`): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:21](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L21)
+Defined in: [packages/core/src/transport/worker-types.ts:21](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L21)
 
 ##### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [packages/core/src/transport/worker-types.ts:21](https://github.com/
 
 > **addEventListener**(`event`, `handler`): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:22](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L22)
+Defined in: [packages/core/src/transport/worker-types.ts:22](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L22)
 
 ##### Parameters
 
@@ -58,7 +58,7 @@ Defined in: [packages/core/src/transport/worker-types.ts:22](https://github.com/
 
 > **addEventListener**(`event`, `handler`): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:23](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L23)
+Defined in: [packages/core/src/transport/worker-types.ts:23](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L23)
 
 ##### Parameters
 
@@ -80,7 +80,7 @@ Defined in: [packages/core/src/transport/worker-types.ts:23](https://github.com/
 
 > `optional` **close**(): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:28](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L28)
+Defined in: [packages/core/src/transport/worker-types.ts:28](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L28)
 
 #### Returns
 
@@ -92,7 +92,7 @@ Defined in: [packages/core/src/transport/worker-types.ts:28](https://github.com/
 
 > **postMessage**(`message`): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:20](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L20)
+Defined in: [packages/core/src/transport/worker-types.ts:20](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L20)
 
 #### Parameters
 
@@ -112,7 +112,7 @@ Defined in: [packages/core/src/transport/worker-types.ts:20](https://github.com/
 
 > **removeEventListener**(`event`, `handler`): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:24](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L24)
+Defined in: [packages/core/src/transport/worker-types.ts:24](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L24)
 
 ##### Parameters
 
@@ -132,7 +132,7 @@ Defined in: [packages/core/src/transport/worker-types.ts:24](https://github.com/
 
 > **removeEventListener**(`event`, `handler`): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:25](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L25)
+Defined in: [packages/core/src/transport/worker-types.ts:25](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L25)
 
 ##### Parameters
 
@@ -152,7 +152,7 @@ Defined in: [packages/core/src/transport/worker-types.ts:25](https://github.com/
 
 > **removeEventListener**(`event`, `handler`): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:26](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L26)
+Defined in: [packages/core/src/transport/worker-types.ts:26](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L26)
 
 ##### Parameters
 
@@ -174,7 +174,7 @@ Defined in: [packages/core/src/transport/worker-types.ts:26](https://github.com/
 
 > `optional` **start**(): `void`
 
-Defined in: [packages/core/src/transport/worker-types.ts:27](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/transport/worker-types.ts#L27)
+Defined in: [packages/core/src/transport/worker-types.ts:27](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/transport/worker-types.ts#L27)
 
 #### Returns
 

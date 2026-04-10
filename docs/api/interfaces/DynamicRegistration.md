@@ -6,7 +6,7 @@
 
 # Interface: DynamicRegistration
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:3](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/dynamic-registration.ts#L3)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:3](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/dynamic-registration.ts#L3)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/protocol/dynamic-registration.ts:3](https://githu
 
 > **id**: `string`
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:4](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/dynamic-registration.ts#L4)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:4](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/dynamic-registration.ts#L4)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/core/src/protocol/dynamic-registration.ts:4](https://githu
 
 > **method**: `string`
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:5](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/dynamic-registration.ts#L5)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:5](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/dynamic-registration.ts#L5)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [packages/core/src/protocol/dynamic-registration.ts:5](https://githu
 
 > `optional` **registerOptions?**: `unknown`
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:6](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/dynamic-registration.ts#L6)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:6](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/dynamic-registration.ts#L6)

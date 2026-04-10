@@ -6,7 +6,7 @@
 
 # Interface: VersionSource
 
-Defined in: [packages/core/src/utils/document.ts:49](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/document.ts#L49)
+Defined in: [packages/core/src/utils/document.ts:49](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/utils/document.ts#L49)
 
 Source of version information for helper constructors.
 
@@ -16,7 +16,7 @@ Source of version information for helper constructors.
 
 > `optional` **tracker?**: [`DocumentVersionTracker`](../classes/DocumentVersionTracker.md)
 
-Defined in: [packages/core/src/utils/document.ts:51](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/document.ts#L51)
+Defined in: [packages/core/src/utils/document.ts:51](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/utils/document.ts#L51)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/core/src/utils/document.ts:51](https://github.com/pradeepm
 
 > `optional` **version?**: `number`
 
-Defined in: [packages/core/src/utils/document.ts:50](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/utils/document.ts#L50)
+Defined in: [packages/core/src/utils/document.ts:50](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/utils/document.ts#L50)

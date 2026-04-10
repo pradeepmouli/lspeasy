@@ -8,6 +8,6 @@
 
 > `const` **HoverParamsSchema**: `ZodObject`\<\{ `position`: `ZodObject`\<\{ `character`: `ZodNumber`; `line`: `ZodNumber`; \}, `$strip`\>; `textDocument`: `ZodObject`\<\{ `uri`: `ZodString`; \}, `$strip`\>; \}, `$strip`\> = `TextDocumentPositionParamsSchema`
 
-Defined in: [packages/core/src/protocol/schemas.ts:90](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/schemas.ts#L90)
+Defined in: [packages/core/src/protocol/schemas.ts:90](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/schemas.ts#L90)
 
 Hover params

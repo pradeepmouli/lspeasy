@@ -6,7 +6,7 @@
 
 # Interface: RegisterCapabilityParams
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:15](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/dynamic-registration.ts#L15)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:15](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/dynamic-registration.ts#L15)
 
 Params payload for `client/registerCapability`.
 
@@ -16,4 +16,4 @@ Params payload for `client/registerCapability`.
 
 > **registrations**: [`DynamicRegistration`](DynamicRegistration.md)[]
 
-Defined in: [packages/core/src/protocol/dynamic-registration.ts:16](https://github.com/pradeepmouli/lspeasy/blob/9cfbcabb7e5a7111a570b29f368656ea6b98ee25/packages/core/src/protocol/dynamic-registration.ts#L16)
+Defined in: [packages/core/src/protocol/dynamic-registration.ts:16](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/dynamic-registration.ts#L16)
