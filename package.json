@@ -76,7 +76,7 @@
     "typedoc-plugin-markdown": "^4.11.0",
     "typedoc-plugin-to-skills": "^0.6.0",
     "typescript": "^5.9.3",
-    "vite": "^8.0.1",
+    "vite": "^8.0.8",
     "vitest": "^4.0.18"
   },
   "simple-git-hooks": {
