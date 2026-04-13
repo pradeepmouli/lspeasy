@@ -1,32 +1,39 @@
 ---
-description: Create an emergency hotfix workflow with expedited process and mandatory post-mortem.
+description: Create an emergency hotfix workflow with expedited process and mandatory
+  post-mortem.
+scripts:
+  sh: scripts/bash/create-hotfix.sh --json
+  ps: scripts/powershell/create-hotfix.ps1 -Json
 handoffs:
-  - label: Create Expedited Plan
-    agent: speckit.plan
-    prompt: Create an expedited plan for the hotfix. This is an emergency...
-    send: true
-  - label: Break Down Into Tasks
-    agent: speckit.tasks
-    prompt: Break the hotfix plan into minimal tasks
-    send: true
+- label: Create Expedited Plan
+  agent: speckit.plan
+  prompt: Create an expedited plan for the hotfix. This is an emergency...
+  send: true
+- label: Break Down Into Tasks
+  agent: speckit.tasks
+  prompt: Break the hotfix plan into minimal tasks
+  send: true
 ---
 
+
+<!-- Extension: workflows -->
+<!-- Config: .specify/extensions/workflows/ -->
 The user input to you can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
 
 User input:
 
 $ARGUMENTS
 
-The text the user typed after `/speckit.hotfix` in the triggering message **is** the incident description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
+The text the user typed after `/speckit.workflows.hotfix` (or `/speckit.hotfix`) in the triggering message **is** the incident description. Assume you always have it available in this conversation even if `$ARGUMENTS` appears literally below. Do not ask the user to repeat it unless they provided an empty command.
 
-**⚠️  EMERGENCY WORKFLOW - EXPEDITED PROCESS ⚠️**
+**EMERGENCY WORKFLOW - EXPEDITED PROCESS**
 
 Given that incident description, do this:
 
-1. Run the script `.specify/scripts/bash/create-hotfix.sh --json "$ARGUMENTS"` from repo root and parse its JSON output for HOTFIX_ID, BRANCH_NAME, HOTFIX_FILE, POSTMORTEM_FILE, and TIMESTAMP. All file paths must be absolute.
+1. Run the script `.specify/extensions/workflows/scripts/bash/create-hotfix.sh --json "$ARGUMENTS"` from repo root and parse its JSON output for HOTFIX_ID, BRANCH_NAME, HOTFIX_FILE, POSTMORTEM_FILE, and TIMESTAMP. All file paths must be absolute.
   **IMPORTANT** You must only ever run this script once. The JSON is provided in the terminal as output - always refer to it to get the actual content you're looking for.
 
-2. Load `.specify/extensions/workflows/hotfix/hotfix-template.md` to understand required sections.
+2. Load `.specify/extensions/workflows/templates/hotfix/hotfix-template.md` to understand required sections.
 
 3. Write the hotfix incident log to HOTFIX_FILE using the template structure:
    - Fill incident timeline with TIMESTAMP from script output
@@ -39,7 +46,7 @@ Given that incident description, do this:
 4. Report completion with Next Steps:
 
 ```
-⚠️  HOTFIX WORKFLOW INITIATED (EXPEDITED)
+HOTFIX WORKFLOW INITIATED (EXPEDITED)
 
 **Hotfix ID**: [HOTFIX_ID]
 **Branch**: [BRANCH_NAME]
@@ -47,19 +54,19 @@ Given that incident description, do this:
 **Severity**: [P0/P1/P2]
 **Hotfix Report**: [HOTFIX_FILE]
 
-📋 **Next Steps (URGENT):**
+**Next Steps (URGENT):**
 1. Review incident details and confirm severity
 2. Notify stakeholders of incident status
 3. Run `/speckit.plan` to create expedited fix plan
 4. Run `/speckit.tasks` to create minimal task breakdown
 5. Run `/speckit.implement` to apply hotfix immediately
 
-⚠️ **Post-Deployment:**
+**Post-Deployment:**
 - Monitor production after deployment
 - Schedule post-mortem within 24-48 hours
 - Create follow-up `/speckit.bugfix` for proper fix with tests
 
-💡 **Note**: This is the ONLY workflow that permits test-after approach due to emergency
+**Note**: This is the ONLY workflow that permits test-after approach due to emergency
 ```
 
 Note: Hotfix workflow bypasses normal TDD process due to emergency nature. Tests must be added AFTER fix is deployed. This is the ONLY workflow that permits this deviation from the constitution.

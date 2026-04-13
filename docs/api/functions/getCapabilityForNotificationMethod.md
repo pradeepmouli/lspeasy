@@ -1,0 +1,37 @@
+[**lspeasy v1.0.0**](../README.md)
+
+***
+
+[lspeasy](../README.md) / getCapabilityForNotificationMethod
+
+# Function: getCapabilityForNotificationMethod()
+
+> **getCapabilityForNotificationMethod**\<`M`, `D`\>(`method`, `_direction?`): `InternalPaths`\<`Required`\<[`ServerCapabilities`](../interfaces/ServerCapabilities.md)\<`any`\>\>, \{ `bracketNotation`: `false`; `depth`: `number`; `leavesOnly`: `false`; `maxRecursionDepth`: `5`; \}, `0`\> \| `"alwaysOn"`
+
+Defined in: [packages/core/src/protocol/infer.ts:189](https://github.com/pradeepmouli/lspeasy/blob/1dc2e704391f3b32ce8185dadf1a265a4beb41d3/packages/core/src/protocol/infer.ts#L189)
+
+Get the capability key for a given notification method at runtime
+
+## Type Parameters
+
+### M
+
+`M` *extends* `"initialized"` \| `"exit"` \| `"workspace/didChangeConfiguration"` \| `"window/showMessage"` \| `"window/logMessage"` \| `"telemetry/event"` \| `"textDocument/didOpen"` \| `"textDocument/didChange"` \| `"textDocument/didClose"` \| `"textDocument/didSave"` \| `"textDocument/willSave"` \| `"workspace/didChangeWatchedFiles"` \| `"textDocument/publishDiagnostics"` \| `"window/workDoneProgress/cancel"` \| `"workspace/didChangeWorkspaceFolders"` \| `"workspace/didCreateFiles"` \| `"workspace/didRenameFiles"` \| `"workspace/didDeleteFiles"` \| `"$/cancelRequest"` \| `"$/progress"` \| `"$/setTrace"` \| `"$/logTrace"` \| `"notebookDocument/didOpen"` \| `"notebookDocument/didChange"` \| `"notebookDocument/didSave"` \| `"notebookDocument/didClose"`
+
+### D
+
+`D` *extends* `"both"` \| `"clientToServer"` \| `"serverToClient"` = `"both"`
+
+## Parameters
+
+### method
+
+`M`
+
+### \_direction?
+
+`D` = `...`
+
+## Returns
+
+`InternalPaths`\<`Required`\<[`ServerCapabilities`](../interfaces/ServerCapabilities.md)\<`any`\>\>, \{ `bracketNotation`: `false`; `depth`: `number`; `leavesOnly`: `false`; `maxRecursionDepth`: `5`; \}, `0`\> \| `"alwaysOn"`

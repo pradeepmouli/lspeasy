@@ -17,6 +17,7 @@
       "*": ["../../*"],
       "@/*": ["./packages/*/src"]
     },
+    "types": ["node"],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,

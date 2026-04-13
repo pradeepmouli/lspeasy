@@ -1,284 +1,178 @@
 ---
-description: Review completed implementation work and update task status.
-handoffs:
-  - label: Create Implementation Plan
-    agent: speckit.plan
-    prompt: Create a plan based on review feedback
-    send: true
-  - label: Update Tasks
-    agent: speckit.tasks
-    prompt: Update tasks based on review feedback
-    send: true
+description: "Comprehensive code review using specialized agents \u2014 orchestrates\
+  \ code, comments, tests, errors, types, and simplify agents sequentially."
+scripts:
+  sh: scripts/bash/detect-changed-files.sh
+  ps: scripts/powershell/detect-changed-files.ps1
 ---
 
-The user input to you can be provided directly by the agent or as a command argument - you **MUST** consider it before proceeding with the prompt (if not empty).
 
-User input:
+<!-- Extension: review -->
+<!-- Config: .specify/extensions/review/ -->
+# Comprehensive PR Review
 
-$ARGUMENTS
+Run a comprehensive pull request review using multiple specialized agents, each focusing on a different aspect of code quality.
 
-## Overview
+**Review Aspects (optional):** "$ARGUMENTS"
 
-Perform structured code review of completed implementation work, validate against specifications, and update task status in tasks.md.
+## Review Workflow:
 
-## Steps
+1. **Load Configuration**
+   - Read the project config file at `.specify/extensions/review/review-config.yml` (if it exists).
+   - If the file does not exist, fall back to the `defaults.agents` section in the extension's `extension.yml`.
+   - Extract the `agents` map — each key (`code`, `comments`, `tests`, `errors`, `types`, `simplify`) is a boolean toggle.
+   - Agents set to `false` **MUST** be excluded from this run. Do not launch them.
 
-### 1. Load Context
+2. **Determine Review Scope**
+   - Parse arguments to see if user requested specific review aspects.
+   - If specific aspects were requested, run exactly those — config toggles do **not** apply (explicit user request overrides config).
+   - Default (no arguments): Run all applicable reviews that are enabled in config.
 
-Run script to get feature paths and information:
+3. **Available Review Aspects:**
 
-```bash
-cd "$(git rev-parse --show-toplevel)" && \
-source .specify/scripts/bash/common.sh && \
-get_feature_paths
+   - **comments** - Analyze code comment accuracy and maintainability
+   - **tests** - Review test coverage quality and completeness
+   - **errors** - Check error handling for silent failures
+   - **types** - Analyze type design and invariants (if new types added)
+   - **code** - General code review for project guidelines
+   - **simplify** - Simplify code for clarity and maintainability
+   - **all** - Run all applicable reviews (default)
+
+4. **Identify Changed Files**
+
+   - If the user provided a file list or explicit instructions on how to retrieve files (e.g., only staged, only unstaged, a specific folder, etc.), follow those instructions directly.
+   - Otherwise, fall back to the default: execute the `{SCRIPT}` with `--json` to detect changed files.
+     - The script automatically picks the best detection mode:
+       - **Mode A (feature branch):** diffs the current branch against the default branch (`main`/`master`) from the merge-base, plus any staged and unstaged changes.
+       - **Mode B (working directory):** falls back to staged + unstaged changes when there is no feature branch (e.g., working directly on the default branch).
+     - JSON output: `{"branch", "default_branch", "mode", "changed_files": [...]}`
+   - **Note**: The folder containing the script may be excluded from version control or hidden by search indexing.
+
+5. **Determine Applicable Reviews**
+
+   Based on changes **and** config toggles (skip any agent where `agents.<name>` is `false`):
+   - **Always applicable** (if enabled): `/speckit.review.code` (general quality)
+   - **If test files changed** (if enabled): `/speckit.review.tests`
+   - **If comments/docs added** (if enabled): `/speckit.review.comments`
+   - **If error handling changed** (if enabled): `/speckit.review.errors`
+   - **If types added/modified** (if enabled): `/speckit.review.types`
+   - **After passing review** (if enabled): `/speckit.review.simplify` (polish and refine)
+   - If an agent is disabled by config, note it in the final summary (e.g., "simplify: skipped (disabled in config)").
+
+6. **Launch Review Agents**
+
+   **Sequential approach** (one at a time):
+   - Easier to understand and act on
+   - Each report is complete before next
+   - Good for interactive review
+
+   **Parallel approach** (user can request):
+   - Launch all agents simultaneously
+   - Faster for comprehensive review
+   - Results come back together
+
+7. **Aggregate Results**
+
+   After agents complete, summarize:
+   - **Critical Issues** (must fix before merge)
+   - **Important Issues** (should fix)
+   - **Suggestions** (nice to have)
+   - **Positive Observations** (what's good)
+
+8. **Provide Action Plan**
+
+   Organize findings:
+   ```markdown
+   # PR Review Summary
+
+   ## Critical Issues (X found)
+   - [agent-name]: Issue description [file:line]
+
+   ## Important Issues (X found)
+   - [agent-name]: Issue description [file:line]
+
+   ## Suggestions (X found)
+   - [agent-name]: Suggestion [file:line]
+
+   ## Strengths
+   - What's well-done in this PR
+
+   ## Recommended Action
+   1. Fix critical issues first
+   2. Address important issues
+   3. Consider suggestions
+   4. Re-run review after fixes
+   ```
+
+## Usage Examples:
+
+**Full review (default):**
+```
+/speckit.review
 ```
 
-This provides:
-- `FEATURE_DIR` - Feature directory path
-- `FEATURE_SPEC` - Specification file (spec.md)
-- `IMPL_PLAN` - Implementation plan (plan.md)
-- `TASKS` - Task list (tasks.md)
+**Specific aspects:**
+```
+/speckit.review tests errors
+# Reviews only test coverage and error handling
 
-Load these files to understand:
-- Feature requirements and acceptance criteria
-- Implementation approach and design decisions
-- Task breakdown and current status
+/speckit.review comments
+# Reviews only code comments
 
-### 2. Identify Review Target
-
-**If user provided task ID** (e.g., "T001" in arguments):
-- Review that specific task
-- Focus review on changes related to that task
-
-**If no task ID provided**:
-- Review all pending tasks (marked with `[ ]` in tasks.md)
-- Or review most recent code changes
-- Ask user which tasks to review if unclear
-
-### 3. Review Implementation
-
-Conduct thorough review:
-
-**A. Load Code Changes**
-```bash
-# Show recent changes
-git diff main..HEAD
-
-# Or show diff for specific files
-git diff main..HEAD -- path/to/file
+/speckit.review simplify
+# Simplifies code after passing review
 ```
 
-**B. Verify Against Specification**
-- Check if implementation meets acceptance criteria in spec.md
-- Verify design decisions from plan.md are followed
-- Ensure behavior matches expected outcomes
-
-**C. Check Code Quality**
-- Look for bugs, edge cases, error handling
-- Check code clarity and maintainability
-- Verify proper testing coverage
-- Check documentation completeness
-- Flag placeholder/TODO/FIXME code within the implementation scope
-
-**D. Run Tests** (if available)
-```bash
-# Run test suite based on project structure
-npm test              # Node.js projects
-pytest                # Python projects
-cargo test            # Rust projects
-go test ./...         # Go projects
-./gradlew test        # Java/Kotlin projects
+**Parallel review:**
+```
+/speckit.review all parallel
+# Launches all agents in parallel
 ```
 
-**E. Validate Against Quality Gates**
-- Code follows project standards
-- Tests exist and pass
-- Edge cases handled
-- Documentation adequate
-- No obvious security issues
-- No placeholder/TODO/FIXME code left in reviewed scope unless justified and tracked
+## Agent Descriptions:
 
-### 4. Determine Review Outcome
+**comment**:
+- Verifies comment accuracy vs code
+- Identifies comment rot
+- Checks documentation completeness
 
-Choose one of three outcomes:
+**tests**:
+- Reviews behavioral test coverage
+- Identifies critical gaps
+- Evaluates test quality
 
-**✅ Approved - Implementation Ready**
+**errors**:
+- Finds silent failures
+- Reviews catch blocks
+- Checks error logging
 
-Criteria:
-- All acceptance criteria met
-- All tests passing
-- No blocking issues found
-- Code quality acceptable
-- Ready to merge
+**types**:
+- Analyzes type encapsulation
+- Reviews invariant expression
+- Rates type design quality
 
-**⚠️ Approved with Minor Notes**
+**code**:
+- Checks project-specific guidelines (`.specify/memory/constitution.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, or equivalent) compliance
+- Detects bugs and issues
+- Reviews general code quality
 
-Criteria:
-- Core functionality works correctly
-- Tests passing
-- Minor improvements suggested (not blocking)
-- Can be addressed in follow-up
-- OK to merge with notes
+**simplify**:
+- Simplifies complex code
+- Improves clarity and readability
+- Applies project standards
+- Preserves functionality
 
-**❌ Needs Changes - Issues Must Be Fixed**
+## Tips:
 
-Criteria:
-- Bugs or regressions found
-- Tests failing or missing
-- Acceptance criteria not met
-- Security or critical issues
-- Must fix before approval
+- **Run early**: Before creating PR, not after
+- **Focus on changes**: Agents analyze diff by default
+- **Address critical first**: Fix high-priority issues before lower priority
+- **Re-run after fixes**: Verify issues are resolved
+- **Use specific reviews**: Target specific aspects when you know the concern
 
-### 5. Update Tasks (For Approved Work Only)
+## Notes:
 
-For approved work (✅ or ⚠️), mark completed tasks as done:
-
-```bash
-# Mark specific task as done
-.specify/scripts/bash/mark-task-status.sh --task-id T001 --status done
-
-# Mark multiple tasks
-.specify/scripts/bash/mark-task-status.sh --task-id T002 --status done
-.specify/scripts/bash/mark-task-status.sh --task-id T003 --status done
-```
-
-This updates tasks.md, changing:
-- `[ ] T001: Task description` → `[X] T001: Task description`
-
-**For "Needs Changes" outcome**: Do NOT mark tasks as done. They remain pending until issues are fixed.
-
-### 6. Generate Review Report
-
-Create a comprehensive review report:
-
-```markdown
-# Review Report
-
-**Feature**: [Feature name from branch/spec]
-**Reviewer**: [Your agent identifier]
-**Date**: [Current date]
-**Status**: [✅ Approved / ⚠️ Approved with Notes / ❌ Needs Changes]
-
-## Summary
-
-[Brief overview of what was reviewed and outcome]
-
-## Implementation Review
-
-### What Was Reviewed
-- [List tasks or changes reviewed]
-
-### Implementation Quality
-- **Code Quality**: [Assessment]
-- **Test Coverage**: [Assessment]
-- **Documentation**: [Assessment]
-- **Standards Compliance**: [Assessment]
-
-## Test Results
-
-[Output from running tests, if applicable]
-
-**Tests Executed**: [Number]
-**Tests Passing**: [Number]
-**Tests Failing**: [Number]
-
-## Findings
-
-### ✅ What Worked Well
-- [Positive aspect 1]
-- [Positive aspect 2]
-- [Positive aspect 3]
-
-### ⚠️ Issues / Concerns (if any)
-
-#### [Issue Title]
-- **Severity**: [Critical / High / Medium / Low]
-- **Description**: [What the issue is]
-- **Impact**: [Why it matters]
-- **Recommendation**: [How to fix]
-
-[Repeat for each issue]
-
-## Tasks Status
-
-### Completed (Marked as Done)
-- [X] T001: [Task description]
-- [X] T002: [Task description]
-
-### Remaining Pending
-- [ ] T004: [Task description]
-- [ ] T005: [Task description]
-
-## Recommendations
-
-[Suggestions for improvement or follow-up work]
-
-## Next Steps
-
-**For ✅ Approved**:
-1. Tasks marked as complete in tasks.md
-2. Ready to merge feature branch
-3. Consider creating PR for team review
-
-**For ⚠️ Approved with Notes**:
-1. Tasks marked as complete in tasks.md
-2. Can merge with documented follow-up items
-3. Create follow-up tasks for minor improvements
-
-**For ❌ Needs Changes**:
-1. Fix listed issues
-2. Run tests to verify fixes
-3. Request re-review with `/speckit.review`
-```
-
-### 7. Output Summary
-
-Display concise summary to user:
-
-```
-[Status Icon] Review Complete
-
-Feature: [feature name]
-Status: [Approved / Approved with Notes / Needs Changes]
-Tasks Reviewed: [T001, T002, T003]
-Tests: [X passing, Y failing]
-Issues: [N found]
-
-[Next steps based on status]
-```
-
-## Important Notes
-
-1. **Be Thorough**: Don't rush the review - quality matters
-2. **Be Constructive**: Frame feedback positively and helpfully
-3. **Be Specific**: Cite exact locations for issues (file:line)
-4. **Test First**: Always try to run tests before reviewing
-5. **Check Specs**: Compare implementation to specification
-6. **Document Everything**: Write findings for future reference
-7. **Only Mark Done**: Only mark tasks complete when truly done
-
-## Edge Cases
-
-**No tasks.md exists**:
-- Review can still proceed
-- Document findings but skip task updates
-- Recommend creating tasks.md for tracking
-
-**No tests available**:
-- Review code manually without automated tests
-- Note lack of tests as a finding
-- Recommend adding tests
-
-**Multiple features in review**:
-- Review current feature based on branch/directory
-- Use FEATURE_DIR to scope the review
-
-**Ambiguous review target**:
-- Ask user to clarify which tasks to review
-- Or review all pending tasks by default
-
-## Context Information
-
-Review context: $ARGUMENTS
-
-Ensure all review feedback is actionable, specific, and constructive.
+- Agents run autonomously and return detailed reports
+- Each agent focuses on its specialty for deep analysis
+- Results are actionable with specific file:line references
+- Agents use appropriate models for their complexity
