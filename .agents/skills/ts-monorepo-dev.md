@@ -42,7 +42,7 @@ When creating a new monorepo:
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "type-check": "tsgo --noEmit",
+    "type-check": "tsc --noEmit",
     "clean": "pnpm -r clean && rimraf node_modules"
   },
   "devDependencies": {
@@ -129,7 +129,7 @@ mkdir -p packages/new-feature/{src,tests}
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsgo --watch",
+    "dev": "tsc --watch",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "clean": "rimraf dist"
