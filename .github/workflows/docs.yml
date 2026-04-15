@@ -4,11 +4,11 @@ on:
   push:
     branches: [master]
     paths:
-      - "packages/*/src/**"
-      - "src/**"
-      - "typedoc.json"
-      - "typedoc.html.json"
-      - "README.md"
+      - 'packages/*/src/**'
+      - 'src/**'
+      - 'typedoc.json'
+      - 'typedoc.html.json'
+      - 'README.md'
 
 permissions:
   contents: read
@@ -55,4 +55,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
-

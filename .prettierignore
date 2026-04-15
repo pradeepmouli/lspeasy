@@ -7,3 +7,27 @@ coverage/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Build outputs / generated
+**/dist/**
+**/build/**
+**/.turbo/**
+**/.cache/**
+
+# TypeDoc configs (non-standard JSON)
+tsconfig.typedoc.json
+typedoc.json
+
+# Docs and specs
+docs/**
+specs/**
+
+# Agent tooling
+.agents/**
+.claude/**
+.codex/**
+.gemini/**
+.specify/**
+.github/agents/**
+.github/skills/**
+.vscode/**
