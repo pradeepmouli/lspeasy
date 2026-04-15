@@ -26,3 +26,19 @@ Thumbs.db
 # MetaModel cache
 .cache/
 docs/html/
+
+# Generated API docs (typedoc)
+docs/api/
+docs/classes/
+docs/functions/
+docs/interfaces/
+docs/enums/
+docs/types/
+docs/variables/
+docs/modules/
+docs/assets/
+docs/media/
+docs/hierarchy.html
+docs/index.html
+docs/modules.html
+docs/.nojekyll
