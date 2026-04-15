@@ -1,57 +1,77 @@
 # lspeasy
 
-[![CI](https://github.com/pradeepmouli/lspeasy/actions/workflows/ci.yml/badge.svg)](https://github.com/pradeepmouli/lspeasy/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@lspeasy/core)](https://www.npmjs.com/package/@lspeasy/core)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-TypeScript SDK for building [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) clients and servers.
+> A TypeScript SDK for building [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) clients and servers that run anywhere JavaScript runs — Node, browsers, web workers, or VS Code extensions — with a capability-aware, strongly-typed API.
 
 > **⚠️ Pre-1.0 software** — APIs are subject to change between minor versions. Pin to exact versions in production. See the [CHANGELOG](./CHANGELOG.md) for breaking changes between releases.
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@lspeasy/core"><img src="https://img.shields.io/npm/v/@lspeasy/core?style=flat-square&label=%40lspeasy%2Fcore" alt="npm version" /></a>
+  <a href="https://github.com/pradeepmouli/lspeasy/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/pradeepmouli/lspeasy/ci.yml?style=flat-square" alt="ci" /></a>
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="license" />
+  <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square" alt="node" />
+</p>
+
 📚 **Documentation:** <https://pradeepmouli.github.io/lspeasy/>
 
-## Packages
+## Overview
 
-| Package | Description |
-|---------|-------------|
-| [`@lspeasy/core`](./packages/core) | JSON-RPC transport, LSP protocol types, middleware |
-| [`@lspeasy/server`](./packages/server) | LSP server with lifecycle and handler registration |
-| [`@lspeasy/client`](./packages/client) | LSP client with typed `textDocument.*` / `workspace.*` API |
+The [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) standardizes how editors and IDEs talk to language tooling — hover, completion, diagnostics, symbol navigation, and dozens of other features all flow over a single JSON-RPC connection. Implementing a server or client against LSP directly is deceptively involved: you need JSON-RPC framing, message validation, cancellation tokens, progress reporting, capability negotiation, the full lifecycle handshake, and correct handling of roughly a hundred request and notification types.
 
-## Installation
+`lspeasy` is a set of small, focused TypeScript packages that wrap all of that in a modern, ESM-first API. Handlers are registered against a typed, capability-aware namespace — `server.textDocument.onHover(...)` — so the editor-facing surface mirrors the spec and advertised capabilities are enforced at both compile time and runtime. Transports are swappable: run the same server over stdio for a classic editor plugin, over a web worker for a browser playground, over WebSockets for a remote tooling backend, or over TCP for diagnostics.
+
+Compared to `vscode-languageserver` (which is tightly coupled to Node and the VS Code extension model), `lspeasy` is runtime-agnostic, tree-shakeable, browser-friendly, and exposes a middleware pipeline for logging, tracing, and request rewriting without monkey-patching the dispatcher.
+
+## Features
+
+- **Capability-aware handler registration** — `server.textDocument.onHover(...)` is only callable after `registerCapabilities({ hoverProvider: true })`; mismatches are caught at both compile time and at the dispatcher.
+- **Full JSON-RPC 2.0 core** — schemas, framing, request/notification/response types, and typed error codes, all validated with Zod.
+- **Swappable transports** — `StdioTransport`, `TcpTransport`, `IpcTransport`, `WebSocketTransport`, `DedicatedWorkerTransport`, `SharedWorkerTransport`; write your own against the `Transport` interface.
+- **Runs anywhere** — Node.js-specific transports live under `@lspeasy/core/node`; the root export is browser-safe so the same code ships to a VS Code extension and a web playground.
+- **Typed client API** — `client.textDocument.hover(...)`, `client.workspace.symbol(...)`, and the full request surface with request/response types pulled from the LSP spec.
+- **Composable middleware** — `composeMiddleware(...)` plus `createScopedMiddleware({ methods, direction })` for logging, tracing, metrics, or request mutation without touching the core dispatcher.
+- **Lifecycle + progress + cancellation** — initialize/initialized/shutdown/exit are handled for you, with built-in partial-result and work-done progress senders and `CancellationToken` support.
+- **Zod-validated messages** — every inbound message is parsed against a schema, so malformed peers surface as typed errors instead of runtime crashes.
+- **Tree-shakeable, ESM-only** — pay for what you import; no CommonJS compatibility shims dragging extra code into browser bundles.
+
+## Install
 
 ```bash
-# Server
-npm install @lspeasy/server @lspeasy/core
+# Build a server
+pnpm add @lspeasy/server @lspeasy/core
 
-# Client
-npm install @lspeasy/client @lspeasy/core
-
-# Both
-npm install @lspeasy/core @lspeasy/server @lspeasy/client
+# Build a client
+pnpm add @lspeasy/client @lspeasy/core
 ```
 
-## Server
+Requires **Node.js ≥ 20**. For WebSocket **server** mode or Node < 22.4, also install `ws` (optional peer): `pnpm add ws`.
+
+## Quick Start
+
+A minimal LSP server over stdio that responds to `textDocument/hover`:
 
 ```typescript
 import { LSPServer } from '@lspeasy/server';
 import { StdioTransport } from '@lspeasy/core/node';
 
-const server = new LSPServer({ name: 'my-server', version: '1.0.0' });
+const server = new LSPServer({ name: 'hello-lsp', version: '0.1.0' });
 
 server.registerCapabilities({ hoverProvider: true });
 
-// Capability-aware namespace API — only available after registerCapabilities()
-server.textDocument.onHover(async (params) => {
-  return {
-    contents: { kind: 'markdown', value: `Line ${params.position.line}` }
-  };
-});
+server.textDocument.onHover(async (params) => ({
+  contents: {
+    kind: 'markdown',
+    value: `**Hovered** line ${params.position.line}, character ${params.position.character}`
+  }
+}));
 
 await server.listen(new StdioTransport());
 ```
 
-## Client
+Wire it into VS Code, Neovim, Helix, or any LSP-aware editor by spawning the script with `--stdio`.
+
+## Usage
+
+### Writing a client
 
 ```typescript
 import { LSPClient } from '@lspeasy/client';
@@ -72,28 +92,22 @@ const hover = await client.textDocument.hover({
 await client.disconnect();
 ```
 
-## Transports
+### Transports
 
-`@lspeasy/core` ships several built-in transports:
+`@lspeasy/core` ships several built-in transports. Import Node-only transports from the `/node` subpath so browser bundles stay clean.
 
 | Transport | Import | Notes |
 |-----------|--------|-------|
-| `StdioTransport` | `@lspeasy/core/node` | stdin/stdout, child process |
-| `WebSocketTransport` | `@lspeasy/core` | Native `globalThis.WebSocket` (Node ≥22.4, browsers) |
-| `TcpTransport` | `@lspeasy/core` | TCP client/server with optional reconnect |
-| `IpcTransport` | `@lspeasy/core` | Node.js parent/child IPC |
+| `StdioTransport` | `@lspeasy/core/node` | stdin/stdout, child processes |
+| `TcpTransport` | `@lspeasy/core/node` | TCP client/server with optional reconnect |
+| `IpcTransport` | `@lspeasy/core/node` | Node parent/child IPC |
+| `WebSocketTransport` | `@lspeasy/core` | Native `globalThis.WebSocket` (Node ≥22.4 or browsers) |
 | `DedicatedWorkerTransport` | `@lspeasy/core` | Browser dedicated worker |
 | `SharedWorkerTransport` | `@lspeasy/core` | Browser shared worker |
 
-`ws` is an optional dependency — install it for WebSocket **server** mode or Node <22.4:
+### Middleware
 
-```bash
-npm install ws
-```
-
-## Middleware
-
-`@lspeasy/core/middleware` provides a composable middleware pipeline for logging, tracing, and request mutation:
+`@lspeasy/core/middleware` provides a composable pipeline for logging, tracing, or mutating requests on the fly:
 
 ```typescript
 import { composeMiddleware, createScopedMiddleware } from '@lspeasy/core/middleware';
@@ -115,18 +129,32 @@ const textDocOnly = createScopedMiddleware(
 const middleware = composeMiddleware(logging, textDocOnly);
 ```
 
-## Development
+## How it works
+
+At the lowest layer, `@lspeasy/core` models JSON-RPC 2.0 messages (request / notification / response / error) as Zod-validated types and handles LSP's Content-Length framing. A `Transport` is just a bidirectional message pipe — everything from stdio to a `SharedWorker` implements the same interface, so the server and client layers are entirely transport-agnostic.
+
+`@lspeasy/server` layers on lifecycle management (initialize / initialized / shutdown / exit), a capability proxy that gates handler registration on advertised capabilities, a message dispatcher that routes to typed handlers, and helpers for work-done progress and partial results. `@lspeasy/client` is the symmetric counterpart: a typed request surface that mirrors the spec and handles correlation, cancellation, and response validation.
+
+## Packages
+
+| Package | Description |
+|---|---|
+| [`@lspeasy/core`](packages/core) | JSON-RPC 2.0, framing, transports, LSP protocol types, middleware pipeline |
+| [`@lspeasy/server`](packages/server) | Server class with lifecycle, capability-aware handler registration, progress/cancellation |
+| [`@lspeasy/client`](packages/client) | Client with typed `textDocument.*` / `workspace.*` request API |
+| [`@lspeasy/middleware`](packages/middleware) | Shared middleware building blocks |
+
+## Contributing
 
 ```bash
-pnpm install      # install dependencies
-pnpm build        # build all packages
-pnpm test         # run tests
-pnpm lint         # lint
-pnpm format       # format
+pnpm install
+pnpm build
+pnpm test
+pnpm lint
 ```
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) and [docs/](./docs) for architecture notes, ADRs, and the full API reference.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ## License
 
-MIT — [Pradeep Mouli](https://github.com/pradeepmouli)
+MIT — see [LICENSE](./LICENSE).
