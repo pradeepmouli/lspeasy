@@ -54,8 +54,6 @@
     "changeset:publish": "pnpm run build && changeset publish",
     "generate:protocol": "tsx scripts/generate-protocol-types.ts && oxfmt packages/core/src/protocol/*.ts",
     "prepare": "simple-git-hooks",
-    "docs": "typedoc --out docs/html --plugin typedoc-plugin-to-skills",
-    "docs:md": "typedoc",
     "docs:dev": "pnpm --filter @lspeasy/docs dev",
     "docs:build": "pnpm --filter @lspeasy/docs build"
   },
