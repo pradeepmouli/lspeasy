@@ -6,6 +6,8 @@
 
 TypeScript SDK for building [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) clients and servers.
 
+> **⚠️ Pre-1.0 software** — APIs are subject to change between minor versions. Pin to exact versions in production. See the [CHANGELOG](./CHANGELOG.md) for breaking changes between releases.
+
 ## Packages
 
 | Package | Description |
