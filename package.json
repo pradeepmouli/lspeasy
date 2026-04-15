@@ -72,7 +72,7 @@
     "ts-morph": "^28.0.0",
     "tsx": "^4.21.0",
     "type-fest": "^5.4.4",
-    "typedoc": "^0.28.17",
+    "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.11.0",
     "typedoc-plugin-to-skills": "^0.6.0",
     "typescript": "^5.9.3",
