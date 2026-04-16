@@ -24,6 +24,30 @@ export default defineConfig({
   lastUpdated: true,
   cleanUrls: true,
   ignoreDeadLinks: true,
+  head: [
+    ['meta', { property: 'og:title', content: 'lspeasy' }],
+    [
+      'meta',
+      {
+        property: 'og:description',
+        content: 'TypeScript SDK for building Language Server Protocol clients and servers'
+      }
+    ],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:url', content: 'https://pradeepmouli.github.io/lspeasy/' }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+    ['meta', { name: 'twitter:title', content: 'lspeasy' }],
+    [
+      'meta',
+      {
+        name: 'twitter:description',
+        content: 'TypeScript SDK for building Language Server Protocol clients and servers'
+      }
+    ]
+  ],
+  sitemap: {
+    hostname: 'https://pradeepmouli.github.io/lspeasy'
+  },
   themeConfig: {
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
