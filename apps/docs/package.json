@@ -14,6 +14,7 @@
     "typedoc": "0.28.19",
     "typedoc-plugin-markdown": "^4.11.0",
     "typedoc-vitepress-theme": "^1.1.2",
+    "typedoc-plugin-to-skills": "^0.6.0",
     "vue": "^3.5.0"
   },
   "engines": {
