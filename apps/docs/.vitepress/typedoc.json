@@ -14,6 +14,15 @@
   "skipErrorChecking": true,
   "excludeInternal": true,
   "excludePrivate": true,
+  "exclude": [
+    "**/protocol/types.ts"
+  ],
+  "externalPattern": [
+    "**/node_modules/vscode-languageserver-protocol/**",
+    "**/node_modules/vscode-languageserver-types/**",
+    "**/node_modules/vscode-jsonrpc/**"
+  ],
+  "excludeExternals": true,
   "readme": "none",
   "hideBreadcrumbs": false,
   "useCodeBlocks": true,
