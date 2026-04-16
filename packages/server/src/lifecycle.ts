@@ -26,7 +26,7 @@ export class LifecycleManager {
   /**
    * Set server capabilities
    */
-  setCapabilities(capabilities: ServerCapabilities): void {
+  registerCapabilities(capabilities: ServerCapabilities): void {
     this.serverCapabilities = capabilities;
   }
 

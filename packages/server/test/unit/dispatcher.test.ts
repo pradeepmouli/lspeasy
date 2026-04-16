@@ -90,6 +90,28 @@ describe('MessageDispatcher', () => {
       });
     });
 
+    it('should normalize undefined handler result to null', async () => {
+      const handler = vi.fn(async () => undefined);
+      dispatcher.registerRequest('test/method', handler);
+
+      const request: RequestMessage = {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'test/method',
+        params: {}
+      };
+
+      await dispatcher.dispatch(request, mockTransport, new Map());
+
+      expect(mockTransport.sentMessages).toHaveLength(1);
+      const response = mockTransport.sentMessages[0];
+      expect(response.jsonrpc).toBe('2.0');
+      expect(response.id).toBe(1);
+      // result MUST be present (not undefined) per JSON-RPC 2.0 spec
+      expect('result' in response).toBe(true);
+      expect(response.result).toBeNull();
+    });
+
     it('should dispatch notification to handler', async () => {
       const handler = vi.fn();
       dispatcher.registerNotification('test/notification', handler);

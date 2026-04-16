@@ -12,7 +12,7 @@ const server = new LSPServer({
 });
 
 // Set capabilities
-server.setCapabilities({
+server.registerCapabilities({
   hoverProvider: true
 });
 

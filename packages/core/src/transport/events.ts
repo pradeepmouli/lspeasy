@@ -2,13 +2,20 @@
  * Transport lifecycle events
  */
 
-import { EventEmitter } from 'node:events';
+import { DisposableEventEmitter } from '../utils/disposable-event-emitter.js';
 import type { Message } from '../jsonrpc/messages.js';
+
+type TransportEventMap = {
+  connect: [];
+  disconnect: [];
+  error: [Error];
+  message: [Message];
+};
 
 /**
  * Transport event emitter
  */
-export class TransportEventEmitter extends EventEmitter {
+export class TransportEventEmitter extends DisposableEventEmitter<TransportEventMap> {
   /**
    * Emit connect event
    */

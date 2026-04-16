@@ -5,9 +5,40 @@ coverage/
 .coverage/
 *.log
 .DS_Store
+Thumbs.db
+*.tmp
 .env
+.env*
 .env.local
 .env.*.local
+!.env.example
 .nyc_output/
 .pnpm-debug.log*
 *.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# Editor swap files
+*.swp
+
+# MetaModel cache
+.cache/
+docs/html/
+
+# Generated API docs (typedoc)
+docs/api/
+docs/classes/
+docs/functions/
+docs/interfaces/
+docs/enums/
+docs/types/
+docs/variables/
+docs/modules/
+docs/assets/
+docs/media/
+docs/hierarchy.html
+docs/index.html
+docs/modules.html
+docs/.nojekyll

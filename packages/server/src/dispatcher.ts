@@ -12,13 +12,24 @@ import type {
   ClientCapabilities
 } from '@lspeasy/core';
 import { ResponseError, isRequestMessage, isNotificationMessage } from '@lspeasy/core';
-import type { RequestHandler, NotificationHandler, HandlerRegistration } from './types.js';
+import { HandlerRegistry } from '@lspeasy/core/utils';
+import type {
+  RequestHandler,
+  NotificationHandler,
+  RequestContext,
+  NotificationContext
+} from './types.js';
 
 /**
  * Message dispatcher manages request/notification routing
  */
 export class MessageDispatcher {
-  private handlers = new Map<string, HandlerRegistration>();
+  private requestHandlers = new HandlerRegistry<
+    unknown,
+    unknown,
+    [CancellationToken, RequestContext]
+  >();
+  private notificationHandlers = new HandlerRegistry<unknown, void, [NotificationContext]>();
   private pendingRequests = new Map<number | string, AbortController>();
   private clientCapabilities?: ClientCapabilities;
 
@@ -28,7 +39,7 @@ export class MessageDispatcher {
    * Register a request handler
    */
   registerRequest<Params, Result>(method: string, handler: RequestHandler<Params, Result>): void {
-    this.handlers.set(method, { handler, isRequest: true });
+    this.requestHandlers.register(method, handler as RequestHandler);
     this.logger.debug(`Registered request handler: ${method}`);
   }
 
@@ -36,8 +47,24 @@ export class MessageDispatcher {
    * Register a notification handler
    */
   registerNotification<Params>(method: string, handler: NotificationHandler<Params>): void {
-    this.handlers.set(method, { handler, isRequest: false });
+    this.notificationHandlers.register(method, handler as NotificationHandler);
     this.logger.debug(`Registered notification handler: ${method}`);
+  }
+
+  /**
+   * Unregister a request handler
+   */
+  unregisterRequest(method: string): void {
+    this.requestHandlers.unregister(method);
+    this.logger.debug(`Unregistered request handler: ${method}`);
+  }
+
+  /**
+   * Unregister a notification handler
+   */
+  unregisterNotification(method: string): void {
+    this.notificationHandlers.unregister(method);
+    this.logger.debug(`Unregistered notification handler: ${method}`);
   }
 
   /**
@@ -74,8 +101,8 @@ export class MessageDispatcher {
 
     try {
       // Check if handler exists
-      const registration = this.handlers.get(method);
-      if (!registration || !registration.isRequest) {
+      const handler = this.requestHandlers.get(method) as RequestHandler | undefined;
+      if (!handler) {
         await this.sendError(transport, id, ResponseError.methodNotFound(method));
         return;
       }
@@ -95,7 +122,6 @@ export class MessageDispatcher {
       };
 
       // Execute handler
-      const handler = registration.handler as RequestHandler;
       const result = await handler(params, cancellationToken, {
         id,
         method,
@@ -103,10 +129,14 @@ export class MessageDispatcher {
       });
 
       // Send success response
+      // Normalize undefined → null per JSON-RPC 2.0 spec:
+      // a response MUST contain either "result" or "error" — omitting
+      // "result" (which happens when JSON.stringify drops undefined)
+      // produces an invalid message the client can never resolve.
       await transport.send({
         jsonrpc: '2.0',
         id,
-        result
+        result: result ?? null
       });
     } catch (error) {
       // Send error response
@@ -128,13 +158,12 @@ export class MessageDispatcher {
     const { method, params } = notification;
 
     try {
-      const registration = this.handlers.get(method);
-      if (!registration || registration.isRequest) {
+      const handler = this.notificationHandlers.get(method) as NotificationHandler | undefined;
+      if (!handler) {
         this.logger.debug(`No handler for notification: ${method}`);
         return;
       }
 
-      const handler = registration.handler as NotificationHandler;
       await handler(params, {
         method,
         clientCapabilities: this.clientCapabilities
@@ -180,7 +209,8 @@ export class MessageDispatcher {
    * Clear all handlers
    */
   clear(): void {
-    this.handlers.clear();
+    this.requestHandlers.clear();
+    this.notificationHandlers.clear();
     this.pendingRequests.clear();
   }
 }

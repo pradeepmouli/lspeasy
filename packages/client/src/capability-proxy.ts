@@ -1,235 +1,103 @@
 /**
- * Capability-aware proxy for client methods
+ * Capability-aware dynamic method injection for client
  *
- * Dynamically exposes/hides methods based on server capabilities
+ * Dynamically adds methods/namespaces to the client object based on server capabilities
  */
 
-import type { ServerCapabilities, LSPRequest } from '@lspeasy/core';
+import {
+  LSPRequest,
+  LSPNotification,
+  getDefinitionForRequest,
+  getDefinitionForNotification,
+  hasServerCapability
+} from '@lspeasy/core';
 import type { LSPClient } from './client.js';
+import camelCase from 'camelcase';
 
-/**
- * Check if a server capability is enabled
- */
-function isCapabilityEnabled(
-  capabilities: Partial<ServerCapabilities> | undefined,
-  capabilityKey: string
-): boolean {
-  if (!capabilities) return false;
+function deriveNotificationMethodKey(namespaceName: string, notificationKey: string): string {
+  if (notificationKey.endsWith(namespaceName)) {
+    return notificationKey.slice(0, -namespaceName.length);
+  }
+  return notificationKey;
+}
 
-  const value = (capabilities as any)[capabilityKey];
-  return value !== undefined && value !== false && value !== null;
+function getRuntimeRegisteredMethods<
+  ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>
+>(client: LSPClient<ClientCaps>): Set<string> {
+  const runtime = client.getRuntimeCapabilities();
+  return new Set(runtime.dynamicRegistrations.map((registration) => registration.method));
 }
 
 /**
- * Creates a namespace proxy that checks capabilities before allowing method calls
+ * Initializes capability-aware methods on the client object based on LSPRequest definitions
  */
-function createNamespaceProxy<T extends object>(
-  client: LSPClient,
-  namespace: keyof typeof LSPRequest,
-  methods: Record<string, { method: string; serverCapability: string | null }>
-): T {
-  return new Proxy({} as T, {
-    get(_target, prop: string) {
-      const methodInfo = methods[prop];
-      if (!methodInfo) {
-        return undefined;
+export function initializeCapabilityMethods<
+  ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>
+>(client: LSPClient<ClientCaps>): void {
+  const runtimeRegisteredMethods = getRuntimeRegisteredMethods(client);
+
+  if (!client.serverCapabilities) {
+    // Server capabilities not yet known; cannot initialize methods
+    return;
+  }
+  // Attach all namespaces from LSPRequest
+  for (const [namespaceName, namespaceDefinitions] of Object.entries(LSPRequest)) {
+    // Convert namespace name to camelCase for the client property
+    // e.g., "TextDocument" -> "textDocument", "Workspace" -> "workspace"
+    const clientPropertyName = camelCase(namespaceName);
+    const namespace = {} as any;
+    for (const request in namespaceDefinitions) {
+      const d = getDefinitionForRequest<any, any>(
+        namespaceName as keyof typeof LSPRequest,
+        request as any
+      );
+      // Only add methods if:
+      // 1. No capability required (ServerCapability is undefined/null), OR
+      // 2. Server has the required capability
+      if (
+        !d.ServerCapability ||
+        hasServerCapability(client.serverCapabilities, d.ServerCapability) ||
+        runtimeRegisteredMethods.has(d.Method)
+      ) {
+        namespace[camelCase(request)] = (a: any, b: any) => client.sendRequest(d.Method, a, b);
       }
-
-      const serverCaps = (client as any).serverCapabilities as ServerCapabilities | undefined;
-
-      // If serverCapability is null, method is always available (e.g., notifications)
-      const isAvailable =
-        methodInfo.serverCapability === null ||
-        isCapabilityEnabled(serverCaps, methodInfo.serverCapability);
-
-      if (!isAvailable) {
-        // Return undefined for disabled capabilities (method doesn't exist)
-        return undefined;
-      }
-
-      // Determine if this is a notification (sendNotification) or request (sendRequest)
-      const isNotification =
-        methodInfo.method.startsWith('textDocument/did') ||
-        methodInfo.method.startsWith('workspace/did');
-
-      // Return bound method that calls sendRequest or sendNotification
-      return async (params: any) => {
-        if (isNotification) {
-          return (client as any).sendNotification(methodInfo.method, params);
-        } else {
-          return (client as any).sendRequest(methodInfo.method, params);
-        }
-      };
-    },
-
-    has(_target, prop: string) {
-      const methodInfo = methods[prop];
-      if (!methodInfo) return false;
-
-      // If serverCapability is null, method is always available
-      if (methodInfo.serverCapability === null) return true;
-
-      const serverCaps = (client as any).serverCapabilities as ServerCapabilities | undefined;
-      return isCapabilityEnabled(serverCaps, methodInfo.serverCapability);
-    },
-
-    ownKeys(_target) {
-      const serverCaps = (client as any).serverCapabilities as ServerCapabilities | undefined;
-      if (!serverCaps) return [];
-      return Object.keys(methods).filter((key) => {
-        const methodInfo = methods[key]!;
-        // Always include methods with null serverCapability
-        return (
-          methodInfo.serverCapability === null ||
-          isCapabilityEnabled(serverCaps, methodInfo.serverCapability)
-        );
-      });
-    },
-
-    getOwnPropertyDescriptor(_target, prop: string) {
-      const methodInfo = methods[prop];
-      if (!methodInfo) return undefined;
-
-      // If serverCapability is null, always return descriptor
-      if (methodInfo.serverCapability === null) {
-        return {
-          enumerable: true,
-          configurable: true,
-          writable: false
-        };
-      }
-
-      const serverCaps = (client as any).serverCapabilities as ServerCapabilities | undefined;
-      if (!isCapabilityEnabled(serverCaps, methodInfo.serverCapability)) {
-        return undefined;
-      }
-
-      return {
-        enumerable: true,
-        configurable: true,
-        writable: false
-      };
+      // If capability is missing, don't add the method at all (runtime matches types)
     }
-  });
-}
-
-/**
- * Create capability-aware textDocument methods
- */
-export function createTextDocumentProxy(client: LSPClient): any {
-  const methods = {
-    hover: { method: 'textDocument/hover', serverCapability: 'hoverProvider' },
-    completion: { method: 'textDocument/completion', serverCapability: 'completionProvider' },
-    definition: { method: 'textDocument/definition', serverCapability: 'definitionProvider' },
-    references: { method: 'textDocument/references', serverCapability: 'referencesProvider' },
-    documentHighlight: {
-      method: 'textDocument/documentHighlight',
-      serverCapability: 'documentHighlightProvider'
-    },
-    documentSymbol: {
-      method: 'textDocument/documentSymbol',
-      serverCapability: 'documentSymbolProvider'
-    },
-    codeAction: { method: 'textDocument/codeAction', serverCapability: 'codeActionProvider' },
-    codeLens: { method: 'textDocument/codeLens', serverCapability: 'codeLensProvider' },
-    documentLink: { method: 'textDocument/documentLink', serverCapability: 'documentLinkProvider' },
-    formatting: {
-      method: 'textDocument/formatting',
-      serverCapability: 'documentFormattingProvider'
-    },
-    rangeFormatting: {
-      method: 'textDocument/rangeFormatting',
-      serverCapability: 'documentRangeFormattingProvider'
-    },
-    onTypeFormatting: {
-      method: 'textDocument/onTypeFormatting',
-      serverCapability: 'documentOnTypeFormattingProvider'
-    },
-    rename: { method: 'textDocument/rename', serverCapability: 'renameProvider' },
-    prepareRename: { method: 'textDocument/prepareRename', serverCapability: 'renameProvider' },
-    signatureHelp: {
-      method: 'textDocument/signatureHelp',
-      serverCapability: 'signatureHelpProvider'
-    },
-    declaration: { method: 'textDocument/declaration', serverCapability: 'declarationProvider' },
-    typeDefinition: {
-      method: 'textDocument/typeDefinition',
-      serverCapability: 'typeDefinitionProvider'
-    },
-    implementation: {
-      method: 'textDocument/implementation',
-      serverCapability: 'implementationProvider'
-    },
-    foldingRange: { method: 'textDocument/foldingRange', serverCapability: 'foldingRangeProvider' },
-    selectionRange: {
-      method: 'textDocument/selectionRange',
-      serverCapability: 'selectionRangeProvider'
-    },
-    semanticTokensFull: {
-      method: 'textDocument/semanticTokens/full',
-      serverCapability: 'semanticTokensProvider'
-    },
-    semanticTokensRange: {
-      method: 'textDocument/semanticTokens/range',
-      serverCapability: 'semanticTokensProvider'
-    },
-    linkedEditingRange: {
-      method: 'textDocument/linkedEditingRange',
-      serverCapability: 'linkedEditingRangeProvider'
-    },
-    moniker: { method: 'textDocument/moniker', serverCapability: 'monikerProvider' },
-    inlayHint: { method: 'textDocument/inlayHint', serverCapability: 'inlayHintProvider' },
-    inlineValue: { method: 'textDocument/inlineValue', serverCapability: 'inlineValueProvider' },
-    documentColor: { method: 'textDocument/documentColor', serverCapability: 'colorProvider' },
-    colorPresentation: {
-      method: 'textDocument/colorPresentation',
-      serverCapability: 'colorProvider'
-    },
-    prepareCallHierarchy: {
-      method: 'textDocument/prepareCallHierarchy',
-      serverCapability: 'callHierarchyProvider'
-    },
-    prepareTypeHierarchy: {
-      method: 'textDocument/prepareTypeHierarchy',
-      serverCapability: 'typeHierarchyProvider'
-    },
-    // Notification methods - always available regardless of capabilities
-    didOpen: { method: 'textDocument/didOpen', serverCapability: null },
-    didChange: { method: 'textDocument/didChange', serverCapability: null },
-    didClose: { method: 'textDocument/didClose', serverCapability: null },
-    didSave: { method: 'textDocument/didSave', serverCapability: null }
-  };
-
-  return createNamespaceProxy(client, 'TextDocument', methods);
-}
-
-/**
- * Create capability-aware workspace methods
- */
-export function createWorkspaceProxy(client: LSPClient): any {
-  const methods = {
-    symbol: { method: 'workspace/symbol', serverCapability: 'workspaceSymbolProvider' },
-    executeCommand: {
-      method: 'workspace/executeCommand',
-      serverCapability: 'executeCommandProvider'
-    },
-    willCreateFiles: { method: 'workspace/willCreateFiles', serverCapability: 'workspace' },
-    willRenameFiles: { method: 'workspace/willRenameFiles', serverCapability: 'workspace' },
-    willDeleteFiles: { method: 'workspace/willDeleteFiles', serverCapability: 'workspace' },
-    // Notification methods - always available regardless of capabilities
-    didChangeWorkspaceFolders: {
-      method: 'workspace/didChangeWorkspaceFolders',
-      serverCapability: null
-    },
-    didChangeConfiguration: {
-      method: 'workspace/didChangeConfiguration',
-      serverCapability: null
-    },
-    didChangeWatchedFiles: {
-      method: 'workspace/didChangeWatchedFiles',
-      serverCapability: null
+    // Only add namespace if it has at least one method
+    if (Object.keys(namespace).length > 0) {
+      (client as any)[clientPropertyName] = namespace;
     }
-  };
+  }
 
-  return createNamespaceProxy(client, 'Workspace', methods);
+  // Also attach notification namespaces if needed
+  for (const [namespaceName, namespaceDefinitions] of Object.entries(LSPNotification)) {
+    const clientPropertyName = camelCase(namespaceName);
+    if (!(client as any)[clientPropertyName]) {
+      (client as any)[clientPropertyName] = {};
+    }
+    for (const notification in namespaceDefinitions) {
+      const d = getDefinitionForNotification(namespaceName as any, notification);
+      // Notifications typically don't require capabilities, but check anyway
+      if (
+        !d.ServerCapability ||
+        hasServerCapability(client.serverCapabilities, d.ServerCapability) ||
+        runtimeRegisteredMethods.has(d.Method)
+      ) {
+        const methodKey = deriveNotificationMethodKey(namespaceName, notification);
+        (client as any)[clientPropertyName][camelCase(methodKey)] = (a: any) =>
+          client.sendNotification(d.Method, a);
+      }
+    }
+  }
+}
+
+/**
+ * Updates capability-aware methods on the client after server capabilities are received
+ * This should be called after initialization to add/remove methods based on actual capabilities
+ */
+export function updateCapabilityMethods<
+  ClientCaps extends Partial<import('@lspeasy/core').ClientCapabilities>
+>(client: LSPClient<ClientCaps>): void {
+  // Re-run initialization to update methods based on new capabilities
+  initializeCapabilityMethods(client);
 }

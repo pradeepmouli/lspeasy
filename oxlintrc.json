@@ -13,5 +13,14 @@
       "filename-case": "off"
     }
   },
-  "ignorePatterns": ["node_modules", "dist", "build", "coverage", "*.config.ts", "*.config.js"]
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "*.config.ts",
+    "*.config.js",
+    "scripts",
+    "examples"
+  ]
 }

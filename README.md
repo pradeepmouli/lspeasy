@@ -1,376 +1,160 @@
 # lspeasy
 
-[![CI](https://github.com/pradeepmouli/lspeasy/actions/workflows/ci.yml/badge.svg)](https://github.com/pradeepmouli/lspeasy/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](package.json)
-[![pnpm](https://img.shields.io/badge/pnpm-10.27.0-yellow)](package.json)
+> A TypeScript SDK for building [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) clients and servers that run anywhere JavaScript runs — Node, browsers, web workers, or VS Code extensions — with a capability-aware, strongly-typed API.
 
-A modern **TypeScript SDK for building Language Server Protocol (LSP) clients and servers** with strong typing, comprehensive tooling, and an ergonomic API inspired by the Model Context Protocol (MCP) SDK.
+> **⚠️ Pre-1.0 software** — APIs are subject to change between minor versions. Pin to exact versions in production. See the [CHANGELOG](./CHANGELOG.md) for breaking changes between releases.
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@lspeasy/core"><img src="https://img.shields.io/npm/v/@lspeasy/core?style=flat-square&label=%40lspeasy%2Fcore" alt="npm version" /></a>
+  <a href="https://github.com/pradeepmouli/lspeasy/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/pradeepmouli/lspeasy/ci.yml?style=flat-square" alt="ci" /></a>
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="license" />
+  <img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen?style=flat-square" alt="node" />
+</p>
+
+📚 **Documentation:** <https://pradeepmouli.github.io/lspeasy/>
+
+## Overview
+
+The [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) standardizes how editors and IDEs talk to language tooling — hover, completion, diagnostics, symbol navigation, and dozens of other features all flow over a single JSON-RPC connection. Implementing a server or client against LSP directly is deceptively involved: you need JSON-RPC framing, message validation, cancellation tokens, progress reporting, capability negotiation, the full lifecycle handshake, and correct handling of roughly a hundred request and notification types.
+
+`lspeasy` is a set of small, focused TypeScript packages that wrap all of that in a modern, ESM-first API. Handlers are registered against a typed, capability-aware namespace — `server.textDocument.onHover(...)` — so the editor-facing surface mirrors the spec and advertised capabilities are enforced at both compile time and runtime. Transports are swappable: run the same server over stdio for a classic editor plugin, over a web worker for a browser playground, over WebSockets for a remote tooling backend, or over TCP for diagnostics.
+
+Compared to `vscode-languageserver` (which is tightly coupled to Node and the VS Code extension model), `lspeasy` is runtime-agnostic, tree-shakeable, browser-friendly, and exposes a middleware pipeline for logging, tracing, and request rewriting without monkey-patching the dispatcher.
 
 ## Features
 
-- 🔷 **Strongly-typed**: Full TypeScript support with LSP 3.17 types
-- 🚀 **Modern API**: Clean, promise-based API with async/await
-- 🔌 **Transport-agnostic**: Support for stdio, WebSocket, and custom transports
-- 📦 **Modular**: Three focused packages (`@lspeasy/core`, `@lspeasy/server`, `@lspeasy/client`)
-- ✅ **Well-tested**: Comprehensive unit and integration tests
-- 📚 **Documented**: Complete API reference and architecture guide
-- 🎯 **Production-ready**: Memory-safe, error-resilient, performance-optimized
+- **Capability-aware handler registration** — `server.textDocument.onHover(...)` is only callable after `registerCapabilities({ hoverProvider: true })`; mismatches are caught at both compile time and at the dispatcher.
+- **Full JSON-RPC 2.0 core** — schemas, framing, request/notification/response types, and typed error codes, all validated with Zod.
+- **Swappable transports** — `StdioTransport`, `TcpTransport`, `IpcTransport`, `WebSocketTransport`, `DedicatedWorkerTransport`, `SharedWorkerTransport`; write your own against the `Transport` interface.
+- **Runs anywhere** — Node.js-specific transports live under `@lspeasy/core/node`; the root export is browser-safe so the same code ships to a VS Code extension and a web playground.
+- **Typed client API** — `client.textDocument.hover(...)`, `client.workspace.symbol(...)`, and the full request surface with request/response types pulled from the LSP spec.
+- **Composable middleware** — `composeMiddleware(...)` plus `createScopedMiddleware({ methods, direction })` for logging, tracing, metrics, or request mutation without touching the core dispatcher.
+- **Lifecycle + progress + cancellation** — initialize/initialized/shutdown/exit are handled for you, with built-in partial-result and work-done progress senders and `CancellationToken` support.
+- **Zod-validated messages** — every inbound message is parsed against a schema, so malformed peers surface as typed errors instead of runtime crashes.
+- **Tree-shakeable, ESM-only** — pay for what you import; no CommonJS compatibility shims dragging extra code into browser bundles.
+
+## Install
+
+```bash
+# Build a server
+pnpm add @lspeasy/server @lspeasy/core
+
+# Build a client
+pnpm add @lspeasy/client @lspeasy/core
+```
+
+Requires **Node.js ≥ 20**. For WebSocket **server** mode or Node < 22.4, also install `ws` (optional peer): `pnpm add ws`.
 
 ## Quick Start
 
-### Installation
-
-```bash
-npm install @lspeasy/core @lspeasy/server @lspeasy/client
-# or
-pnpm add @lspeasy/core @lspeasy/server @lspeasy/client
-```
-
-### Building an LSP Server
+A minimal LSP server over stdio that responds to `textDocument/hover`:
 
 ```typescript
 import { LSPServer } from '@lspeasy/server';
-import { StdioTransport } from '@lspeasy/core';
+import { StdioTransport } from '@lspeasy/core/node';
 
-// Create server
-const server = new LSPServer({
-  name: 'my-language-server',
-  version: '1.0.0',
-  capabilities: {
-    textDocumentSync: 1,
-    hoverProvider: true,
-    completionProvider: {
-      triggerCharacters: ['.']
-    }
+const server = new LSPServer({ name: 'hello-lsp', version: '0.1.0' });
+
+server.registerCapabilities({ hoverProvider: true });
+
+server.textDocument.onHover(async (params) => ({
+  contents: {
+    kind: 'markdown',
+    value: `**Hovered** line ${params.position.line}, character ${params.position.character}`
   }
-});
+}));
 
-// Register hover handler
-server.onRequest('textDocument/hover', async (params) => {
-  return {
-    contents: {
-      kind: 'markdown',
-      value: `Hover info for ${params.textDocument.uri}`
-    }
-  };
-});
-
-// Register completion handler
-server.onRequest('textDocument/completion', async (params) => {
-  return {
-    isIncomplete: false,
-    items: [
-      { label: 'example', kind: 1 },
-      { label: 'test', kind: 1 }
-    ]
-  };
-});
-
-// Listen on stdio
-const transport = new StdioTransport();
-await server.listen(transport);
+await server.listen(new StdioTransport());
 ```
 
-### Building an LSP Client
+Wire it into VS Code, Neovim, Helix, or any LSP-aware editor by spawning the script with `--stdio`.
+
+## Usage
+
+### Writing a client
 
 ```typescript
 import { LSPClient } from '@lspeasy/client';
-import { StdioTransport } from '@lspeasy/core';
+import { StdioTransport } from '@lspeasy/core/node';
 import { spawn } from 'node:child_process';
 
-// Spawn language server
-const serverProcess = spawn('typescript-language-server', ['--stdio']);
+const proc = spawn('my-language-server', ['--stdio']);
+const transport = new StdioTransport({ input: proc.stdout, output: proc.stdin });
 
-// Create transport
-const transport = new StdioTransport({
-  input: serverProcess.stdout,
-  output: serverProcess.stdin
-});
+const client = new LSPClient({ name: 'my-client', version: '1.0.0' });
+await client.connect(transport);
 
-// Create and connect client
-const client = new LSPClient({
-  name: 'my-editor',
-  version: '1.0.0'
-});
-
-const initResult = await client.connect(transport);
-console.log('Connected to:', initResult.serverInfo);
-
-// Open document
-await client.textDocument.didOpen({
-  textDocument: {
-    uri: 'file:///example.ts',
-    languageId: 'typescript',
-    version: 1,
-    text: 'const x = 1;'
-  }
-});
-
-// Get hover information
 const hover = await client.textDocument.hover({
   textDocument: { uri: 'file:///example.ts' },
   position: { line: 0, character: 6 }
 });
 
-console.log('Hover:', hover?.contents);
-
-// Disconnect gracefully
 await client.disconnect();
 ```
 
-## Packages
+### Transports
 
-### @lspeasy/core
+`@lspeasy/core` ships several built-in transports. Import Node-only transports from the `/node` subpath so browser bundles stay clean.
 
-Core functionality and transport layer:
+| Transport | Import | Notes |
+|-----------|--------|-------|
+| `StdioTransport` | `@lspeasy/core/node` | stdin/stdout, child processes |
+| `TcpTransport` | `@lspeasy/core/node` | TCP client/server with optional reconnect |
+| `IpcTransport` | `@lspeasy/core/node` | Node parent/child IPC |
+| `WebSocketTransport` | `@lspeasy/core` | Native `globalThis.WebSocket` (Node ≥22.4 or browsers) |
+| `DedicatedWorkerTransport` | `@lspeasy/core` | Browser dedicated worker |
+| `SharedWorkerTransport` | `@lspeasy/core` | Browser shared worker |
 
-- JSON-RPC 2.0 message handling
-- `Transport` interface and `StdioTransport` implementation
-- LSP 3.17 protocol types
-- Utilities (cancellation tokens, logging, disposables)
+### Middleware
 
-```typescript
-import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
-```
-
-### @lspeasy/server
-
-LSP server implementation:
-
-- `LSPServer` class with handler registration
-- Initialize/shutdown lifecycle management
-- Server capability declaration
-- Type-safe request/notification handlers
+`@lspeasy/core/middleware` provides a composable pipeline for logging, tracing, or mutating requests on the fly:
 
 ```typescript
-import { LSPServer } from '@lspeasy/server';
-```
+import { composeMiddleware, createScopedMiddleware } from '@lspeasy/core/middleware';
+import type { Middleware } from '@lspeasy/core/middleware';
 
-### @lspeasy/client
+const logging: Middleware = async (ctx, next) => {
+  console.log(`${ctx.direction} ${ctx.method}`);
+  await next();
+};
 
-LSP client implementation:
-
-- `LSPClient` class with connection management
-- High-level `textDocument.*` and `workspace.*` APIs
-- Cancellable requests
-- Server-to-client request handling
-
-```typescript
-import { LSPClient } from '@lspeasy/client';
-```
-
-## Examples
-
-See the [examples](./examples) directory for complete working examples:
-
-- **Server Examples**:
-  - [basic-server.ts](./examples/server/basic-server.ts) - Simple LSP server with hover
-  - [test-server.ts](./examples/server/test-server.ts) - Reusable test server harness
-
-- **Client Examples**:
-  - [basic-client.ts](./examples/client/basic-client.ts) - Connect to typescript-language-server
-  - [test-client.ts](./examples/client/test-client.ts) - Reusable test client harness
-
-## Documentation
-
-- [Capability-Aware Features](./docs/CAPABILITY-AWARE.md) - Runtime capability validation and dynamic methods
-- [Architecture Guide](./docs/ARCHITECTURE.md) - System design and implementation details
-- [API Reference](./docs/API.md) - Complete API documentation
-- [Package READMEs](./packages) - Package-specific guides
-
-## Development
-
-### Setup
-
-```bash
-# Install dependencies
-pnpm install
-
-# Build all packages
-pnpm run build
-
-# Run tests
-pnpm test
-
-# Run linter
-pnpm run lint
-
-# Format code
-pnpm run format
-```
-
-### Project Structure
-
-```
-lspeasy/
-├── packages/
-│   ├── core/           # Transport and protocol foundation
-│   ├── server/         # LSP server implementation
-│   └── client/         # LSP client implementation
-├── examples/           # Usage examples
-├── docs/              # Documentation
-└── specs/             # Feature specifications
-```
-
-### Testing
-
-```bash
-# Run all tests
-pnpm test
-
-# Run specific package tests
-pnpm test packages/core
-pnpm test packages/server
-pnpm test packages/client
-
-# Run with coverage
-pnpm test --coverage
-```
-
-## Key Concepts
-
-### Capability-Aware Design
-
-Both client and server support **capability-aware** operations:
-
-#### Server-Side Capability Validation
-
-Servers validate handler registration against declared capabilities:
-
-```typescript
-const server = new LSPServer({
-  strictCapabilities: true  // Enforce capability checking
-});
-
-server.setCapabilities({
-  hoverProvider: true,
-  // definitionProvider not declared
-});
-
-// ✅ Works - hover capability declared
-server.onRequest('textDocument/hover', async (params) => {
-  return { contents: 'Hover text' };
-});
-
-// ❌ Throws error in strict mode - capability not declared
-server.onRequest('textDocument/definition', async (params) => {
-  return { uri: params.textDocument.uri, range: ... };
-});
-```
-
-#### Client-Side Dynamic Methods
-
-Clients dynamically expose methods based on server capabilities:
-
-```typescript
-await client.connect(transport);
-
-// Methods only exist if server declares capability
-if ('hover' in client.textDocument) {
-  const result = await client.textDocument.hover({
-    textDocument: { uri: 'file:///example.ts' },
-    position: { line: 10, character: 5 }
-  });
-}
-
-// Check available methods
-const methods = Object.keys(client.textDocument)
-  .filter(k => typeof client.textDocument[k] === 'function');
-console.log('Available methods:', methods);
-```
-
-### Transport Layer
-
-Transports handle message transmission:
-
-```typescript
-interface Transport {
-  send(message: Message): Promise<void>;
-  onMessage(handler: (message: Message) => void): Disposable;
-  onError(handler: (error: Error) => void): Disposable;
-  onClose(handler: () => void): Disposable;
-  close(): Promise<void>;
-  isConnected(): boolean;
-}
-```
-
-### Handler Registration
-
-Type-safe handlers with auto-completion:
-
-```typescript
-// Server side
-server.onRequest('textDocument/definition', async (params) => {
-  // params is typed as DefinitionParams
-  return { uri: '...', range: { ... } };
-});
-
-// Client side
-const result = await client.textDocument.definition({
-  textDocument: { uri: '...' },
-  position: { line: 0, character: 5 }
-});
-```
-
-### Cancellation
-
-Cancel in-flight requests:
-
-```typescript
-const tokenSource = new CancellationTokenSource();
-
-const promise = client.sendRequest(
-  'textDocument/completion',
-  params,
-  tokenSource.token
+const textDocOnly = createScopedMiddleware(
+  { methods: /^textDocument\//, direction: 'clientToServer' },
+  async (ctx, next) => {
+    ctx.metadata.startedAt = Date.now();
+    await next();
+  }
 );
 
-// Cancel if needed
-tokenSource.cancel();
+const middleware = composeMiddleware(logging, textDocOnly);
 ```
 
-### Resource Management
+## How it works
 
-Dispose handlers when done:
+At the lowest layer, `@lspeasy/core` models JSON-RPC 2.0 messages (request / notification / response / error) as Zod-validated types and handles LSP's Content-Length framing. A `Transport` is just a bidirectional message pipe — everything from stdio to a `SharedWorker` implements the same interface, so the server and client layers are entirely transport-agnostic.
 
-```typescript
-const disposable = server.onRequest('method', handler);
+`@lspeasy/server` layers on lifecycle management (initialize / initialized / shutdown / exit), a capability proxy that gates handler registration on advertised capabilities, a message dispatcher that routes to typed handlers, and helpers for work-done progress and partial results. `@lspeasy/client` is the symmetric counterpart: a typed request surface that mirrors the spec and handles correlation, cancellation, and response validation.
 
-// Later: cleanup
-disposable.dispose();
-```
+## Packages
 
-## Performance
-
-- **Message parsing**: <1ms p95
-- **Handler dispatch**: <0.1ms p95
-- **Memory efficient**: Automatic resource cleanup
-- **No memory leaks**: Disposable pattern throughout
-
-## Roadmap
-
-- [x] Core JSON-RPC and transport layer
-- [x] LSP server implementation
-- [x] LSP client implementation
-- [x] Unit tests and documentation
-- [x] WebSocket transport
-- [ ] Progress reporting
-- [ ] Partial results
-- [ ] Multi-root workspace support
+| Package | Description |
+|---|---|
+| [`@lspeasy/core`](packages/core) | JSON-RPC 2.0, framing, transports, LSP protocol types, middleware pipeline |
+| [`@lspeasy/server`](packages/server) | Server class with lifecycle, capability-aware handler registration, progress/cancellation |
+| [`@lspeasy/client`](packages/client) | Client with typed `textDocument.*` / `workspace.*` request API |
+| [`@lspeasy/middleware`](packages/middleware) | Shared middleware building blocks |
 
 ## Contributing
 
-1. Follow the coding standards in [AGENTS.md](AGENTS.md)
-2. Write tests for new features
-3. Use conventional commits
-4. Ensure all tests pass before submitting PR
+```bash
+pnpm install
+pnpm build
+pnpm test
+pnpm lint
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ## License
 
-MIT
-
----
-
-**Author**: Pradeep Mouli
-**Repository**: [github.com/pradeepmouli/lspeasy](https://github.com/pradeepmouli/lspeasy)
+MIT — see [LICENSE](./LICENSE).

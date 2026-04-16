@@ -25,21 +25,21 @@ description: "Task list template for feature implementation"
 - **Mobile**: `api/src/`, `ios/src/` or `android/src/`
 - Paths shown below assume single project - adjust based on plan.md structure
 
-<!--
+<!-- 
   ============================================================================
   IMPORTANT: The tasks below are SAMPLE TASKS for illustration purposes only.
-
+  
   The /speckit.tasks command MUST replace these with actual tasks based on:
   - User stories from spec.md (with their priorities P1, P2, P3...)
   - Feature requirements from plan.md
   - Entities from data-model.md
   - Endpoints from contracts/
-
+  
   Tasks MUST be organized by user story so each story can be:
   - Implemented independently
   - Tested independently
   - Delivered as an MVP increment
-
+  
   DO NOT keep these sample tasks in the generated tasks.md file.
   ============================================================================
 -->
@@ -48,9 +48,9 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create package structure in packages/ directory per implementation plan
-- [ ] T002 Initialize TypeScript project with LSP dependencies (configure strict mode)
-- [ ] T003 [P] Configure oxlint, oxfmt, and git hooks (simple-git-hooks + lint-staged)
+- [ ] T001 Create project structure per implementation plan
+- [ ] T002 Initialize [language] project with [framework] dependencies
+- [ ] T003 [P] Configure linting and formatting tools
 
 ---
 
@@ -60,14 +60,14 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-For LSP SDK features, foundational tasks typically include:
+Examples of foundational tasks (adjust based on your project):
 
-- [ ] T004 Define LSP protocol type definitions in packages/protocol
-- [ ] T005 [P] Setup JSON-RPC message transport layer
-- [ ] T006 [P] Implement base client/server connection lifecycle (initialize → shutdown)
-- [ ] T007 Create message dispatcher and handler registry
-- [ ] T008 Setup async cancellation token infrastructure
-- [ ] T009 Configure test harness for protocol conformance testing
+- [ ] T004 Setup database schema and migrations framework
+- [ ] T005 [P] Implement authentication/authorization framework
+- [ ] T006 [P] Setup API routing and middleware structure
+- [ ] T007 Create base models/entities that all stories depend on
+- [ ] T008 Configure error handling and logging infrastructure
+- [ ] T009 Setup environment configuration management
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

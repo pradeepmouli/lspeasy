@@ -158,9 +158,8 @@
 - Total bundle (all 3) under 200KB acceptable for SDK
 
 **Monitoring**:
-- Use `size-limit` package in CI
-- Fail PR if hard limits exceeded
-- Warn if target exceeded but under hard limit
+- ~~Use `size-limit` package in CI~~ (Removed: bundle size limits no longer enforced)
+- Manual monitoring via build artifacts as needed
 
 **Alternatives Considered**:
 - <50KB per package → Rejected: Unrealistic given vscode-* dependencies
@@ -176,7 +175,7 @@
 | LSP Type Definitions | Use vscode-languageserver-protocol v3.17.x (type-only) | DevDependency only, authoritative types, zero runtime cost |
 | Browser Support | Node.js only for v1.0, browser in v1.1+ | Focus MVP, design portable |
 | Performance Benchmarks | <1ms parse, <0.1ms dispatch, <100ms cancellation | CI-monitored, realistic targets |
-| Bundle Size Limits | Core <100KB, Server/Client <50KB (gzipped) | size-limit enforcement in CI |
+| Bundle Size Limits | Core <100KB, Server/Client <50KB (gzipped) | ~~size-limit enforcement in CI~~ (Removed) |
 
 **All NEEDS CLARIFICATION items resolved.** Technical context is now complete and ready for Phase 1 design.
 

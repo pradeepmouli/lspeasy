@@ -1,7 +1,8 @@
 {
   "name": "@lspeasy/client",
-  "version": "1.0.0",
+  "version": "3.0.2",
   "description": "Connect to LSP servers with typed client API",
+  "private": false,
   "keywords": [
     "lsp",
     "language-server-protocol",
@@ -13,7 +14,7 @@
     "url": "https://github.com/pradeepmouli/lspeasy/issues"
   },
   "license": "MIT",
-  "author": "Pradeep Mouli",
+  "author": "Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)",
   "repository": {
     "type": "git",
     "url": "https://github.com/pradeepmouli/lspeasy.git",
@@ -32,17 +33,20 @@
     "dist",
     "README.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsc --build",
-    "clean": "rm -rf dist *.tsbuildinfo",
-    "dev": "tsc --build --watch",
-    "type-check": "tsc --noEmit"
+    "build": "tsgo --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "dev": "tsgo --build --watch",
+    "type-check": "tsgo --noEmit"
   },
   "dependencies": {
     "@lspeasy/core": "workspace:*"
   },
-  "peerDependencies": {
-    "zod": "^3.25.0"
+  "optionalDependencies": {
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

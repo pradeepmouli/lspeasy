@@ -1,0 +1,42 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "../../../packages/client/src/index.ts",
+    "../../../packages/core/src/index.ts",
+    "../../../packages/server/src/index.ts"
+  ],
+  "entryPointStrategy": "resolve",
+  "tsconfig": "./tsconfig.typedoc.json",
+  "out": "../api",
+  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme", "typedoc-plugin-to-skills"],
+  "llmsTxt": true,
+  "llmsTxtOutDir": "../../public",
+  "skipErrorChecking": true,
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "exclude": [
+    "**/protocol/types.ts"
+  ],
+  "externalPattern": [
+    "**/node_modules/vscode-languageserver-protocol/**",
+    "**/node_modules/vscode-languageserver-types/**",
+    "**/node_modules/vscode-jsonrpc/**"
+  ],
+  "excludeExternals": true,
+  "readme": "none",
+  "hideBreadcrumbs": false,
+  "useCodeBlocks": true,
+  "expandObjects": true,
+  "indexFormat": "table",
+  "parametersFormat": "table",
+  "propertiesFormat": "table",
+  "typeDeclarationFormat": "table",
+  "blockTags": [
+    "@useWhen", "@avoidWhen", "@pitfalls", "@config",
+    "@param", "@returns", "@example", "@remarks", "@category",
+    "@throws", "@see", "@deprecated", "@since", "@defaultValue",
+    "@typeParam", "@template", "@public", "@alpha", "@beta",
+    "@internal", "@experimental", "@override", "@virtual",
+    "@readonly", "@sealed", "@group", "@module"
+  ]
+}

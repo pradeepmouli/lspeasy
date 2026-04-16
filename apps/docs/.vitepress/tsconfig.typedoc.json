@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "incremental": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "../../../packages/client/src/index.ts",
+    "../../../packages/core/src/index.ts",
+    "../../../packages/server/src/index.ts"
+  ],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "specs/**/*"]
+}

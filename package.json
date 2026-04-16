@@ -12,25 +12,27 @@
     "lsp-client",
     "lsp-server"
   ],
-  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
+  "homepage": "https://pradeepmouli.github.io/lspeasy/",
   "bugs": {
     "url": "https://github.com/pradeepmouli/lspeasy/issues"
   },
   "license": "MIT",
-  "author": "Pradeep Mouli",
+  "author": "Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)",
   "repository": {
     "type": "git",
     "url": "https://github.com/pradeepmouli/lspeasy.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/*/*"
   ],
   "type": "module",
   "scripts": {
     "build": "pnpm -r run build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage --coverage.include=packages/core/src/**/*.ts",
+    "test:coverage:all": "vitest run --config vitest.coverage-all.config.ts --coverage",
     "test:ui": "vitest --ui",
     "test:e2e": "vitest run e2e",
     "test:unit": "vitest run packages",
@@ -50,43 +52,41 @@
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "changeset:publish": "pnpm run build && changeset publish",
-    "generate:protocol": "tsx scripts/generate-protocol-types.ts",
-    "prepare": "simple-git-hooks"
+    "generate:protocol": "tsx scripts/generate-protocol-types.ts && oxfmt packages/core/src/protocol/*.ts",
+    "prepare": "simple-git-hooks",
+    "docs:dev": "pnpm --filter @lspeasy/docs dev",
+    "docs:build": "pnpm --filter @lspeasy/docs build"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.8",
-    "@size-limit/preset-small-lib": "^12.0.0",
-    "@types/node": "^25.2.0",
-    "@typescript/native-preview": "7.0.0-dev.20260202.1",
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.30.0",
+    "@to-skills/vitepress": "^0.2.0",
+    "@types/node": "^25.6.0",
+    "@typescript/native-preview": "7.0.0-dev.20260322.1",
     "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "^4.0.18",
     "camelcase": "^9.0.0",
-    "lint-staged": "^16.2.7",
-    "oxfmt": "^0.28.0",
-    "oxlint": "^1.43.0",
+    "lint-staged": "^16.4.0",
+    "oxfmt": "^0.44.0",
+    "oxlint": "^1.59.0",
     "simple-git-hooks": "^2.13.1",
-    "size-limit": "^12.0.0",
-    "ts-morph": "^27.0.2",
+    "ts-morph": "^28.0.0",
     "tsx": "^4.21.0",
-    "type-fest": "^5.4.3",
+    "type-fest": "^5.4.4",
+    "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.11.0",
+    "typedoc-plugin-to-skills": "^0.6.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
+    "vite": "^8.0.8",
     "vitest": "^4.0.18"
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm lint-staged"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,md}": [
-      "oxfmt . --no-error-on-unmatched-pattern"
-    ],
-    "*.{ts,tsx,js,jsx}": [
-      "oxlint --fix"
-    ]
+    "pre-commit": "pnpm lint-staged",
+    "pre-push": "pnpm run type-check"
   },
   "engines": {
     "node": ">=20.0.0",
-    "pnpm": ">=10.0.0"
+    "pnpm": ">=10.32.0"
   },
-  "packageManager": "pnpm@10.27.0"
+  "packageManager": "pnpm@10.32.0"
 }

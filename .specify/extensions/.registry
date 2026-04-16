@@ -1,0 +1,688 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "verify": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:4baa329349fffb5598a7bd41f958cf193aac77dd624c1c64799de052995ca29a",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.verify.run",
+          "speckit.verify"
+        ],
+        "gemini": [
+          "speckit.verify.run",
+          "speckit.verify"
+        ],
+        "copilot": [
+          "speckit.verify.run",
+          "speckit.verify"
+        ],
+        "codex": [
+          "speckit.verify.run",
+          "speckit.verify"
+        ],
+        "amp": [
+          "speckit.verify.run",
+          "speckit.verify"
+        ]
+      },
+      "installed_at": "2026-03-23T04:36:56.034639+00:00"
+    },
+    "sync": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:e5f4b9456751e1251693feae987401b3583d67770a43d370741c35182a46d06f",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
+        "gemini": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
+        "copilot": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
+        "codex": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
+        "amp": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ]
+      },
+      "installed_at": "2026-03-23T04:36:57.241337+00:00"
+    },
+    "doctor": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:45150c8ac10b6b002ebea9de34a203911951fe3a89cb8635a2a149082c02eeed",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
+        "gemini": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
+        "copilot": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
+        "codex": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
+        "amp": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ]
+      },
+      "installed_at": "2026-03-23T04:36:57.767252+00:00"
+    },
+    "git": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:9731aa8143a72fbebfdb440f155038ab42642517c2b2bdbbf67c8fdbe076ed79",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
+        ],
+        "claude": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
+        ],
+        "codex": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
+        ],
+        "copilot": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
+        ],
+        "gemini": [
+          "speckit.git.feature",
+          "speckit.git.validate",
+          "speckit.git.remote",
+          "speckit.git.initialize",
+          "speckit.git.commit"
+        ]
+      },
+      "registered_skills": [
+        "speckit-git-feature",
+        "speckit-git-validate",
+        "speckit-git-remote",
+        "speckit-git-initialize",
+        "speckit-git-commit"
+      ],
+      "installed_at": "2026-04-16T02:06:39.088531+00:00"
+    },
+    "worktree": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:7b5d0963fcc6b0f13a38e81448be0604186ab699388b75adbe536387fdd9cf27",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.worktree.create",
+          "speckit.worktree.list",
+          "speckit.worktree.clean"
+        ],
+        "claude": [
+          "speckit.worktree.create",
+          "speckit.worktree.list",
+          "speckit.worktree.clean"
+        ],
+        "codex": [
+          "speckit.worktree.create",
+          "speckit.worktree.list",
+          "speckit.worktree.clean"
+        ],
+        "copilot": [
+          "speckit.worktree.create",
+          "speckit.worktree.list",
+          "speckit.worktree.clean"
+        ],
+        "gemini": [
+          "speckit.worktree.create",
+          "speckit.worktree.list",
+          "speckit.worktree.clean"
+        ]
+      },
+      "registered_skills": [
+        "speckit-worktree-create",
+        "speckit-worktree-list",
+        "speckit-worktree-clean"
+      ],
+      "installed_at": "2026-04-16T02:06:39.521789+00:00"
+    },
+    "branch-convention": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:7efe1bfce264c25a4eddce6d65aa74ebc63a532b82e2d82264155e82c39d3859",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.branch-convention.configure",
+          "speckit.branch-convention.validate",
+          "speckit.branch-convention.rename"
+        ],
+        "claude": [
+          "speckit.branch-convention.configure",
+          "speckit.branch-convention.validate",
+          "speckit.branch-convention.rename"
+        ],
+        "codex": [
+          "speckit.branch-convention.configure",
+          "speckit.branch-convention.validate",
+          "speckit.branch-convention.rename"
+        ],
+        "copilot": [
+          "speckit.branch-convention.configure",
+          "speckit.branch-convention.validate",
+          "speckit.branch-convention.rename"
+        ],
+        "gemini": [
+          "speckit.branch-convention.configure",
+          "speckit.branch-convention.validate",
+          "speckit.branch-convention.rename"
+        ]
+      },
+      "registered_skills": [
+        "speckit-branch-convention-configure",
+        "speckit-branch-convention-validate",
+        "speckit-branch-convention-rename"
+      ],
+      "installed_at": "2026-04-16T02:06:39.956915+00:00"
+    },
+    "review": {
+      "version": "1.0.1",
+      "source": "local",
+      "manifest_hash": "sha256:3f9eedfc8079662edfb8d1f9c07a161be4e66111ea57621061f1658e91710d83",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "claude": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "codex": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "copilot": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "gemini": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ]
+      },
+      "registered_skills": [
+        "speckit-review-run",
+        "speckit-review-code",
+        "speckit-review-comments",
+        "speckit-review-tests",
+        "speckit-review-errors",
+        "speckit-review-types",
+        "speckit-review-simplify"
+      ],
+      "installed_at": "2026-04-16T02:06:40.868441+00:00"
+    },
+    "superb": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:9403df65b0e6107b24d45c3de82a8d15fff475b3b9bd3a2154b194df767dff52",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.superb.clarify",
+          "speckit.superb.tdd",
+          "speckit.superb.review",
+          "speckit.superb.verify",
+          "speckit.superb.critique",
+          "speckit.superb.debug",
+          "speckit.superb.finish",
+          "speckit.superb.respond"
+        ],
+        "claude": [
+          "speckit.superb.clarify",
+          "speckit.superb.tdd",
+          "speckit.superb.review",
+          "speckit.superb.verify",
+          "speckit.superb.critique",
+          "speckit.superb.debug",
+          "speckit.superb.finish",
+          "speckit.superb.respond"
+        ],
+        "codex": [
+          "speckit.superb.clarify",
+          "speckit.superb.tdd",
+          "speckit.superb.review",
+          "speckit.superb.verify",
+          "speckit.superb.critique",
+          "speckit.superb.debug",
+          "speckit.superb.finish",
+          "speckit.superb.respond"
+        ],
+        "copilot": [
+          "speckit.superb.clarify",
+          "speckit.superb.tdd",
+          "speckit.superb.review",
+          "speckit.superb.verify",
+          "speckit.superb.critique",
+          "speckit.superb.debug",
+          "speckit.superb.finish",
+          "speckit.superb.respond"
+        ],
+        "gemini": [
+          "speckit.superb.clarify",
+          "speckit.superb.tdd",
+          "speckit.superb.review",
+          "speckit.superb.verify",
+          "speckit.superb.critique",
+          "speckit.superb.debug",
+          "speckit.superb.finish",
+          "speckit.superb.respond"
+        ]
+      },
+      "registered_skills": [
+        "speckit-superb-clarify",
+        "speckit-superb-tdd",
+        "speckit-superb-review",
+        "speckit-superb-verify",
+        "speckit-superb-critique",
+        "speckit-superb-debug",
+        "speckit-superb-finish",
+        "speckit-superb-respond"
+      ],
+      "installed_at": "2026-04-16T02:06:41.740422+00:00"
+    },
+    "refine": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:f81d942a057a69e00d223e0c2154de0e1040b33f80f9acfc1a15a6e3762ae22b",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.refine.update",
+          "speckit.refine.propagate",
+          "speckit.refine.diff",
+          "speckit.refine.status"
+        ],
+        "claude": [
+          "speckit.refine.update",
+          "speckit.refine.propagate",
+          "speckit.refine.diff",
+          "speckit.refine.status"
+        ],
+        "codex": [
+          "speckit.refine.update",
+          "speckit.refine.propagate",
+          "speckit.refine.diff",
+          "speckit.refine.status"
+        ],
+        "copilot": [
+          "speckit.refine.update",
+          "speckit.refine.propagate",
+          "speckit.refine.diff",
+          "speckit.refine.status"
+        ],
+        "gemini": [
+          "speckit.refine.update",
+          "speckit.refine.propagate",
+          "speckit.refine.diff",
+          "speckit.refine.status"
+        ]
+      },
+      "registered_skills": [
+        "speckit-refine-update",
+        "speckit-refine-propagate",
+        "speckit-refine-diff",
+        "speckit-refine-status"
+      ],
+      "installed_at": "2026-04-16T02:06:42.187670+00:00"
+    },
+    "security-review": {
+      "version": "1.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:549840c2a584f4a18bbb1e4cf8b3ad330011f41464c0d9d6063ee148f87f9d8f",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.security-review.audit",
+          "speckit.security-review.staged",
+          "speckit.security-review.branch"
+        ],
+        "claude": [
+          "speckit.security-review.audit",
+          "speckit.security-review.staged",
+          "speckit.security-review.branch"
+        ],
+        "codex": [
+          "speckit.security-review.audit",
+          "speckit.security-review.staged",
+          "speckit.security-review.branch"
+        ],
+        "copilot": [
+          "speckit.security-review.audit",
+          "speckit.security-review.staged",
+          "speckit.security-review.branch"
+        ],
+        "gemini": [
+          "speckit.security-review.audit",
+          "speckit.security-review.staged",
+          "speckit.security-review.branch"
+        ]
+      },
+      "registered_skills": [
+        "speckit-security-review-audit",
+        "speckit-security-review-staged",
+        "speckit-security-review-branch"
+      ],
+      "installed_at": "2026-04-16T02:06:42.993265+00:00"
+    },
+    "workflows": {
+      "version": "3.4.0",
+      "source": "local",
+      "manifest_hash": "sha256:ee0d2a7985f4cf9e8bcf47c8911d32abccf48279d163fbda570a2ee65a20c6ab",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.workflows.bugfix",
+          "speckit.bugfix",
+          "speckit.workflows.hotfix",
+          "speckit.hotfix",
+          "speckit.workflows.enhance",
+          "speckit.enhance",
+          "speckit.workflows.refactor",
+          "speckit.refactor",
+          "speckit.workflows.deprecate",
+          "speckit.deprecate",
+          "speckit.workflows.modify",
+          "speckit.modify",
+          "speckit.workflows.baseline",
+          "speckit.baseline",
+          "speckit.workflows.cleanup",
+          "speckit.cleanup",
+          "speckit.workflows.review",
+          "speckit.review",
+          "speckit.workflows.phasestoissues",
+          "speckit.phasestoissues",
+          "speckit.workflows.incorporate",
+          "speckit.incorporate",
+          "speckit.workflows.ultraplan-tasks",
+          "speckit.ultraplan.tasks",
+          "speckit.workflows.issue-sync-before-specify",
+          "speckit.issuesync.before-specify",
+          "speckit.workflows.issue-sync-after-specify",
+          "speckit.issuesync.after-specify",
+          "speckit.workflows.issue-sync-before-plan",
+          "speckit.issuesync.before-plan",
+          "speckit.workflows.issue-sync-after-plan",
+          "speckit.issuesync.after-plan",
+          "speckit.workflows.issue-sync-before-tasks",
+          "speckit.issuesync.before-tasks",
+          "speckit.workflows.issue-sync-after-tasks",
+          "speckit.issuesync.after-tasks",
+          "speckit.workflows.issue-sync-before-implement",
+          "speckit.issuesync.before-implement",
+          "speckit.workflows.issue-sync-after-implement",
+          "speckit.issuesync.after-implement"
+        ],
+        "claude": [
+          "speckit.workflows.bugfix",
+          "speckit.bugfix",
+          "speckit.workflows.hotfix",
+          "speckit.hotfix",
+          "speckit.workflows.enhance",
+          "speckit.enhance",
+          "speckit.workflows.refactor",
+          "speckit.refactor",
+          "speckit.workflows.deprecate",
+          "speckit.deprecate",
+          "speckit.workflows.modify",
+          "speckit.modify",
+          "speckit.workflows.baseline",
+          "speckit.baseline",
+          "speckit.workflows.cleanup",
+          "speckit.cleanup",
+          "speckit.workflows.review",
+          "speckit.review",
+          "speckit.workflows.phasestoissues",
+          "speckit.phasestoissues",
+          "speckit.workflows.incorporate",
+          "speckit.incorporate",
+          "speckit.workflows.ultraplan-tasks",
+          "speckit.ultraplan.tasks",
+          "speckit.workflows.issue-sync-before-specify",
+          "speckit.issuesync.before-specify",
+          "speckit.workflows.issue-sync-after-specify",
+          "speckit.issuesync.after-specify",
+          "speckit.workflows.issue-sync-before-plan",
+          "speckit.issuesync.before-plan",
+          "speckit.workflows.issue-sync-after-plan",
+          "speckit.issuesync.after-plan",
+          "speckit.workflows.issue-sync-before-tasks",
+          "speckit.issuesync.before-tasks",
+          "speckit.workflows.issue-sync-after-tasks",
+          "speckit.issuesync.after-tasks",
+          "speckit.workflows.issue-sync-before-implement",
+          "speckit.issuesync.before-implement",
+          "speckit.workflows.issue-sync-after-implement",
+          "speckit.issuesync.after-implement"
+        ],
+        "codex": [
+          "speckit.workflows.bugfix",
+          "speckit.bugfix",
+          "speckit.workflows.hotfix",
+          "speckit.hotfix",
+          "speckit.workflows.enhance",
+          "speckit.enhance",
+          "speckit.workflows.refactor",
+          "speckit.refactor",
+          "speckit.workflows.deprecate",
+          "speckit.deprecate",
+          "speckit.workflows.modify",
+          "speckit.modify",
+          "speckit.workflows.baseline",
+          "speckit.baseline",
+          "speckit.workflows.cleanup",
+          "speckit.cleanup",
+          "speckit.workflows.review",
+          "speckit.review",
+          "speckit.workflows.phasestoissues",
+          "speckit.phasestoissues",
+          "speckit.workflows.incorporate",
+          "speckit.incorporate",
+          "speckit.workflows.ultraplan-tasks",
+          "speckit.ultraplan.tasks",
+          "speckit.workflows.issue-sync-before-specify",
+          "speckit.issuesync.before-specify",
+          "speckit.workflows.issue-sync-after-specify",
+          "speckit.issuesync.after-specify",
+          "speckit.workflows.issue-sync-before-plan",
+          "speckit.issuesync.before-plan",
+          "speckit.workflows.issue-sync-after-plan",
+          "speckit.issuesync.after-plan",
+          "speckit.workflows.issue-sync-before-tasks",
+          "speckit.issuesync.before-tasks",
+          "speckit.workflows.issue-sync-after-tasks",
+          "speckit.issuesync.after-tasks",
+          "speckit.workflows.issue-sync-before-implement",
+          "speckit.issuesync.before-implement",
+          "speckit.workflows.issue-sync-after-implement",
+          "speckit.issuesync.after-implement"
+        ],
+        "copilot": [
+          "speckit.workflows.bugfix",
+          "speckit.bugfix",
+          "speckit.workflows.hotfix",
+          "speckit.hotfix",
+          "speckit.workflows.enhance",
+          "speckit.enhance",
+          "speckit.workflows.refactor",
+          "speckit.refactor",
+          "speckit.workflows.deprecate",
+          "speckit.deprecate",
+          "speckit.workflows.modify",
+          "speckit.modify",
+          "speckit.workflows.baseline",
+          "speckit.baseline",
+          "speckit.workflows.cleanup",
+          "speckit.cleanup",
+          "speckit.workflows.review",
+          "speckit.review",
+          "speckit.workflows.phasestoissues",
+          "speckit.phasestoissues",
+          "speckit.workflows.incorporate",
+          "speckit.incorporate",
+          "speckit.workflows.ultraplan-tasks",
+          "speckit.ultraplan.tasks",
+          "speckit.workflows.issue-sync-before-specify",
+          "speckit.issuesync.before-specify",
+          "speckit.workflows.issue-sync-after-specify",
+          "speckit.issuesync.after-specify",
+          "speckit.workflows.issue-sync-before-plan",
+          "speckit.issuesync.before-plan",
+          "speckit.workflows.issue-sync-after-plan",
+          "speckit.issuesync.after-plan",
+          "speckit.workflows.issue-sync-before-tasks",
+          "speckit.issuesync.before-tasks",
+          "speckit.workflows.issue-sync-after-tasks",
+          "speckit.issuesync.after-tasks",
+          "speckit.workflows.issue-sync-before-implement",
+          "speckit.issuesync.before-implement",
+          "speckit.workflows.issue-sync-after-implement",
+          "speckit.issuesync.after-implement"
+        ],
+        "gemini": [
+          "speckit.workflows.bugfix",
+          "speckit.bugfix",
+          "speckit.workflows.hotfix",
+          "speckit.hotfix",
+          "speckit.workflows.enhance",
+          "speckit.enhance",
+          "speckit.workflows.refactor",
+          "speckit.refactor",
+          "speckit.workflows.deprecate",
+          "speckit.deprecate",
+          "speckit.workflows.modify",
+          "speckit.modify",
+          "speckit.workflows.baseline",
+          "speckit.baseline",
+          "speckit.workflows.cleanup",
+          "speckit.cleanup",
+          "speckit.workflows.review",
+          "speckit.review",
+          "speckit.workflows.phasestoissues",
+          "speckit.phasestoissues",
+          "speckit.workflows.incorporate",
+          "speckit.incorporate",
+          "speckit.workflows.ultraplan-tasks",
+          "speckit.ultraplan.tasks",
+          "speckit.workflows.issue-sync-before-specify",
+          "speckit.issuesync.before-specify",
+          "speckit.workflows.issue-sync-after-specify",
+          "speckit.issuesync.after-specify",
+          "speckit.workflows.issue-sync-before-plan",
+          "speckit.issuesync.before-plan",
+          "speckit.workflows.issue-sync-after-plan",
+          "speckit.issuesync.after-plan",
+          "speckit.workflows.issue-sync-before-tasks",
+          "speckit.issuesync.before-tasks",
+          "speckit.workflows.issue-sync-after-tasks",
+          "speckit.issuesync.after-tasks",
+          "speckit.workflows.issue-sync-before-implement",
+          "speckit.issuesync.before-implement",
+          "speckit.workflows.issue-sync-after-implement",
+          "speckit.issuesync.after-implement"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-16T02:19:30.866350+00:00"
+    }
+  }
+}

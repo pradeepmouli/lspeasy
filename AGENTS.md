@@ -9,12 +9,15 @@ This repository is designed for multi-agent collaboration (Copilot, Claude, Gemi
 - Tooling: pnpm, oxlint, oxfmt, Vitest, simple-git-hooks, lint-staged
 
 ## Ground Rules
+- If running terminal commands in an interactive session, use the integrated terminal so the user can see the output and verify success.
+- Always check the latest version of dependencies before adding new ones.
 - Prefer non-destructive changes; never reset user work.
 - Follow conventional commits.
 - Always run formating, linting, type-checking, and tests before reporting completion or committing. Run formatting last.
 - Always keep docs current when changing scripts or workflows.
 - When adding dependencies, make sure to use the latest stable versions.
 - Abide by the rules in ./specify/memory/constitution.md
+- If you are copilot, also see .github/agents/copilot-instructions.md
 
 ## Workflow Checklist
 1) Install deps: `pnpm install`

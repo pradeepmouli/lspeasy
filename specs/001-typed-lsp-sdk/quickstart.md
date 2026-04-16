@@ -63,7 +63,7 @@ await server.listen(transport);
 ```bash
 ts-node server.ts
 # Or compile and run
-tsc server.ts && node server.js
+tsgo server.ts && node server.js
 ```
 
 **Test with VS Code**: Configure in `.vscode/settings.json`:

@@ -2,6 +2,7 @@
  * Integration test for textDocument/hover request/response
  */
 
+import { LogLevel } from '@lspeasy/core';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { LSPServer } from '@lspeasy/server';
 import type { Transport, HoverParams, Hover } from '@lspeasy/core';
@@ -59,10 +60,10 @@ describe('textDocument/hover Integration', () => {
     server = new LSPServer({
       name: 'hover-test-server',
       version: '1.0.0',
-      logLevel: 'error'
+      logLevel: LogLevel.Error
     });
 
-    server.setCapabilities({
+    server.registerCapabilities({
       hoverProvider: true
     });
 
@@ -137,8 +138,8 @@ describe('textDocument/hover Integration', () => {
   });
 
   it('should return null for no hover', async () => {
-    const noHoverServer = new LSPServer({ logLevel: 'error' });
-    noHoverServer.setCapabilities({ hoverProvider: true });
+    const noHoverServer = new LSPServer({ logLevel: LogLevel.Error });
+    noHoverServer.registerCapabilities({ hoverProvider: true });
 
     noHoverServer.onRequest<'textDocument/hover', HoverParams, Hover | null>(
       'textDocument/hover',
@@ -204,8 +205,8 @@ describe('textDocument/hover Integration', () => {
   });
 
   it('should handle hover with range', async () => {
-    const rangeServer = new LSPServer({ logLevel: 'error' });
-    rangeServer.setCapabilities({ hoverProvider: true });
+    const rangeServer = new LSPServer({ logLevel: LogLevel.Error });
+    rangeServer.registerCapabilities({ hoverProvider: true });
 
     rangeServer.onRequest<'textDocument/hover', HoverParams, Hover | null>(
       'textDocument/hover',
@@ -256,8 +257,8 @@ describe('textDocument/hover Integration', () => {
   });
 
   it('should handle errors in hover handler', async () => {
-    const errorServer = new LSPServer({ logLevel: 'error' });
-    errorServer.setCapabilities({ hoverProvider: true });
+    const errorServer = new LSPServer({ logLevel: LogLevel.Error });
+    errorServer.registerCapabilities({ hoverProvider: true });
 
     errorServer.onRequest('textDocument/hover', async () => {
       throw new Error('Hover error');

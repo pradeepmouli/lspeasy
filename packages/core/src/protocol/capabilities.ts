@@ -4,12 +4,20 @@
  * @module protocol/capabilities
  */
 
-import type {
-  ServerCapabilities,
-  ClientCapabilities,
-  TextDocumentSyncKind
-} from 'vscode-languageserver-protocol';
-import { LSPRequest } from './namespaces.js';
+import type { ServerCapabilities, ClientCapabilities } from 'vscode-languageserver-protocol';
+import type { Paths, PickDeep } from 'type-fest';
+import {
+  getClientCapabilityForNotificationMethod,
+  getClientCapabilityForRequestMethod,
+  getCapabilityForNotificationMethod,
+  getCapabilityForRequestMethod,
+  type LSPNotificationMethod,
+  type LSPRequestMethod,
+  type ClientCapabilityForNotification,
+  type ClientCapabilityForRequest,
+  type ServerCapabilityForNotification,
+  type ServerCapabilityForRequest
+} from './infer.js';
 
 // Re-export capability types
 export type { ServerCapabilities, ClientCapabilities };
@@ -21,21 +29,14 @@ export type { ServerCapabilities, ClientCapabilities };
 /**
  * Filter request definitions that have a ServerCapability field
  */
-type RequestsWithCapabilities = Extract<LSPRequest[keyof LSPRequest], { ServerCapability: string }>;
 
 /**
  * Map a method to its server capability provider key
  */
-export type MethodToCapability<M extends string> = RequestsWithCapabilities extends infer R
-  ? R extends { Method: M; ServerCapability: infer Cap }
-    ? Cap
-    : never
-  : never;
 
 /**
  * Check if a capability value indicates the feature is enabled
  */
-type IsCapabilityEnabled<T> = T extends true | object ? true : false;
 
 /**
  * Extract supported request methods based on server capabilities
@@ -43,24 +44,18 @@ type IsCapabilityEnabled<T> = T extends true | object ? true : false;
  * This type automatically traverses the LSP namespace structure to determine
  * which methods are available based on the provided server capabilities.
  */
-export type MethodsForCapabilities<Caps extends ServerCapabilities> = {
-  [K in RequestsWithCapabilities as K['Method']]: K extends { ServerCapability: infer CapKey }
-    ? CapKey extends keyof Caps
-      ? IsCapabilityEnabled<Caps[CapKey]> extends true
-        ? K['Method']
-        : never
-      : never
-    : never;
-}[RequestsWithCapabilities['Method']];
 
-/**
- * Get the capability key for a given method
- */
-export type CapabilityForMethod<M extends RequestsWithCapabilities['Method']> = Extract<
-  RequestsWithCapabilities,
-  { Method: M }
->['ServerCapability'];
-
+function getProperty<T, K extends Paths<T> & string>(obj: T, key: K): any {
+  const keys = key.split('.') as Array<keyof T>;
+  let result: any = obj;
+  for (const k of keys) {
+    if (result == null) {
+      return undefined;
+    }
+    result = result[k];
+  }
+  return result;
+}
 /**
  * Map of LSP methods to their corresponding server capability keys
  * This is derived from the namespace structure
@@ -69,42 +64,90 @@ export type CapabilityForMethod<M extends RequestsWithCapabilities['Method']> = 
 /**
  * Get the capability key for a given method at runtime
  */
-export function getCapabilityForMethod(method: string): keyof ServerCapabilities | undefined {
-  return (
-    (Object.values(LSPRequest) as any[])
-      .flatMap((ns) => Object.values(ns))
-      .find((req: any) => req.Method === method) as any
-  )?.ServerCapability;
-}
 
 /**
  * Check if a method is supported by the given server capabilities
  */
-export function supportsMethod<M extends string>(
+export function serverSupportsRequest<M extends LSPRequestMethod<'clientToServer'>>(
   method: M,
   capabilities: ServerCapabilities
 ): capabilities is ServerCapabilities &
-  Record<
-    MethodToCapability<M>,
-    NonNullable<ServerCapabilities[MethodToCapability<M> & keyof ServerCapabilities]>
-  > {
-  const capabilityKey = getCapabilityForMethod(method);
-  if (!capabilityKey) {
-    return false;
+  PickDeep<ServerCapabilities, ServerCapabilityForRequest<M>> {
+  const capabilityKey = getCapabilityForRequestMethod(method);
+  if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
+    return true;
   }
+  const value = getProperty(capabilities, capabilityKey);
+  return value !== null && value !== undefined && value !== false;
+}
 
-  const value = capabilities[capabilityKey];
+export function serverSupportsNotification<
+  M extends LSPNotificationMethod<'clientToServer'>,
+  T extends Partial<ServerCapabilities>
+>(
+  method: M,
+  capabilities: T
+): capabilities is T & PickDeep<ServerCapabilities, ServerCapabilityForNotification<M>> {
+  const capabilityKey = getCapabilityForNotificationMethod(method);
+  if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
+    return true;
+  }
+  const value = getProperty(capabilities, capabilityKey as any);
+  return value !== null && value !== undefined && value !== false;
+}
+
+/**
+ * Check if a method is supported by the given client capabilities
+ */
+export function clientSupportsRequest<
+  M extends LSPRequestMethod<'serverToClient'>,
+  T extends Partial<ClientCapabilities>
+>(
+  method: M,
+  capabilities: T
+): capabilities is T & PickDeep<ClientCapabilities, ClientCapabilityForRequest<M>> {
+  const capabilityKey = getClientCapabilityForRequestMethod(method);
+  if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
+    return true;
+  }
+  const value = getProperty(capabilities, capabilityKey as any);
+  return value !== null && value !== undefined && value !== false;
+}
+
+export function clientSupportsNotification<
+  M extends LSPNotificationMethod<'serverToClient'>,
+  T extends Partial<ClientCapabilities>
+>(
+  method: M,
+  capabilities: T
+): capabilities is T & PickDeep<ClientCapabilities, ClientCapabilityForNotification<M>> {
+  const capabilityKey = getClientCapabilityForNotificationMethod(method);
+  if (capabilityKey === 'alwaysOn' || capabilityKey === null) {
+    return true;
+  }
+  const value = getProperty(capabilities, capabilityKey as any);
   return value !== null && value !== undefined && value !== false;
 }
 
 /**
  * Check if a server capability is enabled
  */
-export function hasCapability<K extends keyof ServerCapabilities>(
-  capabilities: ServerCapabilities,
-  capability: K
-): capabilities is ServerCapabilities & Record<K, NonNullable<ServerCapabilities[K]>> {
-  const value = capabilities[capability];
+export function hasServerCapability<
+  K extends Paths<ServerCapabilities>,
+  T extends Partial<ServerCapabilities>
+>(capabilities: T, capability: K): capabilities is T & PickDeep<ServerCapabilities, K> {
+  const value = getProperty(capabilities, capability as any);
+  return value !== null && value !== undefined && value !== false;
+}
+
+/**
+ * Check if a client capability is enabled
+ */
+export function hasClientCapability<
+  K extends Paths<ClientCapabilities>,
+  T extends Partial<ClientCapabilities>
+>(capabilities: T, capability: K): capabilities is T & PickDeep<ClientCapabilities, K> {
+  const value = getProperty(capabilities, capability as any);
   return value !== null && value !== undefined && value !== false;
 }
 
@@ -116,7 +159,7 @@ export function supportsHover(
 ): capabilities is ServerCapabilities & {
   hoverProvider: NonNullable<ServerCapabilities['hoverProvider']>;
 } {
-  return hasCapability(capabilities, 'hoverProvider');
+  return serverSupportsRequest('textDocument/hover', capabilities);
 }
 
 /**
@@ -127,7 +170,7 @@ export function supportsCompletion(
 ): capabilities is ServerCapabilities & {
   completionProvider: NonNullable<ServerCapabilities['completionProvider']>;
 } {
-  return hasCapability(capabilities, 'completionProvider');
+  return serverSupportsRequest('textDocument/completion', capabilities);
 }
 
 /**
@@ -138,7 +181,7 @@ export function supportsDefinition(
 ): capabilities is ServerCapabilities & {
   definitionProvider: NonNullable<ServerCapabilities['definitionProvider']>;
 } {
-  return hasCapability(capabilities, 'definitionProvider');
+  return serverSupportsRequest('textDocument/definition', capabilities);
 }
 
 /**
@@ -149,7 +192,7 @@ export function supportsReferences(
 ): capabilities is ServerCapabilities & {
   referencesProvider: NonNullable<ServerCapabilities['referencesProvider']>;
 } {
-  return hasCapability(capabilities, 'referencesProvider');
+  return serverSupportsRequest('textDocument/references', capabilities);
 }
 
 /**
@@ -160,7 +203,7 @@ export function supportsDocumentSymbol(
 ): capabilities is ServerCapabilities & {
   documentSymbolProvider: NonNullable<ServerCapabilities['documentSymbolProvider']>;
 } {
-  return hasCapability(capabilities, 'documentSymbolProvider');
+  return serverSupportsRequest('textDocument/documentSymbol', capabilities);
 }
 
 /**
@@ -170,6 +213,16 @@ export function supportsWorkspaceFolders(
   capabilities: ServerCapabilities
 ): capabilities is ServerCapabilities & { workspace: { workspaceFolders: { supported: true } } } {
   return capabilities.workspace?.workspaceFolders?.supported === true;
+}
+
+export function supportsNotebookDocumentSync(
+  capabilities: ServerCapabilities
+): capabilities is ServerCapabilities & {
+  notebookDocumentSync: NonNullable<ServerCapabilities['notebookDocumentSync']>;
+} {
+  return (
+    capabilities.notebookDocumentSync !== null && capabilities.notebookDocumentSync !== undefined
+  );
 }
 
 /**
@@ -191,12 +244,3 @@ export function supportsWorkDoneProgress(
 ): capabilities is ClientCapabilities & { window: { workDoneProgress: true } } {
   return capabilities.window?.workDoneProgress === true;
 }
-
-/**
- * Text document sync kind enum for convenience
- */
-export const TextDocumentSyncKinds = {
-  None: 0 as TextDocumentSyncKind,
-  Full: 1 as TextDocumentSyncKind,
-  Incremental: 2 as TextDocumentSyncKind
-} as const;

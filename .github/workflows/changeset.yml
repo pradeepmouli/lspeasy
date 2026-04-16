@@ -1,22 +1,17 @@
-name: Create Changeset
+name: Auto-generate Changeset
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [master]
   workflow_dispatch:
     inputs:
       type:
-        description: 'Change type (leave empty for auto-detection)'
+        description: 'Change type (auto = detect from commits)'
         required: false
         type: choice
-        options:
-          - auto
-          - patch
-          - minor
-          - major
+        options: [auto, patch, minor, major]
         default: auto
-      base_ref:
-        description: 'Base reference to compare against (default: last tag or main)'
-        required: false
-        type: string
 
 permissions:
   contents: write
@@ -24,147 +19,99 @@ permissions:
 
 jobs:
   changeset:
+    name: Generate changeset
     runs-on: ubuntu-latest
+    if: |
+      github.actor != 'github-actions[bot]' &&
+      !startsWith(github.head_ref, 'changeset-release/') &&
+      !startsWith(github.head_ref, 'changeset/') &&
+      !startsWith(github.head_ref, 'dependabot/') &&
+      !startsWith(github.head_ref, 'renovate/')
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0 # Fetch all history for commit analysis
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate changeset from commits
-        id: generate
+      - name: Resolve branch name
+        id: branch
         run: |
-          # Get base reference (last tag or provided ref)
-          if [ -n "${{ inputs.base_ref }}" ]; then
-            BASE_REF="${{ inputs.base_ref }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "name=${{ github.head_ref }}" >> $GITHUB_OUTPUT
           else
-            BASE_REF=$(git describe --tags --abbrev=0 2>/dev/null || echo "main")
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
-          echo "Analyzing commits since: $BASE_REF"
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.branch.outputs.name }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Extract commits since base ref
-          COMMITS=$(git log ${BASE_REF}..HEAD --pretty=format:"%s" --no-merges)
+      - name: Check for existing changeset
+        id: check
+        run: |
+          COUNT=$(find .changeset -maxdepth 1 -name '*.md' ! -name 'README.md' 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "Existing changesets: $COUNT"
 
-          # Auto-detect change type if set to auto
-          CHANGE_TYPE="${{ inputs.type }}"
-          if [ "$CHANGE_TYPE" = "auto" ]; then
-            if echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.+\))?!:|^BREAKING[ -]CHANGE:|breaking"; then
-              CHANGE_TYPE="major"
+      - name: Generate and commit changeset
+        if: steps.check.outputs.count == '0'
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE=$(git merge-base origin/master HEAD)
+          else
+            BASE=$(git describe --tags --abbrev=0 2>/dev/null || echo "master")
+          fi
+
+          COMMITS=$(git log ${BASE}..HEAD --pretty=format:"%s" --no-merges)
+          echo "Commits since base:"
+          echo "$COMMITS"
+
+          TYPE="${{ inputs.type }}"
+          if [ -z "$TYPE" ] || [ "$TYPE" = "auto" ]; then
+            if echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.+\))?!:|BREAKING.CHANGE"; then
+              TYPE="major"
             elif echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.+\))?:"; then
-              CHANGE_TYPE="minor"
+              TYPE="minor"
             else
-              CHANGE_TYPE="patch"
+              TYPE="patch"
+            fi
+          fi
+          echo "Change type: $TYPE"
+
+          # Build frontmatter from packages/*/package.json, fallback to root package.json
+          FRONTMATTER=""
+          for pkg_json in packages/*/package.json; do
+            [ -f "$pkg_json" ] || continue
+            PRIVATE=$(jq -r '.private // false' "$pkg_json" 2>/dev/null || echo 'false')
+            NAME=$(jq -r '.name // ""' "$pkg_json" 2>/dev/null || echo '')
+            if [ "$PRIVATE" != "true" ] && [ -n "$NAME" ] && [ "$NAME" != "null" ]; then
+              FRONTMATTER="${FRONTMATTER}  \"${NAME}\": ${TYPE}\n"
+            fi
+          done
+
+          # Fallback to root package.json for single-package repos
+          if [ -z "$FRONTMATTER" ] && [ -f "package.json" ]; then
+            PRIVATE=$(jq -r '.private // false' "package.json" 2>/dev/null || echo 'false')
+            NAME=$(jq -r '.name // ""' "package.json" 2>/dev/null || echo '')
+            if [ "$PRIVATE" != "true" ] && [ -n "$NAME" ] && [ "$NAME" != "null" ]; then
+              FRONTMATTER="  \"${NAME}\": ${TYPE}\n"
             fi
           fi
 
-          echo "Detected change type: $CHANGE_TYPE"
-          echo "type=$CHANGE_TYPE" >> $GITHUB_OUTPUT
-
-          # Generate changelog content by categorizing commits
-          CHANGELOG_CONTENT=""
-
-          # Features
-          FEATURES=$(echo "$COMMITS" | grep -iE "^(feat|feature)(\(.+\))?:" | sed 's/^feat\(\(.*\)\)\?:/•/' | sed 's/^feature\(\(.*\)\)\?:/•/' || true)
-          if [ -n "$FEATURES" ]; then
-            CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Features\n\n${FEATURES}\n\n"
+          if [ -z "$FRONTMATTER" ]; then
+            echo "No publishable packages found — skipping changeset"
+            exit 0
           fi
 
-          # Bug fixes
-          FIXES=$(echo "$COMMITS" | grep -iE "^fix(\(.+\))?:" | sed 's/^fix\(\(.*\)\)\?:/•/' || true)
-          if [ -n "$FIXES" ]; then
-            CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Bug Fixes\n\n${FIXES}\n\n"
-          fi
+          SUMMARY=$(echo "$COMMITS" | head -5 | sed 's/^/- /' | tr -d '\r')
 
-          # Performance improvements
-          PERF=$(echo "$COMMITS" | grep -iE "^perf(\(.+\))?:" | sed 's/^perf\(\(.*\)\)\?:/•/' || true)
-          if [ -n "$PERF" ]; then
-            CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Performance Improvements\n\n${PERF}\n\n"
-          fi
-
-          # Refactoring
-          REFACTOR=$(echo "$COMMITS" | grep -iE "^refactor(\(.+\))?:" | sed 's/^refactor\(\(.*\)\)\?:/•/' || true)
-          if [ -n "$REFACTOR" ]; then
-            CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Code Refactoring\n\n${REFACTOR}\n\n"
-          fi
-
-          # Documentation
-          DOCS=$(echo "$COMMITS" | grep -iE "^docs(\(.+\))?:" | sed 's/^docs\(\(.*\)\)\?:/•/' || true)
-          if [ -n "$DOCS" ]; then
-            CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Documentation\n\n${DOCS}\n\n"
-          fi
-
-          # Other changes (chore, style, test, build, ci)
-          OTHER=$(echo "$COMMITS" | grep -viE "^(feat|feature|fix|perf|refactor|docs)(\(.+\))?:" || true)
-          if [ -n "$OTHER" ]; then
-            CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Other Changes\n\n${OTHER}\n\n"
-          fi
-
-          # If no categorized commits found, use all commits
-          if [ -z "$CHANGELOG_CONTENT" ]; then
-            CHANGELOG_CONTENT="### Changes\n\n$(echo "$COMMITS" | sed 's/^/• /')\n"
-          fi
-
-          # Save to output file for multi-line content
-          echo "$CHANGELOG_CONTENT" > /tmp/changelog_content.txt
-          echo "base_ref=$BASE_REF" >> $GITHUB_OUTPUT
-
-      - name: Create changeset file
-        run: |
-          CHANGE_TYPE="${{ steps.generate.outputs.type }}"
           TIMESTAMP=$(date +%s)
+          printf -- '---\n%b---\n\n%s\n' "$FRONTMATTER" "$SUMMARY" > ".changeset/${TIMESTAMP}.md"
 
-          cat <<EOF > .changeset/${TIMESTAMP}.md
-          ---
-          "@company/core": ${CHANGE_TYPE}
-          "@company/utils": ${CHANGE_TYPE}
-          ---
+          echo "Created .changeset/${TIMESTAMP}.md:"
+          cat ".changeset/${TIMESTAMP}.md"
 
-          $(cat /tmp/changelog_content.txt)
-          EOF
-
-          echo "Created changeset:"
-          cat .changeset/${TIMESTAMP}.md
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v8
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'chore: add auto-generated changeset for ${{ steps.generate.outputs.type }} release'
-          title: 'chore: add auto-generated changeset (${{ steps.generate.outputs.type }})'
-          body: |
-            ## 🤖 Auto-Generated Changeset
-
-            **Change Type:** `${{ steps.generate.outputs.type }}`
-            **Base Reference:** `${{ steps.generate.outputs.base_ref }}`
-
-            This changeset was automatically generated from commit messages.
-
-            ### Preview
-
-            $(cat /tmp/changelog_content.txt)
-
-            ---
-
-            **Next Steps:**
-            1. Review the generated changelog
-            2. Edit the changeset file if needed to improve descriptions
-            3. Merge this PR when ready
-            4. Run `pnpm changeset:version` to update package versions
-            5. Run `pnpm changeset:publish` to publish to npm
-          branch: changeset/auto-${{ github.run_number }}
-          delete-branch: true
-          labels: |
-            changelog
-            automated
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config core.hooksPath /dev/null
+          git add ".changeset/${TIMESTAMP}.md"
+          git commit -m "chore: add auto-generated changeset (${TYPE})"
+          git push origin HEAD:${{ steps.branch.outputs.name }}

@@ -4,8 +4,42 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { LSPClient } from '../../src/client.js';
-import { StdioTransport, CancellationTokenSource } from '@lspeasy/core';
+import { CancellationTokenSource } from '@lspeasy/core';
+import { StdioTransport } from '@lspeasy/core/node';
 import { PassThrough } from 'node:stream';
+
+const parseMessage = (chunk: Buffer): { id?: string | number; method?: string } | undefined => {
+  const text = chunk.toString('utf8');
+  const start = text.indexOf('{');
+  if (start === -1) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(text.slice(start)) as { id?: string | number; method?: string };
+  } catch {
+    return undefined;
+  }
+};
+
+const INITIALIZED_NOTIFICATION_TIMEOUT_MS = 1000;
+
+const captureRequestId = (outputStream: PassThrough, method: string): Promise<string | number> => {
+  return new Promise((resolve) => {
+    let buffer = Buffer.alloc(0);
+
+    const onData = (chunk: Buffer) => {
+      buffer = Buffer.concat([buffer, chunk]);
+      const message = parseMessage(buffer);
+      if (message?.method === method && message.id !== undefined) {
+        outputStream.off('data', onData);
+        resolve(message.id);
+      }
+    };
+
+    outputStream.on('data', onData);
+  });
+};
 
 describe('LSPClient requests and notifications', () => {
   let client: LSPClient;
@@ -27,39 +61,58 @@ describe('LSPClient requests and notifications', () => {
     });
 
     // Connect and initialize
+    const initIdPromise = captureRequestId(outputStream, 'initialize');
     const connectPromise = client.connect(transport);
 
-    setTimeout(() => {
-      const initResponse = {
-        jsonrpc: '2.0',
-        id: 1,
-        result: {
-          capabilities: {},
-          serverInfo: { name: 'test-server' }
-        }
-      };
-      const responseStr = JSON.stringify(initResponse);
-      const buffer = Buffer.from(`Content-Length: ${responseStr.length}\r\n\r\n${responseStr}`);
-      inputStream.write(buffer);
-    }, 10);
+    const initId = await initIdPromise;
+    const initResponse = {
+      jsonrpc: '2.0',
+      id: initId,
+      result: {
+        capabilities: {},
+        serverInfo: { name: 'test-server' }
+      }
+    };
+    const responseStr = JSON.stringify(initResponse);
+    const buffer = Buffer.from(`Content-Length: ${responseStr.length}\r\n\r\n${responseStr}`);
+    inputStream.write(buffer);
 
     await connectPromise;
+
+    // Consume the 'initialized' notification that was sent after connection
+    await new Promise<void>((resolve, reject) => {
+      const onData = (chunk: Buffer) => {
+        const message = parseMessage(chunk);
+        if (message?.method === 'initialized') {
+          clearTimeout(timeout);
+          outputStream.off('data', onData);
+          resolve();
+        }
+      };
+
+      const timeout = setTimeout(() => {
+        outputStream.off('data', onData);
+        reject(new Error('Timeout waiting for initialized notification'));
+      }, INITIALIZED_NOTIFICATION_TIMEOUT_MS);
+
+      outputStream.on('data', onData);
+    });
   });
 
   describe('sendRequest', () => {
     it('should send request and receive response', async () => {
+      const requestIdPromise = captureRequestId(outputStream, 'textDocument/hover');
       const requestPromise = client.sendRequest('textDocument/hover', {
         textDocument: { uri: 'file:///test.ts' },
         position: { line: 0, character: 5 }
       });
 
-      // Wait for request to be sent
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      const requestId = await requestIdPromise;
 
       // Simulate server response
       const hoverResponse = {
         jsonrpc: '2.0',
-        id: 2,
+        id: requestId,
         result: {
           contents: 'Test hover'
         }
@@ -73,17 +126,18 @@ describe('LSPClient requests and notifications', () => {
     });
 
     it('should reject on error response', async () => {
+      const requestIdPromise = captureRequestId(outputStream, 'textDocument/definition');
       const requestPromise = client.sendRequest('textDocument/definition', {
         textDocument: { uri: 'file:///test.ts' },
         position: { line: 0, character: 5 }
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      const requestId = await requestIdPromise;
 
       // Simulate server error response
       const errorResponse = {
         jsonrpc: '2.0',
-        id: 2,
+        id: requestId,
         error: {
           code: -32601,
           message: 'Method not found'
@@ -99,6 +153,8 @@ describe('LSPClient requests and notifications', () => {
     it('should support cancellable requests', async () => {
       const cancelSource = new CancellationTokenSource();
 
+      const requestIdPromise = captureRequestId(outputStream, 'textDocument/completion');
+
       const requestPromise = client.sendRequest(
         'textDocument/completion',
         {
@@ -108,11 +164,16 @@ describe('LSPClient requests and notifications', () => {
         cancelSource.token
       );
 
-      // Cancel the request
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await requestIdPromise;
+
+      // Set up the expectation BEFORE cancelling to ensure handler is attached
+      const expectation = expect(requestPromise).rejects.toThrow('Request was cancelled');
       cancelSource.cancel();
 
-      await expect(requestPromise).rejects.toThrow('Request was cancelled');
+      await expectation;
+
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
 
     it('should handle already cancelled token', async () => {
@@ -129,6 +190,9 @@ describe('LSPClient requests and notifications', () => {
       );
 
       await expect(requestPromise).rejects.toThrow('Request was cancelled');
+
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
 
     it('should throw if not connected', async () => {
@@ -209,10 +273,14 @@ describe('LSPClient requests and notifications', () => {
       expect(promise).toBeInstanceOf(Promise);
       expect(typeof cancel).toBe('function');
 
-      // Cancel the request
+      // Set up the expectation BEFORE cancelling to ensure handler is attached
+      const expectation = expect(promise).rejects.toThrow('Request was cancelled');
       cancel();
 
-      await expect(promise).rejects.toThrow('Request was cancelled');
+      await expectation;
+
+      // Wait for microtasks to complete
+      await Promise.resolve();
     });
   });
 
@@ -221,7 +289,7 @@ describe('LSPClient requests and notifications', () => {
       const handlerPromise = new Promise<any>((resolve) => {
         client.onRequest('workspace/configuration', async (params) => {
           resolve(params);
-          return { settings: {} };
+          return [{ settings: {} }];
         });
       });
 
@@ -262,7 +330,7 @@ describe('LSPClient requests and notifications', () => {
       const serverRequest = {
         jsonrpc: '2.0',
         id: 100,
-        method: 'unknown/method',
+        method: 'workspace/semanticTokens/refresh',
         params: {}
       };
       const requestStr = JSON.stringify(serverRequest);
@@ -275,9 +343,9 @@ describe('LSPClient requests and notifications', () => {
     });
 
     it('should return disposable to unregister handler', async () => {
-      const handler = async () => ({ result: 'test' });
+      const handler = async () => [] as Array<unknown>;
 
-      const disposable = client.onRequest('test/method', handler);
+      const disposable = client.onRequest('workspace/configuration', handler);
       expect(disposable.dispose).toBeDefined();
 
       disposable.dispose();
@@ -301,7 +369,7 @@ describe('LSPClient requests and notifications', () => {
       const serverRequest = {
         jsonrpc: '2.0',
         id: 101,
-        method: 'test/method',
+        method: 'workspace/configuration',
         params: {}
       };
       const requestStr = JSON.stringify(serverRequest);
@@ -338,7 +406,7 @@ describe('LSPClient requests and notifications', () => {
     it('should return disposable to unregister handler', () => {
       const handler = () => {};
 
-      const disposable = client.onNotification('test/notification', handler);
+      const disposable = client.onNotification('window/logMessage', handler);
       expect(disposable.dispose).toBeDefined();
 
       disposable.dispose();

@@ -25,8 +25,6 @@ export {
 } from './jsonrpc/messages.js';
 
 export { parseMessage, serializeMessage } from './jsonrpc/framing.js';
-export { MessageReader } from './jsonrpc/reader.js';
-export { MessageWriter } from './jsonrpc/writer.js';
 
 export {
   requestMessageSchema,
@@ -39,16 +37,47 @@ export {
 } from './jsonrpc/schemas.js';
 
 // Transport interface and implementations
+// Note: Node.js-specific transports (StdioTransport, TcpTransport, IpcTransport)
+// and stream-based utilities (MessageReader, MessageWriter) are exported from
+// '@lspeasy/core/node' to avoid importing Node.js modules in browser environments.
 export type { Transport } from './transport/transport.js';
-export { StdioTransport } from './transport/stdio.js';
-export type { StdioTransportOptions } from './transport/stdio.js';
+export { DedicatedWorkerTransport } from './transport/dedicated-worker.js';
+export type { DedicatedWorkerTransportOptions } from './transport/dedicated-worker.js';
+export { SharedWorkerTransport } from './transport/shared-worker.js';
+export type { SharedWorkerTransportOptions } from './transport/shared-worker.js';
 export { WebSocketTransport } from './transport/websocket.js';
 export type { WebSocketTransportOptions } from './transport/websocket.js';
+export { createWebSocketClient } from './transport/websocket.js';
 export { TransportEventEmitter } from './transport/events.js';
+
+// Middleware
+export type {
+  Middleware,
+  MiddlewareContext,
+  MiddlewareDirection,
+  MiddlewareMessage,
+  MiddlewareMessageType,
+  MiddlewareNext,
+  MiddlewareResult,
+  MethodFilter,
+  ScopedMiddleware,
+  TypedMiddleware,
+  TypedMiddlewareContext,
+  TypedParams,
+  TypedResult,
+  LSPMethod
+} from './middleware/index.js';
+export {
+  composeMiddleware,
+  executeMiddlewarePipeline,
+  createScopedMiddleware,
+  createTypedMiddleware
+} from './middleware/index.js';
 
 // Utilities
 export type { Disposable } from './utils/disposable.js';
 export { DisposableStore } from './utils/disposable.js';
+export { DisposableEventEmitter } from './utils/disposable-event-emitter.js';
 
 export type { CancellationToken } from './utils/cancellation.js';
 export {
@@ -60,28 +89,24 @@ export type { Logger } from './utils/logger.js';
 export { LogLevel, ConsoleLogger, NullLogger } from './utils/logger.js';
 
 export { JSONRPCErrorCode, ErrorMessage, ResponseError } from './utils/errors.js';
+export {
+  DocumentVersionTracker,
+  createFullDidChangeParams,
+  createIncrementalDidChangeParams
+} from './utils/document.js';
+export type { IncrementalChange, VersionSource } from './utils/document.js';
 
 // Protocol types (re-exported from vscode-languageserver-protocol)
-export * from './protocol/types.js';
+export type * from './protocol/types.js';
 
 // LSP protocol types and constants (overloaded with same name - type and const)
 // Note: Single export statement exports both the type and const with same name
 export { LSPRequest, LSPNotification } from './protocol/namespaces.js';
-export type {
-  M as LSPRequestMethod,
-  LSPNotificationMethod,
-  ParamsForRequest as InferRequestParams,
-  ResultForRequest as InferRequestResult,
-  ParamsForNotification as InferNotificationParams
-} from './protocol/infer.js';
+export * from './protocol/infer.js';
 
 // Capability-conditional method interfaces (hand-written type transformations)
-export type {
-  ClientSendMethods,
-  ServerHandlers,
-  ServerSendMethods,
-  ClientHandlers
-} from './protocol/capability-methods.js';
+export * from './protocol/capability-methods.js';
+export type { Client, Server } from './protocol/capability-methods.js';
 
 // LSP protocol schemas
 export {
@@ -129,7 +154,6 @@ export type {
   WatchKind
 } from './protocol/watching.js';
 export {
-  FileChangeTypes,
   WatchKinds,
   createFileEvent,
   createFileSystemWatcher,
@@ -150,34 +174,54 @@ export {
   createProgressBegin,
   createProgressReport,
   createProgressEnd,
-  createProgressCreateParams
+  createProgressCreateParams,
+  createProgressToken
 } from './protocol/progress.js';
 
 export type { PartialResultParams } from './protocol/partial.js';
+
 export {
   createPartialResultParams,
   hasPartialResultToken,
   getPartialResultToken
 } from './protocol/partial.js';
+export type {
+  DynamicRegistration,
+  DynamicRegistrationBehavior,
+  RegisterCapabilityParams,
+  UnregisterCapability,
+  UnregisterCapabilityParams
+} from './protocol/dynamic-registration.js';
+export {
+  dynamicRegistrationSchema,
+  registerCapabilityParamsSchema,
+  unregisterCapabilitySchema,
+  unregisterCapabilityParamsSchema,
+  isRegisterCapabilityParams,
+  isUnregisterCapabilityParams
+} from './protocol/dynamic-registration.js';
+export type {
+  CancelledPartialResult,
+  CompletedPartialResult,
+  PartialRequestOutcome
+} from './protocol/partial-results.js';
 
 export type {
-  ServerCapabilities,
-  ClientCapabilities,
-  MethodsForCapabilities,
-  CapabilityForMethod,
-  MethodToCapability
-} from './protocol/capabilities.js';
+  WorkerLike,
+  MessagePortLike,
+  SharedWorkerLike,
+  WorkerMessageEventLike,
+  WorkerTransportEnvelope
+} from './transport/worker-types.js';
+export { isMessage, isWorkerTransportEnvelope } from './transport/worker-types.js';
+
+export * from './protocol/capabilities.js';
+
+// Capability guard utilities (shared by client and server)
 export {
-  hasCapability,
-  getCapabilityForMethod,
-  supportsMethod,
-  supportsHover,
-  supportsCompletion,
-  supportsDefinition,
-  supportsReferences,
-  supportsDocumentSymbol,
-  supportsWorkspaceFolders,
-  supportsFileWatching,
-  supportsWorkDoneProgress,
-  TextDocumentSyncKinds
-} from './protocol/capabilities.js';
+  buildMethodSets,
+  SERVER_METHODS,
+  CLIENT_METHODS,
+  checkMethod
+} from './utils/capability-guard.js';
+export type { CheckMethodOptions } from './utils/capability-guard.js';

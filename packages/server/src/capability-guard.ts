@@ -1,22 +1,23 @@
 /**
  * Capability validation for server handlers
  *
- * Ensures handlers can only be registered for declared capabilities
+ * Ensures handlers can only be registered for declared server capabilities,
+ * and that server-to-client messages respect declared client capabilities.
  */
 
-import type { ServerCapabilities } from '@lspeasy/core';
+import type { ClientCapabilities, ServerCapabilities } from '@lspeasy/core';
 import type { Logger } from '@lspeasy/core';
-import { getCapabilityForMethod, hasCapability } from '@lspeasy/core';
-
-/**
- * Check if a capability is enabled in server capabilities
- */
-function isCapabilityEnabled(
-  capabilities: Partial<ServerCapabilities>,
-  capabilityKey: keyof ServerCapabilities
-): boolean {
-  return hasCapability(capabilities as ServerCapabilities, capabilityKey);
-}
+import {
+  SERVER_METHODS,
+  CLIENT_METHODS,
+  checkMethod,
+  getClientCapabilityForNotificationMethod,
+  getClientCapabilityForRequestMethod,
+  hasServerCapability,
+  hasClientCapability,
+  getCapabilityForNotificationMethod,
+  getCapabilityForRequestMethod
+} from '@lspeasy/core';
 
 /**
  * Validates that a handler can be registered for a method
@@ -29,84 +30,61 @@ export class CapabilityGuard {
     private readonly strict: boolean = false
   ) {}
 
-  /**
-   * Check if handler registration is allowed for this method
-   *
-   * @param method - LSP method name
-   * @returns true if allowed, false otherwise
-   * @throws Error if strict mode enabled and capability not declared
-   */
   canRegisterHandler(method: string): boolean {
-    // Special methods that don't require capabilities
-    const alwaysAllowed = [
-      'initialize',
-      'initialized',
-      'shutdown',
-      'exit',
-      '$/cancelRequest',
-      'textDocument/didOpen',
-      'textDocument/didChange',
-      'textDocument/didClose',
-      'textDocument/didSave',
-      'textDocument/willSave',
-      'workspace/didChangeConfiguration',
-      'workspace/didChangeWatchedFiles',
-      'workspace/didChangeWorkspaceFolders',
-      'notebookDocument/didOpen',
-      'notebookDocument/didChange',
-      'notebookDocument/didSave',
-      'notebookDocument/didClose'
-    ];
+    return checkMethod({
+      method,
+      methodSets: SERVER_METHODS,
+      getCapabilityKey: (m) => {
+        return (
+          getCapabilityForRequestMethod(m as any) ?? getCapabilityForNotificationMethod(m as any)
+        );
+      },
+      hasCapability: (key) => hasServerCapability(this.capabilities, key as any),
+      actionLabel: 'register handler',
+      capabilityLabel: 'server capability',
+      logger: this.logger,
+      strict: this.strict
+    });
+  }
+}
 
-    if (alwaysAllowed.includes(method)) {
-      return true;
-    }
+/**
+ * Validates that server-to-client messages respect declared client capabilities
+ */
+export class ClientCapabilityGuard {
+  constructor(
+    private readonly capabilities: Partial<ClientCapabilities>,
+    private readonly logger: Logger,
+    private readonly strict: boolean = false
+  ) {}
 
-    // Check if method requires a capability
-    const capabilityKey = getCapabilityForMethod(method);
-    if (!capabilityKey) {
-      // Unknown method - allow in non-strict mode
-      if (!this.strict) {
-        this.logger.debug(`Unknown method ${method}, allowing in non-strict mode`);
-        return true;
-      }
-
-      const error = `Cannot register handler for unknown method: ${method}`;
-      this.logger.error(error);
-      if (this.strict) {
-        throw new Error(error);
-      }
-      return false;
-    }
-
-    // Check if capability is declared
-    if (!isCapabilityEnabled(this.capabilities, capabilityKey)) {
-      const error = `Cannot register handler for ${method}: server capability '${capabilityKey}' not declared`;
-      this.logger.warn(error);
-
-      if (this.strict) {
-        throw new Error(error);
-      }
-      return false;
-    }
-
-    return true;
+  canSendRequest(method: string): boolean {
+    return checkMethod({
+      method,
+      methodSets: CLIENT_METHODS,
+      getCapabilityKey: (m) => getClientCapabilityForRequestMethod(m as any),
+      hasCapability: (key) => hasClientCapability(this.capabilities, key as any),
+      actionLabel: 'send request',
+      capabilityLabel: 'client capability',
+      logger: this.logger,
+      strict: this.strict
+    });
   }
 
-  /**
-   * Get the capability key for a method
-   */
-  getCapabilityKey(method: string): keyof ServerCapabilities | undefined {
-    return getCapabilityForMethod(method);
+  canSendNotification(method: string): boolean {
+    return checkMethod({
+      method,
+      methodSets: CLIENT_METHODS,
+      getCapabilityKey: (m) => getClientCapabilityForNotificationMethod(m as any),
+      hasCapability: (key) => hasClientCapability(this.capabilities, key as any),
+      actionLabel: 'send notification',
+      capabilityLabel: 'client capability',
+      logger: this.logger,
+      strict: this.strict
+    });
   }
 
-  /**
-   * Get all methods that are allowed based on current capabilities
-   */
-  getAllowedMethods(): string[] {
-    // This would require iterating through all LSP methods
-    // For now, return an empty array - can be enhanced if needed
-    this.logger.warn('getAllowedMethods not fully implemented - returns empty array');
-    return [];
+  getClientCapabilities(): Partial<ClientCapabilities> {
+    return { ...this.capabilities };
   }
 }

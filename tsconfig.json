@@ -17,6 +17,7 @@
       "*": ["../../*"],
       "@/*": ["./packages/*/src"]
     },
+    "types": ["node"],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
@@ -27,5 +28,5 @@
     "incremental": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "build", "coverage"]
+  "exclude": ["node_modules", "dist", "build", "coverage", "specs/**/*"]
 }

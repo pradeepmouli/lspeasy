@@ -10,14 +10,17 @@ export type {
   ServerOptions,
   RequestHandler,
   NotificationHandler,
+  NotebookDocumentHandlerNamespace,
   RequestContext,
-  NotificationContext
+  NotificationContext,
+  Server
 } from './types.js';
 
 export { ServerState } from './types.js';
 
 // Internal exports for testing
 export { MessageDispatcher } from './dispatcher.js';
+export { PartialResultSender } from './progress/partial-result-sender.js';
 
 // Re-export commonly used types from @lspeasy/core
 export type {
@@ -38,15 +41,12 @@ export type {
   // Type inference utilities
   LSPRequestMethod,
   LSPNotificationMethod,
-  InferRequestParams,
-  InferRequestResult,
-  InferNotificationParams
+  ParamsForRequest,
+  ResultForRequest,
+  ParamsForNotification
 } from '@lspeasy/core';
 
-export {
-  ResponseError,
-  JSONRPCErrorCode,
-  StdioTransport,
-  ConsoleLogger,
-  LogLevel
-} from '@lspeasy/core';
+export { ResponseError, JSONRPCErrorCode, ConsoleLogger, LogLevel } from '@lspeasy/core';
+
+// Note: For Node.js-specific transports like StdioTransport, import directly from '@lspeasy/core/node'
+// This keeps @lspeasy/server browser-compatible
