@@ -1,9 +1,9 @@
 ---
-description: "Run a full project health diagnostic \u2014 checks structure, agents,\
-  \ features, scripts, extensions, and git status."
+description: Run a full project health diagnostic — checks structure, agents, features,
+  scripts, extensions, and git status.
 scripts:
-  sh: scripts/bash/doctor.sh
-  ps: scripts/powershell/doctor.ps1
+  sh: .specify/scripts/bash/doctor.sh
+  ps: .specify/scripts/powershell/doctor.ps1
 ---
 
 

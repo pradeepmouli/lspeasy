@@ -1,116 +1,6 @@
 {
   "schema_version": "1.0",
   "extensions": {
-    "verify": {
-      "version": "1.0.0",
-      "source": "local",
-      "manifest_hash": "sha256:4baa329349fffb5598a7bd41f958cf193aac77dd624c1c64799de052995ca29a",
-      "enabled": true,
-      "priority": 10,
-      "registered_commands": {
-        "claude": [
-          "speckit.verify.run",
-          "speckit.verify"
-        ],
-        "gemini": [
-          "speckit.verify.run",
-          "speckit.verify"
-        ],
-        "copilot": [
-          "speckit.verify.run",
-          "speckit.verify"
-        ],
-        "codex": [
-          "speckit.verify.run",
-          "speckit.verify"
-        ],
-        "amp": [
-          "speckit.verify.run",
-          "speckit.verify"
-        ]
-      },
-      "installed_at": "2026-03-23T04:36:56.034639+00:00"
-    },
-    "sync": {
-      "version": "0.1.0",
-      "source": "local",
-      "manifest_hash": "sha256:e5f4b9456751e1251693feae987401b3583d67770a43d370741c35182a46d06f",
-      "enabled": true,
-      "priority": 10,
-      "registered_commands": {
-        "claude": [
-          "speckit.sync.analyze",
-          "speckit.drift",
-          "speckit.sync.propose",
-          "speckit.sync.apply",
-          "speckit.sync.conflicts",
-          "speckit.sync.backfill"
-        ],
-        "gemini": [
-          "speckit.sync.analyze",
-          "speckit.drift",
-          "speckit.sync.propose",
-          "speckit.sync.apply",
-          "speckit.sync.conflicts",
-          "speckit.sync.backfill"
-        ],
-        "copilot": [
-          "speckit.sync.analyze",
-          "speckit.drift",
-          "speckit.sync.propose",
-          "speckit.sync.apply",
-          "speckit.sync.conflicts",
-          "speckit.sync.backfill"
-        ],
-        "codex": [
-          "speckit.sync.analyze",
-          "speckit.drift",
-          "speckit.sync.propose",
-          "speckit.sync.apply",
-          "speckit.sync.conflicts",
-          "speckit.sync.backfill"
-        ],
-        "amp": [
-          "speckit.sync.analyze",
-          "speckit.drift",
-          "speckit.sync.propose",
-          "speckit.sync.apply",
-          "speckit.sync.conflicts",
-          "speckit.sync.backfill"
-        ]
-      },
-      "installed_at": "2026-03-23T04:36:57.241337+00:00"
-    },
-    "doctor": {
-      "version": "1.0.0",
-      "source": "local",
-      "manifest_hash": "sha256:45150c8ac10b6b002ebea9de34a203911951fe3a89cb8635a2a149082c02eeed",
-      "enabled": true,
-      "priority": 10,
-      "registered_commands": {
-        "claude": [
-          "speckit.doctor.check",
-          "speckit.doctor"
-        ],
-        "gemini": [
-          "speckit.doctor.check",
-          "speckit.doctor"
-        ],
-        "copilot": [
-          "speckit.doctor.check",
-          "speckit.doctor"
-        ],
-        "codex": [
-          "speckit.doctor.check",
-          "speckit.doctor"
-        ],
-        "amp": [
-          "speckit.doctor.check",
-          "speckit.doctor"
-        ]
-      },
-      "installed_at": "2026-03-23T04:36:57.767252+00:00"
-    },
     "git": {
       "version": "1.0.0",
       "source": "local",
@@ -654,7 +544,58 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-04-16T22:47:31.938386+00:00"
+      "installed_at": "2026-04-16T23:57:26.691176+00:00"
+    },
+    "sync": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:e5f4b9456751e1251693feae987401b3583d67770a43d370741c35182a46d06f",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
+        "claude": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
+        "codex": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
+        "copilot": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
+        "gemini": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-16T23:57:28.052866+00:00"
     },
     "review": {
       "version": "1.0.1",
@@ -710,7 +651,64 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-04-16T22:47:33.904545+00:00"
+      "installed_at": "2026-04-16T23:57:28.563960+00:00"
+    },
+    "doctor": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:45150c8ac10b6b002ebea9de34a203911951fe3a89cb8635a2a149082c02eeed",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
+        "claude": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
+        "codex": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
+        "copilot": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
+        "gemini": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-16T23:57:28.974084+00:00"
+    },
+    "verify": {
+      "version": "1.0.3",
+      "source": "local",
+      "manifest_hash": "sha256:74202b2c3bb17058b10787838cdf30c9ebe11e8793fc1de04bee75d5f111949a",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.verify.run"
+        ],
+        "claude": [
+          "speckit.verify.run"
+        ],
+        "codex": [
+          "speckit.verify.run"
+        ],
+        "copilot": [
+          "speckit.verify.run"
+        ],
+        "gemini": [
+          "speckit.verify.run"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-16T23:57:30.914166+00:00"
     }
   }
 }

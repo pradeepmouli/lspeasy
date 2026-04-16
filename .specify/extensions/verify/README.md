@@ -19,7 +19,7 @@ specify extension add verify
 Or install from repository directly:
 
 ```bash
-specify extension add verify --from https://github.com/ismaelJimenez/spec-kit-verify/archive/refs/tags/v1.0.0.zip
+specify extension add verify --from https://github.com/ismaelJimenez/spec-kit-verify/archive/refs/tags/v1.0.3.zip
 ```
 
 For local development:
@@ -59,7 +59,7 @@ Validate implemented code against specification artifacts.
 
 ```text
 # In Claude Code
-> /speckit.verify
+> /speckit.verify.run
 ```
 
 **Prerequisites:**
@@ -108,7 +108,7 @@ This extension does not currently support environment variable overrides. All co
 > /speckit.implement
 
 # Step 4: Verify implementation
-> /speckit.verify
+> /speckit.verify.run
 ```
 
 The verify command produces a report like:
@@ -149,7 +149,7 @@ The verify command analyzes implemented code against specification artifacts:
 ## Workflow Integration
 
 ```
-/speckit.specify → /speckit.plan → /speckit.tasks → /speckit.implement → /speckit.verify
+/speckit.specify → /speckit.plan → /speckit.tasks → /speckit.implement → /speckit.verify.run
 ```
 
 ## Operating Principles
@@ -199,4 +199,4 @@ MIT License - see [LICENSE](LICENSE) file
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
-Extension Version: 1.0.0 · Spec Kit: >=0.1.0
+Extension Version: 1.0.3 · Spec Kit: >=0.1.0

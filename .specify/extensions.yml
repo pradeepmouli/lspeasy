@@ -3,20 +3,6 @@ settings:
   auto_execute_hooks: true
 hooks:
   after_implement:
-  - extension: verify
-    command: speckit.verify.run
-    enabled: true
-    optional: true
-    prompt: Run verify to validate implementation against specification?
-    description: Post-implementation verification gate
-    condition: null
-  - extension: sync
-    command: speckit.sync.analyze
-    enabled: true
-    optional: true
-    prompt: Check for spec drift after implementation?
-    description: ''
-    condition: null
   - extension: git
     command: speckit.git.commit
     enabled: true
@@ -41,12 +27,26 @@ hooks:
     prompt: null
     description: Update linked issue for workflow boundary after_implement
     condition: null
+  - extension: sync
+    command: speckit.sync.analyze
+    enabled: true
+    optional: true
+    prompt: Check for spec drift after implementation?
+    description: ''
+    condition: null
   - extension: review
     command: speckit.review.run
     enabled: true
     optional: true
     prompt: Run PR review on implemented changes?
     description: Comprehensive review after implementation
+    condition: null
+  - extension: verify
+    command: speckit.verify.run
+    enabled: true
+    optional: true
+    prompt: Run verify to validate implementation against specification?
+    description: Post-implementation verification gate
     condition: null
   before_specify:
   - extension: git

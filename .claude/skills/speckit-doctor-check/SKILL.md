@@ -1,14 +1,13 @@
 ---
+name: speckit-doctor-check
 description: Run a full project health diagnostic — checks structure, agents, features,
   scripts, extensions, and git status.
-scripts:
-  sh: .specify/scripts/bash/doctor.sh
-  ps: .specify/scripts/powershell/doctor.ps1
+compatibility: Requires spec-kit project structure with .specify/ directory
+metadata:
+  author: github-spec-kit
+  source: doctor:commands/check.md
 ---
 
-
-<!-- Extension: doctor -->
-<!-- Config: .specify/extensions/doctor/ -->
 # Project Health Check
 
 Run a diagnostic scan of the current Spec Kit project to identify setup issues, missing artifacts, and configuration problems.

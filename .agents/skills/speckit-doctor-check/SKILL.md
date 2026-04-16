@@ -1,14 +1,13 @@
 ---
+name: speckit-doctor-check
 description: Run a full project health diagnostic — checks structure, agents, features,
   scripts, extensions, and git status.
-scripts:
-  sh: .specify/scripts/bash/doctor.sh
-  ps: .specify/scripts/powershell/doctor.ps1
+compatibility: Requires spec-kit project structure with .specify/ directory
+metadata:
+  author: github-spec-kit
+  source: doctor:commands/check.md
 ---
 
-
-<!-- Extension: doctor -->
-<!-- Config: .specify/extensions/doctor/ -->
 # Project Health Check
 
 Run a diagnostic scan of the current Spec Kit project to identify setup issues, missing artifacts, and configuration problems.
@@ -23,10 +22,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Outline
 
-1. **Run diagnostic script**: Execute `{SCRIPT}` from the project root and review the output.
+1. **Run diagnostic script**: Execute `.specify/scripts/bash/doctor.sh` from the project root and review the output.
 
 2. **Analyze results**: The script checks 6 areas:
-   - **Project structure** — `.specify/`, `specs/`, `scripts/`, `templates/`, `memory/`, `constitution.md`
+   - **Project structure** — `.specify/`, `specs/`, `.specify/scripts/`, `.specify/templates/`, `.specify/memory/`, `constitution.md`
    - **AI agent configuration** — detects which agent folder is present, verifies commands exist
    - **Feature specifications** — lists features in `specs/`, checks for spec.md/plan.md/tasks.md
    - **Scripts health** — verifies all bash and PowerShell scripts are present and executable
@@ -40,7 +39,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 4. **Suggest fixes**: For each error or warning found, suggest the specific command or action needed to resolve it. Common fixes include:
    - Missing directories → `specify init --here`
-   - Missing constitution → copy from `templates/constitution-template.md`
+   - Missing constitution → copy from `.specify/templates/constitution-template.md`
    - Missing feature artifacts → run `/speckit.plan` or `/speckit.tasks`
-   - Non-executable scripts → `chmod +x scripts/bash/*.sh`
+   - Non-executable scripts → `chmod +x .specify/scripts/bash/*.sh`
    - Empty agent commands → `specify init --here --ai <agent>`
