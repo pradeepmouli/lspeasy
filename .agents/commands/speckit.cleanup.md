@@ -2,8 +2,8 @@
 description: Validate and reorganize spec-kit artifacts with proper numbering and
   structure
 scripts:
-  sh: scripts/bash/create-cleanup.sh --json
-  ps: scripts/powershell/create-cleanup.ps1 -Json
+  sh: .specify/scripts/bash/create-cleanup.sh --json
+  ps: .specify/scripts/powershell/create-cleanup.ps1 -Json
 ---
 
 

@@ -2,8 +2,8 @@
 description: Create a refactoring workflow with metrics tracking and behavior preservation
   validation.
 scripts:
-  sh: scripts/bash/create-refactor.sh --json
-  ps: scripts/powershell/create-refactor.ps1 -Json
+  sh: .specify/scripts/bash/create-refactor.sh --json
+  ps: .specify/scripts/powershell/create-refactor.ps1 -Json
 handoffs:
 - label: Create Implementation Plan
   agent: speckit.plan

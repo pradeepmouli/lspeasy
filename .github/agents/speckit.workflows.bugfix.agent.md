@@ -1,8 +1,8 @@
 ---
 description: Create a bug fix workflow with regression test and minimal documentation.
 scripts:
-  sh: scripts/bash/create-bugfix.sh --json
-  ps: scripts/powershell/create-bugfix.ps1 -Json
+  sh: .specify/scripts/bash/create-bugfix.sh --json
+  ps: .specify/scripts/powershell/create-bugfix.ps1 -Json
 handoffs:
 - label: Create Implementation Plan
   agent: speckit.plan

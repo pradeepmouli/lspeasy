@@ -2,8 +2,8 @@
 description: Create an emergency hotfix workflow with expedited process and mandatory
   post-mortem.
 scripts:
-  sh: scripts/bash/create-hotfix.sh --json
-  ps: scripts/powershell/create-hotfix.ps1 -Json
+  sh: .specify/scripts/bash/create-hotfix.sh --json
+  ps: .specify/scripts/powershell/create-hotfix.ps1 -Json
 handoffs:
 - label: Create Expedited Plan
   agent: speckit.plan

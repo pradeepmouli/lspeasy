@@ -2,8 +2,8 @@
 description: Create baseline documentation for the project, establishing context for
   all future specs.
 scripts:
-  sh: scripts/bash/create-baseline.sh --json
-  ps: scripts/powershell/create-baseline.ps1 -Json
+  sh: .specify/scripts/bash/create-baseline.sh --json
+  ps: .specify/scripts/powershell/create-baseline.ps1 -Json
 ---
 
 

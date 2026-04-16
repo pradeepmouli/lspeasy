@@ -2,8 +2,8 @@
 description: Modify an existing feature with impact analysis and backward compatibility
   tracking.
 scripts:
-  sh: scripts/bash/create-modification.sh --json
-  ps: scripts/powershell/create-modification.ps1 -Json
+  sh: .specify/scripts/bash/create-modification.sh --json
+  ps: .specify/scripts/powershell/create-modification.ps1 -Json
 handoffs:
 - label: Create Implementation Plan
   agent: speckit.plan
