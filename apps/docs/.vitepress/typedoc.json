@@ -10,7 +10,7 @@
   "out": "../api",
   "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme", "typedoc-plugin-to-skills"],
   "llmsTxt": true,
-  "llmsTxtOutDir": "../public",
+  "llmsTxtOutDir": "../../public",
   "skipErrorChecking": true,
   "excludeInternal": true,
   "excludePrivate": true,

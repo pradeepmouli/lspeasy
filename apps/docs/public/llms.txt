@@ -1,0 +1,1527 @@
+# @lspeasy/docs
+
+> Documentation site for lspeasy
+
+## @lspeasy/client
+
+### API
+
+- `CapabilityGuard`: Validates outgoing client requests and notifications against the server's
+declared capabilities.
+- `ClientCapabilityGuard`: Validates that server-to-client handler registrations are backed by
+client capabilities declared in the `initialize` request.
+- `ConnectionHealthTracker`: Tracks connection state transitions and message activity timestamps.
+- `HeartbeatMonitor`: Runs interval-based heartbeat checks for active transports.
+- `NotificationWaiter`: Tracks a single wait-for-notification operation and its timeout lifecycle.
+- `LSPClient`: @lspeasy/client - LSP Client for connecting to language servers
+
+## Optional
+
+### Types
+
+- `LSPClient`: @lspeasy/client - LSP Client for connecting to language servers
+- `ClientOptions`: Configuration for an `LSPClient` instance.
+- `InitializeResult`: Initialize result from server
+- `CancellableRequest`: Return value of `LSPClient.sendCancellableRequest`.
+- `NotebookDocumentNamespace`
+- `PartialRequestOptions`: Options for `LSPClient.sendRequestWithPartialResults`.
+- `PartialRequestResult`: Result returned by partial-result enabled requests.
+- `ConnectionHealth`: Aggregated connection health snapshot returned by
+`LSPClient.getConnectionHealth()`.
+- `HeartbeatConfig`: Configuration for optional heartbeat monitoring.
+- `HeartbeatStatus`: Snapshot of the current heartbeat monitoring status.
+- `StateChangeEvent`: Payload emitted when the connection state changes.
+Subscribe via `LSPClient.onConnectionStateChange()`.
+- `NotificationWaitOptions`: Options for `NotificationWaiter` and `LSPClient.waitForNotification`.
+- `Transport`: Pluggable communication layer for JSON-RPC message exchange.
+- `Logger`: Structured logging interface used throughout lspeasy.
+- `Disposable`: Represents a resource that can be explicitly released.
+- `ConnectionState`: Lifecycle state of an `LSPClient` connection.
+- `LogLevel`: Numeric severity levels for filtering log output.
+
+## @lspeasy/core
+
+### API
+
+- `is`
+- `is`
+- `is`
+- `is`
+- `create`: Creates a new Position literal from the given line and character.
+- `is`: Checks whether the given literal conforms to the Position interface.
+- `create`: Create a new Range literal.
+- `is`: Checks whether the given literal conforms to the Range interface.
+- `create`: Creates a Location literal.
+- `is`: Checks whether the given literal conforms to the Location interface.
+- `create`: Creates a LocationLink literal.
+- `is`: Checks whether the given literal conforms to the LocationLink interface.
+- `create`: Creates a new Color literal.
+- `is`: Checks whether the given literal conforms to the Color interface.
+- `create`: Creates a new ColorInformation literal.
+- `is`: Checks whether the given literal conforms to the ColorInformation interface.
+- `create`: Creates a new ColorInformation literal.
+- `is`: Checks whether the given literal conforms to the ColorInformation interface.
+- `create`: Creates a new FoldingRange literal.
+- `is`: Checks whether the given literal conforms to the FoldingRange interface.
+- `create`: Creates a new DiagnosticRelatedInformation literal.
+- `is`: Checks whether the given literal conforms to the DiagnosticRelatedInformation interface.
+- `is`
+- `create`: Creates a new Diagnostic literal.
+- `is`: Checks whether the given literal conforms to the Diagnostic interface.
+- `create`: Creates a new Command literal.
+- `is`: Checks whether the given literal conforms to the Command interface.
+- `replace`: Creates a replace text edit.
+- `insert`: Creates an insert text edit.
+- `del`: Creates a delete text edit.
+- `is`
+- `create`
+- `is`
+- `is`
+- `replace`: Creates an annotated replace text edit.
+- `insert`: Creates an annotated insert text edit.
+- `del`: Creates an annotated delete text edit.
+- `is`
+- `create`: Creates a new `TextDocumentEdit`
+- `is`
+- `create`
+- `is`
+- `create`
+- `is`
+- `create`
+- `is`
+- `create`: Creates a new TextDocumentIdentifier literal.
+- `is`: Checks whether the given literal conforms to the TextDocumentIdentifier interface.
+- `create`: Creates a new VersionedTextDocumentIdentifier literal.
+- `is`: Checks whether the given literal conforms to the VersionedTextDocumentIdentifier interface.
+- `create`: Creates a new OptionalVersionedTextDocumentIdentifier literal.
+- `is`: Checks whether the given literal conforms to the OptionalVersionedTextDocumentIdentifier interface.
+- `create`: Creates a new TextDocumentItem literal.
+- `is`: Checks whether the given literal conforms to the TextDocumentItem interface.
+- `is`: Checks whether the given value is a value of the MarkupKind type.
+- `is`: Checks whether the given value conforms to the MarkupContent interface.
+- `create`: Creates a new insert / replace edit
+- `is`: Checks whether the given literal conforms to the InsertReplaceEdit interface.
+- `is`
+- `create`: Create a completion item and seed it with a label.
+- `create`: Creates a new completion list.
+- `fromPlainText`: Creates a marked string from plain text.
+- `is`: Checks whether the given value conforms to the MarkedString type.
+- `is`: Checks whether the given value conforms to the Hover interface.
+- `create`: Creates a new parameter information literal.
+- `create`
+- `create`: Create a DocumentHighlight object.
+- `create`: Creates a new symbol information literal.
+- `create`: Create a new workspace symbol.
+- `create`: Creates a new symbol information literal.
+- `is`: Checks whether the given literal conforms to the DocumentSymbol interface.
+- `create`: Creates a new CodeActionContext literal.
+- `is`: Checks whether the given literal conforms to the CodeActionContext interface.
+- `create`: Creates a new code action.
+- `is`
+- `create`: Creates a new CodeLens literal.
+- `is`: Checks whether the given literal conforms to the CodeLens interface.
+- `create`: Creates a new FormattingOptions literal.
+- `is`: Checks whether the given literal conforms to the FormattingOptions interface.
+- `create`: Creates a new DocumentLink literal.
+- `is`: Checks whether the given literal conforms to the DocumentLink interface.
+- `create`: Creates a new SelectionRange
+- `is`
+- `is`
+- `create`: Creates a new InlineValueText literal.
+- `is`
+- `create`: Creates a new InlineValueText literal.
+- `is`
+- `create`: Creates a new InlineValueEvaluatableExpression literal.
+- `is`
+- `create`: Creates a new InlineValueContext literal.
+- `is`: Checks whether the given literal conforms to the InlineValueContext interface.
+- `is`
+- `create`
+- `is`
+- `create`
+- `is`
+- `createSnippet`
+- `create`
+- `create`
+- `create`
+- `create`
+- `create`: Creates a new ITextDocument literal from the given uri and content.
+- `is`: Checks whether the given literal conforms to the ITextDocument interface.
+- `applyEdits`
+- `is`
+- `is`
+- `is`
+- `is`
+- `hasId`
+- `is`
+- `isIncremental`: Checks whether the information describes a delta event.
+- `isFull`: Checks whether the information describes a full replacement event.
+- `is`
+- `getCapabilityForRequestMethod`: Get the capability key for a given method at runtime
+- `getClientCapabilityForRequestMethod`: Get the client capability key for a given request method at runtime
+- `getCapabilityForNotificationMethod`: Get the capability key for a given notification method at runtime
+- `getClientCapabilityForNotificationMethod`: Get the client capability key for a given notification method at runtime
+- `getDefinitionForRequest`
+- `getDefinitionForNotification`
+- `serverSupportsRequest`: Check if a method is supported by the given server capabilities
+- `serverSupportsNotification`
+- `clientSupportsRequest`: Check if a method is supported by the given client capabilities
+- `clientSupportsNotification`
+- `hasServerCapability`: Check if a server capability is enabled
+- `hasClientCapability`: Check if a client capability is enabled
+- `supportsHover`: Helper to check if hover is supported
+- `supportsCompletion`: Helper to check if completion is supported
+- `supportsDefinition`: Helper to check if definition is supported
+- `supportsReferences`: Helper to check if references are supported
+- `supportsDocumentSymbol`: Helper to check if document symbols are supported
+- `supportsWorkspaceFolders`: Helper to check if workspace folders are supported
+- `supportsNotebookDocumentSync`
+- `supportsFileWatching`: Helper to check if file watching is supported
+- `supportsWorkDoneProgress`: Helper to check if work done progress is supported
+- `isRequestMessage`: Returns `true` when `message` is a JSON-RPC request (has `id` + `method`).
+- `isNotificationMessage`: Returns `true` when `message` is a JSON-RPC notification (has `method`,
+no `id`).
+- `isResponseMessage`: Returns `true` when `message` is a JSON-RPC response (has `id`, no `method`).
+- `isSuccessResponse`: Returns `true` when `response` carries a `result` (success case).
+- `isErrorResponse`: Returns `true` when `response` carries an `error` (error case).
+- `parseMessage`: Parses a single framed JSON-RPC 2.0 message from a raw byte buffer.
+- `serializeMessage`: Serializes a JSON-RPC 2.0 message into a framed byte buffer with
+`Content-Length` and `Content-Type` headers.
+- `createWebSocketClient`: Creates a WebSocket client instance, preferring the native
+`globalThis.
+- `composeMiddleware`
+- `executeMiddlewarePipeline`
+- `createScopedMiddleware`
+- `createTypedMiddleware`
+- `createFullDidChangeParams`: Builds `DidChangeTextDocumentParams` for a full-document text replacement.
+- `createIncrementalDidChangeParams`: Builds `DidChangeTextDocumentParams` for an incremental (range-based)
+document change notification.
+- `getSchemaForMethod`: Get schema for a given method
+- `is`
+- `is`
+- `createWorkspaceFolder`: Helper to create a WorkspaceFolder
+- `createWorkspaceFoldersChangeEvent`: Helper to create a WorkspaceFoldersChangeEvent
+- `createFileEvent`: Helper to create a FileEvent
+- `createFileSystemWatcher`: Helper to create a FileSystemWatcher
+- `createDidChangeWatchedFilesParams`: Helper to create DidChangeWatchedFilesParams
+- `is`
+- `is`
+- `hasWorkDoneProgress`
+- `createProgressBegin`: Helper to create a progress begin notification
+- `createProgressReport`: Helper to create a progress report notification
+- `createProgressEnd`: Helper to create a progress end notification
+- `createProgressCreateParams`: Helper to create progress create params
+- `createProgressToken`: Generate a unique progress token
+- `createPartialResultParams`: Helper to create partial result params
+- `hasPartialResultToken`: Type guard to check if params support partial results
+- `getPartialResultToken`: Helper to extract partial result token from params
+- `isRegisterCapabilityParams`: Runtime guard for register-capability params.
+- `isUnregisterCapabilityParams`: Runtime guard for unregister-capability params.
+- `isMessage`: Runtime guard for JSON-RPC message envelopes.
+- `isWorkerTransportEnvelope`: Runtime guard for shared worker transport envelope payloads.
+- `buildMethodSets`
+- `checkMethod`: Shared validation logic for checking if a method is allowed based on capabilities.
+- `createProtocolConnection`
+- `RAL`
+- `install`
+- `is`
+- `is`
+- `is`
+- `is`
+- `createMessageConnection`
+- `fromString`
+- `toString`
+- `fromString`
+- `is`
+- `is`
+- `is`
+- `is`
+- `is`
+- `is`
+- `is`
+- `create`
+- `is`
+- `equals`
+- `create`
+- `is`
+- `diff`
+- `create`
+- `is`
+- `is`
+- `create`
+- `WorkspaceChange`: A workspace change helps constructing changes to a workspace.
+- `RegistrationType`
+- `ProtocolRequestType0`: Classes to type request response pairs
+- `ProtocolRequestType`
+- `ProtocolNotificationType0`
+- `ProtocolNotificationType`
+- `DedicatedWorkerTransport`: JSON-RPC transport backed by a Dedicated Worker instance.
+- `SharedWorkerTransport`: JSON-RPC transport for Shared Worker environments with per-client envelope routing.
+- `WebSocketTransport`: WebSocket-based transport for LSP communication.
+- `TransportEventEmitter`: Transport event emitter
+- `DisposableStore`: Collects multiple `Disposable` instances and releases them together.
+- `DisposableEventEmitter`: Event emitter that returns disposables and can dispose all listeners at once.
+- `CancellationTokenSource`: Controller that creates and manages a `CancellationToken`.
+- `ConsoleLogger`: Logger implementation that writes to the process console with level filtering.
+- `NullLogger`: No-op logger that silently discards all messages.
+- `ResponseError`: An `Error` subclass that maps to a JSON-RPC 2.0 error response.
+- `DocumentVersionTracker`: Tracks monotonically increasing version numbers for open text documents.
+- `RequestType`
+- `RequestType0`: Classes to type request response pairs
+- `RequestType1`
+- `RequestType2`
+- `RequestType3`
+- `RequestType4`
+- `RequestType5`
+- `RequestType6`
+- `RequestType7`
+- `RequestType8`
+- `RequestType9`
+- `NotificationType`
+- `NotificationType0`
+- `NotificationType1`
+- `NotificationType2`
+- `NotificationType3`
+- `NotificationType4`
+- `NotificationType5`
+- `NotificationType6`
+- `NotificationType7`
+- `NotificationType8`
+- `NotificationType9`
+- `ParameterStructures`
+- `LinkedMap`
+- `LRUCache`
+- `Emitter`
+- `SharedArraySenderStrategy`
+- `SharedArrayReceiverStrategy`
+- `AbstractMessageReader`: Reads JSON-RPC messages from some underlying transport.
+- `ReadableStreamMessageReader`: Reads JSON-RPC messages from some underlying transport.
+- `AbstractMessageWriter`
+- `WriteableStreamMessageWriter`: Writes JSON-RPC messages to an underlying transport.
+- `AbstractMessageBuffer`
+- `ProgressType`
+- `ConnectionError`
+- `lspReservedErrorRangeStart`: This is the start range of LSP reserved error codes.
+It doesn't denote a real error code.
+- `RequestFailed`: A request failed but it was syntactically correct, e.
+- `ServerCancelled`: The server cancelled the request. This error code should
+only be used for requests that explicitly support being
+server cancellable.
+- `ContentModified`: The server detected that the content of a document got
+modified outside normal conditions.
+- `RequestCancelled`: The client has canceled a request and a server as detected
+the cancel.
+- `lspReservedErrorRangeEnd`: This is the end range of LSP reserved error codes.
+It doesn't denote a real error code.
+- `MIN_VALUE`
+- `MAX_VALUE`
+- `MIN_VALUE`
+- `MAX_VALUE`
+- `Comment`: Folding range for a comment
+- `Imports`: Folding range for an import or include
+- `Region`: Folding range for a region (e.g. `#region`)
+- `Error`: Reports an error.
+- `Warning`: Reports a warning.
+- `Information`: Reports an information.
+- `Hint`: Reports a hint.
+- `Unnecessary`: Unused or unnecessary code.
+
+Clients are allowed to render diagnostics with this tag faded out instead of having
+an error squiggle.
+- `Deprecated`: Deprecated or obsolete code.
+
+Clients are allowed to rendered diagnostics with this tag strike through.
+- `PlainText`: Plain text is supported as a content format
+- `Markdown`: Markdown is supported as a content format
+- `Text`
+- `Method`
+- `Function`
+- `Constructor`
+- `Field`
+- `Variable`
+- `Class`
+- `Interface`
+- `Module`
+- `Property`
+- `Unit`
+- `Value`
+- `Enum`
+- `Keyword`
+- `Snippet`
+- `Color`
+- `File`
+- `Reference`
+- `Folder`
+- `EnumMember`
+- `Constant`
+- `Struct`
+- `Event`
+- `Operator`
+- `TypeParameter`
+- `PlainText`: The primary text to be inserted is treated as a plain string.
+- `Snippet`: The primary text to be inserted is treated as a snippet.
+- `Deprecated`: Render a completion as obsolete, usually using a strike-out.
+- `asIs`: The insertion or replace strings is taken as it is.
+- `adjustIndentation`: The editor adjusts leading whitespace of new lines so that
+they match the indentation up to the cursor of the line for
+which the item is accepted.
+- `Text`: A textual occurrence.
+- `Read`: Read-access of a symbol, like reading a variable.
+- `Write`: Write-access of a symbol, like writing to a variable.
+- `File`
+- `Module`
+- `Namespace`
+- `Package`
+- `Class`
+- `Method`
+- `Property`
+- `Field`
+- `Constructor`
+- `Enum`
+- `Interface`
+- `Function`
+- `Variable`
+- `Constant`
+- `String`
+- `Number`
+- `Boolean`
+- `Array`
+- `Object`
+- `Key`
+- `Null`
+- `EnumMember`
+- `Struct`
+- `Event`
+- `Operator`
+- `TypeParameter`
+- `Deprecated`: Render a symbol as obsolete, usually using a strike-out.
+- `Empty`: Empty kind.
+- `QuickFix`: Base kind for quickfix actions: 'quickfix'
+- `Refactor`: Base kind for refactoring actions: 'refactor'
+- `RefactorExtract`: Base kind for refactoring extraction actions: 'refactor.
+- `RefactorInline`: Base kind for refactoring inline actions: 'refactor.inline'
+
+Example inline actions:
+
+- Inline function
+- Inline variable
+- Inline constant
+- ...
+- `RefactorRewrite`: Base kind for refactoring rewrite actions: 'refactor.
+- `Source`: Base kind for source actions: `source`
+
+Source code actions apply to the entire file.
+- `SourceOrganizeImports`: Base kind for an organize imports source action: `source.organizeImports`
+- `SourceFixAll`: Base kind for auto-fix source actions: `source.
+- `Invoked`: Code actions were explicitly requested by the user or by an extension.
+- `Automatic`: Code actions were requested automatically.
+- `Type`: An inlay hint that for a type annotation.
+- `Parameter`: An inlay hint that is for a parameter.
+- `Invoked`: Completion was triggered explicitly by a user gesture.
+- `Automatic`: Completion was triggered automatically while editing.
+- `EOL`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `Create`: Supports creating new files and folders.
+- `Rename`: Supports renaming existing files and folders.
+- `Delete`: Supports deleting existing files and folders.
+- `Abort`: Applying the workspace change is simply aborted if one of the changes provided
+fails.
+- `Transactional`: All operations are executed transactional. That means they either all
+succeed or no changes at all are applied to the workspace.
+- `TextOnlyTransactional`: If the workspace edit contains only textual file changes they are executed transactional.
+- `Undo`: The client tries to undo the operations already executed. But there is no
+guarantee that this is succeeding.
+- `UTF8`: Character offsets count UTF-8 code units (e.g. bytes).
+- `UTF16`: Character offsets count UTF-16 code units.
+
+This is the default and must always be supported
+by servers
+- `UTF32`: Character offsets count UTF-32 code units.
+- `method`
+- `messageDirection`
+- `type`
+- `unknownProtocolVersion`: If the protocol version provided by the client can't be handled by the server.
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `Error`: An error message.
+- `Warning`: A warning message.
+- `Info`: An information message.
+- `Log`: A log message.
+- `Debug`: A debug message.
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `None`: Documents should not be synced at all.
+- `Full`: Documents are synced by always sending the full content
+of the document.
+- `Incremental`: Documents are synced by sending the full content on open.
+After that only incremental updates to the document are
+send.
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `Manual`: Manually triggered, e.g. by the user pressing save, by starting debugging,
+or by an API call.
+- `AfterDelay`: Automatic after a delay.
+- `FocusOut`: When the editor lost focus.
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `Invoked`: Completion was triggered by typing an identifier (24x7 code
+complete), manual invocation (e.g Ctrl+Space) or via API.
+- `TriggerCharacter`: Completion was triggered by a trigger character specified by
+the `triggerCharacters` properties of the `CompletionRegistrationOptions`.
+- `TriggerForIncompleteCompletions`: Completion was re-triggered as current completion list is incomplete
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `Invoked`: Signature help was invoked manually by the user or by a command.
+- `TriggerCharacter`: Signature help was triggered by a trigger character.
+- `ContentChange`: Signature help was triggered by the cursor moving or by the document content changing.
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `Identifier`: The client's default behavior is to select the identifier
+according the to language's syntax rule.
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `RequestMethodMap`
+- `NotificationMethodMap`
+- `ClientRequestMethodToCapabilityMap`
+- `ClientNotificationMethodToCapabilityMap`
+- `requestMessageSchema`: Schema for JSON-RPC 2.0 Request Message
+- `notificationMessageSchema`: Schema for JSON-RPC 2.0 Notification Message
+- `responseErrorSchema`: Schema for JSON-RPC 2.0 Response Error
+- `successResponseMessageSchema`: Schema for JSON-RPC 2.0 Success Response Message
+- `errorResponseMessageSchema`: Schema for JSON-RPC 2.0 Error Response Message
+- `responseMessageSchema`: Schema for JSON-RPC 2.0 Response Message (success or error)
+- `messageSchema`: Schema for any JSON-RPC 2.0 Message
+Uses discriminated union based on presence of 'method' and 'id'
+- `JSONRPCErrorCode`: Numeric error codes defined by JSON-RPC 2.0 and the LSP specification.
+- `ErrorMessage`: Error messages for each error code
+- `LSPRequest`: LSP Request methods organized by namespace
+- `LSPNotification`: LSP Notification methods organized by namespace
+- `PositionSchema`: Position in a text document expressed as zero-based line and character offset
+- `RangeSchema`: Range in a text document expressed as (zero-based) start and end positions
+- `TextDocumentIdentifierSchema`: Text document identifier
+- `HoverParamsSchema`: Hover params
+- `HoverSchema`: Hover result
+- `CompletionParamsSchema`: Completion params
+- `CompletionItemSchema`: Completion item
+- `CompletionListSchema`: Completion list
+- `DefinitionParamsSchema`: Definition params
+- `ReferenceParamsSchema`: Reference params
+- `DocumentSymbolParamsSchema`: Document symbol params
+- `DocumentSymbolSchema`: Document symbol
+- `InitializeParamsSchema`: Initialize params
+- `DidOpenTextDocumentParamsSchema`: Did open text document params
+- `DidChangeTextDocumentParamsSchema`: Did change text document params
+- `DidCloseTextDocumentParamsSchema`: Did close text document params
+- `DidSaveTextDocumentParamsSchema`: Did save text document params
+- `LSPSchemas`: Schema registry for method-based lookup
+- `WorkspaceFileChangeTypes`: File change types enum for convenience
+- `Created`: The file got created.
+- `Changed`: The file got changed.
+- `Deleted`: The file got deleted.
+- `Create`: Interested in create events.
+- `Change`: Interested in change events
+- `Delete`: Interested in delete events
+- `WatchKinds`: Watch kinds for file system watchers
+- `dynamicRegistrationSchema`
+- `registerCapabilityParamsSchema`
+- `unregisterCapabilitySchema`
+- `unregisterCapabilityParamsSchema`
+- `SERVER_METHODS`
+- `CLIENT_METHODS`
+- `ParseError`
+- `InvalidRequest`
+- `MethodNotFound`
+- `InvalidParams`
+- `InternalError`
+- `jsonrpcReservedErrorRangeStart`: This is the start range of JSON RPC reserved error codes.
+- `serverErrorStart`
+- `MessageWriteError`: An error occurred when write a message to the transport layer.
+- `MessageReadError`: An error occurred when reading a message from the transport layer.
+- `PendingResponseRejected`: The connection got disposed or lost and all pending responses got
+rejected.
+- `ConnectionInactive`: The connection is inactive and a use of it failed.
+- `ServerNotInitialized`: Error code indicating that a server received a notification or
+request before the server has received the `initialize` request.
+- `UnknownErrorCode`
+- `jsonrpcReservedErrorRangeEnd`: This is the end range of JSON RPC reserved error codes.
+It doesn't denote a real error code.
+- `serverErrorEnd`
+- `None`
+- `First`
+- `AsOld`
+- `Last`
+- `AsNew`
+- `None`
+- `Off`: Turn tracing off.
+- `Messages`: Trace messages only.
+- `Compact`: Compact message tracing.
+- `Verbose`: Verbose message tracing.
+- `type`
+- `type`
+- `Message`
+- `Message`
+- `Message`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `Relative`
+- `method`
+- `messageDirection`
+- `type`
+- `registrationMethod`
+- `method`
+- `messageDirection`
+- `type`
+- `registrationMethod`
+- `method`
+- `messageDirection`
+- `type`
+- `registrationMethod`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `file`: The pattern matches a file only.
+- `folder`: The pattern matches a folder only.
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `document`: The moniker is only unique inside a document
+- `project`: The moniker is unique inside a project for which a dump got created
+- `group`: The moniker is unique inside the group to which a project belongs
+- `scheme`: The moniker is unique inside the moniker scheme.
+- `global`: The moniker is globally unique
+- `$import`: The moniker represent a symbol that is imported into a project
+- `$export`: The moniker represents a symbol that is exported from a project
+- `local`: The moniker represents a symbol that is local to a project (e.g. a local
+variable of a function, a class not visible outside the project, ...)
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `Full`: A diagnostic report with a full
+set of problems.
+- `Unchanged`: A report indicating that the last
+returned report is still accurate.
+- `method`
+- `messageDirection`
+- `type`
+- `partialResult`
+- `method`
+- `messageDirection`
+- `type`
+- `partialResult`
+- `method`
+- `messageDirection`
+- `type`
+- `Markup`: A markup-cell is formatted source that is used for display.
+- `Code`: A code-cell is source code.
+- `method`
+- `messageDirection`
+- `type`
+- `method`
+- `messageDirection`
+- `type`
+- `registrationMethod`
+- `method`
+- `messageDirection`
+- `type`
+- `registrationMethod`
+- `method`
+- `messageDirection`
+- `type`
+- `registrationMethod`
+- `method`
+- `messageDirection`
+- `type`
+- `registrationMethod`
+- `method`
+- `messageDirection`
+- `type`
+
+## Optional
+
+### Types
+
+- `TextDocumentContentParams`
+- `TextDocumentContent`
+- `TextDocumentContentResult`
+- `TextDocumentContentRegistrationOptions`
+- `TextDocumentContentRefreshParams`
+- `CancelParams`
+- `ProgressParams`
+- `LSPErrorCodes`
+- `DocumentUri`: A tagging type for string properties that are actually document URIs.
+- `URI`: A tagging type for string properties that are actually URIs
+- `integer`: Defines an integer in the range of -2^31 to 2^31 - 1.
+- `uinteger`: Defines an unsigned integer in the range of 0 to 2^31 - 1.
+- `decimal`: Defines a decimal number.
+- `LSPAny`: The LSP any type.
+- `LSPObject`
+- `LSPArray`
+- `Position`: Position in a text document expressed as zero-based line and character
+offset.
+- `Range`: A range in a text document expressed as (zero-based) start and end positions.
+- `Location`: Represents a location inside a resource, such as a line
+inside a text file.
+- `LocationLink`: Represents the connection of two locations. Provides additional metadata over normal Location locations,
+including an origin range.
+- `Color`: Represents a color in RGBA space.
+- `ColorInformation`: Represents a color range from a document.
+- `ColorPresentation`
+- `FoldingRangeKind`: A predefined folding range kind.
+
+The type is a string since the value set is extensible
+- `FoldingRange`: Represents a folding range.
+- `DiagnosticRelatedInformation`: Represents a related message and source code location for a diagnostic.
+- `DiagnosticSeverity`
+- `DiagnosticTag`
+- `CodeDescription`: Structure to capture a description for an error code.
+- `Diagnostic`: Represents a diagnostic, such as a compiler error or warning. Diagnostic objects
+are only valid in the scope of a resource.
+- `Command`: Represents a reference to a command.
+- `TextEdit`: A text edit applicable to a text document.
+- `ChangeAnnotation`: Additional information that describes document changes.
+- `ChangeAnnotationIdentifier`: An identifier to refer to a change annotation stored with a workspace edit.
+- `AnnotatedTextEdit`: A special text edit with an additional change annotation.
+- `TextDocumentEdit`: Describes textual changes on a text document.
+- `CreateFileOptions`: Options to create a file.
+- `CreateFile`: Create file operation.
+- `RenameFileOptions`: Rename file options
+- `RenameFile`: Rename file operation
+- `DeleteFileOptions`: Delete file options
+- `DeleteFile`: Delete file operation
+- `TextEditChange`: A change to capture text edits for existing resources.
+- `TextDocumentIdentifier`: A literal to identify a text document in the client.
+- `VersionedTextDocumentIdentifier`: A text document identifier to denote a specific version of a text document.
+- `OptionalVersionedTextDocumentIdentifier`: A text document identifier to optionally denote a specific version of a text document.
+- `TextDocumentItem`: An item to transfer a text document from the client to the
+server.
+- `MarkupKind`
+- `MarkupContent`: A `MarkupContent` literal represents a string value which content is interpreted base on its
+kind flag.
+- `CompletionItemKind`
+- `InsertTextFormat`
+- `CompletionItemTag`
+- `InsertReplaceEdit`: A special text edit to provide an insert and a replace operation.
+- `InsertTextMode`
+- `CompletionItemLabelDetails`: Additional details for a completion item label.
+- `CompletionItem`: A completion item represents a text snippet that is
+proposed to complete text that is being typed.
+- `CompletionList`: Represents a collection of CompletionItem completion items to be presented
+in the editor.
+- `MarkedString`: MarkedString can be used to render human readable text.
+- `Hover`: The result of a hover request.
+- `ParameterInformation`: Represents a parameter of a callable-signature. A parameter can
+have a label and a doc-comment.
+- `SignatureInformation`: Represents the signature of something callable. A signature
+can have a label, like a function-name, a doc-comment, and
+a set of parameters.
+- `SignatureHelp`: Signature help represents the signature of something
+callable. There can be multiple signature but only one
+active and only one active parameter.
+- `Definition`: The definition of a symbol represented as one or many Location locations.
+- `DefinitionLink`: Information about where a symbol is defined.
+- `Declaration`: The declaration of a symbol representation as one or many Location locations.
+- `DeclarationLink`: Information about where a symbol is declared.
+- `ReferenceContext`: Value-object that contains additional information when
+requesting references.
+- `DocumentHighlightKind`
+- `DocumentHighlight`: A document highlight is a range inside a text document which deserves
+special attention.
+- `SymbolKind`
+- `SymbolTag`
+- `BaseSymbolInformation`: A base for all symbol information.
+- `SymbolInformation`: Represents information about programming constructs like variables, classes,
+interfaces etc.
+- `WorkspaceSymbol`: A special workspace symbol that supports locations without a range.
+
+See also SymbolInformation.
+- `DocumentSymbol`: Represents programming constructs like variables, classes, interfaces etc.
+- `CodeActionKind`: The kind of a code action.
+- `CodeActionTriggerKind`
+- `CodeActionContext`: Contains additional diagnostic information about the context in which
+a CodeActionProvider.provideCodeActions code action is run.
+- `CodeAction`: A code action represents a change that can be performed in code, e.
+- `CodeLens`: A code lens represents a Command command that should be shown along with
+source text, like the number of references, a way to run tests, etc.
+- `FormattingOptions`: Value-object describing what options formatting should use.
+- `DocumentLink`: A document link is a range in a text document that links to an internal or external resource, like another
+text document or a web site.
+- `SelectionRange`: A selection range represents a part of a selection hierarchy. A selection range
+may have a parent selection range that contains it.
+- `CallHierarchyItem`: Represents programming constructs like functions or constructors in the context
+of call hierarchy.
+- `CallHierarchyIncomingCall`: Represents an incoming call, e.g. a caller of a method or constructor.
+- `CallHierarchyOutgoingCall`: Represents an outgoing call, e.g. calling a getter from a method or a method from a constructor etc.
+- `SemanticTokensLegend`
+- `SemanticTokens`
+- `SemanticTokensEdit`
+- `SemanticTokensDelta`
+- `TypeHierarchyItem`
+- `InlineValueText`: Provide inline value as text.
+- `InlineValueVariableLookup`: Provide inline value through a variable lookup.
+- `InlineValueEvaluatableExpression`: Provide an inline value through an expression evaluation.
+- `InlineValue`: Inline value information can be provided by different means:
+- directly as a text value (class InlineValueText).
+- `InlineValueContext`
+- `InlayHintKind`
+- `InlayHintLabelPart`: An inlay hint label part allows for interactive and composite labels
+of inlay hints.
+- `InlayHint`: Inlay hint information.
+- `StringValue`: A string value used as a snippet is a template which allows to insert text
+and to control the editor cursor when insertion happens.
+- `InlineCompletionItem`: An inline completion item represents a text snippet that is proposed inline to complete text that is being typed.
+- `InlineCompletionList`: Represents a collection of InlineCompletionItem inline completion items to be presented in the editor.
+- `InlineCompletionTriggerKind`
+- `SelectedCompletionInfo`: Describes the currently selected completion item.
+- `InlineCompletionContext`: Provides information about the context in which an inline completion was requested.
+- `TextDocument`: A simple text document. Not to be implemented. The document keeps the content
+as string.
+- `TextDocumentFilter`: A document filter denotes a document by different properties like
+the TextDocument.
+- `NotebookDocumentFilter`: A notebook document filter denotes a notebook document by
+different properties.
+- `NotebookCellTextDocumentFilter`: A notebook cell text document filter denotes a cell text
+document by different properties.
+- `DocumentFilter`: A document filter describes a top level text document or
+a notebook cell document.
+- `DocumentSelector`: A document selector is the combination of one or many document filters.
+- `Registration`: General parameters to register for a notification or to register a provider.
+- `RegistrationParams`
+- `HandlerSignature`
+- `Unregistration`: General parameters to unregister a request or notification.
+- `UnregistrationParams`
+- `HandlerSignature`
+- `TextDocumentPositionParams`: A parameter literal used in requests to pass a text document and a position inside that
+document.
+- `ResourceOperationKind`: The kind of resource operations supported by the client.
+- `FailureHandlingKind`
+- `WorkspaceClientCapabilities`: Workspace specific client capabilities.
+- `TextDocumentClientCapabilities`: Text document specific client capabilities.
+- `WindowClientCapabilities`
+- `RegularExpressionsClientCapabilities`: Client capabilities specific to regular expressions.
+- `MarkdownClientCapabilities`: Client capabilities specific to the used markdown parser.
+- `PositionEncodingKind`: A type indicating how positions are encoded,
+specifically what column offsets mean.
+- `GeneralClientCapabilities`: General client capabilities.
+- `NotebookDocumentClientCapabilities`: Capabilities specific to the notebook document support.
+- `ClientCapabilities`: Defines the capabilities provided by the client.
+- `StaticRegistrationOptions`: Static registration options to be returned in the initialize
+request.
+- `TextDocumentRegistrationOptions`: General text document registration options.
+- `SaveOptions`: Save options.
+- `ServerCapabilities`: Defines the capabilities provided by a language
+server.
+- `_InitializeParams`: The initialize parameters
+- `InitializeParams`
+- `InitializeResult`: The result returned from an initialize request.
+- `InitializeErrorCodes`
+- `InitializeError`: The data type of the ResponseError if the
+initialize request fails.
+- `InitializedParams`
+- `DidChangeConfigurationClientCapabilities`
+- `DidChangeConfigurationRegistrationOptions`
+- `DidChangeConfigurationParams`: The parameters of a change configuration notification.
+- `MessageType`
+- `ShowMessageParams`: The parameters of a notification message.
+- `ShowMessageRequestClientCapabilities`: Show message request client capabilities
+- `MessageActionItem`
+- `ShowMessageRequestParams`
+- `LogMessageParams`: The log message parameters.
+- `TextDocumentSyncClientCapabilities`
+- `TextDocumentSyncKind`
+- `TextDocumentSyncOptions`
+- `DidOpenTextDocumentParams`: The parameters sent in an open text document notification
+- `TextDocumentContentChangeEvent`: An event describing a change to a text document. If only a text is provided
+it is considered to be the full content of the document.
+- `DidChangeTextDocumentParams`: The change text document notification's parameters.
+- `TextDocumentChangeRegistrationOptions`: Describe options to be used when registered for text document change events.
+- `DidCloseTextDocumentParams`: The parameters sent in a close text document notification
+- `DidSaveTextDocumentParams`: The parameters sent in a save text document notification
+- `TextDocumentSaveRegistrationOptions`: Save registration options.
+- `TextDocumentSaveReason`
+- `WillSaveTextDocumentParams`: The parameters sent in a will save text document notification.
+- `DidChangeWatchedFilesClientCapabilities`
+- `DidChangeWatchedFilesRegistrationOptions`: Describe options to be used when registered for text document change events.
+- `Pattern`: The glob pattern to watch relative to the base path.
+- `RelativePattern`: A relative pattern is a helper to construct glob patterns that are matched
+relatively to a base URI.
+- `GlobPattern`: The glob pattern. Either a string pattern or a relative pattern.
+- `PublishDiagnosticsClientCapabilities`: The publish diagnostic client capabilities.
+- `PublishDiagnosticsParams`: The publish diagnostic notification's parameters.
+- `CompletionClientCapabilities`: Completion client capabilities
+- `CompletionTriggerKind`
+- `CompletionContext`: Contains additional information about the context in which a completion request is triggered.
+- `CompletionParams`: Completion parameters
+- `CompletionOptions`: Completion options.
+- `CompletionRegistrationOptions`: Registration options for a CompletionRequest.
+- `HoverClientCapabilities`
+- `HoverOptions`: Hover options.
+- `HoverParams`: Parameters for a HoverRequest.
+- `HoverRegistrationOptions`: Registration options for a HoverRequest.
+- `SignatureHelpClientCapabilities`: Client Capabilities for a SignatureHelpRequest.
+- `SignatureHelpOptions`: Server Capabilities for a SignatureHelpRequest.
+- `SignatureHelpTriggerKind`
+- `SignatureHelpContext`: Additional information about the context in which a signature help request was triggered.
+- `SignatureHelpParams`: Parameters for a SignatureHelpRequest.
+- `SignatureHelpRegistrationOptions`: Registration options for a SignatureHelpRequest.
+- `DefinitionClientCapabilities`: Client Capabilities for a DefinitionRequest.
+- `DefinitionOptions`: Server Capabilities for a DefinitionRequest.
+- `DefinitionParams`: Parameters for a DefinitionRequest.
+- `DefinitionRegistrationOptions`: Registration options for a DefinitionRequest.
+- `ReferenceClientCapabilities`: Client Capabilities for a ReferencesRequest.
+- `ReferenceParams`: Parameters for a ReferencesRequest.
+- `ReferenceOptions`: Reference options.
+- `ReferenceRegistrationOptions`: Registration options for a ReferencesRequest.
+- `DocumentHighlightClientCapabilities`: Client Capabilities for a DocumentHighlightRequest.
+- `DocumentHighlightParams`: Parameters for a DocumentHighlightRequest.
+- `DocumentHighlightOptions`: Provider options for a DocumentHighlightRequest.
+- `DocumentHighlightRegistrationOptions`: Registration options for a DocumentHighlightRequest.
+- `DocumentSymbolClientCapabilities`: Client Capabilities for a DocumentSymbolRequest.
+- `DocumentSymbolParams`: Parameters for a DocumentSymbolRequest.
+- `DocumentSymbolOptions`: Provider options for a DocumentSymbolRequest.
+- `DocumentSymbolRegistrationOptions`: Registration options for a DocumentSymbolRequest.
+- `CodeActionClientCapabilities`: The Client Capabilities of a CodeActionRequest.
+- `CodeActionParams`: The parameters of a CodeActionRequest.
+- `CodeActionOptions`: Provider options for a CodeActionRequest.
+- `CodeActionRegistrationOptions`: Registration options for a CodeActionRequest.
+- `WorkspaceSymbolClientCapabilities`: Client capabilities for a WorkspaceSymbolRequest.
+- `WorkspaceSymbolParams`: The parameters of a WorkspaceSymbolRequest.
+- `WorkspaceSymbolOptions`: Server capabilities for a WorkspaceSymbolRequest.
+- `WorkspaceSymbolRegistrationOptions`: Registration options for a WorkspaceSymbolRequest.
+- `CodeLensClientCapabilities`: The client capabilities  of a CodeLensRequest.
+- `CodeLensWorkspaceClientCapabilities`
+- `CodeLensParams`: The parameters of a CodeLensRequest.
+- `CodeLensOptions`: Code Lens provider options of a CodeLensRequest.
+- `CodeLensRegistrationOptions`: Registration options for a CodeLensRequest.
+- `DocumentLinkClientCapabilities`: The client capabilities of a DocumentLinkRequest.
+- `DocumentLinkParams`: The parameters of a DocumentLinkRequest.
+- `DocumentLinkOptions`: Provider options for a DocumentLinkRequest.
+- `DocumentLinkRegistrationOptions`: Registration options for a DocumentLinkRequest.
+- `DocumentFormattingClientCapabilities`: Client capabilities of a DocumentFormattingRequest.
+- `DocumentFormattingParams`: The parameters of a DocumentFormattingRequest.
+- `DocumentFormattingOptions`: Provider options for a DocumentFormattingRequest.
+- `DocumentFormattingRegistrationOptions`: Registration options for a DocumentFormattingRequest.
+- `DocumentRangeFormattingClientCapabilities`: Client capabilities of a DocumentRangeFormattingRequest.
+- `DocumentRangeFormattingParams`: The parameters of a DocumentRangeFormattingRequest.
+- `DocumentRangesFormattingParams`: The parameters of a DocumentRangesFormattingRequest.
+- `DocumentRangeFormattingOptions`: Provider options for a DocumentRangeFormattingRequest.
+- `DocumentRangeFormattingRegistrationOptions`: Registration options for a DocumentRangeFormattingRequest.
+- `DocumentOnTypeFormattingClientCapabilities`: Client capabilities of a DocumentOnTypeFormattingRequest.
+- `DocumentOnTypeFormattingParams`: The parameters of a DocumentOnTypeFormattingRequest.
+- `DocumentOnTypeFormattingOptions`: Provider options for a DocumentOnTypeFormattingRequest.
+- `DocumentOnTypeFormattingRegistrationOptions`: Registration options for a DocumentOnTypeFormattingRequest.
+- `PrepareSupportDefaultBehavior`
+- `RenameClientCapabilities`
+- `RenameParams`: The parameters of a RenameRequest.
+- `RenameOptions`: Provider options for a RenameRequest.
+- `RenameRegistrationOptions`: Registration options for a RenameRequest.
+- `PrepareRenameParams`: A parameter literal used in requests to pass a text document and a position inside that
+document.
+- `PrepareRenameResult`
+- `ExecuteCommandClientCapabilities`: The client capabilities of a ExecuteCommandRequest.
+- `ExecuteCommandParams`: The parameters of a ExecuteCommandRequest.
+- `ExecuteCommandOptions`: The server capabilities of a ExecuteCommandRequest.
+- `ExecuteCommandRegistrationOptions`: Registration options for a ExecuteCommandRequest.
+- `WorkspaceEditClientCapabilities`
+- `ApplyWorkspaceEditResponse`
+- `LSPRequestMethod`: Union type of all valid LSP request method names
+- `LSPNotificationMethod`: Union type of all valid LSP notification method names
+- `ParamsForRequest`: Infer request parameters from method name
+- `ResultForRequest`: Infer request result from method name
+- `ServerCapabilityForRequest`
+- `ClientCapabilityForRequest`
+- `ParamsForNotification`: Infer notification parameters from method name
+- `ServerCapabilityForNotification`
+- `ClientCapabilityForNotification`
+- `OptionsForRequest`
+- `RegistrationOptionsForRequest`
+- `DirectionForRequest`
+- `DirectionForNotification`
+- `RequestDefinition`
+- `ClientNotifications`: Client methods for sending requests to server
+Methods are conditionally visible based on ServerCapabilities
+- `ClientRequests`
+- `ServerHandlers`: Server handler registration methods (for requests from client)
+Handlers are conditionally visible based on ServerCapabilities
+- `ClientRequestHandlers`: Client handler registration methods (for requests from server)
+- `ClientNotificationHandlers`
+- `ServerSendMethods`
+- `ToRequestSignature`
+- `ToNotificationSignature`
+- `ToRequestHandlerSignature`
+- `ToNotificationHandlerSignature`
+- `AvailableMethods`
+- `BaseMessage`: Base JSON-RPC 2.0 message discriminant.
+- `RequestMessage`: JSON-RPC 2.0 Request message — expects a response from the peer.
+- `NotificationMessage`: JSON-RPC 2.0 Notification message — no response is expected or sent.
+- `SuccessResponseMessage`: JSON-RPC 2.0 success response to a prior request.
+- `ErrorResponseMessage`: JSON-RPC 2.0 error response to a prior request.
+- `ResponseMessage`: JSON-RPC 2.0 Response message — either a success result or an error.
+- `Message`: Union of all JSON-RPC 2.0 message types sent over a transport.
+- `ResponseErrorInterface`: JSON-RPC 2.0 error object embedded in an error response.
+- `Transport`: Pluggable communication layer for JSON-RPC message exchange.
+- `DedicatedWorkerTransportOptions`
+- `SharedWorkerTransportOptions`
+- `WebSocketTransportOptions`: Options for configuring a `WebSocketTransport`.
+- `Middleware`: A function that intercepts JSON-RPC messages flowing through `LSPServer`
+or `LSPClient`.
+- `MiddlewareContext`: Execution context passed to every middleware function in the pipeline.
+- `MiddlewareDirection`: Direction of a JSON-RPC message in the middleware pipeline.
+- `MiddlewareMessage`: The JSON-RPC message exposed to middleware, with `id` made read-only to
+prevent accidental mutation that would break response correlation.
+- `MiddlewareMessageType`: Kind of JSON-RPC message flowing through middleware.
+- `MiddlewareNext`: Calls the next middleware (or final handler) in the pipeline.
+- `MiddlewareResult`: The return value from a middleware function.
+- `MethodFilter`: Filter predicate used by `ScopedMiddleware` to select which messages
+a middleware should intercept.
+- `ScopedMiddleware`: A `Middleware` paired with a `MethodFilter` so it only runs for matching
+messages.
+- `TypedMiddleware`: A middleware function narrowed to a specific LSP method with full type
+inference for `params` and `result`.
+- `TypedMiddlewareContext`: Typed middleware context narrowed to a specific LSP method.
+Use with `createTypedMiddleware` for full type inference.
+- `TypedParams`: Infers the params type for a given LSP method.
+- `TypedResult`: Infers the result type for a given LSP method (void for notifications).
+- `LSPMethod`: Union of all LSP request and notification method strings.
+- `Disposable`: Represents a resource that can be explicitly released.
+- `CancellationToken`: Singleton token that is never cancelled
+- `CancellationToken`: Read-only handle for observing cancellation state.
+- `Logger`: Structured logging interface used throughout lspeasy.
+- `IncrementalChange`: Represents a single incremental text document change.
+- `VersionSource`: Source of version information for helper constructors.
+- `LSPRequest`: LSP Request type definitions organized by namespace
+- `LSPNotification`: LSP Notification type definitions organized by namespace
+- `Client`
+- `AvailableRequests`: Mapped type of all available LSP request methods and their handler signatures
+- `AvailableNotifications`: Mapped type of all available LSP notification methods and their handler signatures
+- `Server`: Combined Server type with handlers and send methods
+- `AvailableRequests`: Mapped type of all available LSP request methods and their handler signatures
+- `AvailableNotifications`: Mapped type of all available LSP notification methods and their handler signatures
+- `WorkspaceFolder`: A workspace folder inside a client.
+- `WorkspaceFoldersChangeEvent`: The workspace folder change event.
+- `WorkspaceEdit`: A workspace edit represents changes to many resources managed in the workspace.
+- `ApplyWorkspaceEditParams`: The parameters passed via an apply workspace edit request.
+- `ApplyWorkspaceEditResult`: The result returned from the apply workspace edit request.
+- `DidChangeWorkspaceFoldersParams`: The parameters of a `workspace/didChangeWorkspaceFolders` notification.
+- `DidChangeWatchedFilesParams`: The watched files change notification's parameters.
+- `FileEvent`: An event describing a file change.
+- `FileChangeType`
+- `FileSystemWatcher`
+- `WatchKind`
+- `ProgressToken`
+- `WorkDoneProgressBegin`
+- `WorkDoneProgressReport`
+- `WorkDoneProgressEnd`
+- `WorkDoneProgressParams`
+- `WorkDoneProgressOptions`
+- `WorkDoneProgressCreateParams`
+- `WorkDoneProgressValue`: WorkDoneProgress value types
+- `PartialResultParams`: A parameter literal used to pass a partial result token.
+- `DynamicRegistration`
+- `DynamicRegistrationBehavior`: Controls compatibility behavior for dynamic registrations not declared by client capabilities.
+- `RegisterCapabilityParams`: Params payload for `client/registerCapability`.
+- `UnregisterCapability`: Entry used by `client/unregisterCapability`.
+- `UnregisterCapabilityParams`: Params payload for `client/unregisterCapability`.
+- `CancelledPartialResult`: Structured response when a partial-enabled request is cancelled.
+- `CompletedPartialResult`: Structured response when a partial-enabled request completes successfully.
+- `PartialRequestOutcome`: Union return type for partial-enabled client requests.
+- `WorkerLike`: Minimal worker contract required by dedicated worker transport.
+- `MessagePortLike`: Minimal message port contract required by shared worker transport.
+- `SharedWorkerLike`: Shared worker wrapper exposing a message port.
+- `WorkerMessageEventLike`: Lightweight event shape shared by worker and message port adapters.
+- `WorkerTransportEnvelope`: Envelope used by shared worker transport to preserve client isolation.
+- `CheckMethodOptions`
+- `ProtocolConnection`
+- `RAL`
+- `MessageBuffer`
+- `MessageBufferEncoding`
+- `ReadableStream`
+- `WritableStream`
+- `DuplexStream`
+- `MessageSignature`: An interface to type messages.
+- `ErrorCodes`
+- `_EM`: End marker interface for request and notification types.
+- `Touch`
+- `Event`: Represents a typed event.
+- `AbstractCancellationTokenSource`
+- `MessageReader`: Reads JSON-RPC messages from some underlying transport.
+- `DataCallback`: A callback that receives each incoming JSON-RPC message.
+- `MessageReaderOptions`
+- `PartialMessageInfo`
+- `MessageWriter`: Writes JSON-RPC messages to an underlying transport.
+- `MessageWriterOptions`
+- `ContentTypeEncoderOptions`
+- `ContentEncoder`
+- `ContentTypeEncoder`
+- `ContentTypeDecoderOptions`
+- `ContentDecoder`
+- `ContentTypeDecoder`
+- `ConnectionStrategy`
+- `ConnectionOptions`
+- `MessageConnection`
+- `HandlerResult`
+- `StarRequestHandler`
+- `GenericRequestHandler`
+- `RequestHandler0`
+- `RequestHandler`
+- `RequestHandler1`
+- `RequestHandler2`
+- `RequestHandler3`
+- `RequestHandler4`
+- `RequestHandler5`
+- `RequestHandler6`
+- `RequestHandler7`
+- `RequestHandler8`
+- `RequestHandler9`
+- `StarNotificationHandler`
+- `GenericNotificationHandler`
+- `NotificationHandler0`
+- `NotificationHandler`
+- `NotificationHandler1`
+- `NotificationHandler2`
+- `NotificationHandler3`
+- `NotificationHandler4`
+- `NotificationHandler5`
+- `NotificationHandler6`
+- `NotificationHandler7`
+- `NotificationHandler8`
+- `NotificationHandler9`
+- `TraceValues`
+- `TraceOptions`
+- `SetTraceParams`
+- `LogTraceParams`
+- `Tracer`
+- `CancellationId`
+- `CancellationReceiverStrategy`: This will break with the next major version and will become
+export type CancellationReceiverStrategy = IdCancellationReceiverStrategy | RequestCanc...
+- `CancellationSenderStrategy`
+- `CancellationStrategy`
+- `MessageStrategy`
+- `HandlerSignature`
+- `ImplementationParams`: A parameter literal used in requests to pass a text document and a position inside that
+document.
+- `ImplementationRegistrationOptions`: General text document registration options.
+- `ImplementationOptions`
+- `HandlerSignature`
+- `TypeDefinitionParams`: A parameter literal used in requests to pass a text document and a position inside that
+document.
+- `TypeDefinitionRegistrationOptions`: General text document registration options.
+- `TypeDefinitionOptions`
+- `HandlerSignature`
+- `MiddlewareSignature`
+- `HandlerSignature`
+- `MiddlewareSignature`
+- `HandlerSignature`
+- `MiddlewareSignature`
+- `ConfigurationParams`: The parameters of a configuration request.
+- `ConfigurationItem`
+- `HandlerSignature`
+- `HandlerSignature`
+- `DocumentColorOptions`
+- `DocumentColorParams`: Parameters for a DocumentColorRequest.
+- `ColorPresentationParams`: Parameters for a ColorPresentationRequest.
+- `DocumentColorRegistrationOptions`: General text document registration options.
+- `FoldingRangeClientCapabilities`
+- `FoldingRangeOptions`
+- `HandlerSignature`
+- `FoldingRangeParams`: Parameters for a FoldingRangeRequest.
+- `FoldingRangeRegistrationOptions`: General text document registration options.
+- `HandlerSignature`
+- `DeclarationClientCapabilities`
+- `HandlerSignature`
+- `DeclarationParams`: A parameter literal used in requests to pass a text document and a position inside that
+document.
+- `DeclarationRegistrationOptions`: General text document registration options.
+- `DeclarationOptions`
+- `SelectionRangeClientCapabilities`
+- `SelectionRangeOptions`
+- `SelectionRangeParams`: A parameter literal used in selection range requests.
+- `HandlerSignature`
+- `SelectionRangeRegistrationOptions`: General text document registration options.
+- `HandlerSignature`
+- `WorkDoneProgressCancelParams`
+- `HandlerSignature`
+- `CallHierarchyClientCapabilities`
+- `CallHierarchyOptions`: Call hierarchy options used during static registration.
+- `CallHierarchyRegistrationOptions`: Call hierarchy options used during static or dynamic registration.
+- `CallHierarchyIncomingCallsParams`: The parameter of a `callHierarchy/incomingCalls` request.
+- `HandlerSignature`
+- `CallHierarchyOutgoingCallsParams`: The parameter of a `callHierarchy/outgoingCalls` request.
+- `HandlerSignature`
+- `CallHierarchyPrepareParams`: The parameter of a `textDocument/prepareCallHierarchy` request.
+- `HandlerSignature`
+- `SemanticTokensPartialResult`
+- `SemanticTokensDeltaPartialResult`
+- `TokenFormat`
+- `SemanticTokensClientCapabilities`
+- `SemanticTokensOptions`
+- `SemanticTokensRegistrationOptions`
+- `SemanticTokensParams`
+- `HandlerSignature`
+- `SemanticTokensDeltaParams`
+- `HandlerSignature`
+- `SemanticTokensRangeParams`
+- `HandlerSignature`
+- `HandlerSignature`
+- `ShowDocumentParams`: Params to show a resource in the UI.
+- `HandlerSignature`
+- `MiddlewareSignature`
+- `ShowDocumentResult`: The result of a showDocument request.
+- `ShowDocumentClientCapabilities`: Client capabilities for the showDocument request.
+- `LinkedEditingRangeClientCapabilities`: Client capabilities for the linked editing range request.
+- `LinkedEditingRanges`: The result of a linked editing range request.
+- `LinkedEditingRangeOptions`
+- `LinkedEditingRangeParams`: A parameter literal used in requests to pass a text document and a position inside that
+document.
+- `LinkedEditingRangeRegistrationOptions`: General text document registration options.
+- `HandlerSignature`
+- `FileOperationOptions`: Options for notifications/requests for user operations on files.
+- `FileOperationClientCapabilities`: Capabilities relating to events from file operations by the user in the client.
+- `FileOperationRegistrationOptions`: The options to register for file operations.
+- `FileOperationPatternOptions`: Matching options for the file operation pattern.
+- `FileOperationPatternKind`
+- `HandlerSignature`
+- `CreateFilesParams`: The parameters sent in notifications/requests for user-initiated creation of
+files.
+- `FileCreate`: Represents information on a file/folder create.
+- `HandlerSignature`
+- `HandlerSignature`
+- `RenameFilesParams`: The parameters sent in notifications/requests for user-initiated renames of
+files.
+- `FileRename`: Represents information on a file/folder rename.
+- `HandlerSignature`
+- `HandlerSignature`
+- `DeleteFilesParams`: The parameters sent in notifications/requests for user-initiated deletes of
+files.
+- `FileDelete`: Represents information on a file/folder delete.
+- `HandlerSignature`
+- `UniquenessLevel`
+- `MonikerKind`
+- `Moniker`: Moniker definition to match LSIF 0.5 moniker definition.
+- `MonikerClientCapabilities`: Client capabilities specific to the moniker request.
+- `MonikerOptions`
+- `MonikerRegistrationOptions`: General text document registration options.
+- `MonikerParams`: A parameter literal used in requests to pass a text document and a position inside that
+document.
+- `TypeHierarchyClientCapabilities`
+- `TypeHierarchyOptions`: Type hierarchy options used during static registration.
+- `TypeHierarchyRegistrationOptions`: Type hierarchy options used during static or dynamic registration.
+- `TypeHierarchyPrepareParams`: The parameter of a `textDocument/prepareTypeHierarchy` request.
+- `HandlerSignature`
+- `TypeHierarchySubtypesParams`: The parameter of a `typeHierarchy/subtypes` request.
+- `HandlerSignature`
+- `TypeHierarchySupertypesParams`: The parameter of a `typeHierarchy/supertypes` request.
+- `HandlerSignature`
+- `InlineValueClientCapabilities`: Client capabilities specific to inline values.
+- `InlineValueOptions`: Inline value options used during static registration.
+- `InlineValueRegistrationOptions`: Inline value options used during static or dynamic registration.
+- `InlineValueWorkspaceClientCapabilities`: Client workspace capabilities specific to inline values.
+- `InlineValueParams`: A parameter literal used in inline value requests.
+- `HandlerSignature`
+- `HandlerSignature`
+- `InlayHintClientCapabilities`: Inlay hint client capabilities.
+- `InlayHintOptions`: Inlay hint options used during static registration.
+- `InlayHintRegistrationOptions`: Inlay hint options used during static or dynamic registration.
+- `InlayHintWorkspaceClientCapabilities`: Client workspace capabilities specific to inlay hints.
+- `InlayHintParams`: A parameter literal used in inlay hint requests.
+- `HandlerSignature`
+- `HandlerSignature`
+- `HandlerSignature`
+- `DiagnosticClientCapabilities`: Client capabilities specific to diagnostic pull requests.
+- `DiagnosticOptions`: Diagnostic options.
+- `DiagnosticRegistrationOptions`: Diagnostic registration options.
+- `DiagnosticServerCancellationData`: Cancellation data returned from a diagnostic request.
+- `DocumentDiagnosticParams`: Parameters of the document diagnostic request.
+- `DocumentDiagnosticReportKind`
+- `FullDocumentDiagnosticReport`: A diagnostic report with a full set of problems.
+- `RelatedFullDocumentDiagnosticReport`: A full diagnostic report with a set of related documents.
+- `UnchangedDocumentDiagnosticReport`: A diagnostic report indicating that the last returned
+report is still accurate.
+- `RelatedUnchangedDocumentDiagnosticReport`: An unchanged diagnostic report with a set of related documents.
+- `DocumentDiagnosticReport`: The result of a document diagnostic pull request.
+- `DocumentDiagnosticReportPartialResult`: A partial result for a document diagnostic report.
+- `HandlerSignature`
+- `PreviousResultId`: A previous result id in a workspace pull request.
+- `WorkspaceDiagnosticParams`: Parameters of the workspace diagnostic request.
+- `WorkspaceFullDocumentDiagnosticReport`: A full document diagnostic report for a workspace diagnostic result.
+- `WorkspaceUnchangedDocumentDiagnosticReport`: An unchanged document diagnostic report for a workspace diagnostic result.
+- `WorkspaceDocumentDiagnosticReport`: A workspace diagnostic document report.
+- `WorkspaceDiagnosticReport`: A workspace diagnostic report.
+- `WorkspaceDiagnosticReportPartialResult`: A partial result for a workspace diagnostic report.
+- `HandlerSignature`
+- `HandlerSignature`
+- `NotebookDocumentSyncClientCapabilities`: Notebook specific client capabilities.
+- `NotebookCellKind`
+- `ExecutionSummary`
+- `NotebookCell`: A notebook cell.
+- `NotebookDocument`: A notebook document.
+- `NotebookDocumentIdentifier`: A literal to identify a notebook document in the client.
+- `VersionedNotebookDocumentIdentifier`: A versioned notebook document identifier.
+- `NotebookDocumentSyncOptions`: Options specific to a notebook plus its cells
+to be synced to the server.
+- `NotebookDocumentSyncRegistrationOptions`: Registration options specific to a notebook.
+- `DidOpenNotebookDocumentParams`: The params sent in an open notebook document notification.
+- `NotebookCellArrayChange`: A change describing how to move a `NotebookCell`
+array from state S to S'.
+- `NotebookDocumentChangeEvent`: A change event for a notebook document.
+- `DidChangeNotebookDocumentParams`: The params sent in a change notebook document notification.
+- `DidSaveNotebookDocumentParams`: The params sent in a save notebook document notification.
+- `DidCloseNotebookDocumentParams`: The params sent in a close notebook document notification.
+- `InlineCompletionClientCapabilities`: Client capabilities specific to inline completions.
+- `InlineCompletionOptions`: Inline completion options used during static registration.
+- `InlineCompletionParams`: A parameter literal used in inline completion requests.
+- `InlineCompletionRegistrationOptions`: Inline completion options used during static or dynamic registration.
+- `HandlerSignature`
+- `SemanticTokenTypes`: A set of predefined token types. This set is not fixed
+an clients can specify additional token types via the
+corresponding client capabilities.
+- `SemanticTokenModifiers`: A set of predefined token modifiers. This set is not fixed
+an clients can specify additional token types via the
+corresponding client capabilities.
+- `MessageDirection`
+- `LogLevel`: Numeric severity levels for filtering log output.
+- `Trace`
+- `TraceFormat`
+- `ConnectionErrors`
+
+## @lspeasy/server
+
+### API
+
+- `MessageDispatcher`: Message dispatcher manages request/notification routing
+- `PartialResultSender`: Helper for emitting typed `$/progress` partial result batches from server handlers.
+- `ResponseError`: An `Error` subclass that maps to a JSON-RPC 2.0 error response.
+- `ConsoleLogger`: Logger implementation that writes to the process console with level filtering.
+- `LSPServer`: @lspeasy/server - Build LSP servers with simple, typed API
+- `JSONRPCErrorCode`: Numeric error codes defined by JSON-RPC 2.0 and the LSP specification.
+
+## Optional
+
+### Types
+
+- `LSPServer`: @lspeasy/server - Build LSP servers with simple, typed API
+- `ServerOptions`: Configuration for an `LSPServer` instance.
+- `RequestHandler`: Signature for LSP request handlers registered via `LSPServer.onRequest`.
+- `NotificationHandler`: Signature for LSP notification handlers registered via
+`LSPServer.onNotification`.
+- `NotebookDocumentHandlerNamespace`
+- `RequestContext`: Context provided to request handlers alongside params and the cancellation token.
+- `NotificationContext`: Context provided to notification handlers alongside params.
+- `Server`: Combined Server type with handlers and send methods
+- `AvailableRequests`: Mapped type of all available LSP request methods and their handler signatures
+- `AvailableNotifications`: Mapped type of all available LSP notification methods and their handler signatures
+- `CancellationToken`: Singleton token that is never cancelled
+- `CancellationToken`: Read-only handle for observing cancellation state.
+- `LSPRequestMethod`: Union type of all valid LSP request method names
+- `LSPNotificationMethod`: Union type of all valid LSP notification method names
+- `ParamsForRequest`: Infer request parameters from method name
+- `ResultForRequest`: Infer request result from method name
+- `ParamsForNotification`: Infer notification parameters from method name
+- `ServerState`: Lifecycle state of an `LSPServer` instance.
