@@ -243,70 +243,6 @@
       ],
       "installed_at": "2026-04-16T02:06:39.956915+00:00"
     },
-    "review": {
-      "version": "1.0.1",
-      "source": "local",
-      "manifest_hash": "sha256:3f9eedfc8079662edfb8d1f9c07a161be4e66111ea57621061f1658e91710d83",
-      "enabled": true,
-      "priority": 10,
-      "registered_commands": {
-        "amp": [
-          "speckit.review.run",
-          "speckit.review.code",
-          "speckit.review.comments",
-          "speckit.review.tests",
-          "speckit.review.errors",
-          "speckit.review.types",
-          "speckit.review.simplify"
-        ],
-        "claude": [
-          "speckit.review.run",
-          "speckit.review.code",
-          "speckit.review.comments",
-          "speckit.review.tests",
-          "speckit.review.errors",
-          "speckit.review.types",
-          "speckit.review.simplify"
-        ],
-        "codex": [
-          "speckit.review.run",
-          "speckit.review.code",
-          "speckit.review.comments",
-          "speckit.review.tests",
-          "speckit.review.errors",
-          "speckit.review.types",
-          "speckit.review.simplify"
-        ],
-        "copilot": [
-          "speckit.review.run",
-          "speckit.review.code",
-          "speckit.review.comments",
-          "speckit.review.tests",
-          "speckit.review.errors",
-          "speckit.review.types",
-          "speckit.review.simplify"
-        ],
-        "gemini": [
-          "speckit.review.run",
-          "speckit.review.code",
-          "speckit.review.comments",
-          "speckit.review.tests",
-          "speckit.review.errors",
-          "speckit.review.types",
-          "speckit.review.simplify"
-        ]
-      },
-      "registered_skills": [
-        "speckit-review-run",
-        "speckit-review-code",
-        "speckit-review-comments",
-        "speckit-review-tests",
-        "speckit-review-errors",
-        "speckit-review-types",
-        "speckit-review-simplify"
-      ],
-      "installed_at": "2026-04-16T02:06:40.868441+00:00"
-    },
     "superb": {
       "version": "1.0.0",
       "source": "local",
@@ -463,10 +399,46 @@
       ],
       "installed_at": "2026-04-16T02:06:42.993265+00:00"
     },
-    "workflows": {
-      "version": "3.4.0",
+    "optimize": {
+      "version": "1.0.0",
       "source": "local",
-      "manifest_hash": "sha256:ee0d2a7985f4cf9e8bcf47c8911d32abccf48279d163fbda570a2ee65a20c6ab",
+      "manifest_hash": "sha256:011bc93e18ca788185271fc493d658d66c2544b99c131fcd293b136442af30f1",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "claude": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "codex": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "copilot": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "gemini": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-16T14:15:53.185875+00:00"
+    },
+    "workflows": {
+      "version": "3.4.1",
+      "source": "local",
+      "manifest_hash": "sha256:1cc3968653596f79da052120cab67240e588d2e75aa9a81534291d23dea4eeb0",
       "enabled": true,
       "priority": 10,
       "registered_commands": {
@@ -682,7 +654,63 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-04-16T02:19:30.866350+00:00"
+      "installed_at": "2026-04-16T22:47:31.938386+00:00"
+    },
+    "review": {
+      "version": "1.0.1",
+      "source": "local",
+      "manifest_hash": "sha256:3f9eedfc8079662edfb8d1f9c07a161be4e66111ea57621061f1658e91710d83",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "amp": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "claude": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "codex": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "copilot": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
+        "gemini": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-16T22:47:33.904545+00:00"
     }
   }
 }

@@ -1,0 +1,2187 @@
+# @lspeasy/docs
+
+> Documentation site for lspeasy
+
+## @lspeasy/client
+
+### CapabilityGuard
+
+Validates outgoing client requests and notifications against the server's
+declared capabilities.
+
+```ts
+constructor(capabilities: Partial<ServerCapabilities>, logger: Logger, strict: boolean): CapabilityGuard
+```
+
+**Methods:**
+- `canSendRequest(method: string): boolean` — 
+- `canSendNotification(method: string): boolean` — 
+- `getServerCapabilities(): Partial<ServerCapabilities>` — 
+
+### ClientCapabilityGuard
+
+Validates that server-to-client handler registrations are backed by
+client capabilities declared in the `initialize` request.
+
+```ts
+constructor(capabilities: Partial<ClientCapabilities>, logger: Logger, strict: boolean): ClientCapabilityGuard
+```
+
+**Methods:**
+- `canRegisterHandler(method: string): boolean` — 
+- `getClientCapabilities(): Partial<ClientCapabilities>` — 
+
+### ConnectionHealthTracker
+
+Tracks connection state transitions and message activity timestamps.
+
+```ts
+constructor(): ConnectionHealthTracker
+```
+
+**Methods:**
+- `getHealth(): ConnectionHealth` — Returns a defensive copy of the current health snapshot.
+- `setState(next: ConnectionState, reason?: string): void` — Updates connection state and emits state/health change events.
+- `markMessageSent(): void` — Records outbound message activity.
+- `markMessageReceived(): void` — Records inbound message activity.
+- `setHeartbeat(status: HeartbeatStatus): void` — Updates the heartbeat subsection of the current health snapshot.
+- `onStateChange(handler: (event: StateChangeEvent) => void): () => void` — Subscribes to connection state transitions.
+- `onHealthChange(handler: (health: ConnectionHealth) => void): () => void` — Subscribes to health snapshot updates.
+- `on<K>(event: K, listener: Listener<HealthEventMap, K>): Disposable` — Register a listener and receive a disposable to unregister it.
+- `once<K>(event: K, listener: Listener<HealthEventMap, K>): Disposable` — Register a one-time listener that automatically unregisters after first emission.
+- `emit<K>(event: K, args: HealthEventMap[K]): void` — Emit an event to all registered listeners in registration order.
+- `dispose(): void` — Dispose all listeners and prevent further registrations.
+
+### HeartbeatMonitor
+
+Runs interval-based heartbeat checks for active transports.
+
+```ts
+constructor(options: HeartbeatMonitorOptions): HeartbeatMonitor
+```
+
+**Methods:**
+- `start(): void` — Starts heartbeat interval checks.
+- `stop(): void` — Stops heartbeat interval checks.
+- `markPong(): void` — Marks a successful heartbeat response.
+- `getStatus(): HeartbeatStatus` — Returns the latest heartbeat status snapshot.
+
+### NotificationWaiter
+
+Tracks a single wait-for-notification operation and its timeout lifecycle.
+
+```ts
+constructor<TParams>(method: string, options: NotificationWaitOptions<TParams>, resolve: (params: TParams) => void, reject: (error: Error) => void, onCleanup: () => void): NotificationWaiter<TParams>
+```
+
+**Methods:**
+- `start(): void` — Starts timeout tracking for the wait operation.
+- `matches(method: string, params: TParams): boolean` — Returns whether an incoming notification satisfies this waiter.
+- `resolve(params: TParams): void` — Resolves the waiter and performs cleanup.
+- `reject(error: Error): void` — Rejects the waiter and performs cleanup.
+- `cleanup(): void` — Clears timeout state and detaches waiter resources.
+
+### LSPClient
+
+@lspeasy/client - LSP Client for connecting to language servers
+
+```ts
+type LSPClient = BaseLSPClient<ClientCaps> & Client<ClientCaps, ServerCapabilities>
+```
+
+### ClientOptions
+
+Configuration for an `LSPClient` instance.
+
+### InitializeResult
+
+Initialize result from server
+
+### CancellableRequest
+
+Return value of `LSPClient.sendCancellableRequest`.
+
+### NotebookDocumentNamespace
+
+### PartialRequestOptions
+
+Options for `LSPClient.sendRequestWithPartialResults`.
+
+### PartialRequestResult
+
+Result returned by partial-result enabled requests.
+
+```ts
+type PartialRequestResult = PartialRequestOutcome<TPartial, TResult>
+```
+
+### ConnectionHealth
+
+Aggregated connection health snapshot returned by
+`LSPClient.getConnectionHealth()`.
+
+### HeartbeatConfig
+
+Configuration for optional heartbeat monitoring.
+
+### HeartbeatStatus
+
+Snapshot of the current heartbeat monitoring status.
+
+### StateChangeEvent
+
+Payload emitted when the connection state changes.
+Subscribe via `LSPClient.onConnectionStateChange()`.
+
+### NotificationWaitOptions
+
+Options for `NotificationWaiter` and `LSPClient.waitForNotification`.
+
+### Transport
+
+Pluggable communication layer for JSON-RPC message exchange.
+
+### Logger
+
+Structured logging interface used throughout lspeasy.
+
+### Disposable
+
+Represents a resource that can be explicitly released.
+
+### ConnectionState
+
+Lifecycle state of an `LSPClient` connection.
+
+- `Connecting` = `"connecting"` — 
+- `Connected` = `"connected"` — 
+- `Disconnecting` = `"disconnecting"` — 
+- `Disconnected` = `"disconnected"` — 
+
+### LogLevel
+
+Numeric severity levels for filtering log output.
+
+- `Error` = `0` — 
+- `Warn` = `1` — 
+- `Info` = `2` — 
+- `Debug` = `3` — 
+- `Trace` = `4` — 
+
+### LSPClient
+
+@lspeasy/client - LSP Client for connecting to language servers
+
+```ts
+let LSPClient: (options?: ClientOptions<ClientCaps>) => LSPClient<ClientCaps>
+```
+
+---
+
+## @lspeasy/core
+
+### getCapabilityForRequestMethod
+
+Get the capability key for a given method at runtime
+
+```ts
+getCapabilityForRequestMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
+```
+
+**Parameters:**
+- `method: M` — 
+- `_direction: D` — 
+
+**Returns:** `InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
+
+### getClientCapabilityForRequestMethod
+
+Get the client capability key for a given request method at runtime
+
+```ts
+getClientCapabilityForRequestMethod<M, D>(method: M, _direction: D): "alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>
+```
+
+**Parameters:**
+- `method: M` — 
+- `_direction: D` — 
+
+**Returns:** `"alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>`
+
+### getCapabilityForNotificationMethod
+
+Get the capability key for a given notification method at runtime
+
+```ts
+getCapabilityForNotificationMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
+```
+
+**Parameters:**
+- `method: M` — 
+- `_direction: D` — 
+
+**Returns:** `InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
+
+### getClientCapabilityForNotificationMethod
+
+Get the client capability key for a given notification method at runtime
+
+```ts
+getClientCapabilityForNotificationMethod<M, D>(method: M, _direction: D): "alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>
+```
+
+**Parameters:**
+- `method: M` — 
+- `_direction: D` — 
+
+**Returns:** `"alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>`
+
+### getDefinitionForRequest
+
+```ts
+getDefinitionForRequest<N, M>(namespace: N, methodKey: M): { CallHierarchy: { IncomingCalls: { Method: "callHierarchy/incomingCalls"; Direction: "clientToServer" }; OutgoingCalls: { Method: "callHierarchy/outgoingCalls"; Direction: "clientToServer" } }; Client: { Registration: { Method: "client/registerCapability"; Direction: "serverToClient" }; Unregistration: { Method: "client/unregisterCapability"; Direction: "serverToClient" } }; CodeAction: { Resolve: { Method: "codeAction/resolve"; Direction: "clientToServer"; ServerCapability: "codeActionProvider.resolveProvider"; ClientCapability: "textDocument.codeAction.resolveSupport" } }; CodeLens: { Resolve: { Method: "codeLens/resolve"; Direction: "clientToServer"; ServerCapability: "codeLensProvider.resolveProvider"; ClientCapability: "textDocument.codeLens.resolveSupport" } }; CompletionItem: { CompletionResolve: { Method: "completionItem/resolve"; Direction: "clientToServer"; ServerCapability: "completionProvider.resolveProvider"; ClientCapability: "textDocument.completion.completionItem.resolveSupport" } }; DocumentLink: { Resolve: { Method: "documentLink/resolve"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider.resolveProvider"; ClientCapability: "textDocument.documentLink" } }; InlayHint: { Resolve: { Method: "inlayHint/resolve"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider.resolveProvider"; ClientCapability: "textDocument.inlayHint.resolveSupport" } }; Lifecycle: { Initialize: { Method: "initialize"; Direction: "clientToServer" }; Shutdown: { Method: "shutdown"; Direction: "clientToServer" } }; TextDocument: { Implementation: { Method: "textDocument/implementation"; Direction: "clientToServer"; ServerCapability: "implementationProvider"; ClientCapability: "textDocument.implementation" }; TypeDefinition: { Method: "textDocument/typeDefinition"; Direction: "clientToServer"; ServerCapability: "typeDefinitionProvider"; ClientCapability: "textDocument.typeDefinition" }; DocumentColor: { Method: "textDocument/documentColor"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; ColorPresentation: { Method: "textDocument/colorPresentation"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; FoldingRange: { Method: "textDocument/foldingRange"; Direction: "clientToServer"; ServerCapability: "foldingRangeProvider"; ClientCapability: "textDocument.foldingRange" }; Declaration: { Method: "textDocument/declaration"; Direction: "clientToServer"; ServerCapability: "declarationProvider"; ClientCapability: "textDocument.declaration" }; SelectionRange: { Method: "textDocument/selectionRange"; Direction: "clientToServer"; ServerCapability: "selectionRangeProvider"; ClientCapability: "textDocument.selectionRange" }; CallHierarchyPrepare: { Method: "textDocument/prepareCallHierarchy"; Direction: "clientToServer"; ServerCapability: "callHierarchyProvider"; ClientCapability: "textDocument.callHierarchy" }; SemanticTokens: { Method: "textDocument/semanticTokens/full"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider"; ClientCapability: "textDocument.semanticTokens"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensDelta: { Method: "textDocument/semanticTokens/full/delta"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.full.delta"; ClientCapability: "textDocument.semanticTokens.requests.full.delta"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensRange: { Method: "textDocument/semanticTokens/range"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.range"; ClientCapability: "textDocument.semanticTokens.requests.range"; RegistrationMethod: "textDocument/semanticTokens" }; LinkedEditingRange: { Method: "textDocument/linkedEditingRange"; Direction: "clientToServer"; ServerCapability: "linkedEditingRangeProvider"; ClientCapability: "textDocument.linkedEditingRange" }; Moniker: { Method: "textDocument/moniker"; Direction: "clientToServer"; ServerCapability: "monikerProvider"; ClientCapability: "textDocument.moniker" }; TypeHierarchyPrepare: { Method: "textDocument/prepareTypeHierarchy"; Direction: "clientToServer"; ServerCapability: "typeHierarchyProvider"; ClientCapability: "textDocument.typeHierarchy" }; InlineValue: { Method: "textDocument/inlineValue"; Direction: "clientToServer"; ServerCapability: "inlineValueProvider"; ClientCapability: "textDocument.inlineValue" }; InlayHint: { Method: "textDocument/inlayHint"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider"; ClientCapability: "textDocument.inlayHint" }; DocumentDiagnostic: { Method: "textDocument/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider"; ClientCapability: "textDocument.diagnostic" }; InlineCompletion: { Method: "textDocument/inlineCompletion"; Direction: "clientToServer"; ServerCapability: "inlineCompletionProvider"; ClientCapability: "textDocument.inlineCompletion" }; WillSaveTextDocumentWaitUntil: { Method: "textDocument/willSaveWaitUntil"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSaveWaitUntil"; ClientCapability: "textDocument.synchronization.willSaveWaitUntil" }; Completion: { Method: "textDocument/completion"; Direction: "clientToServer"; ServerCapability: "completionProvider"; ClientCapability: "textDocument.completion" }; Hover: { Method: "textDocument/hover"; Direction: "clientToServer"; ServerCapability: "hoverProvider"; ClientCapability: "textDocument.hover" }; SignatureHelp: { Method: "textDocument/signatureHelp"; Direction: "clientToServer"; ServerCapability: "signatureHelpProvider"; ClientCapability: "textDocument.signatureHelp" }; Definition: { Method: "textDocument/definition"; Direction: "clientToServer"; ServerCapability: "definitionProvider"; ClientCapability: "textDocument.definition" }; References: { Method: "textDocument/references"; Direction: "clientToServer"; ServerCapability: "referencesProvider"; ClientCapability: "textDocument.references" }; DocumentHighlight: { Method: "textDocument/documentHighlight"; Direction: "clientToServer"; ServerCapability: "documentHighlightProvider"; ClientCapability: "textDocument.documentHighlight" }; DocumentSymbol: { Method: "textDocument/documentSymbol"; Direction: "clientToServer"; ServerCapability: "documentSymbolProvider"; ClientCapability: "textDocument.documentSymbol" }; CodeAction: { Method: "textDocument/codeAction"; Direction: "clientToServer"; ServerCapability: "codeActionProvider"; ClientCapability: "textDocument.codeAction" }; CodeLens: { Method: "textDocument/codeLens"; Direction: "clientToServer"; ServerCapability: "codeLensProvider"; ClientCapability: "textDocument.codeLens" }; DocumentLink: { Method: "textDocument/documentLink"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider"; ClientCapability: "textDocument.documentLink" }; DocumentFormatting: { Method: "textDocument/formatting"; Direction: "clientToServer"; ServerCapability: "documentFormattingProvider"; ClientCapability: "textDocument.formatting" }; DocumentRangeFormatting: { Method: "textDocument/rangeFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider"; ClientCapability: "textDocument.rangeFormatting" }; DocumentRangesFormatting: { Method: "textDocument/rangesFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider.rangesSupport"; ClientCapability: "textDocument.rangeFormatting.rangesSupport" }; DocumentOnTypeFormatting: { Method: "textDocument/onTypeFormatting"; Direction: "clientToServer"; ServerCapability: "documentOnTypeFormattingProvider"; ClientCapability: "textDocument.onTypeFormatting" }; Rename: { Method: "textDocument/rename"; Direction: "clientToServer"; ServerCapability: "renameProvider"; ClientCapability: "textDocument.rename" }; PrepareRename: { Method: "textDocument/prepareRename"; Direction: "clientToServer"; ServerCapability: "renameProvider.prepareProvider"; ClientCapability: "textDocument.rename.prepareSupport" } }; TypeHierarchy: { Supertypes: { Method: "typeHierarchy/supertypes"; Direction: "clientToServer" }; Subtypes: { Method: "typeHierarchy/subtypes"; Direction: "clientToServer" } }; Window: { WorkDoneProgressCreate: { Method: "window/workDoneProgress/create"; Direction: "serverToClient"; ClientCapability: "window.workDoneProgress" }; ShowDocument: { Method: "window/showDocument"; Direction: "serverToClient"; ClientCapability: "window.showDocument.support" }; ShowMessage: { Method: "window/showMessageRequest"; Direction: "serverToClient"; ClientCapability: "window.showMessage" } }; Workspace: { WillCreateFiles: { Method: "workspace/willCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willCreate"; ClientCapability: "workspace.fileOperations.willCreate" }; WillRenameFiles: { Method: "workspace/willRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willRename"; ClientCapability: "workspace.fileOperations.willRename" }; WillDeleteFiles: { Method: "workspace/willDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willDelete"; ClientCapability: "workspace.fileOperations.willDelete" }; Diagnostic: { Method: "workspace/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider.workspaceDiagnostics"; ClientCapability: "workspace.diagnostics" }; TextDocumentContent: { Method: "workspace/textDocumentContent"; Direction: "clientToServer"; ServerCapability: "workspace.textDocumentContent"; ClientCapability: "workspace.textDocumentContent" }; Symbol: { Method: "workspace/symbol"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider"; ClientCapability: "workspace.symbol" }; ExecuteCommand: { Method: "workspace/executeCommand"; Direction: "clientToServer"; ServerCapability: "executeCommandProvider"; ClientCapability: "workspace.executeCommand" }; Folders: { Method: "workspace/workspaceFolders"; Direction: "serverToClient"; ServerCapability: "workspace.workspaceFolders"; ClientCapability: "workspace.workspaceFolders" }; Configuration: { Method: "workspace/configuration"; Direction: "serverToClient"; ClientCapability: "workspace.configuration" }; FoldingRangeRefresh: { Method: "workspace/foldingRange/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.foldingRange.refreshSupport" }; SemanticTokensRefresh: { Method: "workspace/semanticTokens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.semanticTokens.refreshSupport" }; InlineValueRefresh: { Method: "workspace/inlineValue/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlineValue.refreshSupport" }; InlayHintRefresh: { Method: "workspace/inlayHint/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlayHint.refreshSupport" }; DiagnosticRefresh: { Method: "workspace/diagnostic/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.diagnostics.refreshSupport" }; TextDocumentContentRefresh: { Method: "workspace/textDocumentContent/refresh"; Direction: "serverToClient" }; CodeLensRefresh: { Method: "workspace/codeLens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.codeLens" }; ApplyWorkspaceEdit: { Method: "workspace/applyEdit"; Direction: "serverToClient"; ClientCapability: "workspace.applyEdit" } }; WorkspaceSymbol: { Resolve: { Method: "workspaceSymbol/resolve"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider.resolveProvider"; ClientCapability: "workspace.symbol.resolveSupport" } } }[N][M]
+```
+
+**Parameters:**
+- `namespace: N` — 
+- `methodKey: M` — 
+
+**Returns:** `{ CallHierarchy: { IncomingCalls: { Method: "callHierarchy/incomingCalls"; Direction: "clientToServer" }; OutgoingCalls: { Method: "callHierarchy/outgoingCalls"; Direction: "clientToServer" } }; Client: { Registration: { Method: "client/registerCapability"; Direction: "serverToClient" }; Unregistration: { Method: "client/unregisterCapability"; Direction: "serverToClient" } }; CodeAction: { Resolve: { Method: "codeAction/resolve"; Direction: "clientToServer"; ServerCapability: "codeActionProvider.resolveProvider"; ClientCapability: "textDocument.codeAction.resolveSupport" } }; CodeLens: { Resolve: { Method: "codeLens/resolve"; Direction: "clientToServer"; ServerCapability: "codeLensProvider.resolveProvider"; ClientCapability: "textDocument.codeLens.resolveSupport" } }; CompletionItem: { CompletionResolve: { Method: "completionItem/resolve"; Direction: "clientToServer"; ServerCapability: "completionProvider.resolveProvider"; ClientCapability: "textDocument.completion.completionItem.resolveSupport" } }; DocumentLink: { Resolve: { Method: "documentLink/resolve"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider.resolveProvider"; ClientCapability: "textDocument.documentLink" } }; InlayHint: { Resolve: { Method: "inlayHint/resolve"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider.resolveProvider"; ClientCapability: "textDocument.inlayHint.resolveSupport" } }; Lifecycle: { Initialize: { Method: "initialize"; Direction: "clientToServer" }; Shutdown: { Method: "shutdown"; Direction: "clientToServer" } }; TextDocument: { Implementation: { Method: "textDocument/implementation"; Direction: "clientToServer"; ServerCapability: "implementationProvider"; ClientCapability: "textDocument.implementation" }; TypeDefinition: { Method: "textDocument/typeDefinition"; Direction: "clientToServer"; ServerCapability: "typeDefinitionProvider"; ClientCapability: "textDocument.typeDefinition" }; DocumentColor: { Method: "textDocument/documentColor"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; ColorPresentation: { Method: "textDocument/colorPresentation"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; FoldingRange: { Method: "textDocument/foldingRange"; Direction: "clientToServer"; ServerCapability: "foldingRangeProvider"; ClientCapability: "textDocument.foldingRange" }; Declaration: { Method: "textDocument/declaration"; Direction: "clientToServer"; ServerCapability: "declarationProvider"; ClientCapability: "textDocument.declaration" }; SelectionRange: { Method: "textDocument/selectionRange"; Direction: "clientToServer"; ServerCapability: "selectionRangeProvider"; ClientCapability: "textDocument.selectionRange" }; CallHierarchyPrepare: { Method: "textDocument/prepareCallHierarchy"; Direction: "clientToServer"; ServerCapability: "callHierarchyProvider"; ClientCapability: "textDocument.callHierarchy" }; SemanticTokens: { Method: "textDocument/semanticTokens/full"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider"; ClientCapability: "textDocument.semanticTokens"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensDelta: { Method: "textDocument/semanticTokens/full/delta"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.full.delta"; ClientCapability: "textDocument.semanticTokens.requests.full.delta"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensRange: { Method: "textDocument/semanticTokens/range"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.range"; ClientCapability: "textDocument.semanticTokens.requests.range"; RegistrationMethod: "textDocument/semanticTokens" }; LinkedEditingRange: { Method: "textDocument/linkedEditingRange"; Direction: "clientToServer"; ServerCapability: "linkedEditingRangeProvider"; ClientCapability: "textDocument.linkedEditingRange" }; Moniker: { Method: "textDocument/moniker"; Direction: "clientToServer"; ServerCapability: "monikerProvider"; ClientCapability: "textDocument.moniker" }; TypeHierarchyPrepare: { Method: "textDocument/prepareTypeHierarchy"; Direction: "clientToServer"; ServerCapability: "typeHierarchyProvider"; ClientCapability: "textDocument.typeHierarchy" }; InlineValue: { Method: "textDocument/inlineValue"; Direction: "clientToServer"; ServerCapability: "inlineValueProvider"; ClientCapability: "textDocument.inlineValue" }; InlayHint: { Method: "textDocument/inlayHint"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider"; ClientCapability: "textDocument.inlayHint" }; DocumentDiagnostic: { Method: "textDocument/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider"; ClientCapability: "textDocument.diagnostic" }; InlineCompletion: { Method: "textDocument/inlineCompletion"; Direction: "clientToServer"; ServerCapability: "inlineCompletionProvider"; ClientCapability: "textDocument.inlineCompletion" }; WillSaveTextDocumentWaitUntil: { Method: "textDocument/willSaveWaitUntil"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSaveWaitUntil"; ClientCapability: "textDocument.synchronization.willSaveWaitUntil" }; Completion: { Method: "textDocument/completion"; Direction: "clientToServer"; ServerCapability: "completionProvider"; ClientCapability: "textDocument.completion" }; Hover: { Method: "textDocument/hover"; Direction: "clientToServer"; ServerCapability: "hoverProvider"; ClientCapability: "textDocument.hover" }; SignatureHelp: { Method: "textDocument/signatureHelp"; Direction: "clientToServer"; ServerCapability: "signatureHelpProvider"; ClientCapability: "textDocument.signatureHelp" }; Definition: { Method: "textDocument/definition"; Direction: "clientToServer"; ServerCapability: "definitionProvider"; ClientCapability: "textDocument.definition" }; References: { Method: "textDocument/references"; Direction: "clientToServer"; ServerCapability: "referencesProvider"; ClientCapability: "textDocument.references" }; DocumentHighlight: { Method: "textDocument/documentHighlight"; Direction: "clientToServer"; ServerCapability: "documentHighlightProvider"; ClientCapability: "textDocument.documentHighlight" }; DocumentSymbol: { Method: "textDocument/documentSymbol"; Direction: "clientToServer"; ServerCapability: "documentSymbolProvider"; ClientCapability: "textDocument.documentSymbol" }; CodeAction: { Method: "textDocument/codeAction"; Direction: "clientToServer"; ServerCapability: "codeActionProvider"; ClientCapability: "textDocument.codeAction" }; CodeLens: { Method: "textDocument/codeLens"; Direction: "clientToServer"; ServerCapability: "codeLensProvider"; ClientCapability: "textDocument.codeLens" }; DocumentLink: { Method: "textDocument/documentLink"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider"; ClientCapability: "textDocument.documentLink" }; DocumentFormatting: { Method: "textDocument/formatting"; Direction: "clientToServer"; ServerCapability: "documentFormattingProvider"; ClientCapability: "textDocument.formatting" }; DocumentRangeFormatting: { Method: "textDocument/rangeFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider"; ClientCapability: "textDocument.rangeFormatting" }; DocumentRangesFormatting: { Method: "textDocument/rangesFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider.rangesSupport"; ClientCapability: "textDocument.rangeFormatting.rangesSupport" }; DocumentOnTypeFormatting: { Method: "textDocument/onTypeFormatting"; Direction: "clientToServer"; ServerCapability: "documentOnTypeFormattingProvider"; ClientCapability: "textDocument.onTypeFormatting" }; Rename: { Method: "textDocument/rename"; Direction: "clientToServer"; ServerCapability: "renameProvider"; ClientCapability: "textDocument.rename" }; PrepareRename: { Method: "textDocument/prepareRename"; Direction: "clientToServer"; ServerCapability: "renameProvider.prepareProvider"; ClientCapability: "textDocument.rename.prepareSupport" } }; TypeHierarchy: { Supertypes: { Method: "typeHierarchy/supertypes"; Direction: "clientToServer" }; Subtypes: { Method: "typeHierarchy/subtypes"; Direction: "clientToServer" } }; Window: { WorkDoneProgressCreate: { Method: "window/workDoneProgress/create"; Direction: "serverToClient"; ClientCapability: "window.workDoneProgress" }; ShowDocument: { Method: "window/showDocument"; Direction: "serverToClient"; ClientCapability: "window.showDocument.support" }; ShowMessage: { Method: "window/showMessageRequest"; Direction: "serverToClient"; ClientCapability: "window.showMessage" } }; Workspace: { WillCreateFiles: { Method: "workspace/willCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willCreate"; ClientCapability: "workspace.fileOperations.willCreate" }; WillRenameFiles: { Method: "workspace/willRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willRename"; ClientCapability: "workspace.fileOperations.willRename" }; WillDeleteFiles: { Method: "workspace/willDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willDelete"; ClientCapability: "workspace.fileOperations.willDelete" }; Diagnostic: { Method: "workspace/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider.workspaceDiagnostics"; ClientCapability: "workspace.diagnostics" }; TextDocumentContent: { Method: "workspace/textDocumentContent"; Direction: "clientToServer"; ServerCapability: "workspace.textDocumentContent"; ClientCapability: "workspace.textDocumentContent" }; Symbol: { Method: "workspace/symbol"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider"; ClientCapability: "workspace.symbol" }; ExecuteCommand: { Method: "workspace/executeCommand"; Direction: "clientToServer"; ServerCapability: "executeCommandProvider"; ClientCapability: "workspace.executeCommand" }; Folders: { Method: "workspace/workspaceFolders"; Direction: "serverToClient"; ServerCapability: "workspace.workspaceFolders"; ClientCapability: "workspace.workspaceFolders" }; Configuration: { Method: "workspace/configuration"; Direction: "serverToClient"; ClientCapability: "workspace.configuration" }; FoldingRangeRefresh: { Method: "workspace/foldingRange/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.foldingRange.refreshSupport" }; SemanticTokensRefresh: { Method: "workspace/semanticTokens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.semanticTokens.refreshSupport" }; InlineValueRefresh: { Method: "workspace/inlineValue/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlineValue.refreshSupport" }; InlayHintRefresh: { Method: "workspace/inlayHint/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlayHint.refreshSupport" }; DiagnosticRefresh: { Method: "workspace/diagnostic/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.diagnostics.refreshSupport" }; TextDocumentContentRefresh: { Method: "workspace/textDocumentContent/refresh"; Direction: "serverToClient" }; CodeLensRefresh: { Method: "workspace/codeLens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.codeLens" }; ApplyWorkspaceEdit: { Method: "workspace/applyEdit"; Direction: "serverToClient"; ClientCapability: "workspace.applyEdit" } }; WorkspaceSymbol: { Resolve: { Method: "workspaceSymbol/resolve"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider.resolveProvider"; ClientCapability: "workspace.symbol.resolveSupport" } } }[N][M]`
+
+### getDefinitionForNotification
+
+```ts
+getDefinitionForNotification<N, M>(namespace: N, methodKey: M): { General: { Cancel: { Method: "$/cancelRequest"; Direction: "both" }; Progress: { Method: "$/progress"; Direction: "both" }; SetTrace: { Method: "$/setTrace"; Direction: "clientToServer" }; LogTrace: { Method: "$/logTrace"; Direction: "serverToClient" } }; Lifecycle: { Initialized: { Method: "initialized"; Direction: "clientToServer" }; Exit: { Method: "exit"; Direction: "clientToServer" } }; NotebookDocument: { DidOpenNotebookDocument: { Method: "notebookDocument/didOpen"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidChangeNotebookDocument: { Method: "notebookDocument/didChange"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidSaveNotebookDocument: { Method: "notebookDocument/didSave"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidCloseNotebookDocument: { Method: "notebookDocument/didClose"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" } }; Telemetry: { Event: { Method: "telemetry/event"; Direction: "serverToClient" } }; TextDocument: { DidOpenTextDocument: { Method: "textDocument/didOpen"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidChangeTextDocument: { Method: "textDocument/didChange"; Direction: "clientToServer"; ServerCapability: "textDocumentSync"; ClientCapability: "textDocument.synchronization" }; DidCloseTextDocument: { Method: "textDocument/didClose"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidSaveTextDocument: { Method: "textDocument/didSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.save"; ClientCapability: "textDocument.synchronization.didSave" }; WillSaveTextDocument: { Method: "textDocument/willSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSave"; ClientCapability: "textDocument.synchronization.willSave" }; PublishDiagnostics: { Method: "textDocument/publishDiagnostics"; Direction: "serverToClient"; ClientCapability: "textDocument.publishDiagnostics" } }; Window: { WorkDoneProgressCancel: { Method: "window/workDoneProgress/cancel"; Direction: "clientToServer" }; ShowMessage: { Method: "window/showMessage"; Direction: "serverToClient"; ClientCapability: "window.showMessage" }; LogMessage: { Method: "window/logMessage"; Direction: "serverToClient" } }; Workspace: { DidChangeWorkspaceFolders: { Method: "workspace/didChangeWorkspaceFolders"; Direction: "clientToServer"; ServerCapability: "workspace.workspaceFolders.changeNotifications" }; DidCreateFiles: { Method: "workspace/didCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didCreate"; ClientCapability: "workspace.fileOperations.didCreate" }; DidRenameFiles: { Method: "workspace/didRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didRename"; ClientCapability: "workspace.fileOperations.didRename" }; DidDeleteFiles: { Method: "workspace/didDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didDelete"; ClientCapability: "workspace.fileOperations.didDelete" }; DidChangeConfiguration: { Method: "workspace/didChangeConfiguration"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeConfiguration" }; DidChangeWatchedFiles: { Method: "workspace/didChangeWatchedFiles"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeWatchedFiles" } } }[N][M]
+```
+
+**Parameters:**
+- `namespace: N` — 
+- `methodKey: M` — 
+
+**Returns:** `{ General: { Cancel: { Method: "$/cancelRequest"; Direction: "both" }; Progress: { Method: "$/progress"; Direction: "both" }; SetTrace: { Method: "$/setTrace"; Direction: "clientToServer" }; LogTrace: { Method: "$/logTrace"; Direction: "serverToClient" } }; Lifecycle: { Initialized: { Method: "initialized"; Direction: "clientToServer" }; Exit: { Method: "exit"; Direction: "clientToServer" } }; NotebookDocument: { DidOpenNotebookDocument: { Method: "notebookDocument/didOpen"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidChangeNotebookDocument: { Method: "notebookDocument/didChange"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidSaveNotebookDocument: { Method: "notebookDocument/didSave"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidCloseNotebookDocument: { Method: "notebookDocument/didClose"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" } }; Telemetry: { Event: { Method: "telemetry/event"; Direction: "serverToClient" } }; TextDocument: { DidOpenTextDocument: { Method: "textDocument/didOpen"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidChangeTextDocument: { Method: "textDocument/didChange"; Direction: "clientToServer"; ServerCapability: "textDocumentSync"; ClientCapability: "textDocument.synchronization" }; DidCloseTextDocument: { Method: "textDocument/didClose"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidSaveTextDocument: { Method: "textDocument/didSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.save"; ClientCapability: "textDocument.synchronization.didSave" }; WillSaveTextDocument: { Method: "textDocument/willSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSave"; ClientCapability: "textDocument.synchronization.willSave" }; PublishDiagnostics: { Method: "textDocument/publishDiagnostics"; Direction: "serverToClient"; ClientCapability: "textDocument.publishDiagnostics" } }; Window: { WorkDoneProgressCancel: { Method: "window/workDoneProgress/cancel"; Direction: "clientToServer" }; ShowMessage: { Method: "window/showMessage"; Direction: "serverToClient"; ClientCapability: "window.showMessage" }; LogMessage: { Method: "window/logMessage"; Direction: "serverToClient" } }; Workspace: { DidChangeWorkspaceFolders: { Method: "workspace/didChangeWorkspaceFolders"; Direction: "clientToServer"; ServerCapability: "workspace.workspaceFolders.changeNotifications" }; DidCreateFiles: { Method: "workspace/didCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didCreate"; ClientCapability: "workspace.fileOperations.didCreate" }; DidRenameFiles: { Method: "workspace/didRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didRename"; ClientCapability: "workspace.fileOperations.didRename" }; DidDeleteFiles: { Method: "workspace/didDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didDelete"; ClientCapability: "workspace.fileOperations.didDelete" }; DidChangeConfiguration: { Method: "workspace/didChangeConfiguration"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeConfiguration" }; DidChangeWatchedFiles: { Method: "workspace/didChangeWatchedFiles"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeWatchedFiles" } } }[N][M]`
+
+### serverSupportsRequest
+
+Check if a method is supported by the given server capabilities
+
+```ts
+serverSupportsRequest<M>(method: M, capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "callHierarchyProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForRequest<M>]>[KeyType] }
+```
+
+**Parameters:**
+- `method: M` — 
+- `capabilities: ServerCapabilities` — 
+
+**Returns:** `capabilities is ServerCapabilities<any> & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "callHierarchyProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForRequest<M>]>[KeyType] }`
+
+### serverSupportsNotification
+
+```ts
+serverSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForNotification<M>]>[KeyType] }
+```
+
+**Parameters:**
+- `method: M` — 
+- `capabilities: T` — 
+
+**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForNotification<M>]>[KeyType] }`
+
+### clientSupportsRequest
+
+Check if a method is supported by the given client capabilities
+
+```ts
+clientSupportsRequest<M, T>(method: M, capabilities: T): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.workspaceFolders" | "workspace.configuration" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>[KeyType] }
+```
+
+**Parameters:**
+- `method: M` — 
+- `capabilities: T` — 
+
+**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.workspaceFolders" | "workspace.configuration" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>[KeyType] }`
+
+### clientSupportsNotification
+
+```ts
+clientSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "window.showMessage" | "textDocument.publishDiagnostics"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForNotification<M>]>[KeyType] }
+```
+
+**Parameters:**
+- `method: M` — 
+- `capabilities: T` — 
+
+**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "window.showMessage" | "textDocument.publishDiagnostics"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForNotification<M>]>[KeyType] }`
+
+### hasServerCapability
+
+Check if a server capability is enabled
+
+```ts
+hasServerCapability<K, T>(capabilities: T, capability: K): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[K]>[KeyType] }
+```
+
+**Parameters:**
+- `capabilities: T` — 
+- `capability: K` — 
+
+**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[K]>[KeyType] }`
+
+### hasClientCapability
+
+Check if a client capability is enabled
+
+```ts
+hasClientCapability<K, T>(capabilities: T, capability: K): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>[KeyType] }
+```
+
+**Parameters:**
+- `capabilities: T` — 
+- `capability: K` — 
+
+**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>[KeyType] }`
+
+### supportsHover
+
+Helper to check if hover is supported
+
+```ts
+supportsHover(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }
+```
+
+**Parameters:**
+- `capabilities: ServerCapabilities` — 
+
+**Returns:** `capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }`
+
+### supportsCompletion
+
+Helper to check if completion is supported
+
+```ts
+supportsCompletion(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }
+```
+
+**Parameters:**
+- `capabilities: ServerCapabilities` — 
+
+**Returns:** `capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }`
+
+### supportsDefinition
+
+Helper to check if definition is supported
+
+```ts
+supportsDefinition(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }
+```
+
+**Parameters:**
+- `capabilities: ServerCapabilities` — 
+
+**Returns:** `capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }`
+
+### supportsReferences
+
+Helper to check if references are supported
+
+```ts
+supportsReferences(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { referencesProvider: NonNullable<boolean | ReferenceOptions | undefined> }
+```
+
+**Parameters:**
+- `capabilities: ServerCapabilities` — 
+
+**Returns:** `capabilities is ServerCapabilities<any> & { referencesProvider: NonNullable<boolean | ReferenceOptions | undefined> }`
+
+### supportsDocumentSymbol
+
+Helper to check if document symbols are supported
+
+```ts
+supportsDocumentSymbol(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { documentSymbolProvider: NonNullable<boolean | DocumentSymbolOptions | undefined> }
+```
+
+**Parameters:**
+- `capabilities: ServerCapabilities` — 
+
+**Returns:** `capabilities is ServerCapabilities<any> & { documentSymbolProvider: NonNullable<boolean | DocumentSymbolOptions | undefined> }`
+
+### supportsWorkspaceFolders
+
+Helper to check if workspace folders are supported
+
+```ts
+supportsWorkspaceFolders(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { workspace: { workspaceFolders: { supported: true } } }
+```
+
+**Parameters:**
+- `capabilities: ServerCapabilities` — 
+
+**Returns:** `capabilities is ServerCapabilities<any> & { workspace: { workspaceFolders: { supported: true } } }`
+
+### supportsNotebookDocumentSync
+
+```ts
+supportsNotebookDocumentSync(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { notebookDocumentSync: NonNullable<NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | undefined> }
+```
+
+**Parameters:**
+- `capabilities: ServerCapabilities` — 
+
+**Returns:** `capabilities is ServerCapabilities<any> & { notebookDocumentSync: NonNullable<NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | undefined> }`
+
+### supportsFileWatching
+
+Helper to check if file watching is supported
+
+```ts
+supportsFileWatching(capabilities: ClientCapabilities): capabilities is ClientCapabilities & { workspace: { didChangeWatchedFiles: { dynamicRegistration: true } } }
+```
+
+**Parameters:**
+- `capabilities: ClientCapabilities` — 
+
+**Returns:** `capabilities is ClientCapabilities & { workspace: { didChangeWatchedFiles: { dynamicRegistration: true } } }`
+
+### supportsWorkDoneProgress
+
+Helper to check if work done progress is supported
+
+```ts
+supportsWorkDoneProgress(capabilities: ClientCapabilities): capabilities is ClientCapabilities & { window: { workDoneProgress: true } }
+```
+
+**Parameters:**
+- `capabilities: ClientCapabilities` — 
+
+**Returns:** `capabilities is ClientCapabilities & { window: { workDoneProgress: true } }`
+
+### isRequestMessage
+
+Returns `true` when `message` is a JSON-RPC request (has `id` + `method`).
+
+```ts
+isRequestMessage(message: Message): message is RequestMessage
+```
+
+**Parameters:**
+- `message: Message` — 
+
+**Returns:** `message is RequestMessage`
+
+### isNotificationMessage
+
+Returns `true` when `message` is a JSON-RPC notification (has `method`,
+no `id`).
+
+```ts
+isNotificationMessage(message: Message): message is NotificationMessage
+```
+
+**Parameters:**
+- `message: Message` — 
+
+**Returns:** `message is NotificationMessage`
+
+### isResponseMessage
+
+Returns `true` when `message` is a JSON-RPC response (has `id`, no `method`).
+
+```ts
+isResponseMessage(message: Message): message is ResponseMessage
+```
+
+**Parameters:**
+- `message: Message` — 
+
+**Returns:** `message is ResponseMessage`
+
+### isSuccessResponse
+
+Returns `true` when `response` carries a `result` (success case).
+
+```ts
+isSuccessResponse(message: ResponseMessage): message is SuccessResponseMessage
+```
+
+**Parameters:**
+- `message: ResponseMessage` — 
+
+**Returns:** `message is SuccessResponseMessage`
+
+### isErrorResponse
+
+Returns `true` when `response` carries an `error` (error case).
+
+```ts
+isErrorResponse(message: ResponseMessage): message is ErrorResponseMessage
+```
+
+**Parameters:**
+- `message: ResponseMessage` — 
+
+**Returns:** `message is ErrorResponseMessage`
+
+### parseMessage
+
+Parses a single framed JSON-RPC 2.0 message from a raw byte buffer.
+
+```ts
+parseMessage(buffer: Buffer): { message: Message; bytesRead: number } | null
+```
+
+**Parameters:**
+- `buffer: Buffer` — Raw byte buffer that may contain one or more framed messages.
+
+**Returns:** `{ message: Message; bytesRead: number } | null`
+
+### serializeMessage
+
+Serializes a JSON-RPC 2.0 message into a framed byte buffer with
+`Content-Length` and `Content-Type` headers.
+
+```ts
+serializeMessage(message: Message): Buffer
+```
+
+**Parameters:**
+- `message: Message` — The JSON-RPC message to serialize.
+
+**Returns:** `Buffer`
+
+### createWebSocketClient
+
+Creates a WebSocket client instance, preferring the native
+`globalThis.WebSocket` (Node ≥ 22.4 / modern browsers) and falling back
+to the optional `ws` peer dependency.
+
+```ts
+createWebSocketClient(url: string): WebSocketLike
+```
+
+**Parameters:**
+- `url: string` — The WebSocket server URL to connect to.
+
+**Returns:** `WebSocketLike`
+
+### composeMiddleware
+
+```ts
+composeMiddleware(middlewares: Middleware[]): Middleware
+```
+
+**Parameters:**
+- `middlewares: Middleware[]` — 
+
+**Returns:** `Middleware`
+
+### executeMiddlewarePipeline
+
+```ts
+executeMiddlewarePipeline(registrations: MiddlewareRegistration[] | undefined, context: MiddlewareContext, finalHandler: () => Promise<void | MiddlewareResult>): Promise<void | MiddlewareResult>
+```
+
+**Parameters:**
+- `registrations: MiddlewareRegistration[] | undefined` — 
+- `context: MiddlewareContext` — 
+- `finalHandler: () => Promise<void | MiddlewareResult>` — 
+
+**Returns:** `Promise<void | MiddlewareResult>`
+
+### createScopedMiddleware
+
+```ts
+createScopedMiddleware(filter: MethodFilter, middleware: Middleware): ScopedMiddleware
+```
+
+**Parameters:**
+- `filter: MethodFilter` — 
+- `middleware: Middleware` — 
+
+**Returns:** `ScopedMiddleware`
+
+### createTypedMiddleware
+
+```ts
+createTypedMiddleware<M>(method: M, middleware: TypedMiddleware<M>): ScopedMiddleware
+```
+
+**Parameters:**
+- `method: M` — 
+- `middleware: TypedMiddleware<M>` — 
+
+**Returns:** `ScopedMiddleware`
+
+### createFullDidChangeParams
+
+Builds `DidChangeTextDocumentParams` for a full-document text replacement.
+
+```ts
+createFullDidChangeParams(uri: string, text: string, source: VersionSource): DidChangeTextDocumentParams
+```
+
+**Parameters:**
+- `uri: string` — The document URI.
+- `text: string` — The complete new document text.
+- `source: VersionSource` — Either an explicit `version` number or a `tracker` instance.
+
+**Returns:** `DidChangeTextDocumentParams`
+
+### createIncrementalDidChangeParams
+
+Builds `DidChangeTextDocumentParams` for an incremental (range-based)
+document change notification.
+
+```ts
+createIncrementalDidChangeParams(uri: string, changes: IncrementalChange[], source: VersionSource): DidChangeTextDocumentParams
+```
+
+**Parameters:**
+- `uri: string` — The document URI.
+- `changes: IncrementalChange[]` — One or more range-based text changes.
+- `source: VersionSource` — Either an explicit `version` number or a `tracker` instance.
+
+**Returns:** `DidChangeTextDocumentParams`
+
+### getSchemaForMethod
+
+Get schema for a given method
+
+```ts
+getSchemaForMethod(method: string): ZodType<any, unknown, $ZodTypeInternals<any, unknown>> | undefined
+```
+
+**Parameters:**
+- `method: string` — 
+
+**Returns:** `ZodType<any, unknown, $ZodTypeInternals<any, unknown>> | undefined`
+
+### createWorkspaceFolder
+
+Helper to create a WorkspaceFolder
+
+```ts
+createWorkspaceFolder(uri: string, name: string): WorkspaceFolder
+```
+
+**Parameters:**
+- `uri: string` — 
+- `name: string` — 
+
+**Returns:** `WorkspaceFolder`
+
+### createWorkspaceFoldersChangeEvent
+
+Helper to create a WorkspaceFoldersChangeEvent
+
+```ts
+createWorkspaceFoldersChangeEvent(added: WorkspaceFolder[], removed: WorkspaceFolder[]): WorkspaceFoldersChangeEvent
+```
+
+**Parameters:**
+- `added: WorkspaceFolder[]` — 
+- `removed: WorkspaceFolder[]` — 
+
+**Returns:** `WorkspaceFoldersChangeEvent`
+
+### createFileEvent
+
+Helper to create a FileEvent
+
+```ts
+createFileEvent(uri: string, type: FileChangeType): FileEvent
+```
+
+**Parameters:**
+- `uri: string` — 
+- `type: FileChangeType` — 
+
+**Returns:** `FileEvent`
+
+### createFileSystemWatcher
+
+Helper to create a FileSystemWatcher
+
+```ts
+createFileSystemWatcher(globPattern: string, kind?: number): FileSystemWatcher
+```
+
+**Parameters:**
+- `globPattern: string` — 
+- `kind: number` (optional) — 
+
+**Returns:** `FileSystemWatcher`
+
+### createDidChangeWatchedFilesParams
+
+Helper to create DidChangeWatchedFilesParams
+
+```ts
+createDidChangeWatchedFilesParams(changes: FileEvent[]): DidChangeWatchedFilesParams
+```
+
+**Parameters:**
+- `changes: FileEvent[]` — 
+
+**Returns:** `DidChangeWatchedFilesParams`
+
+### createProgressBegin
+
+Helper to create a progress begin notification
+
+```ts
+createProgressBegin(title: string, cancellable?: boolean, message?: string, percentage?: number): WorkDoneProgressBegin
+```
+
+**Parameters:**
+- `title: string` — 
+- `cancellable: boolean` (optional) — 
+- `message: string` (optional) — 
+- `percentage: number` (optional) — 
+
+**Returns:** `WorkDoneProgressBegin`
+
+### createProgressReport
+
+Helper to create a progress report notification
+
+```ts
+createProgressReport(message?: string, percentage?: number, cancellable?: boolean): WorkDoneProgressReport
+```
+
+**Parameters:**
+- `message: string` (optional) — 
+- `percentage: number` (optional) — 
+- `cancellable: boolean` (optional) — 
+
+**Returns:** `WorkDoneProgressReport`
+
+### createProgressEnd
+
+Helper to create a progress end notification
+
+```ts
+createProgressEnd(message?: string): WorkDoneProgressEnd
+```
+
+**Parameters:**
+- `message: string` (optional) — 
+
+**Returns:** `WorkDoneProgressEnd`
+
+### createProgressCreateParams
+
+Helper to create progress create params
+
+```ts
+createProgressCreateParams(token: ProgressToken): WorkDoneProgressCreateParams
+```
+
+**Parameters:**
+- `token: ProgressToken` — 
+
+**Returns:** `WorkDoneProgressCreateParams`
+
+### createProgressToken
+
+Generate a unique progress token
+
+```ts
+createProgressToken(): ProgressToken
+```
+
+**Returns:** `ProgressToken`
+
+### createPartialResultParams
+
+Helper to create partial result params
+
+```ts
+createPartialResultParams(token: ProgressToken): PartialResultParams
+```
+
+**Parameters:**
+- `token: ProgressToken` — 
+
+**Returns:** `PartialResultParams`
+
+### hasPartialResultToken
+
+Type guard to check if params support partial results
+
+```ts
+hasPartialResultToken(params: unknown): params is PartialResultParams
+```
+
+**Parameters:**
+- `params: unknown` — 
+
+**Returns:** `params is PartialResultParams`
+
+### getPartialResultToken
+
+Helper to extract partial result token from params
+
+```ts
+getPartialResultToken(params: PartialResultParams): ProgressToken | undefined
+```
+
+**Parameters:**
+- `params: PartialResultParams` — 
+
+**Returns:** `ProgressToken | undefined`
+
+### isRegisterCapabilityParams
+
+Runtime guard for register-capability params.
+
+```ts
+isRegisterCapabilityParams(value: unknown): value is RegisterCapabilityParams
+```
+
+**Parameters:**
+- `value: unknown` — 
+
+**Returns:** `value is RegisterCapabilityParams`
+
+### isUnregisterCapabilityParams
+
+Runtime guard for unregister-capability params.
+
+```ts
+isUnregisterCapabilityParams(value: unknown): value is UnregisterCapabilityParams
+```
+
+**Parameters:**
+- `value: unknown` — 
+
+**Returns:** `value is UnregisterCapabilityParams`
+
+### isMessage
+
+Runtime guard for JSON-RPC message envelopes.
+
+```ts
+isMessage(value: unknown): value is Message
+```
+
+**Parameters:**
+- `value: unknown` — 
+
+**Returns:** `value is Message`
+
+### isWorkerTransportEnvelope
+
+Runtime guard for shared worker transport envelope payloads.
+
+```ts
+isWorkerTransportEnvelope(value: unknown): value is WorkerTransportEnvelope
+```
+
+**Parameters:**
+- `value: unknown` — 
+
+**Returns:** `value is WorkerTransportEnvelope`
+
+### buildMethodSets
+
+```ts
+buildMethodSets(capabilityKey: CapabilityKey): { all: Set<string>; alwaysAllowed: Set<string> }
+```
+
+**Parameters:**
+- `capabilityKey: CapabilityKey` — 
+
+**Returns:** `{ all: Set<string>; alwaysAllowed: Set<string> }`
+
+### checkMethod
+
+Shared validation logic for checking if a method is allowed based on capabilities.
+
+Returns true if allowed, false if disallowed (non-strict), or throws (strict).
+
+```ts
+checkMethod(opts: CheckMethodOptions): boolean
+```
+
+**Parameters:**
+- `opts: CheckMethodOptions` — 
+
+**Returns:** `boolean`
+
+### DedicatedWorkerTransport
+
+JSON-RPC transport backed by a Dedicated Worker instance.
+
+```ts
+constructor(options: DedicatedWorkerTransportOptions): DedicatedWorkerTransport
+```
+
+**Methods:**
+- `send(message: Message): Promise<void>` — Send a message to the remote peer.
+- `onMessage(handler: (message: Message) => void): Disposable` — Subscribe to incoming messages.
+- `onError(handler: (error: Error) => void): Disposable` — Subscribe to transport errors.
+- `onClose(handler: () => void): Disposable` — Subscribe to connection close.
+- `close(): Promise<void>` — Close the transport connection and release resources.
+- `isConnected(): boolean` — Returns `true` if the transport is currently connected and able to
+send messages.
+
+### SharedWorkerTransport
+
+JSON-RPC transport for Shared Worker environments with per-client envelope routing.
+
+```ts
+constructor(options: SharedWorkerTransportOptions): SharedWorkerTransport
+```
+
+**Methods:**
+- `send(message: Message): Promise<void>` — Send a message to the remote peer.
+- `onMessage(handler: (message: Message) => void): Disposable` — Subscribe to incoming messages.
+- `onError(handler: (error: Error) => void): Disposable` — Subscribe to transport errors.
+- `onClose(handler: () => void): Disposable` — Subscribe to connection close.
+- `close(): Promise<void>` — Close the transport connection and release resources.
+- `isConnected(): boolean` — Returns `true` if the transport is currently connected and able to
+send messages.
+
+### WebSocketTransport
+
+WebSocket-based transport for LSP communication.
+
+```ts
+constructor(options: WebSocketTransportOptions): WebSocketTransport
+```
+
+**Methods:**
+- `send(message: Message): Promise<void>` — Send a message through the WebSocket
+- `onMessage(handler: (message: Message) => void): Disposable` — Register a handler for incoming messages
+- `onError(handler: (error: Error) => void): Disposable` — Register a handler for transport errors
+- `onClose(handler: () => void): Disposable` — Register a handler for transport closure
+- `close(): Promise<void>` — Close the WebSocket connection
+- `isConnected(): boolean` — Check if the transport is currently connected
+- `getReconnectAttempts(): number` — Get the current reconnection attempt count
+- `isReconnectEnabled(): boolean` — Check if reconnection is enabled
+
+### TransportEventEmitter
+
+Transport event emitter
+
+```ts
+constructor(): TransportEventEmitter
+```
+
+**Methods:**
+- `emitConnect(): void` — Emit connect event
+- `emitDisconnect(): void` — Emit disconnect event
+- `emitError(error: Error): void` — Emit error event
+- `emitMessage(message: Message): void` — Emit message event
+- `on<K>(event: K, listener: Listener<TransportEventMap, K>): Disposable` — Register a listener and receive a disposable to unregister it.
+- `once<K>(event: K, listener: Listener<TransportEventMap, K>): Disposable` — Register a one-time listener that automatically unregisters after first emission.
+- `emit<K>(event: K, args: TransportEventMap[K]): void` — Emit an event to all registered listeners in registration order.
+- `dispose(): void` — Dispose all listeners and prevent further registrations.
+
+### DisposableStore
+
+Collects multiple `Disposable` instances and releases them together.
+
+```ts
+constructor(): DisposableStore
+```
+
+**Methods:**
+- `add<T>(disposable: T): T` — Add a disposable to the store
+- `dispose(): void` — Dispose all resources in the store
+- `isDisposed(): boolean` — Check if store is disposed
+- `clear(): void` — Clear all disposables without disposing them
+
+### DisposableEventEmitter
+
+Event emitter that returns disposables and can dispose all listeners at once.
+
+```ts
+constructor<TEvents>(): DisposableEventEmitter<TEvents>
+```
+
+**Methods:**
+- `on<K>(event: K, listener: Listener<TEvents, K>): Disposable` — Register a listener and receive a disposable to unregister it.
+- `once<K>(event: K, listener: Listener<TEvents, K>): Disposable` — Register a one-time listener that automatically unregisters after first emission.
+- `emit<K>(event: K, args: TEvents[K]): void` — Emit an event to all registered listeners in registration order.
+- `dispose(): void` — Dispose all listeners and prevent further registrations.
+
+### CancellationTokenSource
+
+Controller that creates and manages a `CancellationToken`.
+
+```ts
+constructor(): CancellationTokenSource
+```
+
+**Methods:**
+- `cancel(): void` — Signal cancellation
+- `dispose(): void` — Dispose the source
+
+### ConsoleLogger
+
+Logger implementation that writes to the process console with level filtering.
+
+```ts
+constructor(level: LogLevel): ConsoleLogger
+```
+
+**Methods:**
+- `error(message: string, args: unknown[]): void` — 
+- `warn(message: string, args: unknown[]): void` — 
+- `info(message: string, args: unknown[]): void` — 
+- `debug(message: string, args: unknown[]): void` — 
+- `trace(message: string, args: unknown[]): void` — 
+
+### NullLogger
+
+No-op logger that silently discards all messages.
+
+```ts
+constructor(): NullLogger
+```
+
+**Methods:**
+- `error(): void` — 
+- `warn(): void` — 
+- `info(): void` — 
+- `debug(): void` — 
+- `trace(): void` — 
+
+### ResponseError
+
+An `Error` subclass that maps to a JSON-RPC 2.0 error response.
+
+```ts
+constructor(code: number, message: string, data?: unknown): ResponseError
+```
+
+**Properties:**
+- `stackTraceLimit: number` — The `Error.stackTraceLimit` property specifies the number of stack frames
+collected by a stack trace (whether generated by `new Error().stack` or
+`Error.captureStackTrace(obj)`).
+
+The default value is `10` but may be set to any valid JavaScript number. Changes
+will affect any stack trace captured _after_ the value has been changed.
+
+If set to a non-number value, or set to a negative number, stack traces will
+not capture any frames.
+- `code: number` — 
+- `data: unknown` — 
+- `name: string` — 
+- `message: string` — 
+- `stack: string` — 
+- `cause: unknown` — 
+
+**Methods:**
+- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error
+- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error
+- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error
+- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error
+- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error
+- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error
+- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error
+- `captureStackTrace(targetObject: object, constructorOpt?: Function): void` — Creates a `.stack` property on `targetObject`, which when accessed returns
+a string representing the location in the code at which
+`Error.captureStackTrace()` was called.
+
+```js
+const myObject = {};
+Error.captureStackTrace(myObject);
+myObject.stack;  // Similar to `new Error().stack`
+```
+
+The first line of the trace will be prefixed with
+`${myObject.name}: ${myObject.message}`.
+
+The optional `constructorOpt` argument accepts a function. If given, all frames
+above `constructorOpt`, including `constructorOpt`, will be omitted from the
+generated stack trace.
+
+The `constructorOpt` argument is useful for hiding implementation
+details of error generation from the user. For instance:
+
+```js
+function a() {
+  b();
+}
+
+function b() {
+  c();
+}
+
+function c() {
+  // Create an error without stack trace to avoid calculating the stack trace twice.
+  const { stackTraceLimit } = Error;
+  Error.stackTraceLimit = 0;
+  const error = new Error();
+  Error.stackTraceLimit = stackTraceLimit;
+
+  // Capture the stack trace above function b
+  Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+  throw error;
+}
+
+a();
+```
+- `prepareStackTrace(err: Error, stackTraces: CallSite[]): any` — 
+- `toJSON(): { code: number; message: string; data: unknown }` — Serializes to the JSON-RPC wire format (`{ code, message, data? }`).
+
+### DocumentVersionTracker
+
+Tracks monotonically increasing version numbers for open text documents.
+
+```ts
+constructor(): DocumentVersionTracker
+```
+
+**Methods:**
+- `open(uri: string, initialVersion: number): void` — Starts tracking a document URI with an optional initial version.
+- `nextVersion(uri: string): number` — Increments and returns the next document version.
+- `currentVersion(uri: string): number | undefined` — Returns the current tracked version, if any.
+- `close(uri: string): void` — Stops tracking a document URI.
+
+### LSPRequestMethod
+
+Union type of all valid LSP request method names
+
+```ts
+type LSPRequestMethod = Direction extends "both" ? KeyAsString<FlatRequestMap> : ConditionalKeys<FlatRequestMap, { Direction: Direction | "both" }> & string
+```
+
+### LSPNotificationMethod
+
+Union type of all valid LSP notification method names
+
+```ts
+type LSPNotificationMethod = Direction extends "both" ? KeyAsString<FlatNotificationMap> : ConditionalKeys<FlatNotificationMap, { Direction: Direction | "both" }> & string
+```
+
+### ParamsForRequest
+
+Infer request parameters from method name
+
+```ts
+type ParamsForRequest = M extends LSPRequestMethod ? FlatRequestMap[M]["Params"] : never
+```
+
+### ResultForRequest
+
+Infer request result from method name
+
+```ts
+type ResultForRequest = M extends LSPRequestMethod ? FlatRequestMap[M]["Result"] : never
+```
+
+### ServerCapabilityForRequest
+
+```ts
+type ServerCapabilityForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { ServerCapability: infer C } ? C : never : never
+```
+
+### ClientCapabilityForRequest
+
+```ts
+type ClientCapabilityForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { ClientCapability: infer C } ? C : never : never
+```
+
+### ParamsForNotification
+
+Infer notification parameters from method name
+
+```ts
+type ParamsForNotification = M extends LSPNotificationMethod ? FlatNotificationMap[M]["Params"] : never
+```
+
+### ServerCapabilityForNotification
+
+```ts
+type ServerCapabilityForNotification = M extends LSPNotificationMethod ? FlatNotificationMap[M] extends { ServerCapability: infer C } ? C : never : never
+```
+
+### ClientCapabilityForNotification
+
+```ts
+type ClientCapabilityForNotification = M extends LSPNotificationMethod ? FlatNotificationMap[M] extends { ClientCapability: infer C } ? C : never : never
+```
+
+### OptionsForRequest
+
+```ts
+type OptionsForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { Options: infer O } ? O : never : never
+```
+
+### RegistrationOptionsForRequest
+
+```ts
+type RegistrationOptionsForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { RegistrationOptions: infer R } ? R : never : never
+```
+
+### DirectionForRequest
+
+```ts
+type DirectionForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { Direction: infer D } ? D : never : never
+```
+
+### DirectionForNotification
+
+```ts
+type DirectionForNotification = M extends LSPNotificationMethod ? FlatNotificationMap[M] extends { Direction: infer D } ? D : never : never
+```
+
+### RequestDefinition
+
+```ts
+type RequestDefinition = typeof IncomingCalls
+```
+
+### ClientNotifications
+
+Client methods for sending requests to server
+Methods are conditionally visible based on ServerCapabilities
+
+```ts
+type ClientNotifications = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in ConditionalKeys<LSPRequest[Namespace], { Direction: "clientToServer" | "both" }> as CamelCase<Method>]: TransformToClientSendMethod<LSPRequest[Namespace][Method], ServerCaps> }> }>>
+```
+
+### ClientRequests
+
+```ts
+type ClientRequests = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in ConditionalKeys<LSPRequest[Namespace], { Direction: "clientToServer" | "both" }> as CamelCase<Method>]: TransformToClientSendMethod<LSPRequest[Namespace][Method], ServerCaps> }> }>>
+```
+
+### ServerHandlers
+
+Server handler registration methods (for requests from client)
+Handlers are conditionally visible based on ServerCapabilities
+
+```ts
+type ServerHandlers = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof LSPRequest[Namespace] as `on${Method & string}`]: TransformToServerHandler<LSPRequest[Namespace][Method], ServerCaps> }> }>>
+```
+
+### ClientRequestHandlers
+
+Client handler registration methods (for requests from server)
+
+```ts
+type ClientRequestHandlers = RemoveNever<{ [Namespace in keyof LSPRequest as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPRequest[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Request`]: TransformToClientHandler<LSPRequest[Namespace][Method], _ClientCaps> } }>
+```
+
+### ClientNotificationHandlers
+
+```ts
+type ClientNotificationHandlers = RemoveNever<{ [Namespace in keyof LSPNotification as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPNotification[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Notification`]: TransformToClientHandler<LSPNotification[Namespace][Method], _ClientCaps> } }>
+```
+
+### ServerSendMethods
+
+```ts
+type ServerSendMethods = Simplify<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNever<{ [Method in keyof LSPRequest[Namespace] as CamelCase<Method & string>]: TransformToServerSendMethod<LSPRequest[Namespace][Method], _ClientCaps> }> }>
+```
+
+### ToRequestSignature
+
+```ts
+type ToRequestSignature = T extends { Method: string; Params: infer P; Result?: infer R } ? (params: P) => Promise<R> : never
+```
+
+### ToNotificationSignature
+
+```ts
+type ToNotificationSignature = T extends { Method: string; Params: infer P } ? (params: P) => void : never
+```
+
+### ToRequestHandlerSignature
+
+```ts
+type ToRequestHandlerSignature = T extends { Method: string; Params: infer P; Result?: infer R } ? (handler: (params: P) => Promise<R> | R) => void : never
+```
+
+### ToNotificationHandlerSignature
+
+```ts
+type ToNotificationHandlerSignature = T extends { Method: string; Params: infer P } ? (handler: (params: P) => void) => void : never
+```
+
+### AvailableMethods
+
+### BaseMessage
+
+Base JSON-RPC 2.0 message discriminant.
+
+### RequestMessage
+
+JSON-RPC 2.0 Request message — expects a response from the peer.
+
+### NotificationMessage
+
+JSON-RPC 2.0 Notification message — no response is expected or sent.
+
+### SuccessResponseMessage
+
+JSON-RPC 2.0 success response to a prior request.
+
+### ErrorResponseMessage
+
+JSON-RPC 2.0 error response to a prior request.
+
+### ResponseMessage
+
+JSON-RPC 2.0 Response message — either a success result or an error.
+
+```ts
+type ResponseMessage = SuccessResponseMessage | ErrorResponseMessage
+```
+
+### Message
+
+Union of all JSON-RPC 2.0 message types sent over a transport.
+
+```ts
+type Message = RequestMessage | NotificationMessage | ResponseMessage
+```
+
+### ResponseErrorInterface
+
+JSON-RPC 2.0 error object embedded in an error response.
+
+### Transport
+
+Pluggable communication layer for JSON-RPC message exchange.
+
+### DedicatedWorkerTransportOptions
+
+### SharedWorkerTransportOptions
+
+### WebSocketTransportOptions
+
+Options for configuring a `WebSocketTransport`.
+
+### Middleware
+
+A function that intercepts JSON-RPC messages flowing through `LSPServer`
+or `LSPClient`.
+
+```ts
+type Middleware = (context: MiddlewareContext, next: MiddlewareNext) => Promise<void | MiddlewareResult>
+```
+
+### MiddlewareContext
+
+Execution context passed to every middleware function in the pipeline.
+
+### MiddlewareDirection
+
+Direction of a JSON-RPC message in the middleware pipeline.
+
+```ts
+type MiddlewareDirection = "clientToServer" | "serverToClient"
+```
+
+### MiddlewareMessage
+
+The JSON-RPC message exposed to middleware, with `id` made read-only to
+prevent accidental mutation that would break response correlation.
+
+```ts
+type MiddlewareMessage = ImmutableId<Message>
+```
+
+### MiddlewareMessageType
+
+Kind of JSON-RPC message flowing through middleware.
+
+```ts
+type MiddlewareMessageType = "request" | "response" | "notification" | "error"
+```
+
+### MiddlewareNext
+
+Calls the next middleware (or final handler) in the pipeline.
+
+```ts
+type MiddlewareNext = () => Promise<void | MiddlewareResult>
+```
+
+### MiddlewareResult
+
+The return value from a middleware function.
+
+### MethodFilter
+
+Filter predicate used by `ScopedMiddleware` to select which messages
+a middleware should intercept.
+
+### ScopedMiddleware
+
+A `Middleware` paired with a `MethodFilter` so it only runs for matching
+messages.
+
+### TypedMiddleware
+
+A middleware function narrowed to a specific LSP method with full type
+inference for `params` and `result`.
+
+```ts
+type TypedMiddleware = (context: TypedMiddlewareContext<M>, next: MiddlewareNext) => Promise<void | MiddlewareResult>
+```
+
+### TypedMiddlewareContext
+
+Typed middleware context narrowed to a specific LSP method.
+Use with `createTypedMiddleware` for full type inference.
+
+### TypedParams
+
+Infers the params type for a given LSP method.
+
+```ts
+type TypedParams = M extends LSPRequestMethod ? ParamsForRequest<M> : M extends LSPNotificationMethod ? ParamsForNotification<M> : never
+```
+
+### TypedResult
+
+Infers the result type for a given LSP method (void for notifications).
+
+```ts
+type TypedResult = M extends LSPRequestMethod ? ResultForRequest<M> : void
+```
+
+### LSPMethod
+
+Union of all LSP request and notification method strings.
+
+```ts
+type LSPMethod = LSPRequestMethod | LSPNotificationMethod
+```
+
+### Disposable
+
+Represents a resource that can be explicitly released.
+
+### CancellationToken
+
+Singleton token that is never cancelled
+
+### CancellationToken
+
+Read-only handle for observing cancellation state.
+
+### Logger
+
+Structured logging interface used throughout lspeasy.
+
+### IncrementalChange
+
+Represents a single incremental text document change.
+
+### VersionSource
+
+Source of version information for helper constructors.
+
+### LSPRequest
+
+LSP Request type definitions organized by namespace
+
+### LSPNotification
+
+LSP Notification type definitions organized by namespace
+
+### Client
+
+```ts
+type Client = SimplifyDeep<{ [K in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["requests"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["requests"][K]]: ToRequestSignature<AvailableMethods<ClientCaps, ServerCaps>["client"]["requests"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["notifications"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["notifications"][K]]: ToNotificationSignature<AvailableMethods<ClientCaps, ServerCaps>["client"]["notifications"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["requestHandlers"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["requestHandlers"][K] as `on${PascalCase<string & Q, { preserveConsecutiveUppercase: true }>}`]: ToRequestHandlerSignature<AvailableMethods<ClientCaps, ServerCaps>["client"]["requestHandlers"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["notificationHandlers"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["notificationHandlers"][K] as `on${PascalCase<string & Q, { preserveConsecutiveUppercase: true }>}`]: ToNotificationHandlerSignature<AvailableMethods<ClientCaps, ServerCaps>["client"]["notificationHandlers"][K][Q]> } }>
+```
+
+### AvailableRequests
+
+Mapped type of all available LSP request methods and their handler signatures
+
+```ts
+type AvailableRequests = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof Requests[Namespace] as CamelCase<Method & string>]: IsClientCapabilityEnabled<ClientCaps, Requests[Namespace][Method]> extends true ? Requests[Namespace][Method] : never }> }>>
+```
+
+### AvailableNotifications
+
+Mapped type of all available LSP notification methods and their handler signatures
+
+```ts
+type AvailableNotifications = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof Notifications[Namespace] as CamelCase<StripNamespaceSuffix<Namespace & string, Method & string>>]: IsClientCapabilityEnabled<ClientCaps, Notifications[Namespace][Method]> extends true ? Notifications[Namespace][Method] : never }> }>>
+```
+
+### Server
+
+Combined Server type with handlers and send methods
+
+```ts
+type Server = SimplifyDeep<{ [K in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["requests"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["requests"][K]]: ToRequestSignature<AvailableMethods<ClientCaps, ServerCaps>["server"]["requests"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["notifications"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["notifications"][K]]: ToNotificationSignature<AvailableMethods<ClientCaps, ServerCaps>["server"]["notifications"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["requestHandlers"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["requestHandlers"][K] as `on${PascalCase<string & Q, { preserveConsecutiveUppercase: true }>}`]: ToRequestHandlerSignature<AvailableMethods<ClientCaps, ServerCaps>["server"]["requestHandlers"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["notificationHandlers"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["notificationHandlers"][K] as `on${PascalCase<string & Q, { preserveConsecutiveUppercase: true }>}`]: ToNotificationHandlerSignature<AvailableMethods<ClientCaps, ServerCaps>["server"]["notificationHandlers"][K][Q]> } }>
+```
+
+### AvailableRequests
+
+Mapped type of all available LSP request methods and their handler signatures
+
+```ts
+type AvailableRequests = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof Requests[Namespace] as CamelCase<Method & string>]: IsServerCapabilityEnabled<ServerCaps, Requests[Namespace][Method]> extends true ? Requests[Namespace][Method] : never }> }>>
+```
+
+### AvailableNotifications
+
+Mapped type of all available LSP notification methods and their handler signatures
+
+```ts
+type AvailableNotifications = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof Notifications[Namespace] as CamelCase<StripNamespaceSuffix<Namespace & string, Method & string>>]: IsServerCapabilityEnabled<ServerCaps, Notifications[Namespace][Method]> extends true ? Notifications[Namespace][Method] : never }> }>>
+```
+
+### WorkDoneProgressValue
+
+WorkDoneProgress value types
+
+```ts
+type WorkDoneProgressValue = WorkDoneProgressBegin | WorkDoneProgressReport | WorkDoneProgressEnd
+```
+
+### PartialResultParams
+
+A parameter literal used to pass a partial result token.
+
+### DynamicRegistration
+
+### DynamicRegistrationBehavior
+
+Controls compatibility behavior for dynamic registrations not declared by client capabilities.
+
+### RegisterCapabilityParams
+
+Params payload for `client/registerCapability`.
+
+### UnregisterCapability
+
+Entry used by `client/unregisterCapability`.
+
+### UnregisterCapabilityParams
+
+Params payload for `client/unregisterCapability`.
+
+### CancelledPartialResult
+
+Structured response when a partial-enabled request is cancelled.
+
+### CompletedPartialResult
+
+Structured response when a partial-enabled request completes successfully.
+
+### PartialRequestOutcome
+
+Union return type for partial-enabled client requests.
+
+```ts
+type PartialRequestOutcome = CancelledPartialResult<TPartial> | CompletedPartialResult<TPartial, TResult>
+```
+
+### WorkerLike
+
+Minimal worker contract required by dedicated worker transport.
+
+### MessagePortLike
+
+Minimal message port contract required by shared worker transport.
+
+### SharedWorkerLike
+
+Shared worker wrapper exposing a message port.
+
+### WorkerMessageEventLike
+
+Lightweight event shape shared by worker and message port adapters.
+
+### WorkerTransportEnvelope
+
+Envelope used by shared worker transport to preserve client isolation.
+
+### CheckMethodOptions
+
+### LogLevel
+
+Numeric severity levels for filtering log output.
+
+- `Error` = `0` — 
+- `Warn` = `1` — 
+- `Info` = `2` — 
+- `Debug` = `3` — 
+- `Trace` = `4` — 
+
+### RequestMethodMap
+
+```ts
+const RequestMethodMap: Map<LSPRequestMethod, { Direction: DirectionForRequest<LSPRequestMethod>; ServerCapability?: ServerCapabilityForRequest<LSPRequestMethod>; ClientCapability?: ClientCapabilityForRequest<LSPRequestMethod> }>
+```
+
+### NotificationMethodMap
+
+```ts
+const NotificationMethodMap: Map<LSPNotificationMethod, { Direction: DirectionForNotification<LSPNotificationMethod>; ServerCapability?: ServerCapabilityForNotification<LSPNotificationMethod>; ClientCapability?: ClientCapabilityForNotification<LSPNotificationMethod> }>
+```
+
+### ClientRequestMethodToCapabilityMap
+
+```ts
+const ClientRequestMethodToCapabilityMap: Map<string, string | undefined>
+```
+
+### ClientNotificationMethodToCapabilityMap
+
+```ts
+const ClientNotificationMethodToCapabilityMap: Map<string, string | undefined>
+```
+
+### requestMessageSchema
+
+Schema for JSON-RPC 2.0 Request Message
+
+```ts
+const requestMessageSchema: ZodObject<{ jsonrpc: ZodLiteral<"2.0">; id: ZodUnion<readonly [ZodString, ZodNumber]>; method: ZodString; params: ZodOptional<ZodUnknown> }, $strip>
+```
+
+### notificationMessageSchema
+
+Schema for JSON-RPC 2.0 Notification Message
+
+```ts
+const notificationMessageSchema: ZodObject<{ jsonrpc: ZodLiteral<"2.0">; method: ZodString; params: ZodOptional<ZodUnknown> }, $strip>
+```
+
+### responseErrorSchema
+
+Schema for JSON-RPC 2.0 Response Error
+
+```ts
+const responseErrorSchema: ZodObject<{ code: ZodNumber; message: ZodString; data: ZodOptional<ZodUnknown> }, $strip>
+```
+
+### successResponseMessageSchema
+
+Schema for JSON-RPC 2.0 Success Response Message
+
+```ts
+const successResponseMessageSchema: ZodObject<{ jsonrpc: ZodLiteral<"2.0">; id: ZodUnion<readonly [ZodString, ZodNumber]>; result: ZodUnknown }, $strip>
+```
+
+### errorResponseMessageSchema
+
+Schema for JSON-RPC 2.0 Error Response Message
+
+```ts
+const errorResponseMessageSchema: ZodObject<{ jsonrpc: ZodLiteral<"2.0">; id: ZodUnion<readonly [ZodString, ZodNumber]>; error: ZodObject<{ code: ZodNumber; message: ZodString; data: ZodOptional<ZodUnknown> }, $strip> }, $strip>
+```
+
+### responseMessageSchema
+
+Schema for JSON-RPC 2.0 Response Message (success or error)
+
+```ts
+const responseMessageSchema: ZodUnion<readonly [ZodObject<{ jsonrpc: ZodLiteral<"2.0">; id: ZodUnion<readonly [ZodString, ZodNumber]>; result: ZodUnknown }, $strip>, ZodObject<{ jsonrpc: ZodLiteral<"2.0">; id: ZodUnion<readonly [ZodString, ZodNumber]>; error: ZodObject<{ code: ZodNumber; message: ZodString; data: ZodOptional<ZodUnknown> }, $strip> }, $strip>]>
+```
+
+### messageSchema
+
+Schema for any JSON-RPC 2.0 Message
+Uses discriminated union based on presence of 'method' and 'id'
+
+```ts
+const messageSchema: ZodUnion<readonly [ZodObject<{ jsonrpc: ZodLiteral<"2.0">; id: ZodUnion<readonly [ZodString, ZodNumber]>; method: ZodString; params: ZodOptional<ZodUnknown> }, $strip>, ZodObject<{ jsonrpc: ZodLiteral<"2.0">; method: ZodString; params: ZodOptional<ZodUnknown> }, $strip>, ZodObject<{ jsonrpc: ZodLiteral<"2.0">; id: ZodUnion<readonly [ZodString, ZodNumber]>; result: ZodUnknown }, $strip>, ZodObject<{ jsonrpc: ZodLiteral<"2.0">; id: ZodUnion<readonly [ZodString, ZodNumber]>; error: ZodObject<{ code: ZodNumber; message: ZodString; data: ZodOptional<ZodUnknown> }, $strip> }, $strip>]>
+```
+
+### JSONRPCErrorCode
+
+Numeric error codes defined by JSON-RPC 2.0 and the LSP specification.
+
+```ts
+const JSONRPCErrorCode: { ParseError: -32700; InvalidRequest: -32600; MethodNotFound: -32601; InvalidParams: -32602; InternalError: -32603; ServerNotInitialized: -32002; UnknownErrorCode: -32001; ServerErrorStart: -32099; ServerErrorEnd: -32000; RequestCancelled: -32800; ContentModified: -32801; ServerCancelled: -32802 }
+```
+
+### ErrorMessage
+
+Error messages for each error code
+
+```ts
+const ErrorMessage: Record<number, string>
+```
+
+### LSPRequest
+
+LSP Request methods organized by namespace
+
+```ts
+let LSPRequest: { CallHierarchy: { IncomingCalls: { Method: "callHierarchy/incomingCalls"; Direction: "clientToServer" }; OutgoingCalls: { Method: "callHierarchy/outgoingCalls"; Direction: "clientToServer" } }; Client: { Registration: { Method: "client/registerCapability"; Direction: "serverToClient" }; Unregistration: { Method: "client/unregisterCapability"; Direction: "serverToClient" } }; CodeAction: { Resolve: { Method: "codeAction/resolve"; Direction: "clientToServer"; ServerCapability: "codeActionProvider.resolveProvider"; ClientCapability: "textDocument.codeAction.resolveSupport" } }; CodeLens: { Resolve: { Method: "codeLens/resolve"; Direction: "clientToServer"; ServerCapability: "codeLensProvider.resolveProvider"; ClientCapability: "textDocument.codeLens.resolveSupport" } }; CompletionItem: { CompletionResolve: { Method: "completionItem/resolve"; Direction: "clientToServer"; ServerCapability: "completionProvider.resolveProvider"; ClientCapability: "textDocument.completion.completionItem.resolveSupport" } }; DocumentLink: { Resolve: { Method: "documentLink/resolve"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider.resolveProvider"; ClientCapability: "textDocument.documentLink" } }; InlayHint: { Resolve: { Method: "inlayHint/resolve"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider.resolveProvider"; ClientCapability: "textDocument.inlayHint.resolveSupport" } }; Lifecycle: { Initialize: { Method: "initialize"; Direction: "clientToServer" }; Shutdown: { Method: "shutdown"; Direction: "clientToServer" } }; TextDocument: { Implementation: { Method: "textDocument/implementation"; Direction: "clientToServer"; ServerCapability: "implementationProvider"; ClientCapability: "textDocument.implementation" }; TypeDefinition: { Method: "textDocument/typeDefinition"; Direction: "clientToServer"; ServerCapability: "typeDefinitionProvider"; ClientCapability: "textDocument.typeDefinition" }; DocumentColor: { Method: "textDocument/documentColor"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; ColorPresentation: { Method: "textDocument/colorPresentation"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; FoldingRange: { Method: "textDocument/foldingRange"; Direction: "clientToServer"; ServerCapability: "foldingRangeProvider"; ClientCapability: "textDocument.foldingRange" }; Declaration: { Method: "textDocument/declaration"; Direction: "clientToServer"; ServerCapability: "declarationProvider"; ClientCapability: "textDocument.declaration" }; SelectionRange: { Method: "textDocument/selectionRange"; Direction: "clientToServer"; ServerCapability: "selectionRangeProvider"; ClientCapability: "textDocument.selectionRange" }; CallHierarchyPrepare: { Method: "textDocument/prepareCallHierarchy"; Direction: "clientToServer"; ServerCapability: "callHierarchyProvider"; ClientCapability: "textDocument.callHierarchy" }; SemanticTokens: { Method: "textDocument/semanticTokens/full"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider"; ClientCapability: "textDocument.semanticTokens"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensDelta: { Method: "textDocument/semanticTokens/full/delta"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.full.delta"; ClientCapability: "textDocument.semanticTokens.requests.full.delta"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensRange: { Method: "textDocument/semanticTokens/range"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.range"; ClientCapability: "textDocument.semanticTokens.requests.range"; RegistrationMethod: "textDocument/semanticTokens" }; LinkedEditingRange: { Method: "textDocument/linkedEditingRange"; Direction: "clientToServer"; ServerCapability: "linkedEditingRangeProvider"; ClientCapability: "textDocument.linkedEditingRange" }; Moniker: { Method: "textDocument/moniker"; Direction: "clientToServer"; ServerCapability: "monikerProvider"; ClientCapability: "textDocument.moniker" }; TypeHierarchyPrepare: { Method: "textDocument/prepareTypeHierarchy"; Direction: "clientToServer"; ServerCapability: "typeHierarchyProvider"; ClientCapability: "textDocument.typeHierarchy" }; InlineValue: { Method: "textDocument/inlineValue"; Direction: "clientToServer"; ServerCapability: "inlineValueProvider"; ClientCapability: "textDocument.inlineValue" }; InlayHint: { Method: "textDocument/inlayHint"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider"; ClientCapability: "textDocument.inlayHint" }; DocumentDiagnostic: { Method: "textDocument/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider"; ClientCapability: "textDocument.diagnostic" }; InlineCompletion: { Method: "textDocument/inlineCompletion"; Direction: "clientToServer"; ServerCapability: "inlineCompletionProvider"; ClientCapability: "textDocument.inlineCompletion" }; WillSaveTextDocumentWaitUntil: { Method: "textDocument/willSaveWaitUntil"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSaveWaitUntil"; ClientCapability: "textDocument.synchronization.willSaveWaitUntil" }; Completion: { Method: "textDocument/completion"; Direction: "clientToServer"; ServerCapability: "completionProvider"; ClientCapability: "textDocument.completion" }; Hover: { Method: "textDocument/hover"; Direction: "clientToServer"; ServerCapability: "hoverProvider"; ClientCapability: "textDocument.hover" }; SignatureHelp: { Method: "textDocument/signatureHelp"; Direction: "clientToServer"; ServerCapability: "signatureHelpProvider"; ClientCapability: "textDocument.signatureHelp" }; Definition: { Method: "textDocument/definition"; Direction: "clientToServer"; ServerCapability: "definitionProvider"; ClientCapability: "textDocument.definition" }; References: { Method: "textDocument/references"; Direction: "clientToServer"; ServerCapability: "referencesProvider"; ClientCapability: "textDocument.references" }; DocumentHighlight: { Method: "textDocument/documentHighlight"; Direction: "clientToServer"; ServerCapability: "documentHighlightProvider"; ClientCapability: "textDocument.documentHighlight" }; DocumentSymbol: { Method: "textDocument/documentSymbol"; Direction: "clientToServer"; ServerCapability: "documentSymbolProvider"; ClientCapability: "textDocument.documentSymbol" }; CodeAction: { Method: "textDocument/codeAction"; Direction: "clientToServer"; ServerCapability: "codeActionProvider"; ClientCapability: "textDocument.codeAction" }; CodeLens: { Method: "textDocument/codeLens"; Direction: "clientToServer"; ServerCapability: "codeLensProvider"; ClientCapability: "textDocument.codeLens" }; DocumentLink: { Method: "textDocument/documentLink"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider"; ClientCapability: "textDocument.documentLink" }; DocumentFormatting: { Method: "textDocument/formatting"; Direction: "clientToServer"; ServerCapability: "documentFormattingProvider"; ClientCapability: "textDocument.formatting" }; DocumentRangeFormatting: { Method: "textDocument/rangeFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider"; ClientCapability: "textDocument.rangeFormatting" }; DocumentRangesFormatting: { Method: "textDocument/rangesFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider.rangesSupport"; ClientCapability: "textDocument.rangeFormatting.rangesSupport" }; DocumentOnTypeFormatting: { Method: "textDocument/onTypeFormatting"; Direction: "clientToServer"; ServerCapability: "documentOnTypeFormattingProvider"; ClientCapability: "textDocument.onTypeFormatting" }; Rename: { Method: "textDocument/rename"; Direction: "clientToServer"; ServerCapability: "renameProvider"; ClientCapability: "textDocument.rename" }; PrepareRename: { Method: "textDocument/prepareRename"; Direction: "clientToServer"; ServerCapability: "renameProvider.prepareProvider"; ClientCapability: "textDocument.rename.prepareSupport" } }; TypeHierarchy: { Supertypes: { Method: "typeHierarchy/supertypes"; Direction: "clientToServer" }; Subtypes: { Method: "typeHierarchy/subtypes"; Direction: "clientToServer" } }; Window: { WorkDoneProgressCreate: { Method: "window/workDoneProgress/create"; Direction: "serverToClient"; ClientCapability: "window.workDoneProgress" }; ShowDocument: { Method: "window/showDocument"; Direction: "serverToClient"; ClientCapability: "window.showDocument.support" }; ShowMessage: { Method: "window/showMessageRequest"; Direction: "serverToClient"; ClientCapability: "window.showMessage" } }; Workspace: { WillCreateFiles: { Method: "workspace/willCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willCreate"; ClientCapability: "workspace.fileOperations.willCreate" }; WillRenameFiles: { Method: "workspace/willRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willRename"; ClientCapability: "workspace.fileOperations.willRename" }; WillDeleteFiles: { Method: "workspace/willDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willDelete"; ClientCapability: "workspace.fileOperations.willDelete" }; Diagnostic: { Method: "workspace/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider.workspaceDiagnostics"; ClientCapability: "workspace.diagnostics" }; TextDocumentContent: { Method: "workspace/textDocumentContent"; Direction: "clientToServer"; ServerCapability: "workspace.textDocumentContent"; ClientCapability: "workspace.textDocumentContent" }; Symbol: { Method: "workspace/symbol"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider"; ClientCapability: "workspace.symbol" }; ExecuteCommand: { Method: "workspace/executeCommand"; Direction: "clientToServer"; ServerCapability: "executeCommandProvider"; ClientCapability: "workspace.executeCommand" }; Folders: { Method: "workspace/workspaceFolders"; Direction: "serverToClient"; ServerCapability: "workspace.workspaceFolders"; ClientCapability: "workspace.workspaceFolders" }; Configuration: { Method: "workspace/configuration"; Direction: "serverToClient"; ClientCapability: "workspace.configuration" }; FoldingRangeRefresh: { Method: "workspace/foldingRange/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.foldingRange.refreshSupport" }; SemanticTokensRefresh: { Method: "workspace/semanticTokens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.semanticTokens.refreshSupport" }; InlineValueRefresh: { Method: "workspace/inlineValue/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlineValue.refreshSupport" }; InlayHintRefresh: { Method: "workspace/inlayHint/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlayHint.refreshSupport" }; DiagnosticRefresh: { Method: "workspace/diagnostic/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.diagnostics.refreshSupport" }; TextDocumentContentRefresh: { Method: "workspace/textDocumentContent/refresh"; Direction: "serverToClient" }; CodeLensRefresh: { Method: "workspace/codeLens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.codeLens" }; ApplyWorkspaceEdit: { Method: "workspace/applyEdit"; Direction: "serverToClient"; ClientCapability: "workspace.applyEdit" } }; WorkspaceSymbol: { Resolve: { Method: "workspaceSymbol/resolve"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider.resolveProvider"; ClientCapability: "workspace.symbol.resolveSupport" } } }
+```
+
+### LSPNotification
+
+LSP Notification methods organized by namespace
+
+```ts
+let LSPNotification: { General: { Cancel: { Method: "$/cancelRequest"; Direction: "both" }; Progress: { Method: "$/progress"; Direction: "both" }; SetTrace: { Method: "$/setTrace"; Direction: "clientToServer" }; LogTrace: { Method: "$/logTrace"; Direction: "serverToClient" } }; Lifecycle: { Initialized: { Method: "initialized"; Direction: "clientToServer" }; Exit: { Method: "exit"; Direction: "clientToServer" } }; NotebookDocument: { DidOpenNotebookDocument: { Method: "notebookDocument/didOpen"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidChangeNotebookDocument: { Method: "notebookDocument/didChange"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidSaveNotebookDocument: { Method: "notebookDocument/didSave"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidCloseNotebookDocument: { Method: "notebookDocument/didClose"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" } }; Telemetry: { Event: { Method: "telemetry/event"; Direction: "serverToClient" } }; TextDocument: { DidOpenTextDocument: { Method: "textDocument/didOpen"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidChangeTextDocument: { Method: "textDocument/didChange"; Direction: "clientToServer"; ServerCapability: "textDocumentSync"; ClientCapability: "textDocument.synchronization" }; DidCloseTextDocument: { Method: "textDocument/didClose"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidSaveTextDocument: { Method: "textDocument/didSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.save"; ClientCapability: "textDocument.synchronization.didSave" }; WillSaveTextDocument: { Method: "textDocument/willSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSave"; ClientCapability: "textDocument.synchronization.willSave" }; PublishDiagnostics: { Method: "textDocument/publishDiagnostics"; Direction: "serverToClient"; ClientCapability: "textDocument.publishDiagnostics" } }; Window: { WorkDoneProgressCancel: { Method: "window/workDoneProgress/cancel"; Direction: "clientToServer" }; ShowMessage: { Method: "window/showMessage"; Direction: "serverToClient"; ClientCapability: "window.showMessage" }; LogMessage: { Method: "window/logMessage"; Direction: "serverToClient" } }; Workspace: { DidChangeWorkspaceFolders: { Method: "workspace/didChangeWorkspaceFolders"; Direction: "clientToServer"; ServerCapability: "workspace.workspaceFolders.changeNotifications" }; DidCreateFiles: { Method: "workspace/didCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didCreate"; ClientCapability: "workspace.fileOperations.didCreate" }; DidRenameFiles: { Method: "workspace/didRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didRename"; ClientCapability: "workspace.fileOperations.didRename" }; DidDeleteFiles: { Method: "workspace/didDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didDelete"; ClientCapability: "workspace.fileOperations.didDelete" }; DidChangeConfiguration: { Method: "workspace/didChangeConfiguration"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeConfiguration" }; DidChangeWatchedFiles: { Method: "workspace/didChangeWatchedFiles"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeWatchedFiles" } } }
+```
+
+### PositionSchema
+
+Position in a text document expressed as zero-based line and character offset
+
+```ts
+const PositionSchema: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>
+```
+
+### RangeSchema
+
+Range in a text document expressed as (zero-based) start and end positions
+
+```ts
+const RangeSchema: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>
+```
+
+### TextDocumentIdentifierSchema
+
+Text document identifier
+
+```ts
+const TextDocumentIdentifierSchema: ZodObject<{ uri: ZodString }, $strip>
+```
+
+### HoverParamsSchema
+
+Hover params
+
+```ts
+const HoverParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>
+```
+
+### HoverSchema
+
+Hover result
+
+```ts
+const HoverSchema: ZodObject<{ contents: ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<readonly [ZodLiteral<"plaintext">, ZodLiteral<"markdown">]>; value: ZodString }, $strip>, ZodObject<{ language: ZodString; value: ZodString }, $strip>, ZodArray<ZodUnion<readonly [ZodString, ZodObject<{ language: ZodString; value: ZodString }, $strip>]>>]>; range: ZodOptional<ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>> }, $strip>
+```
+
+### CompletionParamsSchema
+
+Completion params
+
+```ts
+const CompletionParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodString, ZodNumber]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodString, ZodNumber]>>; context: ZodOptional<ZodObject<{ triggerKind: ZodNumber; triggerCharacter: ZodOptional<ZodString> }, $strip>> }, $strip>
+```
+
+### CompletionItemSchema
+
+Completion item
+
+```ts
+const CompletionItemSchema: ZodObject<{ label: ZodString; kind: ZodOptional<ZodNumber>; tags: ZodOptional<ZodArray<ZodNumber>>; detail: ZodOptional<ZodString>; documentation: ZodOptional<ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<readonly [ZodLiteral<"plaintext">, ZodLiteral<"markdown">]>; value: ZodString }, $strip>]>>; deprecated: ZodOptional<ZodBoolean>; preselect: ZodOptional<ZodBoolean>; sortText: ZodOptional<ZodString>; filterText: ZodOptional<ZodString>; insertText: ZodOptional<ZodString>; insertTextFormat: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>>; textEdit: ZodOptional<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; newText: ZodString }, $strip>>; additionalTextEdits: ZodOptional<ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; newText: ZodString }, $strip>>>; commitCharacters: ZodOptional<ZodArray<ZodString>>; command: ZodOptional<ZodAny>; data: ZodOptional<ZodUnknown> }, $strip>
+```
+
+### CompletionListSchema
+
+Completion list
+
+```ts
+const CompletionListSchema: ZodObject<{ isIncomplete: ZodBoolean; items: ZodArray<ZodObject<{ label: ZodString; kind: ZodOptional<ZodNumber>; tags: ZodOptional<ZodArray<ZodNumber>>; detail: ZodOptional<ZodString>; documentation: ZodOptional<ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<(...)>; value: ZodString }, $strip>]>>; deprecated: ZodOptional<ZodBoolean>; preselect: ZodOptional<ZodBoolean>; sortText: ZodOptional<ZodString>; filterText: ZodOptional<ZodString>; insertText: ZodOptional<ZodString>; insertTextFormat: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>>; textEdit: ZodOptional<ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; newText: ZodString }, $strip>>; additionalTextEdits: ZodOptional<ZodArray<ZodObject<{ range: ZodObject<{ start: ...; end: ... }, $strip>; newText: ZodString }, $strip>>>; commitCharacters: ZodOptional<ZodArray<ZodString>>; command: ZodOptional<ZodAny>; data: ZodOptional<ZodUnknown> }, $strip>> }, $strip>
+```
+
+### DefinitionParamsSchema
+
+Definition params
+
+```ts
+const DefinitionParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>
+```
+
+### ReferenceParamsSchema
+
+Reference params
+
+```ts
+const ReferenceParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; context: ZodObject<{ includeDeclaration: ZodBoolean }, $strip> }, $strip>
+```
+
+### DocumentSymbolParamsSchema
+
+Document symbol params
+
+```ts
+const DocumentSymbolParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>
+```
+
+### DocumentSymbolSchema
+
+Document symbol
+
+```ts
+const DocumentSymbolSchema: z.ZodType<any>
+```
+
+### InitializeParamsSchema
+
+Initialize params
+
+```ts
+const InitializeParamsSchema: ZodObject<{ processId: ZodUnion<readonly [ZodNumber, ZodNull]>; clientInfo: ZodOptional<ZodObject<{ name: ZodString; version: ZodOptional<ZodString> }, $strip>>; locale: ZodOptional<ZodString>; rootPath: ZodOptional<ZodUnion<readonly [ZodString, ZodNull]>>; rootUri: ZodUnion<readonly [ZodString, ZodNull]>; initializationOptions: ZodOptional<ZodUnknown>; capabilities: ZodAny; trace: ZodOptional<ZodEnum<{ off: "off"; messages: "messages"; verbose: "verbose" }>>; workspaceFolders: ZodOptional<ZodNullable<ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>>>> }, $strip>
+```
+
+### DidOpenTextDocumentParamsSchema
+
+Did open text document params
+
+```ts
+const DidOpenTextDocumentParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString; languageId: ZodString; version: ZodNumber; text: ZodString }, $strip> }, $strip>
+```
+
+### DidChangeTextDocumentParamsSchema
+
+Did change text document params
+
+```ts
+const DidChangeTextDocumentParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString; version: ZodNumber }, $strip>; contentChanges: ZodArray<ZodUnion<readonly [ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip>; rangeLength: ZodOptional<ZodNumber>; text: ZodString }, $strip>, ZodObject<{ text: ZodString }, $strip>]>> }, $strip>
+```
+
+### DidCloseTextDocumentParamsSchema
+
+Did close text document params
+
+```ts
+const DidCloseTextDocumentParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>
+```
+
+### DidSaveTextDocumentParamsSchema
+
+Did save text document params
+
+```ts
+const DidSaveTextDocumentParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; text: ZodOptional<ZodString> }, $strip>
+```
+
+### LSPSchemas
+
+Schema registry for method-based lookup
+
+```ts
+const LSPSchemas: { textDocument/hover: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; textDocument/completion: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodString, ZodNumber]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodString, ZodNumber]>>; context: ZodOptional<ZodObject<{ triggerKind: ZodNumber; triggerCharacter: ZodOptional<ZodString> }, $strip>> }, $strip>; textDocument/definition: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; textDocument/references: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; context: ZodObject<{ includeDeclaration: ZodBoolean }, $strip> }, $strip>; textDocument/documentSymbol: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; initialize: ZodObject<{ processId: ZodUnion<readonly [ZodNumber, ZodNull]>; clientInfo: ZodOptional<ZodObject<{ name: ZodString; version: ZodOptional<ZodString> }, $strip>>; locale: ZodOptional<ZodString>; rootPath: ZodOptional<ZodUnion<readonly [ZodString, ZodNull]>>; rootUri: ZodUnion<readonly [ZodString, ZodNull]>; initializationOptions: ZodOptional<ZodUnknown>; capabilities: ZodAny; trace: ZodOptional<ZodEnum<{ off: "off"; messages: "messages"; verbose: "verbose" }>>; workspaceFolders: ZodOptional<ZodNullable<ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>>>> }, $strip>; textDocument/didOpen: ZodObject<{ textDocument: ZodObject<{ uri: ZodString; languageId: ZodString; version: ZodNumber; text: ZodString }, $strip> }, $strip>; textDocument/didChange: ZodObject<{ textDocument: ZodObject<{ uri: ZodString; version: ZodNumber }, $strip>; contentChanges: ZodArray<ZodUnion<readonly [ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; rangeLength: ZodOptional<ZodNumber>; text: ZodString }, $strip>, ZodObject<{ text: ZodString }, $strip>]>> }, $strip>; textDocument/didClose: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/didSave: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; text: ZodOptional<ZodString> }, $strip> }
+```
+
+### WorkspaceFileChangeTypes
+
+File change types enum for convenience
+
+```ts
+const WorkspaceFileChangeTypes: { Created: FileChangeType; Changed: FileChangeType; Deleted: FileChangeType }
+```
+
+### WatchKinds
+
+Watch kinds for file system watchers
+
+```ts
+const WatchKinds: { Create: number; Change: number; Delete: number; All: number }
+```
+
+### dynamicRegistrationSchema
+
+```ts
+const dynamicRegistrationSchema: ZodObject<{ id: ZodString; method: ZodString; registerOptions: ZodOptional<ZodUnknown> }, $strip>
+```
+
+### registerCapabilityParamsSchema
+
+```ts
+const registerCapabilityParamsSchema: ZodObject<{ registrations: ZodArray<ZodObject<{ id: ZodString; method: ZodString; registerOptions: ZodOptional<ZodUnknown> }, $strip>> }, $strip>
+```
+
+### unregisterCapabilitySchema
+
+```ts
+const unregisterCapabilitySchema: ZodObject<{ id: ZodString; method: ZodString }, $strip>
+```
+
+### unregisterCapabilityParamsSchema
+
+```ts
+const unregisterCapabilityParamsSchema: ZodObject<{ unregisterations: ZodArray<ZodObject<{ id: ZodString; method: ZodString }, $strip>> }, $strip>
+```
+
+### SERVER_METHODS
+
+```ts
+const SERVER_METHODS: { all: Set<string>; alwaysAllowed: Set<string> }
+```
+
+### CLIENT_METHODS
+
+```ts
+const CLIENT_METHODS: { all: Set<string>; alwaysAllowed: Set<string> }
+```
+
+---
+
+## @lspeasy/server
+
+### MessageDispatcher
+
+Message dispatcher manages request/notification routing
+
+```ts
+constructor(logger: Logger): MessageDispatcher
+```
+
+**Methods:**
+- `registerRequest<Params, Result>(method: string, handler: RequestHandler<Params, Result>): void` — Register a request handler
+- `registerNotification<Params>(method: string, handler: NotificationHandler<Params>): void` — Register a notification handler
+- `unregisterRequest(method: string): void` — Unregister a request handler
+- `unregisterNotification(method: string): void` — Unregister a notification handler
+- `setClientCapabilities(capabilities: ClientCapabilities): void` — Set client capabilities (from initialize request)
+- `dispatch(message: Message, transport: Transport, cancellationTokens: Map<string | number, AbortController>): Promise<void>` — Dispatch an incoming message
+- `cancelRequest(id: string | number): void` — Cancel a pending request
+- `clear(): void` — Clear all handlers
+
+### PartialResultSender
+
+Helper for emitting typed `$/progress` partial result batches from server handlers.
+
+```ts
+constructor(server: BaseLSPServer): PartialResultSender
+```
+
+**Methods:**
+- `send<T>(token: ProgressToken, value: T): Promise<void>` — 
+
+### ResponseError
+
+An `Error` subclass that maps to a JSON-RPC 2.0 error response.
+
+```ts
+constructor(code: number, message: string, data?: unknown): ResponseError
+```
+
+**Properties:**
+- `stackTraceLimit: number` — The `Error.stackTraceLimit` property specifies the number of stack frames
+collected by a stack trace (whether generated by `new Error().stack` or
+`Error.captureStackTrace(obj)`).
+
+The default value is `10` but may be set to any valid JavaScript number. Changes
+will affect any stack trace captured _after_ the value has been changed.
+
+If set to a non-number value, or set to a negative number, stack traces will
+not capture any frames.
+- `code: number` — 
+- `data: unknown` — 
+- `name: string` — 
+- `message: string` — 
+- `stack: string` — 
+- `cause: unknown` — 
+
+**Methods:**
+- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error
+- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error
+- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error
+- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error
+- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error
+- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error
+- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error
+- `captureStackTrace(targetObject: object, constructorOpt?: Function): void` — Creates a `.stack` property on `targetObject`, which when accessed returns
+a string representing the location in the code at which
+`Error.captureStackTrace()` was called.
+
+```js
+const myObject = {};
+Error.captureStackTrace(myObject);
+myObject.stack;  // Similar to `new Error().stack`
+```
+
+The first line of the trace will be prefixed with
+`${myObject.name}: ${myObject.message}`.
+
+The optional `constructorOpt` argument accepts a function. If given, all frames
+above `constructorOpt`, including `constructorOpt`, will be omitted from the
+generated stack trace.
+
+The `constructorOpt` argument is useful for hiding implementation
+details of error generation from the user. For instance:
+
+```js
+function a() {
+  b();
+}
+
+function b() {
+  c();
+}
+
+function c() {
+  // Create an error without stack trace to avoid calculating the stack trace twice.
+  const { stackTraceLimit } = Error;
+  Error.stackTraceLimit = 0;
+  const error = new Error();
+  Error.stackTraceLimit = stackTraceLimit;
+
+  // Capture the stack trace above function b
+  Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+  throw error;
+}
+
+a();
+```
+- `prepareStackTrace(err: Error, stackTraces: CallSite[]): any` — 
+- `toJSON(): { code: number; message: string; data: unknown }` — Serializes to the JSON-RPC wire format (`{ code, message, data? }`).
+
+### ConsoleLogger
+
+Logger implementation that writes to the process console with level filtering.
+
+```ts
+constructor(level?: LogLevel): ConsoleLogger
+```
+
+**Methods:**
+- `error(message: string, args: unknown[]): void` — 
+- `warn(message: string, args: unknown[]): void` — 
+- `info(message: string, args: unknown[]): void` — 
+- `debug(message: string, args: unknown[]): void` — 
+- `trace(message: string, args: unknown[]): void` — 
+
+### LSPServer
+
+@lspeasy/server - Build LSP servers with simple, typed API
+
+```ts
+type LSPServer = BaseLSPServer<ServerCaps> & Server<ClientCapabilities, ServerCaps>
+```
+
+### ServerOptions
+
+Configuration for an `LSPServer` instance.
+
+### RequestHandler
+
+Signature for LSP request handlers registered via `LSPServer.onRequest`.
+
+```ts
+type RequestHandler = (params: Params, token: CancellationToken, context: RequestContext) => Promise<Result> | Result
+```
+
+### NotificationHandler
+
+Signature for LSP notification handlers registered via
+`LSPServer.onNotification`.
+
+```ts
+type NotificationHandler = (params: Params, context: NotificationContext) => void | Promise<void>
+```
+
+### NotebookDocumentHandlerNamespace
+
+### RequestContext
+
+Context provided to request handlers alongside params and the cancellation token.
+
+### NotificationContext
+
+Context provided to notification handlers alongside params.
+
+### Server
+
+Combined Server type with handlers and send methods
+
+```ts
+type Server = SimplifyDeep<{ [K in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["requests"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["requests"][K]]: ToRequestSignature<AvailableMethods<ClientCaps, ServerCaps>["server"]["requests"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["notifications"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["notifications"][K]]: ToNotificationSignature<AvailableMethods<ClientCaps, ServerCaps>["server"]["notifications"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["requestHandlers"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["requestHandlers"][K] as `on${PascalCase<string & Q, { preserveConsecutiveUppercase: true }>}`]: ToRequestHandlerSignature<AvailableMethods<ClientCaps, ServerCaps>["server"]["requestHandlers"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["notificationHandlers"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["server"]["notificationHandlers"][K] as `on${PascalCase<string & Q, { preserveConsecutiveUppercase: true }>}`]: ToNotificationHandlerSignature<AvailableMethods<ClientCaps, ServerCaps>["server"]["notificationHandlers"][K][Q]> } }>
+```
+
+### AvailableRequests
+
+Mapped type of all available LSP request methods and their handler signatures
+
+```ts
+type AvailableRequests = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof Requests[Namespace] as CamelCase<Method & string>]: IsServerCapabilityEnabled<ServerCaps, Requests[Namespace][Method]> extends true ? Requests[Namespace][Method] : never }> }>>
+```
+
+### AvailableNotifications
+
+Mapped type of all available LSP notification methods and their handler signatures
+
+```ts
+type AvailableNotifications = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof Notifications[Namespace] as CamelCase<StripNamespaceSuffix<Namespace & string, Method & string>>]: IsServerCapabilityEnabled<ServerCaps, Notifications[Namespace][Method]> extends true ? Notifications[Namespace][Method] : never }> }>>
+```
+
+### CancellationToken
+
+Singleton token that is never cancelled
+
+### CancellationToken
+
+Read-only handle for observing cancellation state.
+
+### LSPRequestMethod
+
+Union type of all valid LSP request method names
+
+```ts
+type LSPRequestMethod = Direction extends "both" ? KeyAsString<FlatRequestMap> : ConditionalKeys<FlatRequestMap, { Direction: Direction | "both" }> & string
+```
+
+### LSPNotificationMethod
+
+Union type of all valid LSP notification method names
+
+```ts
+type LSPNotificationMethod = Direction extends "both" ? KeyAsString<FlatNotificationMap> : ConditionalKeys<FlatNotificationMap, { Direction: Direction | "both" }> & string
+```
+
+### ParamsForRequest
+
+Infer request parameters from method name
+
+```ts
+type ParamsForRequest = M extends LSPRequestMethod ? FlatRequestMap[M]["Params"] : never
+```
+
+### ResultForRequest
+
+Infer request result from method name
+
+```ts
+type ResultForRequest = M extends LSPRequestMethod ? FlatRequestMap[M]["Result"] : never
+```
+
+### ParamsForNotification
+
+Infer notification parameters from method name
+
+```ts
+type ParamsForNotification = M extends LSPNotificationMethod ? FlatNotificationMap[M]["Params"] : never
+```
+
+### ServerState
+
+Lifecycle state of an `LSPServer` instance.
+
+- `Created` = `"created"` — 
+- `Initializing` = `"initializing"` — 
+- `Initialized` = `"initialized"` — 
+- `ShuttingDown` = `"shutting_down"` — 
+- `Shutdown` = `"shutdown"` — 
+
+### LSPServer
+
+@lspeasy/server - Build LSP servers with simple, typed API
+
+```ts
+let LSPServer: (options?: ServerOptions<ServerCaps>) => LSPServer<ServerCaps>
+```
+
+### JSONRPCErrorCode
+
+Numeric error codes defined by JSON-RPC 2.0 and the LSP specification.
+
+```ts
+const JSONRPCErrorCode: { ParseError: -32700; InvalidRequest: -32600; MethodNotFound: -32601; InvalidParams: -32602; InternalError: -32603; ServerNotInitialized: -32002; UnknownErrorCode: -32001; ServerErrorStart: -32099; ServerErrorEnd: -32000; RequestCancelled: -32800; ContentModified: -32801; ServerCancelled: -32802 }
+```
+
+---
