@@ -3,7 +3,18 @@
  */
 
 /**
- * JSON-RPC 2.0 error codes
+ * Numeric error codes defined by JSON-RPC 2.0 and the LSP specification.
+ *
+ * @remarks
+ * Use these constants when throwing `ResponseError` from request handlers
+ * so clients can programmatically distinguish error types.
+ *
+ * Ranges:
+ * - `-32700` to `-32600`: JSON-RPC 2.0 standard errors
+ * - `-32899` to `-32800`: LSP-reserved range
+ * - `-32099` to `-32000`: Application-defined errors
+ *
+ * @category Errors
  */
 export const JSONRPCErrorCode = {
   // Standard JSON-RPC 2.0 errors
@@ -42,7 +53,45 @@ export const ErrorMessage: Record<number, string> = {
 };
 
 /**
- * LSP Response Error
+ * An `Error` subclass that maps to a JSON-RPC 2.0 error response.
+ *
+ * @remarks
+ * Throw a `ResponseError` from any request handler to send a structured error
+ * response to the client. The framework catches it and converts it to the wire
+ * format automatically.
+ *
+ * Use the static factory methods (`ResponseError.invalidParams()`, etc.) for
+ * the standard JSON-RPC / LSP error codes rather than constructing raw codes.
+ *
+ * @useWhen
+ * A request handler needs to reject with a machine-readable error code that
+ * the client can act on (e.g. respond with `MethodNotFound` when a capability
+ * was not declared, or `InvalidParams` when schema validation fails).
+ *
+ * @avoidWhen
+ * You want to log a server-side error without sending an error to the client —
+ * throw a plain `Error` and handle it via `server.onError()` instead.
+ *
+ * @pitfalls
+ * NEVER throw `ResponseError` with a code outside the defined ranges without
+ * documenting it. Undocumented codes are opaque to clients and tools.
+ *
+ * @example
+ * ```ts
+ * import { ResponseError, JSONRPCErrorCode } from '@lspeasy/core';
+ * import { LSPServer } from '@lspeasy/server';
+ *
+ * const server = new LSPServer();
+ * server.onRequest('textDocument/hover', async (params) => {
+ *   const doc = getDocument(params.textDocument.uri);
+ *   if (!doc) {
+ *     throw ResponseError.invalidParams(`Unknown document: ${params.textDocument.uri}`);
+ *   }
+ *   return computeHover(doc, params.position);
+ * });
+ * ```
+ *
+ * @category Errors
  */
 export class ResponseError extends Error {
   constructor(
@@ -55,7 +104,7 @@ export class ResponseError extends Error {
   }
 
   /**
-   * Convert to JSON-RPC error object
+   * Serializes to the JSON-RPC wire format (`{ code, message, data? }`).
    */
   toJSON() {
     return {

@@ -20,8 +20,19 @@ import {
 } from '@lspeasy/core';
 
 /**
- * Validates that a request/notification can be sent based on
- * declared server capabilities
+ * Validates outgoing client requests and notifications against the server's
+ * declared capabilities.
+ *
+ * @remarks
+ * Created internally by `LSPClient` after a successful `initialize` handshake.
+ * In non-strict mode (default) violations are logged as warnings; in strict
+ * mode they throw.
+ *
+ * @useWhen
+ * You are implementing a custom client layer and need the same validation
+ * behaviour that `LSPClient` uses. Otherwise this is an internal detail.
+ *
+ * @category Client
  */
 export class CapabilityGuard {
   constructor(
@@ -62,8 +73,14 @@ export class CapabilityGuard {
 }
 
 /**
- * Validates that handlers can be registered based on
- * declared client capabilities
+ * Validates that server-to-client handler registrations are backed by
+ * client capabilities declared in the `initialize` request.
+ *
+ * @remarks
+ * Created internally by `LSPClient`. In non-strict mode violations are logged
+ * as warnings; in strict mode they throw.
+ *
+ * @category Client
  */
 export class ClientCapabilityGuard {
   constructor(

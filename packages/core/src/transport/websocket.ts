@@ -29,43 +29,57 @@ type WebSocketLike = {
 const READY_STATE_CONNECTING = 0;
 const READY_STATE_OPEN = 1;
 
+/**
+ * Options for configuring a `WebSocketTransport`.
+ *
+ * @remarks
+ * Provide either `url` (client mode — the transport opens the connection)
+ * or `socket` (server mode — the transport wraps an already-accepted
+ * WebSocket). Providing both or neither throws at construction time.
+ *
+ * @config
+ * @category Transport
+ */
 export interface WebSocketTransportOptions {
   /**
-   * WebSocket URL for client mode (e.g., 'ws://localhost:3000')
+   * WebSocket URL for client mode (e.g., `'ws://localhost:3000'`).
+   * Mutually exclusive with `socket`.
    */
   url?: string;
 
   /**
-   * Existing WebSocket instance for server mode
+   * Existing WebSocket instance for server mode.
+   * Mutually exclusive with `url`.
    */
   socket?: WebSocketLike;
 
   /**
-   * Enable automatic reconnection (client mode only)
+   * Enable automatic reconnection on unexpected disconnect (client mode only).
+   * @defaultValue false
    */
   enableReconnect?: boolean;
 
   /**
-   * Maximum number of reconnection attempts
-   * @default 5
+   * Maximum number of reconnection attempts before giving up.
+   * @defaultValue 5
    */
   maxReconnectAttempts?: number;
 
   /**
-   * Initial delay between reconnection attempts in milliseconds
-   * @default 1000
+   * Initial delay between reconnection attempts in milliseconds.
+   * @defaultValue 1000
    */
   reconnectDelay?: number;
 
   /**
-   * Maximum delay between reconnection attempts in milliseconds
-   * @default 30000
+   * Maximum delay between reconnection attempts in milliseconds.
+   * @defaultValue 30000
    */
   maxReconnectDelay?: number;
 
   /**
-   * Multiplier for exponential backoff
-   * @default 2
+   * Multiplier for exponential back-off between reconnection attempts.
+   * @defaultValue 2
    */
   reconnectBackoffMultiplier?: number;
 }
@@ -104,6 +118,21 @@ function getWsWebSocketCtor(): ((url: string) => WebSocketLike) | undefined {
   }
 }
 
+/**
+ * Creates a WebSocket client instance, preferring the native
+ * `globalThis.WebSocket` (Node ≥ 22.4 / modern browsers) and falling back
+ * to the optional `ws` peer dependency.
+ *
+ * @remarks
+ * This is a low-level factory used internally by `WebSocketTransport` in
+ * client mode. You rarely need to call it directly.
+ *
+ * @param url - The WebSocket server URL to connect to.
+ * @returns A `WebSocketLike` instance that is currently connecting.
+ * @throws If neither `globalThis.WebSocket` nor the `ws` package is available.
+ *
+ * @category Transport
+ */
 export function createWebSocketClient(url: string): WebSocketLike {
   const nativeCtor = getNativeWebSocketCtor();
   if (nativeCtor) {
@@ -141,11 +170,68 @@ function parseIncomingMessage(data: unknown): Message {
 }
 
 /**
- * WebSocket-based transport for LSP communication
+ * WebSocket-based transport for LSP communication.
  *
- * Supports both client and server modes:
- * - Client mode: Connects to a WebSocket server URL
- * - Server mode: Wraps an existing WebSocket connection
+ * @remarks
+ * Operates in two modes, determined by the constructor options:
+ *
+ * - **Client mode** (`url` provided) — opens a new WebSocket connection to
+ *   the given URL. Optionally supports automatic reconnection with
+ *   exponential back-off.
+ * - **Server mode** (`socket` provided) — wraps an already-accepted
+ *   WebSocket instance (e.g. from an `http.Server` `upgrade` event).
+ *
+ * Works in browsers (native `WebSocket`), Node.js ≥ 22.4 (native
+ * `globalThis.WebSocket`), and earlier Node.js versions with the optional
+ * `ws` peer dependency installed.
+ *
+ * @useWhen
+ * You are building a browser-based LSP client, a WebSocket-backed language
+ * server, or any LSP integration that must run over HTTP/HTTPS infrastructure.
+ *
+ * @avoidWhen
+ * You are building a CLI language server — `StdioTransport` (from
+ * `@lspeasy/core/node`) is the conventional choice and avoids the overhead
+ * of a network stack. For same-process workers prefer
+ * `DedicatedWorkerTransport` or `SharedWorkerTransport`.
+ *
+ * @pitfalls
+ * NEVER set `enableReconnect: true` in server mode (`socket` provided) —
+ * the option is silently ignored (reconnect has no URL to reconnect to), but
+ * the intent is misleading and suggests lifecycle management will be handled
+ * when it is not.
+ *
+ * NEVER send messages before `isConnected()` returns `true`. In client mode
+ * the socket is in CONNECTING state immediately after construction; `send()`
+ * will throw until the open event fires.
+ *
+ * @example
+ * ```ts
+ * // Client mode — connect to a running WebSocket LSP server
+ * import { LSPClient } from '@lspeasy/server';
+ * import { WebSocketTransport } from '@lspeasy/core';
+ *
+ * const transport = new WebSocketTransport({ url: 'ws://localhost:2087' });
+ * const client = new LSPClient();
+ * await client.connect(transport);
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Server mode — wrap an accepted WebSocket (e.g. inside a ws upgrade handler)
+ * import { LSPServer } from '@lspeasy/server';
+ * import { WebSocketTransport } from '@lspeasy/core';
+ * import { WebSocketServer } from 'ws';
+ *
+ * const wss = new WebSocketServer({ port: 2087 });
+ * wss.on('connection', (socket) => {
+ *   const transport = new WebSocketTransport({ socket });
+ *   const server = new LSPServer();
+ *   void server.listen(transport);
+ * });
+ * ```
+ *
+ * @category Transport
  */
 export class WebSocketTransport implements Transport {
   private socket: WebSocketLike;

@@ -52,8 +52,22 @@ export function parseHeaders(
 }
 
 /**
- * Parse a complete message from buffer
- * Returns { message, bytesRead } or null if incomplete
+ * Parses a single framed JSON-RPC 2.0 message from a raw byte buffer.
+ *
+ * @remarks
+ * This is the low-level framing parser used internally by Node.js transports
+ * (`StdioTransport`, `TcpTransport`). The buffer may contain partial data;
+ * `null` is returned when more bytes are needed.
+ *
+ * The framing format is the LSP base protocol:
+ * `Content-Length: <n>\r\n\r\n<json-body>`.
+ *
+ * @param buffer - Raw byte buffer that may contain one or more framed messages.
+ * @returns An object with the parsed `message` and `bytesRead`, or `null` if
+ *   the buffer does not yet contain a complete framed message.
+ * @throws If `Content-Length` is missing or the JSON body cannot be parsed.
+ *
+ * @category JSON-RPC
  */
 export function parseMessage(buffer: Buffer): { message: Message; bytesRead: number } | null {
   // Parse headers
@@ -98,7 +112,18 @@ export function parseMessage(buffer: Buffer): { message: Message; bytesRead: num
 }
 
 /**
- * Serialize a message to buffer with headers
+ * Serializes a JSON-RPC 2.0 message into a framed byte buffer with
+ * `Content-Length` and `Content-Type` headers.
+ *
+ * @remarks
+ * Counterpart of `parseMessage`. Used internally by Node.js transports.
+ * The output format is:
+ * `Content-Length: <n>\r\nContent-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n<json>`.
+ *
+ * @param message - The JSON-RPC message to serialize.
+ * @returns A `Buffer` containing the complete framed message ready for I/O.
+ *
+ * @category JSON-RPC
  */
 export function serializeMessage(message: Message): Buffer {
   // Serialize JSON body

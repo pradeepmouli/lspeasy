@@ -47,18 +47,75 @@ import { CapabilityGuard, ClientCapabilityGuard } from './capability-guard.js';
 import { initializeServerHandlerMethods, initializeServerSendMethods } from './capability-proxy.js';
 
 /**
- * LSP Server class with dynamic capability-aware typing
+ * Full-featured LSP server with automatic lifecycle management, typed handlers,
+ * capability-aware namespaces, and pluggable middleware.
  *
- * This class dynamically provides handler registration and send methods based on capabilities.
- * Methods are type-safe and conditionally available based on the Capabilities type parameter.
+ * @remarks
+ * `LSPServer` manages the complete LSP lifecycle (`initialize` / `initialized`
+ * / `shutdown` / `exit`) automatically. Register your handlers with
+ * `onRequest` / `onNotification`, declare capabilities with
+ * `registerCapabilities`, then start the server with `listen(transport)`.
  *
- * @template Capabilities - Server capabilities (defaults to ServerCapabilities)
+ * ### Capability-aware namespaces
+ *
+ * After calling `registerCapabilities(caps)`, the server exposes typed
+ * namespaces — e.g. `server.textDocument.onHover(handler)` — that are only
+ * present when the corresponding capability is declared. TypeScript enforces
+ * this at compile time so you cannot accidentally register a handler for a
+ * capability you never advertised.
+ *
+ * ### Transport selection
+ *
+ * - **Browser / universal**: `WebSocketTransport` (from `@lspeasy/core`)
+ * - **Node.js**: `StdioTransport`, `TcpTransport`, `IpcTransport` (from `@lspeasy/core/node`)
+ * - **Web Workers**: `DedicatedWorkerTransport`, `SharedWorkerTransport` (from `@lspeasy/core`)
+ *
+ * @useWhen
+ * You are building an LSP language server that editors and language-client
+ * tooling will connect to. `LSPServer` is the primary entry point for all
+ * server implementations.
+ *
+ * @avoidWhen
+ * You need a bare JSON-RPC layer without LSP semantics — use the transport
+ * and framing utilities directly instead.
+ *
+ * @pitfalls
+ * NEVER call `server.shutdown()` or `server.close()` from inside a request
+ * or notification handler — doing so attempts to close the transport while it
+ * is actively dispatching, causing a deadlock.
+ *
+ * NEVER mutate `ServerCapabilities` after `initialized` has been received.
+ * The client cached the `InitializeResult` at handshake time; runtime changes
+ * are invisible to it.
+ *
+ * NEVER share one `LSPServer` instance across multiple transports or
+ * connections. Each connection requires its own server instance to maintain
+ * independent protocol state (lifecycle phase, pending request IDs, etc.).
+ *
+ * NEVER send a server-to-client notification before the `initialize` response
+ * has been dispatched. Use the `initialized` notification handler as the
+ * earliest safe point for server-initiated messages.
  *
  * @example
- * // Create a server with specific capabilities
- * type MyCaps = { hoverProvider: true; completionProvider: { triggerCharacters: ['.'] } };
- * const server = new LSPServer<MyCaps>();
- * server.registerCapabilities({ hoverProvider: true, completionProvider: { triggerCharacters: ['.'] } });
+ * ```ts
+ * import { LSPServer } from '@lspeasy/server';
+ * // Node.js: import { StdioTransport } from '@lspeasy/core/node';
+ * // Browser: import { WebSocketTransport } from '@lspeasy/core';
+ *
+ * const server = new LSPServer({ name: 'my-lsp', version: '1.0.0' })
+ *   .registerCapabilities({ hoverProvider: true });
+ *
+ * server.textDocument.onHover(async (params, token) => {
+ *   if (token.isCancellationRequested) return null;
+ *   return { contents: { kind: 'plaintext', value: 'Hello from my-lsp' } };
+ * });
+ *
+ * const transport = new StdioTransport();
+ * await server.listen(transport);
+ * ```
+ *
+ * @template Capabilities - Shape of the server capabilities, defaults to `ServerCapabilities`.
+ * @category Server
  */
 export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = ServerCapabilities> {
   private readonly logger: Logger;
@@ -360,7 +417,16 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 
   /**
-   * Start listening on a transport
+   * Attaches the server to a transport and begins processing messages.
+   *
+   * @remarks
+   * After `listen()` returns the server is ready to receive the `initialize`
+   * request from the client. The LSP handshake proceeds automatically.
+   *
+   * @param transport - The transport to listen on.
+   * @throws If the server is already listening (call `close()` first).
+   *
+   * @category Lifecycle
    */
   async listen(transport: Transport): Promise<void> {
     if (this.transport) {
@@ -388,7 +454,19 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 
   /**
-   * Graceful shutdown
+   * Initiates graceful shutdown, waits for in-flight handlers, then closes
+   * the transport.
+   *
+   * @remarks
+   * Waits up to `timeout` ms for pending handlers to complete, then
+   * cancels any remaining in-flight requests before closing. Use this method
+   * to shut down in response to an OS signal or editor session end.
+   *
+   * @param timeout - Maximum milliseconds to wait for in-flight handlers before
+   *   force-cancelling them.
+   * @defaultValue 5000
+   *
+   * @category Lifecycle
    */
   async shutdown(timeout: number = 5000): Promise<void> {
     if (this.state === ServerState.Shutdown) {

@@ -62,20 +62,66 @@ import { PartialResultCollector } from './connection/partial-result-collector.js
  */
 
 /**
- * LSP Client for connecting to language servers
+ * Typed LSP client that connects to a language server, manages the LSP
+ * handshake, and exposes capability-aware request namespaces.
  *
- * This class dynamically extends with capability-aware methods based on server capabilities.
- * Use `.expect<ServerCaps>()` after initialization to get typed access to server capabilities.
+ * @remarks
+ * `LSPClient` handles the `initialize` / `initialized` handshake
+ * automatically on `connect()`. After connecting, call `expect<ServerCaps>()`
+ * to narrow the client type to the server's advertised capabilities, giving
+ * you typed access to namespaces like `client.textDocument.hover(params)`.
  *
- * @template ClientCaps - Client capabilities (defaults to ClientCapabilities)
+ * ### Capability-aware namespaces
+ * After `connect()`, `LSPClient` dynamically attaches namespaces reflecting
+ * the server's `InitializeResult.capabilities`. Use `expect<Caps>()` to make
+ * this visible in TypeScript without changing runtime behaviour.
+ *
+ * ### Dynamic registration
+ * The client handles `client/registerCapability` and
+ * `client/unregisterCapability` requests automatically, updating the
+ * capability-aware namespaces at runtime.
+ *
+ * @useWhen
+ * You are embedding an LSP client inside an editor extension, a CLI tool, a
+ * test harness, or any process that connects to a language server.
+ *
+ * @avoidWhen
+ * You need to build the server end — use `LSPServer` from `@lspeasy/server`.
+ *
+ * @pitfalls
+ * NEVER call `sendRequest` before `connect()` completes — the transport is not
+ * attached yet and the call throws.
+ *
+ * NEVER send requests after `disconnect()` is called — the transport has been
+ * closed; any pending promises will reject with a "Connection closed" error.
+ *
+ * NEVER share one `LSPClient` across two separate language server processes —
+ * each process is an independent JSON-RPC peer with its own ID sequence and
+ * lifecycle state.
  *
  * @example
- * // Create a client, then narrow server capabilities after connecting
- * const client = new LSPClient<MyClientCaps>();
+ * ```ts
+ * import { LSPClient } from '@lspeasy/client';
+ * import { WebSocketTransport } from '@lspeasy/core';
+ *
+ * const client = new LSPClient({
+ *   name: 'my-editor',
+ *   capabilities: { textDocument: { hover: {} } },
+ * });
+ *
+ * const transport = new WebSocketTransport({ url: 'ws://localhost:2087' });
  * await client.connect(transport);
- * const typed = client.expect<{ hoverProvider: true; completionProvider: {} }>();
- * // typed.textDocument.hover is available (typed)
- * // typed.textDocument.completion is available (typed)
+ *
+ * const typed = client.expect<{ hoverProvider: true }>();
+ * const hover = await typed.textDocument.hover({
+ *   textDocument: { uri: 'file:///src/index.ts' },
+ *   position: { line: 0, character: 5 },
+ * });
+ * console.log(hover?.contents);
+ * ```
+ *
+ * @template ClientCaps - Client capabilities shape, defaults to `ClientCapabilities`.
+ * @category Client
  */
 class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities> {
   private transport?: Transport;
@@ -175,7 +221,21 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 
   /**
-   * Connect to server and complete initialization
+   * Connects to the language server and performs the LSP initialization
+   * handshake (`initialize` → `initialized`).
+   *
+   * @remarks
+   * Sends an `initialize` request with the client's declared capabilities,
+   * waits for the server's `InitializeResult`, then sends `initialized`.
+   * Throws and cleans up the transport on any failure during handshake.
+   *
+   * @param transport - The transport to use for the connection.
+   * @returns The server's `InitializeResult` including `capabilities` and
+   *   optional `serverInfo`.
+   * @throws If the client is already connected, or the `initialize` request
+   *   fails (e.g. server rejects the protocol version).
+   *
+   * @category Lifecycle
    */
   async connect(transport: Transport): Promise<InitializeResult> {
     if (this.connected) {
@@ -408,7 +468,39 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 
   /**
-   * Send a cancellable request
+   * Sends a request that can be cancelled via the returned `cancel()` function.
+   *
+   * @remarks
+   * Convenience wrapper that creates a `CancellationTokenSource` internally,
+   * attaches it to the request, and exposes `cancel()` on the result.
+   * Calling `cancel()` sends `$/cancelRequest` to the server and rejects
+   * `promise` with a cancellation error.
+   *
+   * @param method - The LSP request method string.
+   * @param params - Optional request parameters.
+   * @returns A `CancellableRequest` with `promise` and `cancel`.
+   *
+   * @pitfalls
+   * NEVER ignore the `CancellableRequest.promise` rejection after calling
+   * `cancel()`. Always attach a `.catch()` handler to avoid unhandled
+   * promise rejections.
+   *
+   * @example
+   * ```ts
+   * const req = client.sendCancellableRequest('textDocument/completion', params);
+   *
+   * // Cancel on user keystroke
+   * input.addEventListener('input', () => req.cancel());
+   *
+   * try {
+   *   const result = await req.promise;
+   * } catch (e) {
+   *   if (e.message.includes('cancel')) return; // User cancelled
+   *   throw e;
+   * }
+   * ```
+   *
+   * @category Client
    */
   sendCancellableRequest<M extends LSPRequestMethod<'clientToServer'>>(
     method: M,
@@ -425,7 +517,40 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 
   /**
-   * Send a request with partial-result streaming support.
+   * Sends a request with partial-result streaming support (LSP
+   * `partialResultToken`).
+   *
+   * @remarks
+   * Attaches a `partialResultToken` to the outgoing request params, then
+   * collects `$/progress` notifications from the server as each partial
+   * result arrives. Returns a summary of all partial results plus the final
+   * result when the request completes.
+   *
+   * @param method - The LSP request method (must support `partialResultToken`).
+   * @param params - The request parameters (a `partialResultToken` is injected).
+   * @param options - Streaming options including an `onPartial` callback.
+   * @param token - Optional cancellation token.
+   * @returns A `PartialRequestResult` with `cancelled`, `partialResults`, and
+   *   `finalResult` (undefined if cancelled).
+   *
+   * @useWhen
+   * The server supports incremental results for long-running operations like
+   * `textDocument/completion` or `workspace/symbol` with large result sets.
+   *
+   * @avoidWhen
+   * The server does not advertise partial result support — the token will be
+   * silently ignored and no `$/progress` notifications will arrive.
+   *
+   * @example
+   * ```ts
+   * const { partialResults, finalResult } = await client.sendRequestWithPartialResults(
+   *   'workspace/symbol',
+   *   { query: 'MyClass' },
+   *   { onPartial: (symbols) => updateUI(symbols) }
+   * );
+   * ```
+   *
+   * @category Client
    */
   async sendRequestWithPartialResults<
     M extends LSPRequestMethod<'clientToServer'>,

@@ -4,14 +4,49 @@
  */
 
 /**
- * Represents a disposable resource that can be cleaned up
+ * Represents a resource that can be explicitly released.
+ *
+ * @remarks
+ * Every subscription, handler registration, and event listener in lspeasy
+ * returns a `Disposable`. Call `.dispose()` to unsubscribe and free memory.
+ * Use `DisposableStore` to collect and dispose multiple resources at once.
+ *
+ * @category Lifecycle
  */
 export interface Disposable {
   dispose(): void;
 }
 
 /**
- * Store for managing multiple disposables
+ * Collects multiple `Disposable` instances and releases them together.
+ *
+ * @remarks
+ * Ideal for managing handler registrations on a server that should all be
+ * torn down when a document is closed or a feature is disabled.
+ * Once `dispose()` is called on the store, any further `add()` calls
+ * immediately dispose the item rather than storing it.
+ *
+ * @useWhen
+ * You register multiple handlers (hover, completion, definition) that share
+ * the same lifetime — collect them all into one store and dispose the store
+ * on shutdown or feature toggle.
+ *
+ * @example
+ * ```ts
+ * import { DisposableStore } from '@lspeasy/core';
+ * import { LSPServer } from '@lspeasy/server';
+ *
+ * const server = new LSPServer();
+ * const disposables = new DisposableStore();
+ *
+ * disposables.add(server.onRequest('textDocument/hover', handleHover));
+ * disposables.add(server.onRequest('textDocument/completion', handleCompletion));
+ *
+ * // Later — unregister all handlers at once
+ * disposables.dispose();
+ * ```
+ *
+ * @category Lifecycle
  */
 export class DisposableStore implements Disposable {
   private disposables: Disposable[] = [];

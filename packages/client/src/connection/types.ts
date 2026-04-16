@@ -1,5 +1,14 @@
 /**
- * Lifecycle state for the client connection.
+ * Lifecycle state of an `LSPClient` connection.
+ *
+ * @remarks
+ * Transitions: `Disconnected` → `Connecting` (on `connect()`) → `Connected`
+ * (after `initialized`) → `Disconnecting` (on `disconnect()`) →
+ * `Disconnected`.
+ *
+ * Listen for state changes via `LSPClient.onConnectionStateChange`.
+ *
+ * @category Client
  */
 export enum ConnectionState {
   Connecting = 'connecting',
@@ -10,15 +19,28 @@ export enum ConnectionState {
 
 /**
  * Configuration for optional heartbeat monitoring.
+ *
+ * @remarks
+ * When `enabled` is `true`, the client sends a `$/ping` request at each
+ * `interval` milliseconds. If no response arrives within `timeout`
+ * milliseconds, the connection is marked unresponsive.
+ *
+ * @config
+ * @category Client
  */
 export interface HeartbeatConfig {
+  /** Whether heartbeat monitoring is active. */
   enabled?: boolean;
+  /** Interval between pings in milliseconds. */
   interval: number;
+  /** Time to wait for a pong response in milliseconds. */
   timeout: number;
 }
 
 /**
- * Runtime heartbeat status snapshot.
+ * Snapshot of the current heartbeat monitoring status.
+ *
+ * @category Client
  */
 export interface HeartbeatStatus {
   enabled: boolean;
@@ -30,7 +52,10 @@ export interface HeartbeatStatus {
 }
 
 /**
- * Aggregated connection health details.
+ * Aggregated connection health snapshot returned by
+ * `LSPClient.getConnectionHealth()`.
+ *
+ * @category Client
  */
 export interface ConnectionHealth {
   state: ConnectionState;
@@ -40,7 +65,10 @@ export interface ConnectionHealth {
 }
 
 /**
- * Event payload emitted when connection state changes.
+ * Payload emitted when the connection state changes.
+ * Subscribe via `LSPClient.onConnectionStateChange()`.
+ *
+ * @category Client
  */
 export interface StateChangeEvent {
   previous: ConnectionState;

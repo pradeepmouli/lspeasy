@@ -26,7 +26,14 @@ import type { HeartbeatConfig } from './connection/types.js';
 export type { Client } from '@lspeasy/core';
 
 /**
- * LSP Client options
+ * Configuration for an `LSPClient` instance.
+ *
+ * @remarks
+ * Passed to the `LSPClient` constructor. All fields are optional; the client
+ * works with zero configuration.
+ *
+ * @config
+ * @category Client
  */
 export interface ClientOptions<
   ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities
@@ -101,25 +108,43 @@ export interface InitializeResult {
 }
 
 /**
- * Cancellable request result
+ * Return value of `LSPClient.sendCancellableRequest`.
+ *
+ * @remarks
+ * `promise` rejects with a cancellation error when `cancel()` is called.
+ * Always attach a `.catch()` handler to `promise` before calling `cancel()`
+ * to avoid unhandled promise rejections.
+ *
+ * @typeParam T - The expected response result type.
+ * @category Client
  */
 export interface CancellableRequest<T> {
   /**
-   * Promise that resolves with the request result
+   * Promise that resolves with the request result or rejects on cancellation.
    */
   promise: Promise<T>;
 
   /**
-   * Function to cancel the request
+   * Cancels the in-flight request and sends `$/cancelRequest` to the server.
    */
   cancel: () => void;
 }
 
 /**
- * Options for sending a request with partial-result streaming.
+ * Options for `LSPClient.sendRequestWithPartialResults`.
+ *
+ * @config
+ * @typeParam TPartial - The partial result element type.
+ * @category Client
  */
 export interface PartialRequestOptions<TPartial> {
+  /**
+   * Custom `partialResultToken` value; auto-generated when omitted.
+   */
   token?: string | number;
+  /**
+   * Called for each `$/progress` notification carrying a partial result.
+   */
   onPartial: (partial: TPartial) => void;
 }
 
