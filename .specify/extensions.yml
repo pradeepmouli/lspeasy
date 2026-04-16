@@ -17,13 +17,6 @@ hooks:
     prompt: Check for spec drift after implementation?
     description: ''
     condition: null
-  - extension: workflows
-    command: speckit.workflows.issue-sync-after-implement
-    enabled: true
-    optional: false
-    prompt: null
-    description: Update linked issue for workflow boundary after_implement
-    condition: null
   - extension: git
     command: speckit.git.commit
     enabled: true
@@ -48,23 +41,14 @@ hooks:
 
       '
     condition: null
-  after_plan_ultraplan:
   - extension: workflows
-    command: speckit.workflows.ultraplan-tasks
-    enabled: true
-    optional: true
-    prompt: Run ultraplan to generate a deep task breakdown from spec.md and plan.md?
-    description: Deep task breakdown using extended analysis — opt-in replacement
-      for speckit.tasks
-    condition: null
-  before_specify:
-  - extension: workflows
-    command: speckit.workflows.issue-sync-before-specify
+    command: speckit.workflows.issue-sync-after-implement
     enabled: true
     optional: false
     prompt: null
-    description: Update linked issue for workflow boundary before_specify
+    description: Update linked issue for workflow boundary after_implement
     condition: null
+  before_specify:
   - extension: git
     command: speckit.git.feature
     enabled: true
@@ -91,14 +75,14 @@ hooks:
 
       '
     condition: null
-  after_specify:
   - extension: workflows
-    command: speckit.workflows.issue-sync-after-specify
+    command: speckit.workflows.issue-sync-before-specify
     enabled: true
     optional: false
     prompt: null
-    description: Update linked issue for workflow boundary after_specify
+    description: Update linked issue for workflow boundary before_specify
     condition: null
+  after_specify:
   - extension: git
     command: speckit.git.commit
     enabled: true
@@ -120,14 +104,14 @@ hooks:
     prompt: Check artifact sync status after specification?
     description: Show sync status after spec generation
     condition: null
-  before_plan:
   - extension: workflows
-    command: speckit.workflows.issue-sync-before-plan
+    command: speckit.workflows.issue-sync-after-specify
     enabled: true
     optional: false
     prompt: null
-    description: Update linked issue for workflow boundary before_plan
+    description: Update linked issue for workflow boundary after_specify
     condition: null
+  before_plan:
   - extension: git
     command: speckit.git.commit
     enabled: true
@@ -135,14 +119,14 @@ hooks:
     prompt: Commit outstanding changes before planning?
     description: Auto-commit before implementation planning
     condition: null
-  after_plan:
   - extension: workflows
-    command: speckit.workflows.issue-sync-after-plan
+    command: speckit.workflows.issue-sync-before-plan
     enabled: true
     optional: false
     prompt: null
-    description: Update linked issue for workflow boundary after_plan
+    description: Update linked issue for workflow boundary before_plan
     condition: null
+  after_plan:
   - extension: git
     command: speckit.git.commit
     enabled: true
@@ -157,14 +141,14 @@ hooks:
     prompt: Check artifact sync status after planning?
     description: Show sync status after plan generation
     condition: null
-  before_tasks:
   - extension: workflows
-    command: speckit.workflows.issue-sync-before-tasks
+    command: speckit.workflows.issue-sync-after-plan
     enabled: true
     optional: false
     prompt: null
-    description: Update linked issue for workflow boundary before_tasks
+    description: Update linked issue for workflow boundary after_plan
     condition: null
+  before_tasks:
   - extension: git
     command: speckit.git.commit
     enabled: true
@@ -172,14 +156,14 @@ hooks:
     prompt: Commit outstanding changes before task generation?
     description: Auto-commit before task generation
     condition: null
-  after_tasks:
   - extension: workflows
-    command: speckit.workflows.issue-sync-after-tasks
+    command: speckit.workflows.issue-sync-before-tasks
     enabled: true
     optional: false
     prompt: null
-    description: Update linked issue for workflow boundary after_tasks
+    description: Update linked issue for workflow boundary before_tasks
     condition: null
+  after_tasks:
   - extension: git
     command: speckit.git.commit
     enabled: true
@@ -197,14 +181,14 @@ hooks:
 
       '
     condition: null
-  before_implement:
   - extension: workflows
-    command: speckit.workflows.issue-sync-before-implement
+    command: speckit.workflows.issue-sync-after-tasks
     enabled: true
     optional: false
     prompt: null
-    description: Update linked issue for workflow boundary before_implement
+    description: Update linked issue for workflow boundary after_tasks
     condition: null
+  before_implement:
   - extension: git
     command: speckit.git.commit
     enabled: true
@@ -222,13 +206,12 @@ hooks:
 
       '
     condition: null
-  before_commit:
   - extension: workflows
-    command: speckit.workflows.review
+    command: speckit.workflows.issue-sync-before-implement
     enabled: true
-    optional: true
-    prompt: Confirm review is approved before committing?
-    description: Ensure review is complete before git commit
+    optional: false
+    prompt: null
+    description: Update linked issue for workflow boundary before_implement
     condition: null
   before_constitution:
   - extension: git
@@ -309,4 +292,21 @@ hooks:
     optional: true
     prompt: Commit after syncing issues?
     description: Auto-commit after tasks-to-issues conversion
+    condition: null
+  after_plan_ultraplan:
+  - extension: workflows
+    command: speckit.workflows.ultraplan-tasks
+    enabled: true
+    optional: true
+    prompt: Run ultraplan to generate a deep task breakdown from spec.md and plan.md?
+    description: Deep task breakdown using extended analysis — opt-in replacement
+      for speckit.tasks
+    condition: null
+  before_commit:
+  - extension: workflows
+    command: speckit.workflows.review
+    enabled: true
+    optional: true
+    prompt: Confirm review is approved before committing?
+    description: Ensure review is complete before git commit
     condition: null
