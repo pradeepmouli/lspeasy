@@ -1,5 +1,38 @@
 /**
- * @lspeasy/core - Core types, transports, and utilities for LSP SDK
+ * Core types, transports, and utilities shared by all lspeasy packages.
+ *
+ * @remarks
+ * `@lspeasy/core` is the shared foundation for the lspeasy SDK. It contains
+ * everything needed to build custom LSP integrations, and re-exports the
+ * most-used pieces from `@lspeasy/client` and `@lspeasy/server`.
+ *
+ * ### Key areas
+ *
+ * **JSON-RPC 2.0** — Message types ({@link RequestMessage}, {@link NotificationMessage},
+ * {@link ResponseMessage}), framing ({@link parseMessage}, {@link serializeMessage}),
+ * and Zod schemas for validation.
+ *
+ * **Transports** — The {@link Transport} interface plus browser-compatible
+ * implementations: {@link WebSocketTransport}, {@link DedicatedWorkerTransport},
+ * {@link SharedWorkerTransport}.
+ * Node.js transports (`StdioTransport`, `TcpTransport`, `IpcTransport`) are
+ * in `@lspeasy/core/node` to avoid importing Node.js builtins in browsers.
+ *
+ * **Middleware** — The {@link Middleware} pipeline runs on every
+ * client-to-server and server-to-client message. Use {@link createScopedMiddleware}
+ * to limit a middleware to specific methods, and {@link createTypedMiddleware}
+ * for full param/result type inference.
+ *
+ * **LSP protocol** — {@link LSPRequest} and {@link LSPNotification} namespaces
+ * expose every standard LSP method with its params and result types.
+ * {@link LSPRequestMethod} / {@link LSPNotificationMethod} are the union types
+ * for string-literal method names.
+ *
+ * **Utilities** — {@link CancellationTokenSource} for request cancellation,
+ * {@link DisposableStore} for lifecycle management, {@link ResponseError} for
+ * structured JSON-RPC errors, {@link DocumentVersionTracker} for document sync.
+ *
+ * @packageDocumentation
  */
 
 // JSON-RPC 2.0 types and utilities

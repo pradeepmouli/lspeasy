@@ -1,5 +1,38 @@
 /**
- * @lspeasy/server - Build LSP servers with simple, typed API
+ * LSP server package for hosting Language Server Protocol (LSP) servers.
+ *
+ * @remarks
+ * Use `@lspeasy/server` when you need to build the **provider** side of the
+ * Language Server Protocol — a daemon that editors and language-client tooling
+ * connect to in order to get diagnostics, completions, hover, go-to-definition,
+ * and other language intelligence features.
+ *
+ * The primary entry point is {@link LSPServer}. Construct it with
+ * {@link ServerOptions}, call `registerCapabilities(caps)` to declare what
+ * the server supports, register handlers with `onRequest` / `onNotification`,
+ * then call `listen(transport)` to accept the first client connection.
+ *
+ * ### Choosing a transport
+ * | Environment | Transport |
+ * |---|---|
+ * | Editor stdio/pipe | `StdioTransport` from `@lspeasy/core/node` |
+ * | TCP socket | `TcpTransport` from `@lspeasy/core/node` |
+ * | In-process / test | `WebSocketTransport` from `@lspeasy/core` |
+ * | Web Workers | `DedicatedWorkerTransport` from `@lspeasy/core` |
+ *
+ * ### Typed capability namespaces
+ * After `registerCapabilities({ hoverProvider: true })`, TypeScript exposes
+ * `server.textDocument.onHover(handler)` — methods that are absent unless the
+ * corresponding capability is declared. This prevents accidentally registering
+ * handlers for capabilities the server never advertised.
+ *
+ * ### Handler conventions
+ * - {@link RequestHandler} — async, throws {@link ResponseError} for
+ *   structured errors, checks `token.isCancellationRequested` for early exit.
+ * - {@link NotificationHandler} — fire-and-forget; unhandled rejections
+ *   surface via `server.onError()`.
+ *
+ * @packageDocumentation
  */
 
 // Main server class

@@ -27,7 +27,7 @@ import type { Disposable } from './disposable.js';
  * The handler is synchronous and returns in less than a few milliseconds.
  * Polling `isCancellationRequested` in a tight loop has negligible benefit.
  *
- * @pitfalls
+ * @never
  * NEVER ignore the cancellation token on long-running requests. If a client
  * sends `$/cancelRequest` and the server does not stop processing, the client
  * times out and receives no usable feedback. Always check

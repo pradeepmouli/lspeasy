@@ -18,7 +18,7 @@ import type {
  * You are building an LSP client that sends `textDocument/didChange`
  * notifications and need to track per-document version counters.
  *
- * @pitfalls
+ * @never
  * NEVER send a `textDocument/didChange` with the same version number as a
  * previous change for the same document. The server may reject the change as
  * a no-op or apply it out of order, causing text state desync.

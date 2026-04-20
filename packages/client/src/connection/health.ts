@@ -9,6 +9,28 @@ type HealthEventMap = {
 
 /**
  * Tracks connection state transitions and message activity timestamps.
+ *
+ * @remarks
+ * `ConnectionHealthTracker` is created internally by `LSPClient` and exposed
+ * via `client.connectionHealth`. Subscribe to `stateChanged` and
+ * `healthChanged` events to react to disconnections or transport failures.
+ *
+ * @useWhen
+ * You need to monitor connection liveness — for example, to show a status
+ * indicator, trigger reconnection logic, or surface transport errors to users.
+ *
+ * @see {@link HeartbeatMonitor} for detecting silent transport failures with
+ * periodic ping/pong checks.
+ *
+ * @never
+ * NEVER mutate the object returned by `getHealth()` — it is a defensive copy
+ * but consumers that store a reference and then modify it will see stale state.
+ *
+ * NEVER call `setState` from outside `LSPClient` internals. External callers
+ * have no knowledge of the full state-transition graph; setting state directly
+ * can desync the client's internal bookkeeping from the tracker's reported state.
+ *
+ * @category Client
  */
 export class ConnectionHealthTracker extends DisposableEventEmitter<HealthEventMap> {
   private health: ConnectionHealth = {
@@ -19,6 +41,9 @@ export class ConnectionHealthTracker extends DisposableEventEmitter<HealthEventM
 
   /**
    * Returns a defensive copy of the current health snapshot.
+   *
+   * @returns A shallow copy of the current {@link ConnectionHealth} object,
+   *   including a nested copy of `heartbeat` when present.
    */
   getHealth(): ConnectionHealth {
     const baseHealth: ConnectionHealth = {
@@ -37,6 +62,13 @@ export class ConnectionHealthTracker extends DisposableEventEmitter<HealthEventM
 
   /**
    * Updates connection state and emits state/health change events.
+   *
+   * @param next - The new {@link ConnectionState} to transition to.
+   * @param reason - Optional human-readable reason for the state transition
+   *   (e.g. `'Transport error'`). Included in the emitted `StateChangeEvent`.
+   *
+   * @see {@link ConnectionState} for valid state values.
+   * @see {@link ConnectionHealthTracker} for the full class contract.
    */
   setState(next: ConnectionState, reason?: string): void {
     if (this.health.state === next) {

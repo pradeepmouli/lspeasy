@@ -21,7 +21,26 @@ import type {
 } from './types.js';
 
 /**
- * Message dispatcher manages request/notification routing
+ * Routes incoming JSON-RPC requests and notifications to their registered handlers.
+ *
+ * @remarks
+ * `MessageDispatcher` is an internal component of `LSPServer`. It maintains
+ * separate handler registries for requests (which require a response) and
+ * notifications (fire-and-forget), and handles cancellation via `AbortController`.
+ *
+ * Most users should interact with `LSPServer.onRequest` / `LSPServer.onNotification`
+ * instead of using `MessageDispatcher` directly.
+ *
+ * @never
+ * NEVER register the same method in both the request and notification handler
+ * registries — the dispatcher uses separate lookup tables and the method will
+ * only match one path, silently ignoring the other.
+ *
+ * NEVER call `dispatch` before calling `setClientCapabilities` if your handler
+ * reads `context.clientCapabilities` — the value will be `undefined` until
+ * the `initialize` request is processed.
+ *
+ * @category Server
  */
 export class MessageDispatcher {
   private requestHandlers = new HandlerRegistry<
@@ -36,7 +55,12 @@ export class MessageDispatcher {
   constructor(private readonly logger: Logger) {}
 
   /**
-   * Register a request handler
+   * Register a typed request handler for the given LSP method.
+   *
+   * @param method - The LSP method string (e.g. `'textDocument/hover'`).
+   * @param handler - The handler function to invoke for matching requests.
+   *
+   * @see {@link RequestHandler} for the handler signature.
    */
   registerRequest<Params, Result>(method: string, handler: RequestHandler<Params, Result>): void {
     this.requestHandlers.register(method, handler as RequestHandler);
@@ -44,7 +68,12 @@ export class MessageDispatcher {
   }
 
   /**
-   * Register a notification handler
+   * Register a typed notification handler for the given LSP method.
+   *
+   * @param method - The LSP method string (e.g. `'textDocument/didOpen'`).
+   * @param handler - The handler function to invoke for matching notifications.
+   *
+   * @see {@link NotificationHandler} for the handler signature.
    */
   registerNotification<Params>(method: string, handler: NotificationHandler<Params>): void {
     this.notificationHandlers.register(method, handler as NotificationHandler);

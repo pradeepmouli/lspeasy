@@ -72,7 +72,7 @@ export const ErrorMessage: Record<number, string> = {
  * You want to log a server-side error without sending an error to the client —
  * throw a plain `Error` and handle it via `server.onError()` instead.
  *
- * @pitfalls
+ * @never
  * NEVER throw `ResponseError` with a code outside the defined ranges without
  * documenting it. Undocumented codes are opaque to clients and tools.
  *

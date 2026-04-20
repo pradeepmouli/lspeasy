@@ -24,7 +24,7 @@ export interface BaseMessage {
  * Per the JSON-RPC 2.0 spec, `id` may be a `string` or `number` — never
  * assume integers only.
  *
- * @pitfalls
+ * @never
  * NEVER assume JSON-RPC IDs are integers. The spec permits strings, and some
  * LSP clients (e.g. VS Code extensions) use string IDs. Always use `String(id)`
  * when keying pending-request maps.
@@ -45,7 +45,7 @@ export interface RequestMessage extends BaseMessage {
  * notification violates the JSON-RPC 2.0 spec and will be silently dropped
  * by compliant clients.
  *
- * @pitfalls
+ * @never
  * NEVER send a notification before the `initialize` response has been sent
  * by the server. The LSP spec requires the server to respond to `initialize`
  * before any other message is exchanged; clients discard early notifications.

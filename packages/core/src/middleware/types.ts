@@ -112,7 +112,7 @@ export interface TypedMiddlewareContext<M extends LSPMethod> extends MiddlewareC
  * Set `shortCircuit: true` (plus `response` or `error`) to bypass all
  * remaining middleware and the final handler.
  *
- * @pitfalls
+ * @never
  * NEVER short-circuit a request without providing a valid `response` or
  * `error` — the pending request will never resolve and the client will time
  * out with no recourse.
@@ -151,7 +151,7 @@ export type MiddlewareNext = () => Promise<void | MiddlewareResult>;
  * `onRequest` / `onNotification` handler instead. Middleware adds overhead
  * for every message regardless of method.
  *
- * @pitfalls
+ * @never
  * NEVER mutate `context.message.id` — it is read-only by design. Response
  * correlation depends on the ID remaining stable through the pipeline.
  *

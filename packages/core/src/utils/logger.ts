@@ -55,7 +55,7 @@ export interface Logger {
  * custom logger is provided. Set `logLevel` in `ServerOptions` /
  * `ClientOptions` to control verbosity.
  *
- * @pitfalls
+ * @never
  * NEVER use `ConsoleLogger` in a stdio LSP server (`StdioTransport`) — the
  * LSP base protocol uses stdout as the message channel. Any `console.log` /
  * `console.info` / `console.debug` output will corrupt the stdio stream.

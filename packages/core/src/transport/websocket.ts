@@ -195,7 +195,7 @@ function parseIncomingMessage(data: unknown): Message {
  * of a network stack. For same-process workers prefer
  * `DedicatedWorkerTransport` or `SharedWorkerTransport`.
  *
- * @pitfalls
+ * @never
  * NEVER set `enableReconnect: true` in server mode (`socket` provided) —
  * the option is silently ignored (reconnect has no URL to reconnect to), but
  * the intent is misleading and suggests lifecycle management will be handled

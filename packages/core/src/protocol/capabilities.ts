@@ -81,6 +81,14 @@ export function serverSupportsRequest<M extends LSPRequestMethod<'clientToServer
   return value !== null && value !== undefined && value !== false;
 }
 
+/**
+ * Type-guarding predicate that narrows `capabilities` to include the specific
+ * server capability key required for the given client-to-server notification method.
+ *
+ * @param method - The LSP notification method string (e.g. `'textDocument/didOpen'`).
+ * @param capabilities - The `ServerCapabilities` object to test.
+ * @returns `true` when the server has declared support for the method.
+ */
 export function serverSupportsNotification<
   M extends LSPNotificationMethod<'clientToServer'>,
   T extends Partial<ServerCapabilities>
@@ -114,6 +122,14 @@ export function clientSupportsRequest<
   return value !== null && value !== undefined && value !== false;
 }
 
+/**
+ * Type-guarding predicate that narrows `capabilities` to include the specific
+ * client capability key required for the given server-to-client notification method.
+ *
+ * @param method - The LSP notification method string (e.g. `'window/logMessage'`).
+ * @param capabilities - The `ClientCapabilities` object to test.
+ * @returns `true` when the client has declared support for the method.
+ */
 export function clientSupportsNotification<
   M extends LSPNotificationMethod<'serverToClient'>,
   T extends Partial<ClientCapabilities>
@@ -215,6 +231,12 @@ export function supportsWorkspaceFolders(
   return capabilities.workspace?.workspaceFolders?.supported === true;
 }
 
+/**
+ * Helper to check if notebook document sync is supported by the server.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @returns `true` when `notebookDocumentSync` is declared (not null/undefined).
+ */
 export function supportsNotebookDocumentSync(
   capabilities: ServerCapabilities
 ): capabilities is ServerCapabilities & {

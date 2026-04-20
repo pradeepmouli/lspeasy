@@ -31,6 +31,19 @@ export interface NotificationWaitOptions<TParams> {
  * a server-side operation — for example, waiting for
  * `textDocument/publishDiagnostics` after saving a document.
  *
+ * @avoidWhen
+ * You need to listen for ongoing notifications (not a one-shot wait) — use
+ * `LSPClient.onNotification` for persistent subscriptions instead.
+ *
+ * @never
+ * NEVER create a `NotificationWaiter` without setting a timeout — an
+ * indefinite wait will leak the waiter permanently if the notification never
+ * arrives (e.g. the server suppresses it for certain file types).
+ *
+ * NEVER use `NotificationWaiter` to wait for notifications that arrive before
+ * the waiter is registered. The waiter only sees notifications emitted after
+ * `start()` is called; earlier notifications are silently missed.
+ *
  * @example
  * ```ts
  * // Wait for diagnostics after saving

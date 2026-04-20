@@ -7,6 +7,21 @@ import { LSPRequest, LSPNotification } from '../protocol/namespaces.js';
 
 type CapabilityKey = 'ServerCapability' | 'ClientCapability';
 
+/**
+ * Builds the full set of LSP methods and the subset that are always allowed
+ * (not gated by a capability) for a given capability key.
+ *
+ * @remarks
+ * Iterates every entry in {@link LSPRequest} and {@link LSPNotification} to
+ * collect method strings, then marks those without a corresponding capability
+ * entry as always-allowed (e.g. `initialize`, `shutdown`, `$/cancelRequest`).
+ *
+ * @param capabilityKey - Whether to index by `'ServerCapability'` or `'ClientCapability'`.
+ * @returns An object with `all` (every known method) and `alwaysAllowed`
+ *   (methods that do not require a capability declaration).
+ *
+ * @category Utilities
+ */
 export function buildMethodSets(capabilityKey: CapabilityKey): {
   all: Set<string>;
   alwaysAllowed: Set<string>;
@@ -37,7 +52,20 @@ export function buildMethodSets(capabilityKey: CapabilityKey): {
   return { all, alwaysAllowed };
 }
 
+/**
+ * Pre-built method sets indexed by server capability.
+ * Used by `CapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
+ *
+ * @category Utilities
+ */
 export const SERVER_METHODS = buildMethodSets('ServerCapability');
+
+/**
+ * Pre-built method sets indexed by client capability.
+ * Used by `ClientCapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
+ *
+ * @category Utilities
+ */
 export const CLIENT_METHODS = buildMethodSets('ClientCapability');
 
 export interface CheckMethodOptions {

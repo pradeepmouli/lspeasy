@@ -32,6 +32,17 @@ import {
  * You are implementing a custom client layer and need the same validation
  * behaviour that `LSPClient` uses. Otherwise this is an internal detail.
  *
+ * @see {@link ClientCapabilityGuard} for the companion guard that validates
+ * server-to-client handler registrations against client capabilities.
+ *
+ * @throws Error When `strict` is `true` and a method is not in the known
+ * method set or the required server capability has not been declared.
+ *
+ * @never
+ * NEVER construct `CapabilityGuard` before the `initialize` handshake completes.
+ * Server capabilities are only known after the `InitializeResult` is received;
+ * instantiating the guard too early will treat all methods as unsupported.
+ *
  * @category Client
  */
 export class CapabilityGuard {
@@ -41,6 +52,18 @@ export class CapabilityGuard {
     private readonly strict: boolean = false
   ) {}
 
+  /**
+   * Returns `true` if the server capability for `method` is declared.
+   *
+   * @param method - The LSP request method string to check (e.g. `'textDocument/hover'`).
+   * @returns `true` if allowed; `false` (non-strict) if the required server capability
+   *   is missing.
+   *
+   * @throws Error In strict mode, throws if `method` is unknown or its required
+   *   server capability has not been declared.
+   *
+   * @see {@link CapabilityGuard} for full class documentation.
+   */
   canSendRequest(method: string): boolean {
     return checkMethod({
       method,
@@ -54,6 +77,13 @@ export class CapabilityGuard {
     });
   }
 
+  /**
+   * Returns `true` if the server capability for `method` is declared.
+   *
+   * @param method - The LSP notification method string to check.
+   * @returns `true` if allowed; `false` (or throws in strict mode) if the required
+   *   server capability is missing.
+   */
   canSendNotification(method: string): boolean {
     return checkMethod({
       method,
@@ -67,6 +97,11 @@ export class CapabilityGuard {
     });
   }
 
+  /**
+   * Returns a defensive copy of the server capabilities this guard was built from.
+   *
+   * @returns A shallow copy of the server capabilities object.
+   */
   getServerCapabilities(): Partial<ServerCapabilities> {
     return { ...this.capabilities };
   }
@@ -80,6 +115,12 @@ export class CapabilityGuard {
  * Created internally by `LSPClient`. In non-strict mode violations are logged
  * as warnings; in strict mode they throw.
  *
+ * @never
+ * NEVER register server-to-client handlers for capabilities not declared in
+ * the original `initialize` request — the server may send the corresponding
+ * requests, but without the capability declaration the client has no contract
+ * to handle them, leading to silent failures or unexpected errors.
+ *
  * @category Client
  */
 export class ClientCapabilityGuard {
@@ -89,6 +130,17 @@ export class ClientCapabilityGuard {
     private readonly strict: boolean = false
   ) {}
 
+  /**
+   * Returns `true` if the client has declared the capability required to handle `method`.
+   *
+   * @param method - The LSP method string to validate against client capabilities.
+   * @returns `true` if the client capability is declared; `false` (non-strict) if missing.
+   *
+   * @throws Error In strict mode, throws if `method` is unknown or the required
+   *   client capability was not declared in the `initialize` request.
+   *
+   * @see {@link ClientCapabilityGuard} for full class documentation.
+   */
   canRegisterHandler(method: string): boolean {
     return checkMethod({
       method,
@@ -107,6 +159,11 @@ export class ClientCapabilityGuard {
     });
   }
 
+  /**
+   * Returns a defensive copy of the client capabilities this guard was built from.
+   *
+   * @returns A shallow copy of the client capabilities object.
+   */
   getClientCapabilities(): Partial<ClientCapabilities> {
     return { ...this.capabilities };
   }

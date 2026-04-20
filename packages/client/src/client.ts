@@ -88,7 +88,7 @@ import { PartialResultCollector } from './connection/partial-result-collector.js
  * @avoidWhen
  * You need to build the server end — use `LSPServer` from `@lspeasy/server`.
  *
- * @pitfalls
+ * @never
  * NEVER call `sendRequest` before `connect()` completes — the transport is not
  * attached yet and the call throws.
  *
@@ -480,7 +480,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    * @param params - Optional request parameters.
    * @returns A `CancellableRequest` with `promise` and `cancel`.
    *
-   * @pitfalls
+   * @never
    * NEVER ignore the `CancellableRequest.promise` rejection after calling
    * `cancel()`. Always attach a `.catch()` handler to avoid unhandled
    * promise rejections.
@@ -1279,9 +1279,74 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 }
 
+/**
+ * Typed LSP client that connects to a language server, manages the LSP
+ * handshake, and exposes capability-aware request namespaces.
+ *
+ * @remarks
+ * `LSPClient` handles the `initialize` / `initialized` handshake automatically
+ * on `connect()`. After connecting, call `expect<ServerCaps>()` to narrow the
+ * client type to the server's advertised capabilities, giving you typed access
+ * to namespaces like `client.textDocument.hover(params)`.
+ *
+ * @useWhen
+ * You are embedding an LSP client inside an editor extension, a CLI tool, a
+ * test harness, or any process that connects to a language server.
+ *
+ * @avoidWhen
+ * You need to build the server end — use `LSPServer` from `@lspeasy/server`.
+ *
+ * @never
+ * NEVER call `sendRequest` before `connect()` completes — the transport is not
+ * attached yet and the call throws.
+ *
+ * NEVER send requests after `disconnect()` is called — the transport has been
+ * closed; any pending promises will reject with a "Connection closed" error.
+ *
+ * NEVER share one `LSPClient` across two separate language server processes —
+ * each process is an independent JSON-RPC peer with its own ID sequence and
+ * lifecycle state.
+ *
+ * @throws Error When `connect()` is called while already connected.
+ * @throws Error When `sendRequest()` is called before `connect()` completes.
+ *
+ * @see {@link ClientOptions} for all configuration options.
+ * @see {@link ConnectionHealthTracker} for monitoring connection liveness.
+ *
+ * @example
+ * ```ts
+ * import { LSPClient } from '@lspeasy/client';
+ * import { WebSocketTransport } from '@lspeasy/core';
+ *
+ * const client = new LSPClient({
+ *   name: 'my-editor',
+ *   capabilities: { textDocument: { hover: {} } },
+ * });
+ *
+ * const transport = new WebSocketTransport({ url: 'ws://localhost:2087' });
+ * await client.connect(transport);
+ *
+ * const typed = client.expect<{ hoverProvider: true }>();
+ * const hover = await typed.textDocument.hover({
+ *   textDocument: { uri: 'file:///src/index.ts' },
+ *   position: { line: 0, character: 5 },
+ * });
+ * ```
+ *
+ * @template ClientCaps - Client capabilities shape, defaults to `ClientCapabilities`.
+ * @category Client
+ */
 export type LSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities> =
   BaseLSPClient<ClientCaps> & Client<ClientCaps, ServerCapabilities>;
 
+/**
+ * Constructs an {@link LSPClient} instance.
+ *
+ * @param options - Optional {@link ClientOptions} to configure the client.
+ * @returns A new `LSPClient` instance.
+ *
+ * @category Client
+ */
 // Generic constructor that preserves type parameters
 export const LSPClient: new <ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities>(
   options?: ClientOptions<ClientCaps>

@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+/**
+ * A single LSP dynamic capability registration entry.
+ *
+ * @remarks
+ * Sent by the server in a `client/registerCapability` request. The `id` is used
+ * later to unregister the capability via `client/unregisterCapability`.
+ */
 export interface DynamicRegistration {
   id: string;
   method: string;
@@ -27,21 +34,25 @@ export interface UnregisterCapabilityParams {
   unregisterations: UnregisterCapability[];
 }
 
+/** Zod schema for validating a single dynamic-registration entry. */
 export const dynamicRegistrationSchema = z.object({
   id: z.string().min(1),
   method: z.string().min(1),
   registerOptions: z.unknown().optional()
 });
 
+/** Zod schema for validating `client/registerCapability` params. */
 export const registerCapabilityParamsSchema = z.object({
   registrations: z.array(dynamicRegistrationSchema)
 });
 
+/** Zod schema for validating a single capability unregistration entry. */
 export const unregisterCapabilitySchema = z.object({
   id: z.string().min(1),
   method: z.string().min(1)
 });
 
+/** Zod schema for validating `client/unregisterCapability` params. */
 export const unregisterCapabilityParamsSchema = z.object({
   unregisterations: z.array(unregisterCapabilitySchema)
 });

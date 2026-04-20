@@ -153,9 +153,23 @@ export interface PartialRequestOptions<TPartial> {
  */
 export type PartialRequestResult<TPartial, TResult> = PartialRequestOutcome<TPartial, TResult>;
 
+/**
+ * Namespace for sending notebook-document lifecycle notifications to a server.
+ *
+ * @remarks
+ * Available on `client.notebookDocument` after `connect()`. Mirrors the
+ * standard LSP `notebookDocument/*` notification methods for clients that
+ * declare `notebookDocumentSync` capability.
+ *
+ * @category Client
+ */
 export interface NotebookDocumentNamespace {
+  /** Notify the server that a notebook document was opened. */
   didOpen(params: DidOpenNotebookDocumentParams): Promise<void>;
+  /** Notify the server that a notebook document changed. */
   didChange(params: DidChangeNotebookDocumentParams): Promise<void>;
+  /** Notify the server that a notebook document was saved. */
   didSave(params: DidSaveNotebookDocumentParams): Promise<void>;
+  /** Notify the server that a notebook document was closed. */
   didClose(params: DidCloseNotebookDocumentParams): Promise<void>;
 }

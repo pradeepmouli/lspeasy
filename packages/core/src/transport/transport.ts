@@ -28,7 +28,7 @@ import type { Disposable } from '../utils/disposable.js';
  * `WebSocketTransport`, `StdioTransport` (`@lspeasy/core/node`),
  * `TcpTransport` (`@lspeasy/core/node`), or `IpcTransport` (`@lspeasy/core/node`).
  *
- * @pitfalls
+ * @never
  * NEVER share one `Transport` instance between two `LSPServer` or `LSPClient`
  * instances — each connection maintains independent protocol state (pending
  * request IDs, lifecycle phase) and sharing causes ID collisions and state
