@@ -1,6 +1,6 @@
 ---
 name: lspeasy-server
-description: "Build LSP language servers with a simple, fully-typed API Use when: The client sets `partialResultToken` in the request params and you want to; stream intermediate results (e.g. symbols found so far) rather than waiting; for the complete set.."
+description: "Build LSP language servers with a simple, fully-typed API Use when working with lsp, language-server-protocol, lsp-server, language-server."
 license: MIT
 ---
 

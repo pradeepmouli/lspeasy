@@ -1,6 +1,6 @@
 ---
 name: lspeasy-client
-description: "Connect to LSP servers with typed client API Use when: You are implementing a custom client layer and need the same validation; behaviour that `LSPClient` uses. Otherwise this is an internal detail.; You need to monitor connection liveness — for example, to show a status."
+description: "Connect to LSP servers with typed client API Use when working with lsp, language-server-protocol, lsp-client, language-client."
 license: MIT
 ---
 

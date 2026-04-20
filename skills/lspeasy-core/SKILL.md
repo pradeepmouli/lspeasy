@@ -1,6 +1,6 @@
 ---
 name: lspeasy-core
-description: "Core types, transports, and utilities for LSP SDK Use when: You are building a browser-based LSP client, a WebSocket-backed language; server, or any LSP integration that must run over HTTP/HTTPS infrastructure.; You register multiple handlers (hover, completion, definition) that share."
+description: "Core types, transports, and utilities for LSP SDK Use when working with lsp, language-server-protocol, jsonrpc, transport."
 license: MIT
 ---
 
