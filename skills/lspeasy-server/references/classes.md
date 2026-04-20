@@ -10,11 +10,11 @@ constructor(logger: Logger): MessageDispatcher
 **Methods:**
 - `registerRequest<Params, Result>(method: string, handler: RequestHandler<Params, Result>): void` — Register a typed request handler for the given LSP method.
 - `registerNotification<Params>(method: string, handler: NotificationHandler<Params>): void` — Register a typed notification handler for the given LSP method.
-- `unregisterRequest(method: string): void` — Unregister a request handler
-- `unregisterNotification(method: string): void` — Unregister a notification handler
+- `unregisterRequest(method: string): void` — Unregister a request handler.
+- `unregisterNotification(method: string): void` — Unregister a notification handler.
 - `setClientCapabilities(capabilities: ClientCapabilities): void` — Set client capabilities (from initialize request)
-- `dispatch(message: Message, transport: Transport, cancellationTokens: Map<string | number, AbortController>): Promise<void>` — Dispatch an incoming message
-- `cancelRequest(id: string | number): void` — Cancel a pending request
+- `dispatch(message: Message, transport: Transport, cancellationTokens: Map<string | number, AbortController>): Promise<void>` — Dispatch an incoming message to the registered handler.
+- `cancelRequest(id: string | number): void` — Cancel a pending request.
 - `clear(): void` — Clear all handlers
 
 ### `PartialResultSender`
@@ -23,7 +23,7 @@ Emits typed `$/progress` partial-result batches from server-side request handler
 constructor(server: BaseLSPServer): PartialResultSender
 ```
 **Methods:**
-- `send<T>(token: ProgressToken, value: T): Promise<void>`
+- `send<T>(token: ProgressToken, value: T): Promise<void>` — Send a batch of partial results to the client.
 
 ## Errors
 
@@ -50,13 +50,13 @@ not capture any frames.
 - `stack: string` (optional)
 - `cause: unknown` (optional)
 **Methods:**
-- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error
-- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error
-- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error
-- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error
-- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error
-- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error
-- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error
+- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error.
+- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error.
+- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error.
+- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error.
+- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error.
+- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error.
+- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error.
 - `captureStackTrace(targetObject: object, constructorOpt?: Function): void` — Creates a `.stack` property on `targetObject`, which when accessed returns
 a string representing the location in the code at which
 `Error.captureStackTrace()` was called.

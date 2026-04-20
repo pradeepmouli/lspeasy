@@ -211,7 +211,11 @@ export const NotificationMethodMap: Map<
 > = new Map(NotificationMap.map((p) => [p.Method, p]));
 
 /**
- * Get the capability key for a given method at runtime
+ * Get the server capability key for a given request method at runtime.
+ *
+ * @param method - The LSP request method string to look up.
+ * @param _direction - Optional direction filter (currently unused).
+ * @returns The dot-notation capability path, or `'alwaysOn'` if no capability gate exists.
  */
 export function getCapabilityForRequestMethod<
   M extends LSPRequestMethod<D>,
@@ -222,7 +226,11 @@ export function getCapabilityForRequestMethod<
 }
 
 /**
- * Get the client capability key for a given request method at runtime
+ * Get the client capability key for a given request method at runtime.
+ *
+ * @param method - The LSP request method string to look up.
+ * @param _direction - Optional direction filter (currently unused).
+ * @returns The dot-notation capability path, or `'alwaysOn'` if no capability gate exists.
  */
 export function getClientCapabilityForRequestMethod<
   M extends LSPRequestMethod<D>,
@@ -233,7 +241,11 @@ export function getClientCapabilityForRequestMethod<
 }
 
 /**
- * Get the capability key for a given notification method at runtime
+ * Get the server capability key for a given notification method at runtime.
+ *
+ * @param method - The LSP notification method string to look up.
+ * @param _direction - Optional direction filter (currently unused).
+ * @returns The dot-notation capability path, or `'alwaysOn'` if no capability gate exists.
  */
 export function getCapabilityForNotificationMethod<
   M extends LSPNotificationMethod<D>,
@@ -244,7 +256,11 @@ export function getCapabilityForNotificationMethod<
 }
 
 /**
- * Get the client capability key for a given notification method at runtime
+ * Get the client capability key for a given notification method at runtime.
+ *
+ * @param method - The LSP notification method string to look up.
+ * @param _direction - Optional direction filter (currently unused).
+ * @returns The dot-notation capability path, or `'alwaysOn'` if no capability gate exists.
  */
 export function getClientCapabilityForNotificationMethod<
   M extends LSPNotificationMethod<D>,

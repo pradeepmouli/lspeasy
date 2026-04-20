@@ -58,12 +58,12 @@ constructor(options: WebSocketTransportOptions): WebSocketTransport
 ```
 **Methods:**
 - `send(message: Message): Promise<void>` — Send a message through the WebSocket
-- `onMessage(handler: (message: Message) => void): Disposable` — Register a handler for incoming messages
-- `onError(handler: (error: Error) => void): Disposable` — Register a handler for transport errors
-- `onClose(handler: () => void): Disposable` — Register a handler for transport closure
+- `onMessage(handler: (message: Message) => void): Disposable` — Register a handler for incoming messages.
+- `onError(handler: (error: Error) => void): Disposable` — Register a handler for transport errors.
+- `onClose(handler: () => void): Disposable` — Register a handler for transport closure.
 - `close(): Promise<void>` — Close the WebSocket connection
 - `isConnected(): boolean` — Check if the transport is currently connected
-- `getReconnectAttempts(): number` — Get the current reconnection attempt count
+- `getReconnectAttempts(): number` — Get the current reconnection attempt count.
 - `isReconnectEnabled(): boolean` — Check if reconnection is enabled
 ```ts
 // Client mode — connect to a running WebSocket LSP server
@@ -97,7 +97,7 @@ Collects multiple `Disposable` instances and releases them together.
 constructor(): DisposableStore
 ```
 **Methods:**
-- `add<T>(disposable: T): T` — Add a disposable to the store
+- `add<T>(disposable: T): T` — Add a disposable to the store.
 - `dispose(): void` — Dispose all resources in the store
 - `isDisposed(): boolean` — Check if store is disposed
 - `clear(): void` — Clear all disposables without disposing them
@@ -217,13 +217,13 @@ not capture any frames.
 - `stack: string` (optional)
 - `cause: unknown` (optional)
 **Methods:**
-- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error
-- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error
-- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error
-- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error
-- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error
-- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error
-- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error
+- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error.
+- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error.
+- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error.
+- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error.
+- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error.
+- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error.
+- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error.
 - `captureStackTrace(targetObject: object, constructorOpt?: Function): void` — Creates a `.stack` property on `targetObject`, which when accessed returns
 a string representing the location in the code at which
 `Error.captureStackTrace()` was called.

@@ -53,7 +53,11 @@ export class DisposableStore implements Disposable {
   private disposed = false;
 
   /**
-   * Add a disposable to the store
+   * Add a disposable to the store.
+   *
+   * @param disposable - The resource to track. If the store is already disposed,
+   *   `disposable.dispose()` is called immediately.
+   * @returns The same `disposable` passed in, for fluent chaining.
    */
   add<T extends Disposable>(disposable: T): T {
     if (this.disposed) {

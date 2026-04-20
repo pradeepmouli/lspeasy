@@ -9,6 +9,12 @@ handshake, and exposes capability-aware request namespaces.
 BaseLSPClient<ClientCaps> & Client<ClientCaps, ServerCapabilities>
 ```
 
+### `InitializeResult`
+Initialize result from server.
+**Properties:**
+- `capabilities: ServerCapabilities<any>` — Server capabilities advertised in the `initialize` response.
+- `serverInfo: { name: string; version?: string }` (optional) — Optional server identification returned by the language server.
+
 ### `CancellableRequest`
 Return value of `LSPClient.sendCancellableRequest`.
 **Properties:**
@@ -22,29 +28,29 @@ Namespace for sending notebook-document lifecycle notifications to a server.
 Aggregated connection health snapshot returned by
 `LSPClient.getConnectionHealth()`.
 **Properties:**
-- `state: ConnectionState`
-- `lastMessageSent: Date | null`
-- `lastMessageReceived: Date | null`
-- `heartbeat: HeartbeatStatus` (optional)
+- `state: ConnectionState` — Current lifecycle state of the connection.
+- `lastMessageSent: Date | null` — Timestamp of the last outgoing message, or `null` if none has been sent.
+- `lastMessageReceived: Date | null` — Timestamp of the last incoming message, or `null` if none has been received.
+- `heartbeat: HeartbeatStatus` (optional) — Heartbeat monitoring snapshot, present only when heartbeat is configured.
 
 ### `HeartbeatStatus`
 Snapshot of the current heartbeat monitoring status.
 **Properties:**
-- `enabled: boolean`
-- `interval: number`
-- `timeout: number`
-- `lastPing: Date | null`
-- `lastPong: Date | null`
-- `isResponsive: boolean`
+- `enabled: boolean` — Whether heartbeat monitoring is active.
+- `interval: number` — Interval between pings in milliseconds.
+- `timeout: number` — Timeout in milliseconds before a ping is considered unanswered.
+- `lastPing: Date | null` — Timestamp of the last outgoing ping, or `null` if no ping has been sent.
+- `lastPong: Date | null` — Timestamp of the last received pong, or `null` if no pong has been received.
+- `isResponsive: boolean` — Whether the server responded to the most recent ping within the timeout window.
 
 ### `StateChangeEvent`
 Payload emitted when the connection state changes.
 Subscribe via `LSPClient.onConnectionStateChange()`.
 **Properties:**
-- `previous: ConnectionState`
-- `current: ConnectionState`
-- `timestamp: Date`
-- `reason: string` (optional)
+- `previous: ConnectionState` — The state the connection was in before this transition.
+- `current: ConnectionState` — The state the connection has transitioned into.
+- `timestamp: Date` — Wall-clock time at which the state transition occurred.
+- `reason: string` (optional) — Optional human-readable description of why the state changed.
 
 ### `ConnectionState`
 Lifecycle state of an `LSPClient` connection.
@@ -54,12 +60,6 @@ Lifecycle state of an `LSPClient` connection.
 - `Disconnected` = `"disconnected"`
 
 ## types
-
-### `InitializeResult`
-Initialize result from server
-**Properties:**
-- `capabilities: ServerCapabilities<any>`
-- `serverInfo: { name: string; version?: string }` (optional)
 
 ### `PartialRequestResult`
 Result returned by partial-result enabled requests.

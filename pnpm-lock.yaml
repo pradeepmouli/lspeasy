@@ -60,8 +60,8 @@ importers:
         specifier: ^4.11.0
         version: 4.11.0(typedoc@0.28.19(typescript@5.9.3))
       typedoc-plugin-to-skills:
-        specifier: ^0.11.0
-        version: 0.11.0(typedoc@0.28.19(typescript@5.9.3))
+        specifier: ^0.12.0
+        version: 0.12.0(typedoc@0.28.19(typescript@5.9.3))
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -1157,14 +1157,14 @@ packages:
   '@to-skills/core@0.10.0':
     resolution: {integrity: sha512-GVcwK3wzp62idDti7asNMHSr+kaeqWXuVXTKvncUkbDr5jGgDVTlgV+GUPgcCO/7qyV9XEKEPk7EUiAdxnEmlA==}
 
-  '@to-skills/core@0.15.0':
-    resolution: {integrity: sha512-4G8bBOtOd9mzRYKEWj3PoNBYfrKBUnB9lZRIGv5F3T8nyWawWTr5zbNPJVKrN6jiAU98l+6ZirRieEvv8x0j0g==}
+  '@to-skills/core@0.16.0':
+    resolution: {integrity: sha512-ju8Pu5mhnSEeUO1Hpi0Vpi1eFC0e+N32LWjqWCjC9mIqg+AUqo+eCg+pptdijZmMILeGM9v0ukgRPLrLdoZuiA==}
 
   '@to-skills/core@0.8.0':
     resolution: {integrity: sha512-P+sJNS3RHVCbYFVvYAZdQwhQhTniQNS7xv+rd/9bVJbfIBKUjpjiaxSq0qU2kLzQzT4mu/Q65OHDbYYrEtPPtw==}
 
-  '@to-skills/typedoc@0.16.0':
-    resolution: {integrity: sha512-tEZGUfPtkdfuuYneAT/EV7usMQcc+/lEhZwWHbOZukpbV50lFn9pXqDzpya+TQNzkvZEutlOrbNGeQANbCzQ4A==}
+  '@to-skills/typedoc@0.17.0':
+    resolution: {integrity: sha512-RwYCeJ1mRuazbtfi8lO9K/VOZFUYRbe+5wpYoR3uYcZMjkUCfmsmRgMd0bEwD1NDKndQu7HWe8Q6gdWKotwBJQ==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -2296,8 +2296,8 @@ packages:
     peerDependencies:
       typedoc: 0.28.x
 
-  typedoc-plugin-to-skills@0.11.0:
-    resolution: {integrity: sha512-5CQBdEUXzZwSsWCqG8s5L8hUUYNekTcGsoaA7wI0OFnwKeD0WRp4DyjFvmDHpPJSCop4lWipTE35l+c6AdaT+w==}
+  typedoc-plugin-to-skills@0.12.0:
+    resolution: {integrity: sha512-CcZy3GuTWI5LjjHM0s+DQ1jcTd+jTrWdGg9ZkQXWiBGDgYtLczAvEkyQpBtBcpc2gBSnSOObwhrWnNqe7e13Kw==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -3261,13 +3261,13 @@ snapshots:
 
   '@to-skills/core@0.10.0': {}
 
-  '@to-skills/core@0.15.0': {}
+  '@to-skills/core@0.16.0': {}
 
   '@to-skills/core@0.8.0': {}
 
-  '@to-skills/typedoc@0.16.0(typedoc@0.28.19(typescript@5.9.3))':
+  '@to-skills/typedoc@0.17.0(typedoc@0.28.19(typescript@5.9.3))':
     dependencies:
-      '@to-skills/core': 0.15.0
+      '@to-skills/core': 0.16.0
       typedoc: 0.28.19(typescript@5.9.3)
 
   '@to-skills/typedoc@0.9.0(typedoc@0.28.19(typescript@5.9.3))':
@@ -4432,9 +4432,9 @@ snapshots:
     dependencies:
       typedoc: 0.28.19(typescript@5.9.3)
 
-  typedoc-plugin-to-skills@0.11.0(typedoc@0.28.19(typescript@5.9.3)):
+  typedoc-plugin-to-skills@0.12.0(typedoc@0.28.19(typescript@5.9.3)):
     dependencies:
-      '@to-skills/typedoc': 0.16.0(typedoc@0.28.19(typescript@5.9.3))
+      '@to-skills/typedoc': 0.17.0(typedoc@0.28.19(typescript@5.9.3))
       typedoc: 0.28.19(typescript@5.9.3)
 
   typedoc-plugin-to-skills@0.6.0(typedoc@0.28.19(typescript@5.9.3)):

@@ -8,5 +8,5 @@ Runtime guard for unregister-capability params.
 isUnregisterCapabilityParams(value: unknown): value is UnregisterCapabilityParams
 ```
 **Parameters:**
-- `value: unknown`
-**Returns:** `value is UnregisterCapabilityParams`
+- `value: unknown` — The unknown value to test.
+**Returns:** `value is UnregisterCapabilityParams` — `true` when `value` is a valid `UnregisterCapabilityParams` object.

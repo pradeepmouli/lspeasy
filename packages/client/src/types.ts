@@ -97,12 +97,18 @@ export interface ClientOptions<
 }
 
 /**
- * Initialize result from server
+ * Initialize result from server.
+ *
+ * @category Client
  */
 export interface InitializeResult {
+  /** Server capabilities advertised in the `initialize` response. */
   capabilities: import('vscode-languageserver-protocol').ServerCapabilities;
+  /** Optional server identification returned by the language server. */
   serverInfo?: {
+    /** Human-readable name of the language server. */
     name: string;
+    /** Optional version string of the language server. */
     version?: string;
   };
 }

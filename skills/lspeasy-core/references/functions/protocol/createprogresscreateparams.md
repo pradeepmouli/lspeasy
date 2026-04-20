@@ -3,10 +3,10 @@
 ## protocol
 
 ### `createProgressCreateParams`
-Helper to create progress create params
+Creates `WorkDoneProgressCreateParams` for a `window/workDoneProgress/create` request.
 ```ts
 createProgressCreateParams(token: ProgressToken): WorkDoneProgressCreateParams
 ```
 **Parameters:**
-- `token: ProgressToken`
-**Returns:** `WorkDoneProgressCreateParams`
+- `token: ProgressToken` — The progress token to associate with this progress notification.
+**Returns:** `WorkDoneProgressCreateParams` — A `WorkDoneProgressCreateParams` ready to send.

@@ -437,7 +437,10 @@ export class WebSocketTransport implements Transport {
   }
 
   /**
-   * Register a handler for incoming messages
+   * Register a handler for incoming messages.
+   *
+   * @param handler - Callback invoked with each parsed {@link Message} received over the socket.
+   * @returns A {@link Disposable} — call `dispose()` to unregister the handler.
    */
   onMessage(handler: (message: Message) => void): Disposable {
     this.messageHandlers.add(handler);
@@ -450,7 +453,10 @@ export class WebSocketTransport implements Transport {
   }
 
   /**
-   * Register a handler for transport errors
+   * Register a handler for transport errors.
+   *
+   * @param handler - Callback invoked whenever a WebSocket error occurs.
+   * @returns A {@link Disposable} — call `dispose()` to unregister the handler.
    */
   onError(handler: (error: Error) => void): Disposable {
     this.errorHandlers.add(handler);
@@ -463,7 +469,10 @@ export class WebSocketTransport implements Transport {
   }
 
   /**
-   * Register a handler for transport closure
+   * Register a handler for transport closure.
+   *
+   * @param handler - Callback invoked when the WebSocket closes (clean or error).
+   * @returns A {@link Disposable} — call `dispose()` to unregister the handler.
    */
   onClose(handler: () => void): Disposable {
     this.closeHandlers.add(handler);
@@ -516,7 +525,9 @@ export class WebSocketTransport implements Transport {
   }
 
   /**
-   * Get the current reconnection attempt count
+   * Get the current reconnection attempt count.
+   *
+   * @returns The number of reconnection attempts made since the last successful connection.
    */
   getReconnectAttempts(): number {
     return this.reconnectAttempts;

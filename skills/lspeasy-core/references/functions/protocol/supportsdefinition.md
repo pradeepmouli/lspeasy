@@ -3,10 +3,10 @@
 ## protocol
 
 ### `supportsDefinition`
-Helper to check if definition is supported
+Returns `true` when `definitionProvider` is declared in the server capabilities.
 ```ts
 supportsDefinition(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }
 ```
 **Parameters:**
-- `capabilities: ServerCapabilities`
-**Returns:** `capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }`
+- `capabilities: ServerCapabilities` — The server capabilities to check.
+**Returns:** `capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }` — `true` when go-to-definition is supported.

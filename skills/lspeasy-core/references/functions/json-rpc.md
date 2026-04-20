@@ -8,8 +8,8 @@ Returns `true` when `message` is a JSON-RPC request (has `id` + `method`).
 isRequestMessage(message: Message): message is RequestMessage
 ```
 **Parameters:**
-- `message: Message`
-**Returns:** `message is RequestMessage`
+- `message: Message` — The message to test.
+**Returns:** `message is RequestMessage` — `true` when `message` is a RequestMessage.
 
 ### `isNotificationMessage`
 Returns `true` when `message` is a JSON-RPC notification (has `method`,
@@ -18,8 +18,8 @@ no `id`).
 isNotificationMessage(message: Message): message is NotificationMessage
 ```
 **Parameters:**
-- `message: Message`
-**Returns:** `message is NotificationMessage`
+- `message: Message` — The message to test.
+**Returns:** `message is NotificationMessage` — `true` when `message` is a NotificationMessage.
 
 ### `isResponseMessage`
 Returns `true` when `message` is a JSON-RPC response (has `id`, no `method`).
@@ -27,8 +27,8 @@ Returns `true` when `message` is a JSON-RPC response (has `id`, no `method`).
 isResponseMessage(message: Message): message is ResponseMessage
 ```
 **Parameters:**
-- `message: Message`
-**Returns:** `message is ResponseMessage`
+- `message: Message` — The message to test.
+**Returns:** `message is ResponseMessage` — `true` when `message` is a ResponseMessage.
 
 ### `isSuccessResponse`
 Returns `true` when `response` carries a `result` (success case).
@@ -36,8 +36,8 @@ Returns `true` when `response` carries a `result` (success case).
 isSuccessResponse(message: ResponseMessage): message is SuccessResponseMessage
 ```
 **Parameters:**
-- `message: ResponseMessage`
-**Returns:** `message is SuccessResponseMessage`
+- `message: ResponseMessage` — The response message to test.
+**Returns:** `message is SuccessResponseMessage` — `true` when `message` is a SuccessResponseMessage.
 
 ### `isErrorResponse`
 Returns `true` when `response` carries an `error` (error case).
@@ -45,8 +45,8 @@ Returns `true` when `response` carries an `error` (error case).
 isErrorResponse(message: ResponseMessage): message is ErrorResponseMessage
 ```
 **Parameters:**
-- `message: ResponseMessage`
-**Returns:** `message is ErrorResponseMessage`
+- `message: ResponseMessage` — The response message to test.
+**Returns:** `message is ErrorResponseMessage` — `true` when `message` is an ErrorResponseMessage.
 
 ### `parseMessage`
 Parses a single framed JSON-RPC 2.0 message from a raw byte buffer.

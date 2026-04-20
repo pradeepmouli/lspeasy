@@ -3,10 +3,10 @@
 ## protocol
 
 ### `supportsHover`
-Helper to check if hover is supported
+Returns `true` when `hoverProvider` is declared in the server capabilities.
 ```ts
 supportsHover(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }
 ```
 **Parameters:**
-- `capabilities: ServerCapabilities`
-**Returns:** `capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }`
+- `capabilities: ServerCapabilities` — The server capabilities to check.
+**Returns:** `capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }` — `true` when hover is supported.

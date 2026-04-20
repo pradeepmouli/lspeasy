@@ -110,6 +110,9 @@ export class HeartbeatMonitor {
 
   /**
    * Returns the latest heartbeat status snapshot.
+   *
+   * @returns A shallow copy of the current {@link HeartbeatStatus}, including
+   *   timing and responsiveness information.
    */
   getStatus(): HeartbeatStatus {
     return { ...this.status };

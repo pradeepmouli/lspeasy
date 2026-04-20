@@ -137,6 +137,10 @@ export class ConnectionHealthTracker extends DisposableEventEmitter<HealthEventM
 
   /**
    * Subscribes to connection state transitions.
+   *
+   * @param handler - Callback invoked with a {@link StateChangeEvent} each time
+   *   the connection state changes.
+   * @returns An unsubscribe function — call it to remove the listener.
    */
   onStateChange(handler: (event: StateChangeEvent) => void): () => void {
     const disposable = this.on('stateChanged', handler);
@@ -145,6 +149,10 @@ export class ConnectionHealthTracker extends DisposableEventEmitter<HealthEventM
 
   /**
    * Subscribes to health snapshot updates.
+   *
+   * @param handler - Callback invoked with the latest {@link ConnectionHealth}
+   *   snapshot after any state or activity change.
+   * @returns An unsubscribe function — call it to remove the listener.
    */
   onHealthChange(handler: (health: ConnectionHealth) => void): () => void {
     const disposable = this.on('healthChanged', handler);

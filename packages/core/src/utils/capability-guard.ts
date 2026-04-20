@@ -82,7 +82,11 @@ export interface CheckMethodOptions {
 /**
  * Shared validation logic for checking if a method is allowed based on capabilities.
  *
- * Returns true if allowed, false if disallowed (non-strict), or throws (strict).
+ * Returns `true` if allowed, `false` if disallowed in non-strict mode, or throws in strict mode.
+ *
+ * @param opts - Validation options including the method, capability lookup helpers, and logger.
+ * @returns `true` when the method is allowed; `false` when disallowed in non-strict mode.
+ * @throws When the method is disallowed and `opts.strict` is `true`.
  */
 export function checkMethod(opts: CheckMethodOptions): boolean {
   const {

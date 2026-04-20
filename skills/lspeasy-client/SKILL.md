@@ -67,44 +67,8 @@ await client.connect(transport);
 const hover = await client.textDocument.hover({
   textDocument: { uri: 'file:///path/to/file.ts' },
   position: { line: 10, character: 5 }
-});
 
-console.log('Hover:', hover?.contents);
-
-// Disconnect
-await client.disconnect();
-```
-
-### With Capabilities
-
-Declare client capabilities:
-
-```typescript
-const client = new LSPClient({
-  name: 'Advanced Client',
-  version: '1.0.0',
-  transport,
-  capabilities: {
-    textDocument: {
-      hover: {
-        contentFormat: ['markdown', 'plaintext']
-      },
-      completion: {
-        completionItem: {
-          snippetSupport: true,
-          commitCharactersSupport: true
-        }
-      }
-    },
-    workspace: {
-      applyEdit: true,
-      workspaceEdit: {
-        documentChanges: true
-      }
-    }
-  }
-});
-```
+*See references/ for full examples.*
 
 ## When to Use
 
@@ -168,9 +132,9 @@ const client = new LSPClient({
 **Client:** `CapabilityGuard` (Validates outgoing client requests and notifications against the server's
 declared capabilities), `ClientCapabilityGuard` (Validates that server-to-client handler registrations are backed by
 client capabilities declared in the `initialize` request), `ConnectionHealthTracker` (Tracks connection state transitions and message activity timestamps), `HeartbeatMonitor` (Runs interval-based heartbeat checks for active transports), `NotificationWaiter` (Tracks a single wait-for-notification operation and its timeout lifecycle), `LSPClient` (Typed LSP client that connects to a language server, manages the LSP
-handshake, and exposes capability-aware request namespaces), `CancellableRequest` (Return value of `LSPClient), `NotebookDocumentNamespace` (Namespace for sending notebook-document lifecycle notifications to a server), `ConnectionHealth` (Aggregated connection health snapshot returned by
+handshake, and exposes capability-aware request namespaces), `InitializeResult` (Initialize result from server), `CancellableRequest` (Return value of `LSPClient), `NotebookDocumentNamespace` (Namespace for sending notebook-document lifecycle notifications to a server), `ConnectionHealth` (Aggregated connection health snapshot returned by
 `LSPClient), `HeartbeatStatus` (Snapshot of the current heartbeat monitoring status), `StateChangeEvent` (Payload emitted when the connection state changes), `ConnectionState` (Lifecycle state of an `LSPClient` connection), `LSPClient` (Constructs an LSPClient instance)
-**types:** `InitializeResult` (Initialize result from server), `PartialRequestResult` (Result returned by partial-result enabled requests)
+**types:** `PartialRequestResult` (Result returned by partial-result enabled requests)
 **Transport:** `Transport` (Pluggable communication layer for JSON-RPC message exchange)
 **Logging:** `Logger` (Structured logging interface used throughout lspeasy), `LogLevel` (Numeric severity levels for filtering log output)
 **Lifecycle:** `Disposable` (Represents a resource that can be explicitly released)

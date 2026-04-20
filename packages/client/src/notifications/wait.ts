@@ -92,6 +92,10 @@ export class NotificationWaiter<TParams> {
 
   /**
    * Returns whether an incoming notification satisfies this waiter.
+   *
+   * @param method - The notification method string of the incoming message.
+   * @param params - The notification params to test against the optional filter predicate.
+   * @returns `true` when the method matches and the filter (if any) passes.
    */
   matches(method: string, params: TParams): boolean {
     if (method !== this.method) {

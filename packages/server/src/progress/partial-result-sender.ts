@@ -28,6 +28,12 @@ import type { BaseLSPServer } from '../server.js';
 export class PartialResultSender {
   constructor(private readonly server: BaseLSPServer) {}
 
+  /**
+   * Send a batch of partial results to the client.
+   *
+   * @param token - The `partialResultToken` from the originating request params.
+   * @param value - The partial result batch to stream to the client via `$/progress`.
+   */
   async send<T>(token: ProgressToken, value: T): Promise<void> {
     const payload = {
       token,

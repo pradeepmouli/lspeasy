@@ -81,7 +81,9 @@ export class MessageDispatcher {
   }
 
   /**
-   * Unregister a request handler
+   * Unregister a request handler.
+   *
+   * @param method - The LSP method string whose handler should be removed.
    */
   unregisterRequest(method: string): void {
     this.requestHandlers.unregister(method);
@@ -89,7 +91,9 @@ export class MessageDispatcher {
   }
 
   /**
-   * Unregister a notification handler
+   * Unregister a notification handler.
+   *
+   * @param method - The LSP method string whose handler should be removed.
    */
   unregisterNotification(method: string): void {
     this.notificationHandlers.unregister(method);
@@ -104,7 +108,11 @@ export class MessageDispatcher {
   }
 
   /**
-   * Dispatch an incoming message
+   * Dispatch an incoming message to the registered handler.
+   *
+   * @param message - The incoming JSON-RPC message to route.
+   * @param transport - The transport to send the response or error on.
+   * @param cancellationTokens - Map of pending request IDs to their `AbortController`s.
    */
   async dispatch(
     message: Message,
@@ -223,7 +231,9 @@ export class MessageDispatcher {
   }
 
   /**
-   * Cancel a pending request
+   * Cancel a pending request.
+   *
+   * @param id - The request ID to cancel.
    */
   cancelRequest(id: number | string): void {
     const controller = this.pendingRequests.get(id);

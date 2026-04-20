@@ -3,10 +3,10 @@
 ## protocol
 
 ### `supportsCompletion`
-Helper to check if completion is supported
+Returns `true` when `completionProvider` is declared in the server capabilities.
 ```ts
 supportsCompletion(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }
 ```
 **Parameters:**
-- `capabilities: ServerCapabilities`
-**Returns:** `capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }`
+- `capabilities: ServerCapabilities` — The server capabilities to check.
+**Returns:** `capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }` — `true` when completion is supported.

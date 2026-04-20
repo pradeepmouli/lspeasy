@@ -220,44 +220,45 @@ A parameter literal used to pass a partial result token.
 ### `DynamicRegistration`
 A single LSP dynamic capability registration entry.
 **Properties:**
-- `id: string`
-- `method: string`
-- `registerOptions: unknown` (optional)
+- `id: string` — Unique identifier for this registration, used to unregister it later.
+- `method: string` — The LSP method this registration applies to.
+- `registerOptions: unknown` (optional) — Optional method-specific registration options.
 
 ### `DynamicRegistrationBehavior`
 Controls compatibility behavior for dynamic registrations not declared by client capabilities.
 **Properties:**
-- `allowUndeclaredDynamicRegistration: boolean` (optional)
+- `allowUndeclaredDynamicRegistration: boolean` (optional) — When `true`, the client accepts dynamic registrations for capabilities it did not declare
+in the `initialize` request. Useful for compatibility with servers that over-register.
 
 ### `RegisterCapabilityParams`
 Params payload for `client/registerCapability`.
 **Properties:**
-- `registrations: DynamicRegistration[]`
+- `registrations: DynamicRegistration[]` — The capability registrations to apply.
 
 ### `UnregisterCapability`
 Entry used by `client/unregisterCapability`.
 **Properties:**
-- `id: string`
-- `method: string`
+- `id: string` — The registration `id` returned by the original `client/registerCapability` request.
+- `method: string` — The LSP method to unregister.
 
 ### `UnregisterCapabilityParams`
 Params payload for `client/unregisterCapability`.
 **Properties:**
-- `unregisterations: UnregisterCapability[]`
+- `unregisterations: UnregisterCapability[]` — The capability unregistration entries to apply.
 
 ### `CancelledPartialResult`
 Structured response when a partial-enabled request is cancelled.
 **Properties:**
-- `cancelled: true`
-- `partialResults: TPartial[]`
-- `finalResult: undefined` (optional)
+- `cancelled: true` — Discriminant — always `true` for cancelled results.
+- `partialResults: TPartial[]` — Partial result batches received before the cancellation occurred.
+- `finalResult: undefined` (optional) — Always `undefined` for cancelled results — no final result was received.
 
 ### `CompletedPartialResult`
 Structured response when a partial-enabled request completes successfully.
 **Properties:**
-- `cancelled: false`
-- `partialResults: TPartial[]`
-- `finalResult: TResult`
+- `cancelled: false` — Discriminant — always `false` for completed results.
+- `partialResults: TPartial[]` — Partial result batches received during streaming.
+- `finalResult: TResult` — The final result returned when the request completed.
 
 ### `PartialRequestOutcome`
 Union return type for partial-enabled client requests.
@@ -270,36 +271,36 @@ CancelledPartialResult<TPartial> | CompletedPartialResult<TPartial, TResult>
 ### `BaseMessage`
 Base JSON-RPC 2.0 message discriminant.
 **Properties:**
-- `jsonrpc: "2.0"`
+- `jsonrpc: "2.0"` — JSON-RPC protocol version discriminant — always `"2.0"`.
 
 ### `RequestMessage`
 JSON-RPC 2.0 Request message — expects a response from the peer.
 **Properties:**
-- `id: string | number`
-- `method: string`
-- `params: unknown` (optional)
-- `jsonrpc: "2.0"`
+- `id: string | number` — Unique identifier correlating this request to its eventual response.
+- `method: string` — LSP method string, e.g. `'textDocument/hover'`.
+- `jsonrpc: "2.0"` — JSON-RPC protocol version — always `"2.0"` (inherited).
+- `params: unknown` (optional) — Optional request parameters (method-specific shape).
 
 ### `NotificationMessage`
 JSON-RPC 2.0 Notification message — no response is expected or sent.
 **Properties:**
-- `method: string`
-- `params: unknown` (optional)
-- `jsonrpc: "2.0"`
+- `method: string` — LSP method string, e.g. `'textDocument/didOpen'`.
+- `jsonrpc: "2.0"` — JSON-RPC protocol version — always `"2.0"` (inherited).
+- `params: unknown` (optional) — Optional notification parameters (method-specific shape).
 
 ### `SuccessResponseMessage`
 JSON-RPC 2.0 success response to a prior request.
 **Properties:**
-- `id: string | number`
-- `result: unknown`
-- `jsonrpc: "2.0"`
+- `id: string | number` — Identifier matching the originating request's `id`.
+- `jsonrpc: "2.0"` — JSON-RPC protocol version — always `"2.0"` (inherited).
+- `result: unknown` — The request result payload.
 
 ### `ErrorResponseMessage`
 JSON-RPC 2.0 error response to a prior request.
 **Properties:**
-- `id: string | number`
-- `error: ResponseErrorInterface`
-- `jsonrpc: "2.0"`
+- `id: string | number` — Identifier matching the originating request's `id`.
+- `jsonrpc: "2.0"` — JSON-RPC protocol version — always `"2.0"` (inherited).
+- `error: ResponseErrorInterface` — Structured error payload.
 
 ### `ResponseMessage`
 JSON-RPC 2.0 Response message — either a success result or an error.
@@ -308,57 +309,5 @@ SuccessResponseMessage | ErrorResponseMessage
 ```
 
 ### `Message`
-Union of all JSON-RPC 2.0 message types sent over a transport.
-```ts
-RequestMessage | NotificationMessage | ResponseMessage
-```
-
-### `ResponseErrorInterface`
-JSON-RPC 2.0 error object embedded in an error response.
-**Properties:**
-- `code: number`
-- `message: string`
-- `data: unknown` (optional)
-
-## Transport
-
-### `Transport`
-Pluggable communication layer for JSON-RPC message exchange.
-
-## Middleware
-
-### `Middleware`
-A function that intercepts JSON-RPC messages flowing through `LSPServer`
-or `LSPClient`.
-```ts
-(context: MiddlewareContext, next: MiddlewareNext) => Promise<void | MiddlewareResult>
-```
-
-### `MiddlewareContext`
-Execution context passed to every middleware function in the pipeline.
-**Properties:**
-- `direction: MiddlewareDirection` — Whether this message travels from client-to-server or server-to-client.
-- `messageType: MiddlewareMessageType` — The kind of JSON-RPC message.
-- `method: string` — The LSP method string, e.g. `'textDocument/hover'`.
-- `message: MiddlewareMessage` — The raw JSON-RPC message (id is read-only).
-- `metadata: Record<string, unknown>` — Arbitrary key-value pairs for cross-middleware communication.
-- `transport: string` — Constructor name of the active transport, e.g. `'StdioTransport'`.
-
-### `MiddlewareDirection`
-Direction of a JSON-RPC message in the middleware pipeline.
-```ts
-"clientToServer" | "serverToClient"
-```
-
-### `MiddlewareMessage`
-The JSON-RPC message exposed to middleware, with `id` made read-only to
-prevent accidental mutation that would break response correlation.
-```ts
-ImmutableId<Message>
-```
-
-### `MiddlewareMessageType`
-Kind of JSON-RPC message flowing through middleware.
-```ts
 
 <!-- truncated -->

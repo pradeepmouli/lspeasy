@@ -45,6 +45,9 @@ export class DocumentVersionTracker {
 
   /**
    * Starts tracking a document URI with an optional initial version.
+   *
+   * @param uri - The document URI to start tracking.
+   * @param initialVersion - Starting version number (defaults to `0`).
    */
   open(uri: string, initialVersion: number = 0): void {
     this.versions.set(uri, initialVersion);
@@ -52,6 +55,9 @@ export class DocumentVersionTracker {
 
   /**
    * Increments and returns the next document version.
+   *
+   * @param uri - The document URI to increment.
+   * @returns The incremented version number.
    */
   nextVersion(uri: string): number {
     const current = this.versions.get(uri) ?? 0;
@@ -62,6 +68,9 @@ export class DocumentVersionTracker {
 
   /**
    * Returns the current tracked version, if any.
+   *
+   * @param uri - The document URI to query.
+   * @returns The current version number, or `undefined` if the document is not tracked.
    */
   currentVersion(uri: string): number | undefined {
     return this.versions.get(uri);
@@ -69,6 +78,8 @@ export class DocumentVersionTracker {
 
   /**
    * Stops tracking a document URI.
+   *
+   * @param uri - The document URI to stop tracking.
    */
   close(uri: string): void {
     this.versions.delete(uri);
@@ -79,7 +90,9 @@ export class DocumentVersionTracker {
  * Source of version information for helper constructors.
  */
 export interface VersionSource {
+  /** Explicit version number to use; takes precedence over `tracker`. */
   version?: number;
+  /** A `DocumentVersionTracker` instance to auto-increment the version. */
   tracker?: DocumentVersionTracker;
 }
 
@@ -87,8 +100,11 @@ export interface VersionSource {
  * Represents a single incremental text document change.
  */
 export interface IncrementalChange {
+  /** The range in the document that was replaced. */
   range: Range;
+  /** The new text that replaced the range. */
   text: string;
+  /** Optional deprecated length of the replaced range, used by some servers for backwards compat. */
   rangeLength?: number;
 }
 

@@ -101,7 +101,10 @@ export function createProgressReport(
 }
 
 /**
- * Helper to create a progress end notification
+ * Creates a `WorkDoneProgressEnd` payload to close a work-done progress notification.
+ *
+ * @param message - Optional final status message displayed when progress ends.
+ * @returns A `WorkDoneProgressEnd` object ready to send as `$/progress`.
  */
 export function createProgressEnd(message?: string): WorkDoneProgressEnd {
   const result: WorkDoneProgressEnd = { kind: 'end' };
@@ -112,7 +115,10 @@ export function createProgressEnd(message?: string): WorkDoneProgressEnd {
 }
 
 /**
- * Helper to create progress create params
+ * Creates `WorkDoneProgressCreateParams` for a `window/workDoneProgress/create` request.
+ *
+ * @param token - The progress token to associate with this progress notification.
+ * @returns A `WorkDoneProgressCreateParams` ready to send.
  */
 export function createProgressCreateParams(token: ProgressToken): WorkDoneProgressCreateParams {
   return { token };

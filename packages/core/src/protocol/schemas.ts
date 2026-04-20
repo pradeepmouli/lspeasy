@@ -298,7 +298,10 @@ export const LSPSchemas = {
 } as const;
 
 /**
- * Get schema for a given method
+ * Looks up the Zod validation schema for a given LSP method.
+ *
+ * @param method - The LSP method string to look up (e.g. `'textDocument/hover'`).
+ * @returns The Zod schema for the method's params, or `undefined` if none is registered.
  */
 export function getSchemaForMethod(method: string): z.ZodType<any> | undefined {
   return LSPSchemas[method as keyof typeof LSPSchemas];

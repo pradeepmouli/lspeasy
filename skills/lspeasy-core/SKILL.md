@@ -71,88 +71,7 @@ const codeAction = {
 ```typescript
 import { StdioTransport } from '@lspeasy/core';
 
-// Create transport for stdio communication
-const transport = new StdioTransport();
-
-// Listen for messages
-transport.onMessage((message) => {
-  console.log('Received:', message);
-});
-
-// Send a message
-await transport.send({
-  jsonrpc: '2.0',
-  method: 'initialize',
-  id: 1,
-  params: { /* ... */ }
-});
-
-// Clean up
-await transport.close();
-```
-
-### Using WebSocketTransport
-
-```typescript
-import { WebSocketTransport } from '@lspeasy/core';
-
-// Client mode with automatic reconnection
-const transport = new WebSocketTransport({
-  url: 'ws://localhost:3000',
-  enableReconnect: true,
-  maxReconnectAttempts: 5,
-  reconnectDelay: 1000,
-  maxReconnectDelay: 30000,
-  reconnectBackoffMultiplier: 2
-});
-
-// Subscribe to events
-transport.onMessage((message) => {
-  console.log('Received:', message);
-});
-
-transport.onError((error) => {
-  console.error('Transport error:', error);
-});
-
-transport.onClose(() => {
-  console.log('Connection closed');
-});
-
-// Send messages
-await transport.send({
-  jsonrpc: '2.0',
-  method: 'textDocument/hover',
-  id: 2,
-  params: { /* ... */ }
-});
-```
-
-If running on Node.js < 22.4 and using client mode, install `ws`:
-
-```bash
-pnpm add ws
-```
-
-### Server Mode WebSocket
-
-```typescript
-import { WebSocketTransport } from '@lspeasy/core';
-import { WebSocketServer } from 'ws';
-
-const wss = new WebSocketServer({ port: 3000 });
-
-wss.on('connection', (ws) => {
-  // Wrap existing WebSocket connection
-  const transport = new WebSocketTransport({
-    socket: ws
-  });
-
-  transport.onMessage((message) => {
-    // Handle LSP messages
-  });
-});
-```
+*See references/ for full examples.*
 
 ## When to Use
 
@@ -208,11 +127,15 @@ wss.on('connection', (ws) => {
 
 ## Quick Reference
 
-**protocol:** `getCapabilityForRequestMethod` (Get the capability key for a given method at runtime), `getClientCapabilityForRequestMethod` (Get the client capability key for a given request method...), `getCapabilityForNotificationMethod` (Get the capability key for a given notification method at...), `getClientCapabilityForNotificationMethod` (Get the client capability key for a given notification me...), `getDefinitionForRequest` (Retrieves the full definition object for a given LSP request method by
+**protocol:** `getCapabilityForRequestMethod` (Get the server capability key for a given request method at runtime), `getClientCapabilityForRequestMethod` (Get the client capability key for a given request method at runtime), `getCapabilityForNotificationMethod` (Get the server capability key for a given notification method at runtime), `getClientCapabilityForNotificationMethod` (Get the client capability key for a given notification method at runtime), `getDefinitionForRequest` (Retrieves the full definition object for a given LSP request method by
 namespace and method key), `getDefinitionForNotification` (Retrieves the full definition object for a given LSP notification method by
-namespace and method key), `serverSupportsRequest` (Check if a method is supported by the given server capabi...), `serverSupportsNotification` (Type-guarding predicate that narrows `capabilities` to include the specific
-server capability key required for the given client-to-server notification method), `clientSupportsRequest` (Check if a method is supported by the given client capabi...), `clientSupportsNotification` (Type-guarding predicate that narrows `capabilities` to include the specific
-client capability key required for the given server-to-client notification method), `hasServerCapability` (Check if a server capability is enabled), `hasClientCapability` (Check if a client capability is enabled), `supportsHover` (Helper to check if hover is supported), `supportsCompletion` (Helper to check if completion is supported), `supportsDefinition` (Helper to check if definition is supported), `supportsReferences` (Helper to check if references are supported), `supportsDocumentSymbol` (Helper to check if document symbols are supported), `supportsWorkspaceFolders` (Helper to check if workspace folders are supported), `supportsNotebookDocumentSync` (Helper to check if notebook document sync is supported by the server), `supportsFileWatching` (Helper to check if file watching is supported), `supportsWorkDoneProgress` (Helper to check if work done progress is supported), `getSchemaForMethod` (Get schema for a given method), `createWorkspaceFolder` (Helper to create a WorkspaceFolder), `createWorkspaceFoldersChangeEvent` (Helper to create a WorkspaceFoldersChangeEvent), `createFileEvent` (Helper to create a FileEvent), `createFileSystemWatcher` (Helper to create a FileSystemWatcher), `createDidChangeWatchedFilesParams` (Helper to create DidChangeWatchedFilesParams), `createProgressBegin` (Creates a `WorkDoneProgressBegin` payload to start a work-done progress notification), `createProgressReport` (Creates a `WorkDoneProgressReport` payload to update an in-progress work-done notification), `createProgressEnd` (Helper to create a progress end notification), `createProgressCreateParams` (Helper to create progress create params), `createProgressToken` (Generate a unique progress token), `createPartialResultParams` (Helper to create partial result params), `hasPartialResultToken` (Type guard to check if params support partial results), `getPartialResultToken` (Helper to extract partial result token from params), `isRegisterCapabilityParams` (Runtime guard for register-capability params), `isUnregisterCapabilityParams` (Runtime guard for unregister-capability params), `LSPRequestMethod` (Union type of all valid LSP request method names), `LSPNotificationMethod` (Union type of all valid LSP notification method names), `ParamsForRequest` (Infer request parameters from method name), `ResultForRequest` (Infer request result from method name), `ServerCapabilityForRequest` (Resolves the `ServerCapabilities` path key required to enable a given LSP request method), `ClientCapabilityForRequest` (Resolves the `ClientCapabilities` path key required for a client to send a given LSP request), `ParamsForNotification` (Infer notification parameters from method name), `ServerCapabilityForNotification` (Resolves the `ServerCapabilities` path key required to enable a given LSP notification method), `ClientCapabilityForNotification` (Resolves the `ClientCapabilities` path key required for a client to handle a given LSP notification), `OptionsForRequest` (Resolves the registration options type for a given LSP request method), `RegistrationOptionsForRequest` (Resolves the dynamic registration options type for a given LSP request method), `DirectionForRequest` (Resolves the message direction (`'clientToServer'` | `'serverToClient'` | `'both'`)
+namespace and method key), `serverSupportsRequest` (Type-guarding predicate that narrows `capabilities` to include the specific
+server capability key required for the given client-to-server request method), `serverSupportsNotification` (Type-guarding predicate that narrows `capabilities` to include the specific
+server capability key required for the given client-to-server notification method), `clientSupportsRequest` (Type-guarding predicate that narrows `capabilities` to include the specific
+client capability key required for the given server-to-client request method), `clientSupportsNotification` (Type-guarding predicate that narrows `capabilities` to include the specific
+client capability key required for the given server-to-client notification method), `hasServerCapability` (Type-guarding predicate that narrows `capabilities` to confirm a specific server capability
+is enabled at a deep dot-notation path), `hasClientCapability` (Type-guarding predicate that narrows `capabilities` to confirm a specific client capability
+is enabled at a deep dot-notation path), `supportsHover` (Returns `true` when `hoverProvider` is declared in the server capabilities), `supportsCompletion` (Returns `true` when `completionProvider` is declared in the server capabilities), `supportsDefinition` (Returns `true` when `definitionProvider` is declared in the server capabilities), `supportsReferences` (Returns `true` when `referencesProvider` is declared in the server capabilities), `supportsDocumentSymbol` (Returns `true` when `documentSymbolProvider` is declared in the server capabilities), `supportsWorkspaceFolders` (Returns `true` when the server supports workspace folders), `supportsNotebookDocumentSync` (Helper to check if notebook document sync is supported by the server), `supportsFileWatching` (Returns `true` when the client supports dynamic file watching registration), `supportsWorkDoneProgress` (Returns `true` when the client supports work done progress notifications), `getSchemaForMethod` (Looks up the Zod validation schema for a given LSP method), `createWorkspaceFolder` (Helper to create a WorkspaceFolder), `createWorkspaceFoldersChangeEvent` (Helper to create a WorkspaceFoldersChangeEvent), `createFileEvent` (Helper to create a FileEvent), `createFileSystemWatcher` (Helper to create a FileSystemWatcher), `createDidChangeWatchedFilesParams` (Helper to create DidChangeWatchedFilesParams), `createProgressBegin` (Creates a `WorkDoneProgressBegin` payload to start a work-done progress notification), `createProgressReport` (Creates a `WorkDoneProgressReport` payload to update an in-progress work-done notification), `createProgressEnd` (Creates a `WorkDoneProgressEnd` payload to close a work-done progress notification), `createProgressCreateParams` (Creates `WorkDoneProgressCreateParams` for a `window/workDoneProgress/create` request), `createProgressToken` (Generate a unique progress token), `createPartialResultParams` (Creates `PartialResultParams` with the given partial result token), `hasPartialResultToken` (Type guard to check if params support partial results), `getPartialResultToken` (Extracts the partial result token from params), `isRegisterCapabilityParams` (Runtime guard for register-capability params), `isUnregisterCapabilityParams` (Runtime guard for unregister-capability params), `LSPRequestMethod` (Union type of all valid LSP request method names), `LSPNotificationMethod` (Union type of all valid LSP notification method names), `ParamsForRequest` (Infer request parameters from method name), `ResultForRequest` (Infer request result from method name), `ServerCapabilityForRequest` (Resolves the `ServerCapabilities` path key required to enable a given LSP request method), `ClientCapabilityForRequest` (Resolves the `ClientCapabilities` path key required for a client to send a given LSP request), `ParamsForNotification` (Infer notification parameters from method name), `ServerCapabilityForNotification` (Resolves the `ServerCapabilities` path key required to enable a given LSP notification method), `ClientCapabilityForNotification` (Resolves the `ClientCapabilities` path key required for a client to handle a given LSP notification), `OptionsForRequest` (Resolves the registration options type for a given LSP request method), `RegistrationOptionsForRequest` (Resolves the dynamic registration options type for a given LSP request method), `DirectionForRequest` (Resolves the message direction (`'clientToServer'` | `'serverToClient'` | `'both'`)
 for a given LSP request method), `DirectionForNotification` (Resolves the message direction for a given LSP notification method), `RequestDefinition` (The shape of a single LSP request definition entry (method, params, result,
 direction, capability keys)), `ClientNotifications` (Client methods for sending requests to server
 Methods are...), `ClientRequests` (Typed namespace of client-to-server LSP request methods, filtered by the
@@ -229,10 +152,6 @@ methods, notification send methods, and server-to-client handler registrations),
 (direction, server capability, client capability)), `ClientRequestMethodToCapabilityMap` (Runtime map from every LSP request method string to the corresponding
 server capability key (or `undefined` for always-allowed methods)), `ClientNotificationMethodToCapabilityMap` (Runtime map from every LSP notification method string to the corresponding
 server capability key (or `undefined` for always-allowed notifications)), `LSPRequest` (LSP Request methods organized by namespace), `LSPNotification` (LSP Notification methods organized by namespace), `PositionSchema` (Position in a text document expressed as zero-based line...), `RangeSchema` (Range in a text document expressed as (zero-based) start...), `TextDocumentIdentifierSchema` (Text document identifier), `HoverParamsSchema` (Hover params), `HoverSchema` (Hover result), `CompletionParamsSchema` (Completion params), `CompletionItemSchema` (Completion item), `CompletionListSchema` (Completion list), `DefinitionParamsSchema` (Definition params), `ReferenceParamsSchema` (Reference params), `DocumentSymbolParamsSchema` (Document symbol params), `DocumentSymbolSchema` (Document symbol), `InitializeParamsSchema` (Initialize params), `DidOpenTextDocumentParamsSchema` (Did open text document params), `DidChangeTextDocumentParamsSchema` (Did change text document params), `DidCloseTextDocumentParamsSchema` (Did close text document params), `DidSaveTextDocumentParamsSchema` (Did save text document params), `LSPSchemas` (Schema registry for method-based lookup), `WorkspaceFileChangeTypes` (File change types enum for convenience), `WatchKinds` (Watch kinds for file system watchers), `dynamicRegistrationSchema` (Zod schema for validating a single dynamic-registration entry), `registerCapabilityParamsSchema` (Zod schema for validating `client/registerCapability` params), `unregisterCapabilitySchema` (Zod schema for validating a single capability unregistration entry), `unregisterCapabilityParamsSchema` (Zod schema for validating `client/unregisterCapability` params)
-**JSON-RPC:** `isRequestMessage` (Returns `true` when `message` is a JSON-RPC request (has `id` + `method`)), `isNotificationMessage` (Returns `true` when `message` is a JSON-RPC notification (has `method`,
-no `id`)), `isResponseMessage` (Returns `true` when `message` is a JSON-RPC response (has `id`, no `method`)), `isSuccessResponse` (Returns `true` when `response` carries a `result` (success case)), `isErrorResponse` (Returns `true` when `response` carries an `error` (error case)), `parseMessage` (Parses a single framed JSON-RPC 2), `serializeMessage` (Serializes a JSON-RPC 2), `BaseMessage` (Base JSON-RPC 2), `RequestMessage` (JSON-RPC 2), `NotificationMessage` (JSON-RPC 2), `SuccessResponseMessage` (JSON-RPC 2), `ErrorResponseMessage` (JSON-RPC 2), `ResponseMessage` (JSON-RPC 2), `Message` (Union of all JSON-RPC 2), `ResponseErrorInterface` (JSON-RPC 2)
-**Transport:** `createWebSocketClient` (Creates a WebSocket client instance, preferring the native
-`globalThis), `WebSocketTransport` (WebSocket-based transport for LSP communication), `Transport` (Pluggable communication layer for JSON-RPC message exchange)
 
 *185 exports total — see references/ for full API.*
 

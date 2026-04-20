@@ -8,5 +8,5 @@ Runtime guard for register-capability params.
 isRegisterCapabilityParams(value: unknown): value is RegisterCapabilityParams
 ```
 **Parameters:**
-- `value: unknown`
-**Returns:** `value is RegisterCapabilityParams`
+- `value: unknown` — The unknown value to test.
+**Returns:** `value is RegisterCapabilityParams` — `true` when `value` is a valid `RegisterCapabilityParams` object.

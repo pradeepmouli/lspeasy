@@ -99,8 +99,11 @@ export type TypedResult<M extends LSPMethod> = M extends LSPRequestMethod
  * @category Middleware
  */
 export interface TypedMiddlewareContext<M extends LSPMethod> extends MiddlewareContext {
+  /** The specific LSP method string this middleware context is scoped to. */
   method: M;
+  /** Typed parameters inferred from the LSP method signature. */
   params: TypedParams<M>;
+  /** Typed result, populated after `next()` resolves for request middleware. */
   result?: TypedResult<M>;
 }
 
@@ -120,8 +123,11 @@ export interface TypedMiddlewareContext<M extends LSPMethod> extends MiddlewareC
  * @category Middleware
  */
 export interface MiddlewareResult {
+  /** When `true`, all remaining middleware and the final handler are bypassed. */
   shortCircuit?: boolean;
+  /** The response to return when short-circuiting a request. */
   response?: ResponseMessage | RequestMessage | NotificationMessage;
+  /** The error response to return when short-circuiting with a failure. */
   error?: ErrorResponseMessage;
 }
 
@@ -238,6 +244,8 @@ export interface MethodFilter {
  * @category Middleware
  */
 export interface ScopedMiddleware {
+  /** The filter predicate that determines which messages this middleware intercepts. */
   filter: MethodFilter;
+  /** The middleware function to execute when the filter matches. */
   middleware: Middleware;
 }
