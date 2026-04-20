@@ -1,6 +1,6 @@
 ---
 name: lspeasy-client
-description: "Connect to LSP servers with typed client API Use when working with lsp, language-server-protocol, lsp-client, language-client."
+description: "Typed LSP client with capability-aware namespaces, connection health monitoring, and heartbeat detection. Use when building editor extensions, CLI analysis tools, or test harnesses that connect to a language server — and need the lspeasy SDK (LSPClient, CapabilityGuard, ConnectionHealthTracker, HeartbeatMonitor, NotificationWaiter). Keywords: lsp, language-server-protocol, lsp-client, language-client, lspeasy."
 license: MIT
 ---
 
@@ -75,56 +75,30 @@ await client.disconnect();
 
 ## When to Use
 
+**Use this skill when:**
+- You need the same outbound capability validation that `LSPClient` uses internally — for a custom client layer that wraps or replaces `LSPClient`. → use `CapabilityGuard` (normally internal; only reach for it when building a custom client pipeline)
+- You need to monitor connection liveness → use `ConnectionHealthTracker` — e.g. show a status indicator, trigger reconnection logic, or surface transport errors to users. Subscribe to `stateChanged` / `healthChanged` events rather than polling.
+- The server process can die without closing the socket (common with stdio servers that crash silently) → use `HeartbeatMonitor` — without it, the client hangs indefinitely on pending requests with no feedback.
+- You need a one-shot wait for a specific server-to-client notification after triggering a server-side operation → use `NotificationWaiter` — e.g. waiting for `textDocument/publishDiagnostics` after `textDocument/didSave`.
 
-| Task | Use | Why |
-|------|-----|-----|
-| You are implementing a custom client layer and need the same validation | `CapabilityGuard` | — |
-| behaviour that `LSPClient` uses. Otherwise this is an internal detail. | `CapabilityGuard` | — |
-| You need to monitor connection liveness | `ConnectionHealthTracker` | for example, to show a status |
-| indicator, trigger reconnection logic, or surface transport errors to users. | `ConnectionHealthTracker` | — |
-| You need to detect silent transport failures | `HeartbeatMonitor` | for example, when the server |
-| process dies without closing the socket, leaving the client hanging | `HeartbeatMonitor` | — |
-| indefinitely on pending requests. | `HeartbeatMonitor` | — |
-| You need to await a specific server-to-client notification after triggering | `NotificationWaiter` | — |
-| a server-side operation | `NotificationWaiter` | for example, waiting for |
-| `textDocument/publishDiagnostics` after saving a document. | `NotificationWaiter` | — |
+**Do NOT use when:**
+- The transport already provides its own keep-alive (e.g. WebSocket ping frames) — `HeartbeatMonitor` on top creates redundant round-trips and may trigger spurious `onUnresponsive` callbacks that race with the transport's own timeout.
+- You need ongoing notification subscriptions — use `LSPClient.onNotification` for persistent listeners. `NotificationWaiter` is one-shot and leaks if not given a timeout.
 
-**Avoid when:**
+API surface: 5 classes, 11 types, 2 enums, 1 constants
 
-| Don't Use | When | Use Instead |
-|-----------|------|-------------|
-| `HeartbeatMonitor` | The transport already provides its own keep-alive mechanism (e.g. WebSocket | — |
-| `HeartbeatMonitor` | ping frames) | adding a heartbeat on top creates redundant round-trips and |
-| `HeartbeatMonitor` | may interfere with the transport's own timeout logic. | — |
-| `NotificationWaiter` | You need to listen for ongoing notifications (not a one-shot wait) | use |
-| `NotificationWaiter` | `LSPClient.onNotification` for persistent subscriptions instead. | — |
-- API surface: 5 classes, 11 types, 2 enums, 1 constants
+## NEVER
 
-**NEVER:**
-
-- NEVER construct `CapabilityGuard` before the `initialize` handshake completes.
-- Server capabilities are only known after the `InitializeResult` is received;
-- instantiating the guard too early will treat all methods as unsupported.
-- NEVER register server-to-client handlers for capabilities not declared in
-- the original `initialize` request — the server may send the corresponding
-- requests, but without the capability declaration the client has no contract
-- to handle them, leading to silent failures or unexpected errors.
-- NEVER mutate the object returned by `getHealth()` — it is a defensive copy
-- but consumers that store a reference and then modify it will see stale state.
-- NEVER call `setState` from outside `LSPClient` internals. External callers
-- have no knowledge of the full state-transition graph; setting state directly
-- can desync the client's internal bookkeeping from the tracker's reported state.
-- NEVER set `interval` shorter than the typical round-trip latency for your
-- transport — doing so causes constant `onUnresponsive` callbacks on any
-- non-local transport, triggering spurious reconnects.
-- NEVER rely on heartbeat for authentication or access control. The heartbeat
-- only confirms the transport is alive; it carries no identity information.
-- NEVER create a `NotificationWaiter` without setting a timeout — an
-- indefinite wait will leak the waiter permanently if the notification never
-- arrives (e.g. the server suppresses it for certain file types).
-- NEVER use `NotificationWaiter` to wait for notifications that arrive before
-- the waiter is registered. The waiter only sees notifications emitted after
-- `start()` is called; earlier notifications are silently missed.
+- NEVER call `sendRequest` before `connect()` completes — the transport is not attached yet and the call throws immediately with no pending promise to catch.
+- NEVER send requests after `disconnect()` — the transport is closed; pending promises reject with "Connection closed". Reconnect requires a new `connect()` call.
+- NEVER share one `LSPClient` across two separate language server processes — each process is an independent JSON-RPC peer with its own ID sequence and lifecycle state; cross-process ID collisions cause silent response misrouting.
+- NEVER construct `CapabilityGuard` before the `initialize` handshake completes — server capabilities are only known after `InitializeResult` is received; an early guard treats all methods as unsupported.
+- NEVER register server-to-client handlers for capabilities not declared in the original `initialize` request — the server may send the requests but without the capability declaration there is no contract to handle them, producing silent failures.
+- NEVER mutate the object returned by `getHealth()` — it is a defensive copy; stored references that are then modified will diverge from the live state.
+- NEVER call `setState` from outside `LSPClient` internals — external callers have no knowledge of the full state-transition graph; direct mutation desyncs the tracker's reported state from the client's bookkeeping.
+- NEVER set `HeartbeatMonitor.interval` shorter than the typical round-trip latency for your transport — this causes constant `onUnresponsive` callbacks on any non-local transport, triggering spurious reconnects.
+- NEVER create a `NotificationWaiter` without a timeout — an indefinite wait leaks the waiter permanently if the notification never arrives (e.g. the server suppresses `publishDiagnostics` for certain file types).
+- NEVER use `NotificationWaiter` to await notifications that arrive before `start()` is called — earlier notifications are silently missed; register the waiter before triggering the server-side operation.
 
 ## Configuration
 

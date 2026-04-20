@@ -1,6 +1,6 @@
 ---
 name: lspeasy-core
-description: "Core types, transports, and utilities for LSP SDK Use when working with lsp, language-server-protocol, jsonrpc, transport."
+description: "Foundation layer for the lspeasy LSP SDK: transport selection (Stdio, TCP, WebSocket, Worker), middleware pipeline (compose, scoped, typed), protocol type inference (ParamsForRequest, ResultForRequest), and utilities (DisposableStore, CancellationToken, DocumentVersionTracker, ResponseError). Use when choosing a transport for a browser/Node/Worker environment, adding cross-cutting middleware, handling cancellation in long-running handlers, or tracking document version counters. Keywords: lsp, language-server-protocol, jsonrpc, transport, middleware, lspeasy."
 license: MIT
 ---
 
@@ -64,51 +64,30 @@ const codeAction = {
 
 ## When to Use
 
+**Use this skill when:**
+- You need to run LSP over HTTP/HTTPS or in a browser — use `WebSocketTransport`. For CLI servers use `StdioTransport` from `@lspeasy/core/node`; for in-process testing use `DedicatedWorkerTransport` or `SharedWorkerTransport`.
+- You register multiple handlers that share the same lifetime (e.g. feature toggle, document close) → use `DisposableStore` — dispose the whole store rather than tracking individual subscription handles.
+- A request handler must reject with a machine-readable error code (e.g. `MethodNotFound`, `InvalidParams`) that clients can programmatically act on → use `ResponseError`. Throw plain `Error` only for unexpected internal failures.
+- You are implementing a `RequestHandler` that does async work (file I/O, parsing, DB queries) → check `token.isCancellationRequested` at each async yield point. Without it, a cancelled client waits forever with no feedback, and the server wastes CPU on dead requests.
+- You need cross-cutting behavior across all LSP messages (logging, tracing, auth, rate-limiting, test mocking) → use `Middleware`. For a single method, register a dedicated handler instead — middleware runs on every message regardless.
+- You are sending `textDocument/didChange` notifications from a client → use `DocumentVersionTracker` to manage per-document version counters centrally. The LSP spec requires strictly incrementing versions; a duplicate version can cause the server to reject the change silently.
 
-| Task | Use | Why |
-|------|-----|-----|
-| You are building a browser-based LSP client, a WebSocket-backed language | `WebSocketTransport` | — |
-| server, or any LSP integration that must run over HTTP/HTTPS infrastructure. | `WebSocketTransport` | — |
-| You register multiple handlers (hover, completion, definition) that share | `DisposableStore` | — |
-| the same lifetime | `DisposableStore` | collect them all into one store and dispose the store |
-| on shutdown or feature toggle. | `DisposableStore` | — |
-| A request handler needs to reject with a machine-readable error code that | `ResponseError` | — |
-| the client can act on (e.g. respond with `MethodNotFound` when a capability | `ResponseError` | — |
-| was not declared, or `InvalidParams` when schema validation fails). | `ResponseError` | — |
-| You are building an LSP client that sends `textDocument/didChange` | `DocumentVersionTracker` | — |
-| notifications and need to track per-document version counters. | `DocumentVersionTracker` | — |
+**Do NOT use when:**
+- You want to log a server-side error without sending it to the client — throw a plain `Error` caught by `server.onError()` instead of `ResponseError`.
+- You need to handle only one specific LSP method — a dedicated `onRequest` / `onNotification` handler is cheaper than a full Middleware (which runs on every message regardless of method).
 
-**Avoid when:**
+API surface: 55 functions, 11 classes, 77 types, 1 enums, 41 constants
 
-| Don't Use | When | Use Instead |
-|-----------|------|-------------|
-| `WebSocketTransport` | You are building a CLI language server | `StdioTransport` (from |
-| `WebSocketTransport` | `@lspeasy/core/node`) is the conventional choice and avoids the overhead | — |
-| `WebSocketTransport` | of a network stack. For same-process workers prefer | — |
-| `WebSocketTransport` | `DedicatedWorkerTransport` or `SharedWorkerTransport`. | — |
-| `ResponseError` | You want to log a server-side error without sending an error to the client — | — |
-| `ResponseError` | throw a plain `Error` and handle it via `server.onError()` instead. | — |
-- API surface: 55 functions, 11 classes, 77 types, 1 enums, 41 constants
+## NEVER
 
-**NEVER:**
-
-- NEVER set `enableReconnect: true` in server mode (`socket` provided) —
-- the option is silently ignored (reconnect has no URL to reconnect to), but
-- the intent is misleading and suggests lifecycle management will be handled
-- when it is not.
-- NEVER send messages before `isConnected()` returns `true`. In client mode
-- the socket is in CONNECTING state immediately after construction; `send()`
-- will throw until the open event fires.
-- NEVER use `ConsoleLogger` in a stdio LSP server (`StdioTransport`) — the
-- LSP base protocol uses stdout as the message channel. Any `console.log` /
-- `console.info` / `console.debug` output will corrupt the stdio stream.
-- Use `NullLogger` or a file-based logger instead, and send diagnostic
-- messages via `window/logMessage` notifications.
-- NEVER throw `ResponseError` with a code outside the defined ranges without
-- documenting it. Undocumented codes are opaque to clients and tools.
-- NEVER send a `textDocument/didChange` with the same version number as a
-- previous change for the same document. The server may reject the change as
-- a no-op or apply it out of order, causing text state desync.
+- NEVER set `enableReconnect: true` in server mode (`socket` provided) — the option is silently ignored because the server has no URL to reconnect to, but the misleading intent makes it appear lifecycle management is handled when it is not.
+- NEVER send messages before `isConnected()` returns `true` on `WebSocketTransport` — in client mode the socket is in CONNECTING state immediately after construction; `send()` throws until the open event fires.
+- NEVER use `ConsoleLogger` in a stdio LSP server (`StdioTransport`) — stdout is the message channel for the LSP base protocol; any `console.log` / `console.info` / `console.debug` output corrupts the framing and breaks all clients. Use `NullLogger` or a file-based logger; send diagnostic text via `window/logMessage` notifications.
+- NEVER throw `ResponseError` with a code outside the defined JSON-RPC / LSP ranges without documenting it — undocumented codes are opaque to clients and tools that do error-code routing.
+- NEVER send a `textDocument/didChange` with the same version number as a previous change — the server may reject it as a no-op or apply it out of order, causing permanent text desync that only a document close/reopen can fix.
+- NEVER mutate `context.message.id` inside a `Middleware` — response correlation depends on the ID remaining stable through the full pipeline; changing it causes the response to be silently dropped by the client.
+- NEVER `await next()` more than once in a single middleware invocation — the pipeline is not re-entrant; calling `next()` twice dispatches the underlying handler twice, producing duplicate responses or double side-effects.
+- NEVER ignore `token.isCancellationRequested` on long-running request handlers — if the server does not stop on `$/cancelRequest`, the client times out and receives no usable feedback while the server wastes resources.
 
 ## Configuration
 
