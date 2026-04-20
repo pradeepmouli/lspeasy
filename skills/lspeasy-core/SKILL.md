@@ -38,76 +38,120 @@ for string-literal method names.
 DisposableStore for lifecycle management, ResponseError for
 structured JSON-RPC errors, DocumentVersionTracker for document sync.
 
-## Features
-
-- **Capability-aware handler registration** — `server.textDocument.onHover(...)` is only callable after `registerCapabilities({ hoverProvider: true })`; mismatches are caught at both compile time and at the dispatcher.
-- **Full JSON-RPC 2.0 core** — schemas, framing, request/notification/response types, and typed error codes, all validated with Zod.
-- **Swappable transports** — `StdioTransport`, `TcpTransport`, `IpcTransport`, `WebSocketTransport`, `DedicatedWorkerTransport`, `SharedWorkerTransport`; write your own against the `Transport` interface.
-- **Runs anywhere** — Node.js-specific transports live under `@lspeasy/core/node`; the root export is browser-safe so the same code ships to a VS Code extension and a web playground.
-- **Typed client API** — `client.textDocument.hover(...)`, `client.workspace.symbol(...)`, and the full request surface with request/response types pulled from the LSP spec.
-- **Composable middleware** — `composeMiddleware(...)` plus `createScopedMiddleware({ methods, direction })` for logging, tracing, metrics, or request mutation without touching the core dispatcher.
-- **Lifecycle + progress + cancellation** — initialize/initialized/shutdown/exit are handled for you, with built-in partial-result and work-done progress senders and `CancellationToken` support.
-- **Zod-validated messages** — every inbound message is parsed against a schema, so malformed peers surface as typed errors instead of runtime crashes.
-- **Tree-shakeable, ESM-only** — pay for what you import; no CommonJS compatibility shims dragging extra code into browser bundles.
-
 ## Quick Start
 
-### Writing a client
+### Type-Safe LSP Enums
+
+The SDK exports enums for all LSP kind types, providing type safety and IDE autocomplete:
 
 ```typescript
-import { LSPClient } from '@lspeasy/client';
-import { StdioTransport } from '@lspeasy/core/node';
-import { spawn } from 'node:child_process';
+import {
+  CompletionItemKind,
+  SymbolKind,
+  DiagnosticSeverity,
+  CodeActionKind,
+  FoldingRangeKind
+} from '@lspeasy/core/protocol/enums';
 
-const proc = spawn('my-language-server', ['--stdio']);
-const transport = new StdioTransport({ input: proc.stdout, output: proc.stdin });
-
-const client = new LSPClient({ name: 'my-client', version: '1.0.0' });
-await client.connect(transport);
-
-const hover = await client.textDocument.hover({
-  textDocument: { uri: 'file:///example.ts' },
-  position: { line: 0, character: 6 }
-});
-
-await client.disconnect();
-```
-
-### Transports
-
-`@lspeasy/core` ships several built-in transports. Import Node-only transports from the `/node` subpath so browser bundles stay clean.
-
-| Transport | Import | Notes |
-|-----------|--------|-------|
-| `StdioTransport` | `@lspeasy/core/node` | stdin/stdout, child processes |
-| `TcpTransport` | `@lspeasy/core/node` | TCP client/server with optional reconnect |
-| `IpcTransport` | `@lspeasy/core/node` | Node parent/child IPC |
-| `WebSocketTransport` | `@lspeasy/core` | Native `globalThis.WebSocket` (Node ≥22.4 or browsers) |
-| `DedicatedWorkerTransport` | `@lspeasy/core` | Browser dedicated worker |
-| `SharedWorkerTransport` | `@lspeasy/core` | Browser shared worker |
-
-### Middleware
-
-`@lspeasy/core/middleware` provides a composable pipeline for logging, tracing, or mutating requests on the fly:
-
-```typescript
-import { composeMiddleware, createScopedMiddleware } from '@lspeasy/core/middleware';
-import type { Middleware } from '@lspeasy/core/middleware';
-
-const logging: Middleware = async (ctx, next) => {
-  console.log(`${ctx.direction} ${ctx.method}`);
-  await next();
+// Use enums instead of magic numbers
+const completion = {
+  label: 'myFunction',
+  kind: CompletionItemKind.Function // Instead of: kind: 2
 };
 
-const textDocOnly = createScopedMiddleware(
-  { methods: /^textDocument\//, direction: 'clientToServer' },
-  async (ctx, next) => {
-    ctx.metadata.startedAt = Date.now();
-    await next();
-  }
-);
+// String-based kinds support both enums and custom values
+const codeAction = {
+  title: 'Quick fix',
+  kind: CodeActionKind.QuickFix // Or custom: 'refactor.extract.helper'
+};
+```
 
-const middleware = composeMiddleware(logging, textDocOnly);
+### Using StdioTransport
+
+```typescript
+import { StdioTransport } from '@lspeasy/core';
+
+// Create transport for stdio communication
+const transport = new StdioTransport();
+
+// Listen for messages
+transport.onMessage((message) => {
+  console.log('Received:', message);
+});
+
+// Send a message
+await transport.send({
+  jsonrpc: '2.0',
+  method: 'initialize',
+  id: 1,
+  params: { /* ... */ }
+});
+
+// Clean up
+await transport.close();
+```
+
+### Using WebSocketTransport
+
+```typescript
+import { WebSocketTransport } from '@lspeasy/core';
+
+// Client mode with automatic reconnection
+const transport = new WebSocketTransport({
+  url: 'ws://localhost:3000',
+  enableReconnect: true,
+  maxReconnectAttempts: 5,
+  reconnectDelay: 1000,
+  maxReconnectDelay: 30000,
+  reconnectBackoffMultiplier: 2
+});
+
+// Subscribe to events
+transport.onMessage((message) => {
+  console.log('Received:', message);
+});
+
+transport.onError((error) => {
+  console.error('Transport error:', error);
+});
+
+transport.onClose(() => {
+  console.log('Connection closed');
+});
+
+// Send messages
+await transport.send({
+  jsonrpc: '2.0',
+  method: 'textDocument/hover',
+  id: 2,
+  params: { /* ... */ }
+});
+```
+
+If running on Node.js < 22.4 and using client mode, install `ws`:
+
+```bash
+pnpm add ws
+```
+
+### Server Mode WebSocket
+
+```typescript
+import { WebSocketTransport } from '@lspeasy/core';
+import { WebSocketServer } from 'ws';
+
+const wss = new WebSocketServer({ port: 3000 });
+
+wss.on('connection', (ws) => {
+  // Wrap existing WebSocket connection
+  const transport = new WebSocketTransport({
+    socket: ws
+  });
+
+  transport.onMessage((message) => {
+    // Handle LSP messages
+  });
+});
 ```
 
 ## When to Use
@@ -189,25 +233,8 @@ server capability key (or `undefined` for always-allowed notifications)), `LSPRe
 no `id`)), `isResponseMessage` (Returns `true` when `message` is a JSON-RPC response (has `id`, no `method`)), `isSuccessResponse` (Returns `true` when `response` carries a `result` (success case)), `isErrorResponse` (Returns `true` when `response` carries an `error` (error case)), `parseMessage` (Parses a single framed JSON-RPC 2), `serializeMessage` (Serializes a JSON-RPC 2), `BaseMessage` (Base JSON-RPC 2), `RequestMessage` (JSON-RPC 2), `NotificationMessage` (JSON-RPC 2), `SuccessResponseMessage` (JSON-RPC 2), `ErrorResponseMessage` (JSON-RPC 2), `ResponseMessage` (JSON-RPC 2), `Message` (Union of all JSON-RPC 2), `ResponseErrorInterface` (JSON-RPC 2)
 **Transport:** `createWebSocketClient` (Creates a WebSocket client instance, preferring the native
 `globalThis), `WebSocketTransport` (WebSocket-based transport for LSP communication), `Transport` (Pluggable communication layer for JSON-RPC message exchange)
-**Middleware:** `composeMiddleware` (Combines multiple middleware functions into a single middleware that runs
-them left-to-right, each delegating to the next via `next()`), `executeMiddlewarePipeline` (Runs the registered middleware chain for a single JSON-RPC message, then
-calls `finalHandler` if no middleware short-circuits), `createScopedMiddleware` (Wraps a middleware with a filter so it only runs for matching LSP messages), `createTypedMiddleware` (Creates a typed, method-scoped middleware with full TypeScript inference for
-the message params and result), `Middleware` (A function that intercepts JSON-RPC messages flowing through `LSPServer`
-or `LSPClient`), `MiddlewareContext` (Execution context passed to every middleware function in the pipeline), `MiddlewareDirection` (Direction of a JSON-RPC message in the middleware pipeline), `MiddlewareMessage` (The JSON-RPC message exposed to middleware, with `id` made read-only to
-prevent accidental mutation that would break response correlation), `MiddlewareMessageType` (Kind of JSON-RPC message flowing through middleware), `MiddlewareNext` (Calls the next middleware (or final handler) in the pipeline), `MiddlewareResult` (The return value from a middleware function), `MethodFilter` (Filter predicate used by `ScopedMiddleware` to select which messages
-a middleware should intercept), `ScopedMiddleware` (A `Middleware` paired with a `MethodFilter` so it only runs for matching
-messages), `TypedMiddleware` (A middleware function narrowed to a specific LSP method with full type
-inference for `params` and `result`), `TypedMiddlewareContext` (Typed middleware context narrowed to a specific LSP method), `TypedParams` (Infers the params type for a given LSP method), `TypedResult` (Infers the result type for a given LSP method (void for notifications)), `LSPMethod` (Union of all LSP request and notification method strings)
-**Document:** `createFullDidChangeParams` (Builds `DidChangeTextDocumentParams` for a full-document text replacement), `createIncrementalDidChangeParams` (Builds `DidChangeTextDocumentParams` for an incremental (range-based)
-document change notification), `DocumentVersionTracker` (Tracks monotonically increasing version numbers for open text documents)
-**transport:** `isMessage` (Runtime guard for JSON-RPC message envelopes), `isWorkerTransportEnvelope` (Runtime guard for shared worker transport envelope payloads), `DedicatedWorkerTransport` (JSON-RPC transport backed by a Dedicated Worker instance), `SharedWorkerTransport` (JSON-RPC transport for Shared Worker environments with per-client envelope routing), `TransportEventEmitter` (Transport event emitter), `WorkerLike` (Minimal worker contract required by dedicated worker transport), `MessagePortLike` (Minimal message port contract required by shared worker transport), `SharedWorkerLike` (Shared worker wrapper exposing a message port), `WorkerMessageEventLike` (Lightweight event shape shared by worker and message port adapters), `WorkerTransportEnvelope` (Envelope used by shared worker transport to preserve client isolation)
-**Utilities:** `buildMethodSets` (Builds the full set of LSP methods and the subset that are always allowed
-(not gated by a capability) for a given capability key), `SERVER_METHODS` (Pre-built method sets indexed by server capability), `CLIENT_METHODS` (Pre-built method sets indexed by client capability)
-**utils:** `checkMethod` (Shared validation logic for checking if a method is allowed based on capabilities), `DisposableEventEmitter` (Event emitter that returns disposables and can dispose all listeners at once), `CancellationToken` (Singleton token that is never cancelled), `IncrementalChange` (Represents a single incremental text document change), `VersionSource` (Source of version information for helper constructors), `ErrorMessage` (Error messages for each error code)
-**Lifecycle:** `DisposableStore` (Collects multiple `Disposable` instances and releases them together), `CancellationTokenSource` (Controller that creates and manages a `CancellationToken`), `Disposable` (Represents a resource that can be explicitly released), `CancellationToken` (Read-only handle for observing cancellation state)
-**Logging:** `ConsoleLogger` (Logger implementation that writes to the process console with level filtering), `NullLogger` (No-op logger that silently discards all messages), `Logger` (Structured logging interface used throughout lspeasy), `LogLevel` (Numeric severity levels for filtering log output)
-**Errors:** `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `JSONRPCErrorCode` (Numeric error codes defined by JSON-RPC 2)
-**jsonrpc:** `requestMessageSchema` (Schema for JSON-RPC 2), `notificationMessageSchema` (Schema for JSON-RPC 2), `responseErrorSchema` (Schema for JSON-RPC 2), `successResponseMessageSchema` (Schema for JSON-RPC 2), `errorResponseMessageSchema` (Schema for JSON-RPC 2), `responseMessageSchema` (Schema for JSON-RPC 2), `messageSchema` (Schema for any JSON-RPC 2)
+
+*185 exports total — see references/ for full API.*
 
 ## References
 

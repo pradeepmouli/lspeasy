@@ -35,76 +35,75 @@ The client handles `client/registerCapability` and
 `client/unregisterCapability` requests from the server automatically,
 updating the typed namespaces at runtime.
 
-## Features
-
-- **Capability-aware handler registration** — `server.textDocument.onHover(...)` is only callable after `registerCapabilities({ hoverProvider: true })`; mismatches are caught at both compile time and at the dispatcher.
-- **Full JSON-RPC 2.0 core** — schemas, framing, request/notification/response types, and typed error codes, all validated with Zod.
-- **Swappable transports** — `StdioTransport`, `TcpTransport`, `IpcTransport`, `WebSocketTransport`, `DedicatedWorkerTransport`, `SharedWorkerTransport`; write your own against the `Transport` interface.
-- **Runs anywhere** — Node.js-specific transports live under `@lspeasy/core/node`; the root export is browser-safe so the same code ships to a VS Code extension and a web playground.
-- **Typed client API** — `client.textDocument.hover(...)`, `client.workspace.symbol(...)`, and the full request surface with request/response types pulled from the LSP spec.
-- **Composable middleware** — `composeMiddleware(...)` plus `createScopedMiddleware({ methods, direction })` for logging, tracing, metrics, or request mutation without touching the core dispatcher.
-- **Lifecycle + progress + cancellation** — initialize/initialized/shutdown/exit are handled for you, with built-in partial-result and work-done progress senders and `CancellationToken` support.
-- **Zod-validated messages** — every inbound message is parsed against a schema, so malformed peers surface as typed errors instead of runtime crashes.
-- **Tree-shakeable, ESM-only** — pay for what you import; no CommonJS compatibility shims dragging extra code into browser bundles.
-
 ## Quick Start
 
-### Writing a client
+### Basic Client
 
 ```typescript
 import { LSPClient } from '@lspeasy/client';
-import { StdioTransport } from '@lspeasy/core/node';
-import { spawn } from 'node:child_process';
+import { StdioTransport } from '@lspeasy/core';
+import { spawn } from 'child_process';
 
-const proc = spawn('my-language-server', ['--stdio']);
-const transport = new StdioTransport({ input: proc.stdout, output: proc.stdin });
+// Spawn language server
+const serverProcess = spawn('typescript-language-server', ['--stdio']);
 
-const client = new LSPClient({ name: 'my-client', version: '1.0.0' });
-await client.connect(transport);
-
-const hover = await client.textDocument.hover({
-  textDocument: { uri: 'file:///example.ts' },
-  position: { line: 0, character: 6 }
+// Create transport
+const transport = new StdioTransport({
+  input: serverProcess.stdout,
+  output: serverProcess.stdin
 });
 
+// Create client
+const client = new LSPClient({
+  name: 'My Client',
+  version: '1.0.0',
+  transport
+});
+
+// Connect to server (sends initialize + initialized)
+await client.connect(transport);
+
+// Use high-level API
+const hover = await client.textDocument.hover({
+  textDocument: { uri: 'file:///path/to/file.ts' },
+  position: { line: 10, character: 5 }
+});
+
+console.log('Hover:', hover?.contents);
+
+// Disconnect
 await client.disconnect();
 ```
 
-### Transports
+### With Capabilities
 
-`@lspeasy/core` ships several built-in transports. Import Node-only transports from the `/node` subpath so browser bundles stay clean.
-
-| Transport | Import | Notes |
-|-----------|--------|-------|
-| `StdioTransport` | `@lspeasy/core/node` | stdin/stdout, child processes |
-| `TcpTransport` | `@lspeasy/core/node` | TCP client/server with optional reconnect |
-| `IpcTransport` | `@lspeasy/core/node` | Node parent/child IPC |
-| `WebSocketTransport` | `@lspeasy/core` | Native `globalThis.WebSocket` (Node ≥22.4 or browsers) |
-| `DedicatedWorkerTransport` | `@lspeasy/core` | Browser dedicated worker |
-| `SharedWorkerTransport` | `@lspeasy/core` | Browser shared worker |
-
-### Middleware
-
-`@lspeasy/core/middleware` provides a composable pipeline for logging, tracing, or mutating requests on the fly:
+Declare client capabilities:
 
 ```typescript
-import { composeMiddleware, createScopedMiddleware } from '@lspeasy/core/middleware';
-import type { Middleware } from '@lspeasy/core/middleware';
-
-const logging: Middleware = async (ctx, next) => {
-  console.log(`${ctx.direction} ${ctx.method}`);
-  await next();
-};
-
-const textDocOnly = createScopedMiddleware(
-  { methods: /^textDocument\//, direction: 'clientToServer' },
-  async (ctx, next) => {
-    ctx.metadata.startedAt = Date.now();
-    await next();
+const client = new LSPClient({
+  name: 'Advanced Client',
+  version: '1.0.0',
+  transport,
+  capabilities: {
+    textDocument: {
+      hover: {
+        contentFormat: ['markdown', 'plaintext']
+      },
+      completion: {
+        completionItem: {
+          snippetSupport: true,
+          commitCharactersSupport: true
+        }
+      }
+    },
+    workspace: {
+      applyEdit: true,
+      workspaceEdit: {
+        documentChanges: true
+      }
+    }
   }
-);
-
-const middleware = composeMiddleware(logging, textDocOnly);
+});
 ```
 
 ## When to Use
