@@ -1,12 +1,12 @@
 ---
 name: lspeasy-core
-description: "TypeScript SDK for building Language Server Protocol clients and servers Core types, transports, and utilities shared by all lspeasy packages. Use when: You are building a browser-based LSP client, a WebSocket-backed language; server, or any LSP integration that must run over HTTP/HTTPS infrastructure.; You register multiple handlers (hover, completion, definition) that share."
+description: "Core types, transports, and utilities for LSP SDK Use when: You are building a browser-based LSP client, a WebSocket-backed language; server, or any LSP integration that must run over HTTP/HTTPS infrastructure.; You register multiple handlers (hover, completion, definition) that share."
 license: MIT
 ---
 
 # @lspeasy/core
 
-TypeScript SDK for building Language Server Protocol clients and servers
+Core types, transports, and utilities for LSP SDK
 
 `@lspeasy/core` is the shared foundation for the lspeasy SDK. It contains
 everything needed to build custom LSP integrations, and re-exports the
@@ -40,10 +40,6 @@ structured JSON-RPC errors, DocumentVersionTracker for document sync.
 
 ## Quick Start
 
-### Type-Safe LSP Enums
-
-The SDK exports enums for all LSP kind types, providing type safety and IDE autocomplete:
-
 ```typescript
 import {
   CompletionItemKind,
@@ -65,13 +61,6 @@ const codeAction = {
   kind: CodeActionKind.QuickFix // Or custom: 'refactor.extract.helper'
 };
 ```
-
-### Using StdioTransport
-
-```typescript
-import { StdioTransport } from '@lspeasy/core';
-
-*See references/ for full examples.*
 
 ## When to Use
 

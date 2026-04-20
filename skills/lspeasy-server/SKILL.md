@@ -1,12 +1,12 @@
 ---
 name: lspeasy-server
-description: "TypeScript SDK for building Language Server Protocol clients and servers LSP server package for hosting Language Server Protocol (LSP) servers. Use when: The client sets `partialResultToken` in the request params and you want to; stream intermediate results (e.g. symbols found so far) rather than waiting; for the complete set.."
+description: "Build LSP language servers with a simple, fully-typed API Use when: The client sets `partialResultToken` in the request params and you want to; stream intermediate results (e.g. symbols found so far) rather than waiting; for the complete set.."
 license: MIT
 ---
 
 # @lspeasy/server
 
-TypeScript SDK for building Language Server Protocol clients and servers
+Build LSP language servers with a simple, fully-typed API
 
 Use `@lspeasy/server` when you need to build the **provider** side of the
 Language Server Protocol — a daemon that editors and language-client tooling

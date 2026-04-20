@@ -1,12 +1,12 @@
 ---
 name: lspeasy-client
-description: "TypeScript SDK for building Language Server Protocol clients and servers LSP client package for connecting to language servers. Use when: You are implementing a custom client layer and need the same validation; behaviour that `LSPClient` uses. Otherwise this is an internal detail.; You need to monitor connection liveness — for example, to show a status."
+description: "Connect to LSP servers with typed client API Use when: You are implementing a custom client layer and need the same validation; behaviour that `LSPClient` uses. Otherwise this is an internal detail.; You need to monitor connection liveness — for example, to show a status."
 license: MIT
 ---
 
 # @lspeasy/client
 
-TypeScript SDK for building Language Server Protocol clients and servers
+Connect to LSP servers with typed client API
 
 Use `@lspeasy/client` when you need to build the **consumer** side of the
 Language Server Protocol — an editor extension, a CLI analysis tool, a test
@@ -37,8 +37,6 @@ updating the typed namespaces at runtime.
 
 ## Quick Start
 
-### Basic Client
-
 ```typescript
 import { LSPClient } from '@lspeasy/client';
 import { StdioTransport } from '@lspeasy/core';
@@ -67,8 +65,13 @@ await client.connect(transport);
 const hover = await client.textDocument.hover({
   textDocument: { uri: 'file:///path/to/file.ts' },
   position: { line: 10, character: 5 }
+});
 
-*See references/ for full examples.*
+console.log('Hover:', hover?.contents);
+
+// Disconnect
+await client.disconnect();
+```
 
 ## When to Use
 
