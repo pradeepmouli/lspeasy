@@ -63,8 +63,8 @@
     "@to-skills/vitepress": "^0.2.0",
     "@types/node": "^25.6.0",
     "@typescript/native-preview": "7.0.0-dev.20260322.1",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/ui": "^4.1.4",
     "camelcase": "^9.0.0",
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.44.0",
@@ -78,7 +78,7 @@
     "typedoc-plugin-to-skills": "^0.6.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.8",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.4"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged",
