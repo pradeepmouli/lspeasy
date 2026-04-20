@@ -144,6 +144,12 @@ At the lowest layer, `@lspeasy/core` models JSON-RPC 2.0 messages (request / not
 | [`@lspeasy/client`](packages/client) | Client with typed `textDocument.*` / `workspace.*` request API |
 | [`@lspeasy/middleware`](packages/middleware) | Shared middleware building blocks |
 
+## Related Projects
+
+| Library | Relationship | npm |
+|---|---|---|
+| [rune-langium](https://github.com/pradeepmouli/rune-langium) | DSL toolchain powered by lspeasy's LSP server | [![npm](https://img.shields.io/npm/v/@rune-langium/core?style=flat-square)](https://www.npmjs.com/package/@rune-langium/core) |
+
 ## Contributing
 
 ```bash
