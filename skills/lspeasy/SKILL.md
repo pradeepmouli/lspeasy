@@ -1,6 +1,6 @@
 ---
 name: lspeasy
-description: "Router for lspeasy monorepo (client, core, server). Use when working with lspeasy — routes to the correct package skill."
+description: "Router for lspeasy monorepo (client, core, server). Use when working with lspeasy. Also: lsp, language-server-protocol, lsp-client, language-client, jsonrpc, transport, lsp-server, language-server."
 license: MIT
 ---
 # lspeasy
@@ -36,3 +36,8 @@ Build LSP language servers with a simple, fully-typed API
   - A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails).
 
 → Load the `lspeasy-server` skill.
+
+## NEVER
+
+- NEVER load all package skills simultaneously — pick the one matching your task
+- If your task spans multiple packages, load the foundational one first (typically core/shared), then the specific one
