@@ -11,13 +11,30 @@
  * handshake, then use `expect<ServerCaps>()` to get typed access to
  * capability-aware namespaces (e.g. `client.textDocument.hover(params)`).
  *
- * ### Choosing a transport
- * | Environment | Transport |
- * |---|---|
- * | Node.js stdio/pipe | `StdioTransport` from `@lspeasy/core/node` |
- * | Node.js TCP | `TcpTransport` from `@lspeasy/core/node` |
- * | Browser / WebSocket | `WebSocketTransport` from `@lspeasy/core` |
- * | Web Workers | `DedicatedWorkerTransport` from `@lspeasy/core` |
+ * ### Transport Decision Tree
+ *
+ * **Stdio** (`StdioTransport` from `@lspeasy/core/node`)
+ * — Use when: spawning the language server as a child process (the canonical
+ *   editor extension pattern). Zero network overhead; server and client share
+ *   a lifespan. Failure mode: server process dies silently → stdout EOF fires
+ *   `onClose`; pair with `HeartbeatMonitor` on long-lived processes.
+ *
+ * **WebSocket** (`WebSocketTransport` from `@lspeasy/core`)
+ * — Use when: the language server runs remotely (CI, container, cloud dev env)
+ *   or must be browser-accessible. Supports reconnect with exponential back-off.
+ *   Failure mode: network partition → `onError` fires without `onClose`;
+ *   enable `enableReconnect` and subscribe to `ConnectionHealthTracker` events.
+ *
+ * **TCP** (`TcpTransport` from `@lspeasy/core/node`)
+ * — Use when: you need a persistent local socket and control both ends
+ *   (e.g. a test harness or a daemon that outlives the client process).
+ *   Failure mode: port conflict at startup; use `mode: 'client'` only after
+ *   confirming the server is listening, or wrap in a retry loop.
+ *
+ * **DedicatedWorkerTransport** (`DedicatedWorkerTransport` from `@lspeasy/core`)
+ * — Use when: running the language server in a Web Worker for browser isolation.
+ *   Zero latency (shared memory), no WebSocket overhead. Failure mode: worker
+ *   uncaught exception terminates silently; subscribe to `worker.onerror`.
  *
  * ### Connection health
  * Use {@link ConnectionHealthTracker} and {@link HeartbeatMonitor} to detect

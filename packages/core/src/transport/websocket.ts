@@ -185,6 +185,10 @@ function parseIncomingMessage(data: unknown): Message {
  * `globalThis.WebSocket`), and earlier Node.js versions with the optional
  * `ws` peer dependency installed.
  *
+ * @throws {Error} When neither `url` nor `socket` is provided. Fix: supply exactly one — `url` for client mode, `socket` for server mode.
+ * @throws {Error} When both `url` and `socket` are provided. Fix: mutually exclusive — pick one mode per instance.
+ * @throws {Error} (from `send()`) When the socket is not yet open (still in CONNECTING state). Fix: wait for the transport's first message or use `isConnected()` before calling `send()`; in client mode the socket connects asynchronously after construction.
+ *
  * @useWhen
  * You are building a browser-based LSP client, a WebSocket-backed language
  * server, or any LSP integration that must run over HTTP/HTTPS infrastructure.

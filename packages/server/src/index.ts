@@ -12,13 +12,31 @@
  * the server supports, register handlers with `onRequest` / `onNotification`,
  * then call `listen(transport)` to accept the first client connection.
  *
- * ### Choosing a transport
- * | Environment | Transport |
- * |---|---|
- * | Editor stdio/pipe | `StdioTransport` from `@lspeasy/core/node` |
- * | TCP socket | `TcpTransport` from `@lspeasy/core/node` |
- * | In-process / test | `WebSocketTransport` from `@lspeasy/core` |
- * | Web Workers | `DedicatedWorkerTransport` from `@lspeasy/core` |
+ * ### Transport Decision Tree
+ *
+ * **Stdio** (`StdioTransport` from `@lspeasy/core/node`)
+ * — Use when: the client spawns your server as a child process (the canonical
+ *   VS Code extension pattern). No network, no port management. Failure mode:
+ *   `ConsoleLogger` writes to stdout and corrupts the LSP stream — always use
+ *   `NullLogger` or a file-based logger with stdio.
+ *
+ * **WebSocket** (`WebSocketTransport` from `@lspeasy/core`)
+ * — Use when: multiple clients connect over a network, or the server must be
+ *   browser-accessible. Each accepted WebSocket connection needs its own
+ *   `LSPServer` instance. Failure mode: one client crash should not affect
+ *   others — wrap each `wss.on('connection')` callback in try/catch and
+ *   create a fresh `LSPServer` per socket.
+ *
+ * **TCP** (`TcpTransport` from `@lspeasy/core/node`)
+ * — Use when: building a persistent local daemon (e.g. a formatting server
+ *   shared across editor sessions). Failure mode: client disconnect fires
+ *   `close()` on the server instance — use `mode: 'server'` and create a new
+ *   `LSPServer` on each reconnect.
+ *
+ * **DedicatedWorkerTransport** (`DedicatedWorkerTransport` from `@lspeasy/core`)
+ * — Use when: running the server logic in a Web Worker for in-process browser
+ *   isolation. Zero serialization overhead. Failure mode: worker crash is
+ *   silent from the server side — monitor the worker's `onerror` in the host.
  *
  * ### Typed capability namespaces
  * After `registerCapabilities({ hoverProvider: true })`, TypeScript exposes
