@@ -60,8 +60,8 @@ importers:
         specifier: ^4.11.0
         version: 4.11.0(typedoc@0.28.19(typescript@5.9.3))
       typedoc-plugin-to-skills:
-        specifier: 1.1.0
-        version: 1.1.0(typedoc@0.28.19(typescript@5.9.3))
+        specifier: 1.1.1
+        version: 1.1.1(typedoc@0.28.19(typescript@5.9.3))
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -76,22 +76,22 @@ importers:
     devDependencies:
       typedoc:
         specifier: 0.28.19
-        version: 0.28.19(typescript@5.9.3)
+        version: 0.28.19(typescript@6.0.3)
       typedoc-plugin-markdown:
         specifier: ^4.11.0
-        version: 4.11.0(typedoc@0.28.19(typescript@5.9.3))
+        version: 4.11.0(typedoc@0.28.19(typescript@6.0.3))
       typedoc-plugin-to-skills:
         specifier: ^1.0.2
-        version: 1.0.2(typedoc@0.28.19(typescript@5.9.3))
+        version: 1.0.2(typedoc@0.28.19(typescript@6.0.3))
       typedoc-vitepress-theme:
         specifier: ^1.1.2
-        version: 1.1.2(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@5.9.3)))
+        version: 1.1.2(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3)))
       vitepress:
         specifier: 2.0.0-alpha.17
-        version: 2.0.0-alpha.17(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(postcss@8.5.10)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+        version: 2.0.0-alpha.17(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(postcss@8.5.10)(tsx@4.21.0)(typescript@6.0.3)(yaml@2.8.3)
       vue:
         specifier: ^3.5.32
-        version: 3.5.32(typescript@5.9.3)
+        version: 3.5.32(typescript@6.0.3)
 
   packages/client:
     dependencies:
@@ -996,16 +996,16 @@ packages:
   '@to-skills/core@1.0.1':
     resolution: {integrity: sha512-+ThSJwQVJB0Hf/97VFBfqxQXlVO305pZorcMY5j6GzRtGFxs1w85Iwjdm+bQTeZnAiUjVh8o2zhmX3Miv544Yw==}
 
-  '@to-skills/core@1.1.0':
-    resolution: {integrity: sha512-dmer+zH5GmOuaFrFZBJsN05f+6hsoQBR7HGtfNoEP4dj3OV4TUNrd65sbueHmqKYdyqOoFxzPqN1PCwSo1fzag==}
+  '@to-skills/core@1.1.1':
+    resolution: {integrity: sha512-r28UjOt5NjCXf+ID4HdQMfXs5EXcUJdz6sOF0FL0iu3+isaa/34+FA2CDeCLbjjmw35lkboAVQra3jdIJA/2vQ==}
 
   '@to-skills/typedoc@1.0.1':
     resolution: {integrity: sha512-Dz0LB7sfxUAnEwhvNgrL//pnK8jcV+VgUvttB6SwWdRNqSBfpAJ6XEb2yvLzCiWjR9wY8cY/U4ctgsnUADWUdg==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
-  '@to-skills/typedoc@1.0.2':
-    resolution: {integrity: sha512-n+8FjWMLHGsaHjwdX9cloWcoMnJUTJyDdmMOwze9Uq6Q4u20darnXfYrPPWmOAuW7CSFH/SfkV8WtUpfPPCpXw==}
+  '@to-skills/typedoc@1.0.3':
+    resolution: {integrity: sha512-8lWkLbuXY2YrlLmf9HY9ousCRzpxd63vlsDpwsn1IzR0TAbEY5Av3whsNzrXleHrRAl7a48TP2hoHvCGHS6EHQ==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -2123,8 +2123,8 @@ packages:
     peerDependencies:
       typedoc: '>=0.28.0'
 
-  typedoc-plugin-to-skills@1.1.0:
-    resolution: {integrity: sha512-6N8QO5So3WmmMzdXfnSsU029QaHNzTcBr9hzCfqgoOcNEQce5r1i7fsDdBCpqvAFp8raSGAXJLp9FEr72/rOnQ==}
+  typedoc-plugin-to-skills@1.1.1:
+    resolution: {integrity: sha512-xD9b64FpvaPoAcwO0tVKL4Am4HxbmJ3XM3myU08dF3Er9M8i1/NCQ8IgfJtdUjFPsTH6Zj4yCFk2sEDICQdWMQ==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -3013,16 +3013,16 @@ snapshots:
 
   '@to-skills/core@1.0.1': {}
 
-  '@to-skills/core@1.1.0': {}
+  '@to-skills/core@1.1.1': {}
 
-  '@to-skills/typedoc@1.0.1(typedoc@0.28.19(typescript@5.9.3))':
+  '@to-skills/typedoc@1.0.1(typedoc@0.28.19(typescript@6.0.3))':
     dependencies:
       '@to-skills/core': 1.0.1
-      typedoc: 0.28.19(typescript@5.9.3)
+      typedoc: 0.28.19(typescript@6.0.3)
 
-  '@to-skills/typedoc@1.0.2(typedoc@0.28.19(typescript@5.9.3))':
+  '@to-skills/typedoc@1.0.3(typedoc@0.28.19(typescript@5.9.3))':
     dependencies:
-      '@to-skills/core': 1.1.0
+      '@to-skills/core': 1.1.1
       typedoc: 0.28.19(typescript@5.9.3)
 
   '@to-skills/vitepress@0.2.18':
@@ -3113,11 +3113,11 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
-  '@vitejs/plugin-vue@6.0.6(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@5.9.3))':
+  '@vitejs/plugin-vue@6.0.6(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.13
       vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
-      vue: 3.5.32(typescript@5.9.3)
+      vue: 3.5.32(typescript@6.0.3)
 
   '@vitest/coverage-v8@4.1.5(vitest@4.1.5)':
     dependencies:
@@ -3244,34 +3244,34 @@ snapshots:
       '@vue/shared': 3.5.32
       csstype: 3.2.3
 
-  '@vue/server-renderer@3.5.32(vue@3.5.32(typescript@5.9.3))':
+  '@vue/server-renderer@3.5.32(vue@3.5.32(typescript@6.0.3))':
     dependencies:
       '@vue/compiler-ssr': 3.5.32
       '@vue/shared': 3.5.32
-      vue: 3.5.32(typescript@5.9.3)
+      vue: 3.5.32(typescript@6.0.3)
 
   '@vue/shared@3.5.32': {}
 
-  '@vueuse/core@14.2.1(vue@3.5.32(typescript@5.9.3))':
+  '@vueuse/core@14.2.1(vue@3.5.32(typescript@6.0.3))':
     dependencies:
       '@types/web-bluetooth': 0.0.21
       '@vueuse/metadata': 14.2.1
-      '@vueuse/shared': 14.2.1(vue@3.5.32(typescript@5.9.3))
-      vue: 3.5.32(typescript@5.9.3)
+      '@vueuse/shared': 14.2.1(vue@3.5.32(typescript@6.0.3))
+      vue: 3.5.32(typescript@6.0.3)
 
-  '@vueuse/integrations@14.2.1(focus-trap@8.0.1)(vue@3.5.32(typescript@5.9.3))':
+  '@vueuse/integrations@14.2.1(focus-trap@8.0.1)(vue@3.5.32(typescript@6.0.3))':
     dependencies:
-      '@vueuse/core': 14.2.1(vue@3.5.32(typescript@5.9.3))
-      '@vueuse/shared': 14.2.1(vue@3.5.32(typescript@5.9.3))
-      vue: 3.5.32(typescript@5.9.3)
+      '@vueuse/core': 14.2.1(vue@3.5.32(typescript@6.0.3))
+      '@vueuse/shared': 14.2.1(vue@3.5.32(typescript@6.0.3))
+      vue: 3.5.32(typescript@6.0.3)
     optionalDependencies:
       focus-trap: 8.0.1
 
   '@vueuse/metadata@14.2.1': {}
 
-  '@vueuse/shared@14.2.1(vue@3.5.32(typescript@5.9.3))':
+  '@vueuse/shared@14.2.1(vue@3.5.32(typescript@6.0.3))':
     dependencies:
-      vue: 3.5.32(typescript@5.9.3)
+      vue: 3.5.32(typescript@6.0.3)
 
   ansi-colors@4.1.3: {}
 
@@ -4144,19 +4144,23 @@ snapshots:
     dependencies:
       typedoc: 0.28.19(typescript@5.9.3)
 
-  typedoc-plugin-to-skills@1.0.2(typedoc@0.28.19(typescript@5.9.3)):
+  typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3)):
     dependencies:
-      '@to-skills/typedoc': 1.0.1(typedoc@0.28.19(typescript@5.9.3))
+      typedoc: 0.28.19(typescript@6.0.3)
+
+  typedoc-plugin-to-skills@1.0.2(typedoc@0.28.19(typescript@6.0.3)):
+    dependencies:
+      '@to-skills/typedoc': 1.0.1(typedoc@0.28.19(typescript@6.0.3))
+      typedoc: 0.28.19(typescript@6.0.3)
+
+  typedoc-plugin-to-skills@1.1.1(typedoc@0.28.19(typescript@5.9.3)):
+    dependencies:
+      '@to-skills/typedoc': 1.0.3(typedoc@0.28.19(typescript@5.9.3))
       typedoc: 0.28.19(typescript@5.9.3)
 
-  typedoc-plugin-to-skills@1.1.0(typedoc@0.28.19(typescript@5.9.3)):
+  typedoc-vitepress-theme@1.1.2(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@6.0.3))):
     dependencies:
-      '@to-skills/typedoc': 1.0.2(typedoc@0.28.19(typescript@5.9.3))
-      typedoc: 0.28.19(typescript@5.9.3)
-
-  typedoc-vitepress-theme@1.1.2(typedoc-plugin-markdown@4.11.0(typedoc@0.28.19(typescript@5.9.3))):
-    dependencies:
-      typedoc-plugin-markdown: 4.11.0(typedoc@0.28.19(typescript@5.9.3))
+      typedoc-plugin-markdown: 4.11.0(typedoc@0.28.19(typescript@6.0.3))
 
   typedoc@0.28.19(typescript@5.9.3):
     dependencies:
@@ -4165,6 +4169,15 @@ snapshots:
       markdown-it: 14.1.1
       minimatch: 10.2.5
       typescript: 5.9.3
+      yaml: 2.8.3
+
+  typedoc@0.28.19(typescript@6.0.3):
+    dependencies:
+      '@gerrit0/mini-shiki': 3.23.0
+      lunr: 2.3.9
+      markdown-it: 14.1.1
+      minimatch: 10.2.5
+      typescript: 6.0.3
       yaml: 2.8.3
 
   typescript@5.9.3: {}
@@ -4241,7 +4254,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.3
 
-  vitepress@2.0.0-alpha.17(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(postcss@8.5.10)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3):
+  vitepress@2.0.0-alpha.17(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(postcss@8.5.10)(tsx@4.21.0)(typescript@6.0.3)(yaml@2.8.3):
     dependencies:
       '@docsearch/css': 4.6.2
       '@docsearch/js': 4.6.2
@@ -4251,17 +4264,17 @@ snapshots:
       '@shikijs/transformers': 3.23.0
       '@shikijs/types': 3.23.0
       '@types/markdown-it': 14.1.2
-      '@vitejs/plugin-vue': 6.0.6(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@5.9.3))
+      '@vitejs/plugin-vue': 6.0.6(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))(vue@3.5.32(typescript@6.0.3))
       '@vue/devtools-api': 8.1.1
       '@vue/shared': 3.5.32
-      '@vueuse/core': 14.2.1(vue@3.5.32(typescript@5.9.3))
-      '@vueuse/integrations': 14.2.1(focus-trap@8.0.1)(vue@3.5.32(typescript@5.9.3))
+      '@vueuse/core': 14.2.1(vue@3.5.32(typescript@6.0.3))
+      '@vueuse/integrations': 14.2.1(focus-trap@8.0.1)(vue@3.5.32(typescript@6.0.3))
       focus-trap: 8.0.1
       mark.js: 8.11.1
       minisearch: 7.2.0
       shiki: 3.23.0
       vite: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
-      vue: 3.5.32(typescript@5.9.3)
+      vue: 3.5.32(typescript@6.0.3)
     optionalDependencies:
       postcss: 8.5.10
     transitivePeerDependencies:
@@ -4327,15 +4340,15 @@ snapshots:
 
   vscode-languageserver-types@3.17.5: {}
 
-  vue@3.5.32(typescript@5.9.3):
+  vue@3.5.32(typescript@6.0.3):
     dependencies:
       '@vue/compiler-dom': 3.5.32
       '@vue/compiler-sfc': 3.5.32
       '@vue/runtime-dom': 3.5.32
-      '@vue/server-renderer': 3.5.32(vue@3.5.32(typescript@5.9.3))
+      '@vue/server-renderer': 3.5.32(vue@3.5.32(typescript@6.0.3))
       '@vue/shared': 3.5.32
     optionalDependencies:
-      typescript: 5.9.3
+      typescript: 6.0.3
 
   webidl-conversions@3.0.1: {}
 
