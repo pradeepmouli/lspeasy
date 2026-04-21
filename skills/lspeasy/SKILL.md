@@ -9,12 +9,10 @@ license: MIT
 
 ## When to Use
 
-- You are implementing a custom client layer and need the same validation behaviour that `LSPClient` uses. Otherwise this is an internal detail. → `lspeasy-client`
-- You need to monitor connection liveness — for example, to show a status indicator, trigger reconnection logic, or surface transport errors to users. → `lspeasy-client`
-- You are building a browser-based LSP client, a WebSocket-backed language server, or any LSP integration that must run over HTTP/HTTPS infrastructure. → `lspeasy-core`
-- You register multiple handlers (hover, completion, definition) that share the same lifetime — collect them all into one store and dispose the store on shutdown or feature toggle. → `lspeasy-core`
-- The client sets `partialResultToken` in the request params and you want to stream intermediate results (e.g. symbols found so far) rather than waiting for the complete set. → `lspeasy-server`
-- A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails). → `lspeasy-server`
+Use this router when:
+- Connect to LSP servers with typed client API
+- Core types, transports, and utilities for LSP SDK
+- Build LSP language servers with a simple, fully-typed API
 
 ## Decision Tree
 
@@ -24,25 +22,25 @@ license: MIT
 
 ## Routing Logic
 
-### client
+### client → `lspeasy-client`
 
-Connect to LSP servers with typed client API → Load `lspeasy-client`
+Connect to LSP servers with typed client API
 
 - You are implementing a custom client layer and need the same validation behaviour that `LSPClient` uses. Otherwise this is an internal detail.
 - You need to monitor connection liveness — for example, to show a status indicator, trigger reconnection logic, or surface transport errors to users.
 - You need to detect silent transport failures — for example, when the server process dies without closing the socket, leaving the client hanging indefinitely on pending requests.
 
-### core
+### core → `lspeasy-core`
 
-Core types, transports, and utilities for LSP SDK → Load `lspeasy-core`
+Core types, transports, and utilities for LSP SDK
 
 - You are building a browser-based LSP client, a WebSocket-backed language server, or any LSP integration that must run over HTTP/HTTPS infrastructure.
 - You register multiple handlers (hover, completion, definition) that share the same lifetime — collect them all into one store and dispose the store on shutdown or feature toggle.
 - A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails).
 
-### server
+### server → `lspeasy-server`
 
-Build LSP language servers with a simple, fully-typed API → Load `lspeasy-server`
+Build LSP language servers with a simple, fully-typed API
 
 - The client sets `partialResultToken` in the request params and you want to stream intermediate results (e.g. symbols found so far) rather than waiting for the complete set.
 - A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails).
@@ -57,13 +55,13 @@ Build LSP language servers with a simple, fully-typed API → Load `lspeasy-serv
 
 ## Example Invocations
 
-User: "You are implementing a custom client layer and need the..."  
+User: "I need to connect to lsp servers with typed client api"  
 → Load `lspeasy-client`
 
-User: "You are building a browser-based LSP client, a..."  
+User: "I need to core types, transports, and utilities for lsp sdk"  
 → Load `lspeasy-core`
 
-User: "The client sets `partialResultToken` in the request..."  
+User: "I need to build lsp language servers with a simple, fully-typed api"  
 → Load `lspeasy-server`
 
 ## NEVER
