@@ -138,6 +138,12 @@ export type ClientNotifications<ServerCaps extends Partial<ServerCapabilities>> 
   }>
 >;
 
+/**
+ * Typed namespace of client-to-server LSP request methods, filtered by the
+ * server's declared capabilities.
+ *
+ * @typeParam ServerCaps - The server capabilities shape.
+ */
 export type ClientRequests<ServerCaps extends Partial<ServerCapabilities>> = Simplify<
   RemoveNever<{
     [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
@@ -202,6 +208,12 @@ export type ClientRequestHandlers<_ClientCaps extends Partial<ClientCapabilities
   };
 }>;
 
+/**
+ * Typed namespace of server-to-client notification handler registration methods,
+ * filtered by the client's declared capabilities.
+ *
+ * @typeParam _ClientCaps - The client capabilities shape.
+ */
 export type ClientNotificationHandlers<_ClientCaps extends Partial<ClientCapabilities>> =
   RemoveNever<{
     [Namespace in keyof LSPNotification as CamelCase<Namespace>]: {
@@ -215,6 +227,12 @@ export type ClientNotificationHandlers<_ClientCaps extends Partial<ClientCapabil
     };
   }>;
 
+/**
+ * Typed namespace of server-to-client request send methods, filtered by the
+ * client's declared capabilities.
+ *
+ * @typeParam _ClientCaps - The client capabilities shape.
+ */
 export type ServerSendMethods<
   _ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities
 > = Simplify<{
@@ -225,6 +243,10 @@ export type ServerSendMethods<
   }>;
 }>;
 
+/**
+ * Converts an LSP request type definition into a callable method signature
+ * `(params: P) => Promise<R>`.
+ */
 export type ToRequestSignature<T> = T extends {
   Method: string;
   Params: infer P;
@@ -233,6 +255,10 @@ export type ToRequestSignature<T> = T extends {
   ? (params: P) => Promise<R>
   : never;
 
+/**
+ * Converts an LSP notification type definition into a fire-and-forget method
+ * signature `(params: P) => void`.
+ */
 export type ToNotificationSignature<T> = T extends {
   Method: string;
   Params: infer P;
@@ -240,6 +266,10 @@ export type ToNotificationSignature<T> = T extends {
   ? (params: P) => void
   : never;
 
+/**
+ * Converts an LSP request type definition into a handler registration signature
+ * `(handler: (params: P) => Promise<R> | R) => void`.
+ */
 export type ToRequestHandlerSignature<T> = T extends {
   Method: string;
   Params: infer P;
@@ -248,6 +278,10 @@ export type ToRequestHandlerSignature<T> = T extends {
   ? (handler: (params: P) => Promise<R> | R) => void
   : never;
 
+/**
+ * Converts an LSP notification type definition into a handler registration
+ * signature `(handler: (params: P) => void) => void`.
+ */
 export type ToNotificationHandlerSignature<T> = T extends {
   Method: string;
   Params: infer P;
@@ -323,6 +357,13 @@ export namespace Server {
   >;
 }
 
+/**
+ * The complete set of available LSP methods for a client/server capability pair,
+ * split by direction (client send, server send, handlers).
+ *
+ * @typeParam ClientCaps - The client capabilities shape.
+ * @typeParam ServerCaps - The server capabilities shape.
+ */
 export type AvailableMethods<
   ClientCaps extends Partial<ClientCapabilities>,
   ServerCaps extends Partial<ServerCapabilities>
@@ -365,6 +406,21 @@ export type AvailableMethods<
   };
 };
 
+/**
+ * Capability-aware interface for an LSP client, combining typed request send
+ * methods, notification send methods, and server-to-client handler registrations.
+ *
+ * @remarks
+ * `Client<ClientCaps, ServerCaps>` is the type that `LSPClient.expect<ServerCaps>()`
+ * returns. Its namespaces (e.g. `client.textDocument.hover`) are only present
+ * when the corresponding capability exists in `ServerCaps`.
+ *
+ * Obtain a `Client`-typed reference via `LSPClient.expect<MyServerCaps>()` rather
+ * than constructing this type directly.
+ *
+ * @typeParam ClientCaps - The capabilities the client declared.
+ * @typeParam ServerCaps - The capabilities the server advertised.
+ */
 export type Client<
   ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities,
   ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities
@@ -472,12 +528,20 @@ export type Server<
   }
 >;
 
+/**
+ * Runtime map from every LSP request method string to the corresponding
+ * server capability key (or `undefined` for always-allowed methods).
+ */
 export const ClientRequestMethodToCapabilityMap: Map<string, string | undefined> = new Map(
   (Object.values(LSPRequest) as any[])
     .flatMap((ns) => Object.values(ns))
     .map((req: any) => [req.Method, req.ServerCapability] as [string, string | undefined])
 );
 
+/**
+ * Runtime map from every LSP notification method string to the corresponding
+ * server capability key (or `undefined` for always-allowed notifications).
+ */
 export const ClientNotificationMethodToCapabilityMap: Map<string, string | undefined> = new Map(
   (Object.values(LSPNotification) as any[])
     .flatMap((ns) => Object.values(ns))

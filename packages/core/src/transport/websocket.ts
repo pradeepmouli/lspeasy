@@ -185,6 +185,10 @@ function parseIncomingMessage(data: unknown): Message {
  * `globalThis.WebSocket`), and earlier Node.js versions with the optional
  * `ws` peer dependency installed.
  *
+ * @throws {Error} When neither `url` nor `socket` is provided. Fix: supply exactly one — `url` for client mode, `socket` for server mode.
+ * @throws {Error} When both `url` and `socket` are provided. Fix: mutually exclusive — pick one mode per instance.
+ * @throws {Error} (from `send()`) When the socket is not yet open (still in CONNECTING state). Fix: wait for the transport's first message or use `isConnected()` before calling `send()`; in client mode the socket connects asynchronously after construction.
+ *
  * @useWhen
  * You are building a browser-based LSP client, a WebSocket-backed language
  * server, or any LSP integration that must run over HTTP/HTTPS infrastructure.
@@ -195,7 +199,7 @@ function parseIncomingMessage(data: unknown): Message {
  * of a network stack. For same-process workers prefer
  * `DedicatedWorkerTransport` or `SharedWorkerTransport`.
  *
- * @pitfalls
+ * @never
  * NEVER set `enableReconnect: true` in server mode (`socket` provided) —
  * the option is silently ignored (reconnect has no URL to reconnect to), but
  * the intent is misleading and suggests lifecycle management will be handled
@@ -437,7 +441,10 @@ export class WebSocketTransport implements Transport {
   }
 
   /**
-   * Register a handler for incoming messages
+   * Register a handler for incoming messages.
+   *
+   * @param handler - Callback invoked with each parsed {@link Message} received over the socket.
+   * @returns A {@link Disposable} — call `dispose()` to unregister the handler.
    */
   onMessage(handler: (message: Message) => void): Disposable {
     this.messageHandlers.add(handler);
@@ -450,7 +457,10 @@ export class WebSocketTransport implements Transport {
   }
 
   /**
-   * Register a handler for transport errors
+   * Register a handler for transport errors.
+   *
+   * @param handler - Callback invoked whenever a WebSocket error occurs.
+   * @returns A {@link Disposable} — call `dispose()` to unregister the handler.
    */
   onError(handler: (error: Error) => void): Disposable {
     this.errorHandlers.add(handler);
@@ -463,7 +473,10 @@ export class WebSocketTransport implements Transport {
   }
 
   /**
-   * Register a handler for transport closure
+   * Register a handler for transport closure.
+   *
+   * @param handler - Callback invoked when the WebSocket closes (clean or error).
+   * @returns A {@link Disposable} — call `dispose()` to unregister the handler.
    */
   onClose(handler: () => void): Disposable {
     this.closeHandlers.add(handler);
@@ -516,7 +529,9 @@ export class WebSocketTransport implements Transport {
   }
 
   /**
-   * Get the current reconnection attempt count
+   * Get the current reconnection attempt count.
+   *
+   * @returns The number of reconnection attempts made since the last successful connection.
    */
   getReconnectAttempts(): number {
     return this.reconnectAttempts;

@@ -12,6 +12,32 @@ export interface HeartbeatMonitorOptions {
 
 /**
  * Runs interval-based heartbeat checks for active transports.
+ *
+ * @remarks
+ * Created internally by `LSPClient` when `ClientOptions.heartbeat` is
+ * configured. The monitor periodically sends a ping (via `onPing`) and checks
+ * whether a pong was received within `timeout` ms. If not, `onUnresponsive`
+ * is called so the client can close and attempt to reconnect.
+ *
+ * @useWhen
+ * You need to detect silent transport failures — for example, when the server
+ * process dies without closing the socket, leaving the client hanging
+ * indefinitely on pending requests.
+ *
+ * @avoidWhen
+ * The transport already provides its own keep-alive mechanism (e.g. WebSocket
+ * ping frames) — adding a heartbeat on top creates redundant round-trips and
+ * may interfere with the transport's own timeout logic.
+ *
+ * @never
+ * NEVER set `interval` shorter than the typical round-trip latency for your
+ * transport — doing so causes constant `onUnresponsive` callbacks on any
+ * non-local transport, triggering spurious reconnects.
+ *
+ * NEVER rely on heartbeat for authentication or access control. The heartbeat
+ * only confirms the transport is alive; it carries no identity information.
+ *
+ * @category Client
  */
 export class HeartbeatMonitor {
   private timer: NodeJS.Timeout | undefined;
@@ -84,6 +110,9 @@ export class HeartbeatMonitor {
 
   /**
    * Returns the latest heartbeat status snapshot.
+   *
+   * @returns A shallow copy of the current {@link HeartbeatStatus}, including
+   *   timing and responsiveness information.
    */
   getStatus(): HeartbeatStatus {
     return { ...this.status };

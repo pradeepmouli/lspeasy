@@ -13,6 +13,7 @@
  * @category JSON-RPC
  */
 export interface BaseMessage {
+  /** JSON-RPC protocol version discriminant — always `"2.0"`. */
   jsonrpc: '2.0';
 }
 
@@ -24,7 +25,7 @@ export interface BaseMessage {
  * Per the JSON-RPC 2.0 spec, `id` may be a `string` or `number` — never
  * assume integers only.
  *
- * @pitfalls
+ * @never
  * NEVER assume JSON-RPC IDs are integers. The spec permits strings, and some
  * LSP clients (e.g. VS Code extensions) use string IDs. Always use `String(id)`
  * when keying pending-request maps.
@@ -32,8 +33,13 @@ export interface BaseMessage {
  * @category JSON-RPC
  */
 export interface RequestMessage extends BaseMessage {
+  /** Unique identifier correlating this request to its eventual response. */
   id: string | number;
+  /** LSP method string, e.g. `'textDocument/hover'`. */
   method: string;
+  /** JSON-RPC protocol version — always `"2.0"` (inherited). */
+  jsonrpc: '2.0';
+  /** Optional request parameters (method-specific shape). */
   params?: unknown;
 }
 
@@ -45,7 +51,7 @@ export interface RequestMessage extends BaseMessage {
  * notification violates the JSON-RPC 2.0 spec and will be silently dropped
  * by compliant clients.
  *
- * @pitfalls
+ * @never
  * NEVER send a notification before the `initialize` response has been sent
  * by the server. The LSP spec requires the server to respond to `initialize`
  * before any other message is exchanged; clients discard early notifications.
@@ -53,7 +59,11 @@ export interface RequestMessage extends BaseMessage {
  * @category JSON-RPC
  */
 export interface NotificationMessage extends BaseMessage {
+  /** LSP method string, e.g. `'textDocument/didOpen'`. */
   method: string;
+  /** JSON-RPC protocol version — always `"2.0"` (inherited). */
+  jsonrpc: '2.0';
+  /** Optional notification parameters (method-specific shape). */
   params?: unknown;
 }
 
@@ -63,8 +73,11 @@ export interface NotificationMessage extends BaseMessage {
  * @category JSON-RPC
  */
 export interface ResponseError {
+  /** Numeric JSON-RPC error code (see {@link JSONRPCErrorCode} for standard values). */
   code: number;
+  /** Human-readable error description. */
   message: string;
+  /** Optional machine-readable error details for the caller. */
   data?: unknown;
 }
 
@@ -74,7 +87,11 @@ export interface ResponseError {
  * @category JSON-RPC
  */
 export interface SuccessResponseMessage extends BaseMessage {
+  /** Identifier matching the originating request's `id`. */
   id: string | number;
+  /** JSON-RPC protocol version — always `"2.0"` (inherited). */
+  jsonrpc: '2.0';
+  /** The request result payload. */
   result: unknown;
 }
 
@@ -84,7 +101,11 @@ export interface SuccessResponseMessage extends BaseMessage {
  * @category JSON-RPC
  */
 export interface ErrorResponseMessage extends BaseMessage {
+  /** Identifier matching the originating request's `id`. */
   id: string | number;
+  /** JSON-RPC protocol version — always `"2.0"` (inherited). */
+  jsonrpc: '2.0';
+  /** Structured error payload. */
   error: ResponseError;
 }
 
@@ -109,6 +130,8 @@ export type Message = RequestMessage | NotificationMessage | ResponseMessage;
 /**
  * Returns `true` when `message` is a JSON-RPC request (has `id` + `method`).
  *
+ * @param message - The message to test.
+ * @returns `true` when `message` is a {@link RequestMessage}.
  * @category JSON-RPC
  */
 export function isRequestMessage(message: Message): message is RequestMessage {
@@ -119,6 +142,8 @@ export function isRequestMessage(message: Message): message is RequestMessage {
  * Returns `true` when `message` is a JSON-RPC notification (has `method`,
  * no `id`).
  *
+ * @param message - The message to test.
+ * @returns `true` when `message` is a {@link NotificationMessage}.
  * @category JSON-RPC
  */
 export function isNotificationMessage(message: Message): message is NotificationMessage {
@@ -128,6 +153,8 @@ export function isNotificationMessage(message: Message): message is Notification
 /**
  * Returns `true` when `message` is a JSON-RPC response (has `id`, no `method`).
  *
+ * @param message - The message to test.
+ * @returns `true` when `message` is a {@link ResponseMessage}.
  * @category JSON-RPC
  */
 export function isResponseMessage(message: Message): message is ResponseMessage {
@@ -137,6 +164,8 @@ export function isResponseMessage(message: Message): message is ResponseMessage 
 /**
  * Returns `true` when `response` carries a `result` (success case).
  *
+ * @param message - The response message to test.
+ * @returns `true` when `message` is a {@link SuccessResponseMessage}.
  * @category JSON-RPC
  */
 export function isSuccessResponse(message: ResponseMessage): message is SuccessResponseMessage {
@@ -146,6 +175,8 @@ export function isSuccessResponse(message: ResponseMessage): message is SuccessR
 /**
  * Returns `true` when `response` carries an `error` (error case).
  *
+ * @param message - The response message to test.
+ * @returns `true` when `message` is an {@link ErrorResponseMessage}.
  * @category JSON-RPC
  */
 export function isErrorResponse(message: ResponseMessage): message is ErrorResponseMessage {

@@ -99,8 +99,11 @@ export type TypedResult<M extends LSPMethod> = M extends LSPRequestMethod
  * @category Middleware
  */
 export interface TypedMiddlewareContext<M extends LSPMethod> extends MiddlewareContext {
+  /** The specific LSP method string this middleware context is scoped to. */
   method: M;
+  /** Typed parameters inferred from the LSP method signature. */
   params: TypedParams<M>;
+  /** Typed result, populated after `next()` resolves for request middleware. */
   result?: TypedResult<M>;
 }
 
@@ -112,7 +115,7 @@ export interface TypedMiddlewareContext<M extends LSPMethod> extends MiddlewareC
  * Set `shortCircuit: true` (plus `response` or `error`) to bypass all
  * remaining middleware and the final handler.
  *
- * @pitfalls
+ * @never
  * NEVER short-circuit a request without providing a valid `response` or
  * `error` — the pending request will never resolve and the client will time
  * out with no recourse.
@@ -120,8 +123,11 @@ export interface TypedMiddlewareContext<M extends LSPMethod> extends MiddlewareC
  * @category Middleware
  */
 export interface MiddlewareResult {
+  /** When `true`, all remaining middleware and the final handler are bypassed. */
   shortCircuit?: boolean;
+  /** The response to return when short-circuiting a request. */
   response?: ResponseMessage | RequestMessage | NotificationMessage;
+  /** The error response to return when short-circuiting with a failure. */
   error?: ErrorResponseMessage;
 }
 
@@ -151,7 +157,7 @@ export type MiddlewareNext = () => Promise<void | MiddlewareResult>;
  * `onRequest` / `onNotification` handler instead. Middleware adds overhead
  * for every message regardless of method.
  *
- * @pitfalls
+ * @never
  * NEVER mutate `context.message.id` — it is read-only by design. Response
  * correlation depends on the ID remaining stable through the pipeline.
  *
@@ -238,6 +244,8 @@ export interface MethodFilter {
  * @category Middleware
  */
 export interface ScopedMiddleware {
+  /** The filter predicate that determines which messages this middleware intercepts. */
   filter: MethodFilter;
+  /** The middleware function to execute when the filter matches. */
   middleware: Middleware;
 }

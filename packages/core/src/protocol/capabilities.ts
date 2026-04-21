@@ -66,7 +66,12 @@ function getProperty<T, K extends Paths<T> & string>(obj: T, key: K): any {
  */
 
 /**
- * Check if a method is supported by the given server capabilities
+ * Type-guarding predicate that narrows `capabilities` to include the specific
+ * server capability key required for the given client-to-server request method.
+ *
+ * @param method - The LSP request method string (e.g. `'textDocument/hover'`).
+ * @param capabilities - The `ServerCapabilities` object to test.
+ * @returns `true` when the server has declared support for the method.
  */
 export function serverSupportsRequest<M extends LSPRequestMethod<'clientToServer'>>(
   method: M,
@@ -81,6 +86,14 @@ export function serverSupportsRequest<M extends LSPRequestMethod<'clientToServer
   return value !== null && value !== undefined && value !== false;
 }
 
+/**
+ * Type-guarding predicate that narrows `capabilities` to include the specific
+ * server capability key required for the given client-to-server notification method.
+ *
+ * @param method - The LSP notification method string (e.g. `'textDocument/didOpen'`).
+ * @param capabilities - The `ServerCapabilities` object to test.
+ * @returns `true` when the server has declared support for the method.
+ */
 export function serverSupportsNotification<
   M extends LSPNotificationMethod<'clientToServer'>,
   T extends Partial<ServerCapabilities>
@@ -97,7 +110,12 @@ export function serverSupportsNotification<
 }
 
 /**
- * Check if a method is supported by the given client capabilities
+ * Type-guarding predicate that narrows `capabilities` to include the specific
+ * client capability key required for the given server-to-client request method.
+ *
+ * @param method - The LSP request method string (e.g. `'client/registerCapability'`).
+ * @param capabilities - The `ClientCapabilities` object to test.
+ * @returns `true` when the client has declared support for the method.
  */
 export function clientSupportsRequest<
   M extends LSPRequestMethod<'serverToClient'>,
@@ -114,6 +132,14 @@ export function clientSupportsRequest<
   return value !== null && value !== undefined && value !== false;
 }
 
+/**
+ * Type-guarding predicate that narrows `capabilities` to include the specific
+ * client capability key required for the given server-to-client notification method.
+ *
+ * @param method - The LSP notification method string (e.g. `'window/logMessage'`).
+ * @param capabilities - The `ClientCapabilities` object to test.
+ * @returns `true` when the client has declared support for the method.
+ */
 export function clientSupportsNotification<
   M extends LSPNotificationMethod<'serverToClient'>,
   T extends Partial<ClientCapabilities>
@@ -130,7 +156,12 @@ export function clientSupportsNotification<
 }
 
 /**
- * Check if a server capability is enabled
+ * Type-guarding predicate that narrows `capabilities` to confirm a specific server capability
+ * is enabled at a deep dot-notation path.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @param capability - Dot-notation path of the capability (e.g. `'hoverProvider'`).
+ * @returns `true` when the capability at the given path is truthy.
  */
 export function hasServerCapability<
   K extends Paths<ServerCapabilities>,
@@ -141,7 +172,12 @@ export function hasServerCapability<
 }
 
 /**
- * Check if a client capability is enabled
+ * Type-guarding predicate that narrows `capabilities` to confirm a specific client capability
+ * is enabled at a deep dot-notation path.
+ *
+ * @param capabilities - The client capabilities to check.
+ * @param capability - Dot-notation path of the capability (e.g. `'window.workDoneProgress'`).
+ * @returns `true` when the capability at the given path is truthy.
  */
 export function hasClientCapability<
   K extends Paths<ClientCapabilities>,
@@ -152,7 +188,10 @@ export function hasClientCapability<
 }
 
 /**
- * Helper to check if hover is supported
+ * Returns `true` when `hoverProvider` is declared in the server capabilities.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @returns `true` when hover is supported.
  */
 export function supportsHover(
   capabilities: ServerCapabilities
@@ -163,7 +202,10 @@ export function supportsHover(
 }
 
 /**
- * Helper to check if completion is supported
+ * Returns `true` when `completionProvider` is declared in the server capabilities.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @returns `true` when completion is supported.
  */
 export function supportsCompletion(
   capabilities: ServerCapabilities
@@ -174,7 +216,10 @@ export function supportsCompletion(
 }
 
 /**
- * Helper to check if definition is supported
+ * Returns `true` when `definitionProvider` is declared in the server capabilities.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @returns `true` when go-to-definition is supported.
  */
 export function supportsDefinition(
   capabilities: ServerCapabilities
@@ -185,7 +230,10 @@ export function supportsDefinition(
 }
 
 /**
- * Helper to check if references are supported
+ * Returns `true` when `referencesProvider` is declared in the server capabilities.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @returns `true` when find-references is supported.
  */
 export function supportsReferences(
   capabilities: ServerCapabilities
@@ -196,7 +244,10 @@ export function supportsReferences(
 }
 
 /**
- * Helper to check if document symbols are supported
+ * Returns `true` when `documentSymbolProvider` is declared in the server capabilities.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @returns `true` when document symbols are supported.
  */
 export function supportsDocumentSymbol(
   capabilities: ServerCapabilities
@@ -207,7 +258,10 @@ export function supportsDocumentSymbol(
 }
 
 /**
- * Helper to check if workspace folders are supported
+ * Returns `true` when the server supports workspace folders.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @returns `true` when `workspace.workspaceFolders.supported` is `true`.
  */
 export function supportsWorkspaceFolders(
   capabilities: ServerCapabilities
@@ -215,6 +269,12 @@ export function supportsWorkspaceFolders(
   return capabilities.workspace?.workspaceFolders?.supported === true;
 }
 
+/**
+ * Helper to check if notebook document sync is supported by the server.
+ *
+ * @param capabilities - The server capabilities to check.
+ * @returns `true` when `notebookDocumentSync` is declared (not null/undefined).
+ */
 export function supportsNotebookDocumentSync(
   capabilities: ServerCapabilities
 ): capabilities is ServerCapabilities & {
@@ -226,7 +286,10 @@ export function supportsNotebookDocumentSync(
 }
 
 /**
- * Helper to check if file watching is supported
+ * Returns `true` when the client supports dynamic file watching registration.
+ *
+ * @param capabilities - The client capabilities to check.
+ * @returns `true` when `workspace.didChangeWatchedFiles.dynamicRegistration` is `true`.
  */
 export function supportsFileWatching(
   capabilities: ClientCapabilities
@@ -237,7 +300,10 @@ export function supportsFileWatching(
 }
 
 /**
- * Helper to check if work done progress is supported
+ * Returns `true` when the client supports work done progress notifications.
+ *
+ * @param capabilities - The client capabilities to check.
+ * @returns `true` when `window.workDoneProgress` is `true`.
  */
 export function supportsWorkDoneProgress(
   capabilities: ClientCapabilities

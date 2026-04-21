@@ -155,7 +155,7 @@ export interface NotificationContext {
  * Check `token.isCancellationRequested` at async yield points to stop
  * early when the client sends `$/cancelRequest`.
  *
- * @pitfalls
+ * @never
  * NEVER call `server.close()` or `server.shutdown()` from inside a handler —
  * the server is processing messages on the transport at that point, and
  * closing the transport from within a handler causes a deadlock: the handler
@@ -164,6 +164,12 @@ export interface NotificationContext {
  * NEVER mutate server capabilities inside a handler. Capabilities are
  * negotiated once during `initialize`; changing them at runtime has no effect
  * on the client, which cached the `InitializeResult` at startup.
+ *
+ * @throws {@link ResponseError} A structured JSON-RPC error (preferred for protocol errors).
+ * @throws Error Any `Error` subclass is converted to a `-32603 InternalError` response.
+ *
+ * @see {@link NotificationHandler} for the fire-and-forget counterpart.
+ * @see {@link RequestContext} for the third parameter shape.
  *
  * @typeParam Params - The request params type, inferred from the method name.
  * @typeParam Result - The response result type, inferred from the method name.
@@ -184,7 +190,7 @@ export type RequestHandler<Params = unknown, Result = unknown> = (
  * returned promise in any protocol-observable way, but unhandled rejections
  * are forwarded to `server.onError()`.
  *
- * @pitfalls
+ * @never
  * NEVER send a server-to-client notification inside a handler for the LSP
  * `initialize` request. The `initialize` response has not yet been sent at
  * that point; notifications sent before the response are discarded by clients.
@@ -229,9 +235,23 @@ export enum ServerState {
   Shutdown = 'shutdown'
 }
 
+/**
+ * Namespace for registering notebook-document lifecycle notification handlers.
+ *
+ * @remarks
+ * Available on `server.notebookDocument`. Mirrors the standard LSP
+ * `notebookDocument/*` notification methods for servers that support
+ * `notebookDocumentSync` capability.
+ *
+ * @category Handler
+ */
 export interface NotebookDocumentHandlerNamespace {
+  /** Register a handler for `notebookDocument/didOpen` notifications. */
   onDidOpen(handler: NotificationHandler<DidOpenNotebookDocumentParams>): { dispose(): void };
+  /** Register a handler for `notebookDocument/didChange` notifications. */
   onDidChange(handler: NotificationHandler<DidChangeNotebookDocumentParams>): { dispose(): void };
+  /** Register a handler for `notebookDocument/didSave` notifications. */
   onDidSave(handler: NotificationHandler<DidSaveNotebookDocumentParams>): { dispose(): void };
+  /** Register a handler for `notebookDocument/didClose` notifications. */
   onDidClose(handler: NotificationHandler<DidCloseNotebookDocumentParams>): { dispose(): void };
 }

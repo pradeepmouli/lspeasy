@@ -20,6 +20,10 @@ export class DisposableEventEmitter<TEvents extends Record<string, unknown[]>> {
 
   /**
    * Register a listener and receive a disposable to unregister it.
+   *
+   * @param event - The event name to subscribe to.
+   * @param listener - Callback invoked each time `event` is emitted.
+   * @returns A {@link Disposable} — call `dispose()` to remove the listener.
    */
   on<K extends keyof TEvents>(event: K, listener: Listener<TEvents, K>): Disposable {
     if (this.disposed) {
@@ -50,6 +54,10 @@ export class DisposableEventEmitter<TEvents extends Record<string, unknown[]>> {
 
   /**
    * Register a one-time listener that automatically unregisters after first emission.
+   *
+   * @param event - The event name to subscribe to.
+   * @param listener - Callback invoked once the next time `event` is emitted.
+   * @returns A {@link Disposable} — call `dispose()` to cancel before the event fires.
    */
   once<K extends keyof TEvents>(event: K, listener: Listener<TEvents, K>): Disposable {
     if (this.disposed) {
@@ -81,6 +89,9 @@ export class DisposableEventEmitter<TEvents extends Record<string, unknown[]>> {
 
   /**
    * Emit an event to all registered listeners in registration order.
+   *
+   * @param event - The event name to emit.
+   * @param args - Arguments forwarded to each listener in the order they match `TEvents[K]`.
    */
   emit<K extends keyof TEvents>(event: K, ...args: TEvents[K]): void {
     if (this.disposed) {

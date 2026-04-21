@@ -40,14 +40,22 @@ export type {
 };
 
 /**
- * Helper to create a WorkspaceFolder
+ * Helper to create a WorkspaceFolder.
+ *
+ * @param uri - The URI of the workspace folder (e.g. `'file:///home/user/project'`).
+ * @param name - Human-readable name displayed in the editor.
+ * @returns A `WorkspaceFolder` object.
  */
 export function createWorkspaceFolder(uri: string, name: string): WorkspaceFolder {
   return { uri, name };
 }
 
 /**
- * Helper to create a WorkspaceFoldersChangeEvent
+ * Helper to create a WorkspaceFoldersChangeEvent.
+ *
+ * @param added - Workspace folders that were added.
+ * @param removed - Workspace folders that were removed.
+ * @returns A `WorkspaceFoldersChangeEvent` ready to send.
  */
 export function createWorkspaceFoldersChangeEvent(
   added: WorkspaceFolder[],

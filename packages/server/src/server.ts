@@ -79,7 +79,7 @@ import { initializeServerHandlerMethods, initializeServerSendMethods } from './c
  * You need a bare JSON-RPC layer without LSP semantics — use the transport
  * and framing utilities directly instead.
  *
- * @pitfalls
+ * @never
  * NEVER call `server.shutdown()` or `server.close()` from inside a request
  * or notification handler — doing so attempts to close the transport while it
  * is actively dispatching, causing a deadlock.
@@ -342,7 +342,16 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 
   /**
-   * Send a server-to-client request.
+   * Send a server-to-client request and await the client's response.
+   *
+   * @param method - The LSP request method name (server-to-client direction).
+   * @param params - Optional request parameters.
+   * @returns A promise resolving to the client's result.
+   * @throws {Error} When not listening (transport not attached). Fix: only call `sendRequest` from inside a handler or after the `listening` event fires.
+   * @throws {Error} When the client returns a JSON-RPC error response. Fix: catch and inspect `error.code`; `window/showMessageRequest` rejections are user-initiated (user dismissed), not bugs.
+   * @throws {Error} When the request times out (if `requestTimeout` is configured). Fix: increase `ServerOptions.requestTimeout` for slow UI interactions like `window/showMessageRequest`.
+   *
+   * @category Server
    */
   async sendRequest<Method extends LSPRequestMethod<'serverToClient'>>(
     method: Method,
@@ -385,7 +394,14 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 
   /**
-   * Send a server-to-client notification.
+   * Send a server-to-client notification (fire-and-forget).
+   *
+   * @param method - The LSP notification method name (server-to-client direction).
+   * @param params - Optional notification parameters.
+   * @throws {Error} When not listening. Fix: only send notifications after `listen()` resolves and before `shutdown()` is called; guard with `isListening()`.
+   * @throws {Error} When the transport's underlying `send()` fails (e.g. broken socket). Fix: subscribe to `server.onError()` to catch transport-level write failures.
+   *
+   * @category Server
    */
   async sendNotification<Method extends LSPNotificationMethod<'serverToClient'>>(
     method: Method,
@@ -424,7 +440,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
    * request from the client. The LSP handshake proceeds automatically.
    *
    * @param transport - The transport to listen on.
-   * @throws If the server is already listening (call `close()` first).
+   * @throws {Error} When already listening. Fix: call `close()` then create a fresh `LSPServer` instance — do not reuse a single instance across connections.
    *
    * @category Lifecycle
    */
@@ -827,9 +843,71 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 }
 
+/**
+ * Full-featured LSP server with automatic lifecycle management, typed handlers,
+ * capability-aware namespaces, and pluggable middleware.
+ *
+ * @remarks
+ * `LSPServer` manages the complete LSP lifecycle (`initialize` / `initialized`
+ * / `shutdown` / `exit`) automatically. Register handlers with `onRequest` /
+ * `onNotification`, declare capabilities with `registerCapabilities`, then
+ * start with `listen(transport)`.
+ *
+ * ### Capability-aware namespaces
+ * After `registerCapabilities({ hoverProvider: true })`, TypeScript exposes
+ * `server.textDocument.onHover(handler)` — methods absent unless the
+ * corresponding capability is declared.
+ *
+ * @useWhen
+ * You are building an LSP language server that editors and language-client
+ * tooling will connect to.
+ *
+ * @avoidWhen
+ * You need a bare JSON-RPC layer without LSP semantics — use the transport
+ * and framing utilities from `@lspeasy/core` directly.
+ *
+ * @never
+ * NEVER call `server.shutdown()` or `server.close()` from inside a request
+ * or notification handler — doing so attempts to close the transport while it
+ * is actively dispatching, causing a deadlock.
+ *
+ * NEVER mutate `ServerCapabilities` after `initialized` has been received.
+ * The client cached the `InitializeResult` at handshake time; runtime changes
+ * are invisible to it.
+ *
+ * NEVER share one `LSPServer` instance across multiple transports or connections.
+ * Each connection requires its own server instance to maintain independent state.
+ *
+ * @example
+ * ```ts
+ * import { LSPServer } from '@lspeasy/server';
+ * import { StdioTransport } from '@lspeasy/core/node';
+ *
+ * const server = new LSPServer({ name: 'my-lsp', version: '1.0.0' })
+ *   .registerCapabilities({ hoverProvider: true });
+ *
+ * server.textDocument.onHover(async (params, token) => {
+ *   if (token.isCancellationRequested) return null;
+ *   return { contents: { kind: 'plaintext', value: 'Hello from my-lsp' } };
+ * });
+ *
+ * await server.listen(new StdioTransport());
+ * ```
+ *
+ * @template ServerCaps - Shape of the server capabilities.
+ * @category Server
+ */
 export type LSPServer<ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities> =
   BaseLSPServer<ServerCaps> & Server<ClientCapabilities, ServerCaps>;
 
+/**
+ * Constructs an {@link LSPServer} instance.
+ *
+ * @param options - Optional {@link ServerOptions} to configure the server.
+ * @returns A new `LSPServer` instance.
+ *
+ * @category Server
+ */
 // Generic constructor that preserves type parameters
 export const LSPServer: new <ServerCaps extends Partial<ServerCapabilities> = ServerCapabilities>(
   options?: ServerOptions<ServerCaps>

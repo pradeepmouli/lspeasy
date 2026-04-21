@@ -55,7 +55,7 @@ export interface Logger {
  * custom logger is provided. Set `logLevel` in `ServerOptions` /
  * `ClientOptions` to control verbosity.
  *
- * @pitfalls
+ * @never
  * NEVER use `ConsoleLogger` in a stdio LSP server (`StdioTransport`) — the
  * LSP base protocol uses stdout as the message channel. Any `console.log` /
  * `console.info` / `console.debug` output will corrupt the stdio stream.
@@ -78,30 +78,50 @@ export interface Logger {
 export class ConsoleLogger implements Logger {
   constructor(private readonly level: LogLevel = LogLevel.Info) {}
 
+  /**
+   * @param message - The error message to log.
+   * @param args - Additional arguments forwarded to `console.error`.
+   */
   error(message: string, ...args: unknown[]): void {
     if (this.level >= LogLevel.Error) {
       console.error(`[ERROR] ${message}`, ...args);
     }
   }
 
+  /**
+   * @param message - The warning message to log.
+   * @param args - Additional arguments forwarded to `console.warn`.
+   */
   warn(message: string, ...args: unknown[]): void {
     if (this.level >= LogLevel.Warn) {
       console.warn(`[WARN] ${message}`, ...args);
     }
   }
 
+  /**
+   * @param message - The info message to log.
+   * @param args - Additional arguments forwarded to `console.info`.
+   */
   info(message: string, ...args: unknown[]): void {
     if (this.level >= LogLevel.Info) {
       console.info(`[INFO] ${message}`, ...args);
     }
   }
 
+  /**
+   * @param message - The debug message to log.
+   * @param args - Additional arguments forwarded to `console.debug`.
+   */
   debug(message: string, ...args: unknown[]): void {
     if (this.level >= LogLevel.Debug) {
       console.debug(`[DEBUG] ${message}`, ...args);
     }
   }
 
+  /**
+   * @param message - The trace message to log.
+   * @param args - Additional arguments forwarded to `console.log`.
+   */
   trace(message: string, ...args: unknown[]): void {
     if (this.level >= LogLevel.Trace) {
       console.log(`[TRACE] ${message}`, ...args);

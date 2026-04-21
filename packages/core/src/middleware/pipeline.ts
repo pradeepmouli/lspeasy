@@ -39,6 +39,28 @@ function shouldRun(registration: MiddlewareRegistration, context: MiddlewareCont
   });
 }
 
+/**
+ * Runs the registered middleware chain for a single JSON-RPC message, then
+ * calls `finalHandler` if no middleware short-circuits.
+ *
+ * @remarks
+ * This is the core dispatch loop used by `LSPClient` and `LSPServer`. Each
+ * middleware receives `context` and a `next` callback; calling `next()` hands
+ * control to the following middleware. If a middleware returns a result with
+ * `shortCircuit: true` the remaining middleware and `finalHandler` are skipped.
+ *
+ * Scoped middleware (created with `createScopedMiddleware`) is automatically
+ * filtered: it only executes when `matchesFilter` returns `true` for the
+ * current message.
+ *
+ * @param registrations - The list of middleware or scoped-middleware to run.
+ * @param context - The shared context for the current message.
+ * @param finalHandler - The handler to call after all middleware have run.
+ * @returns The result of the first short-circuiting middleware, or the result
+ *   of `finalHandler`.
+ *
+ * @category Middleware
+ */
 export async function executeMiddlewarePipeline(
   registrations: MiddlewareRegistration[] | undefined,
   context: MiddlewareContext,

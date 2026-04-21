@@ -72,7 +72,7 @@ export const ErrorMessage: Record<number, string> = {
  * You want to log a server-side error without sending an error to the client —
  * throw a plain `Error` and handle it via `server.onError()` instead.
  *
- * @pitfalls
+ * @never
  * NEVER throw `ResponseError` with a code outside the defined ranges without
  * documenting it. Undocumented codes are opaque to clients and tools.
  *
@@ -105,6 +105,8 @@ export class ResponseError extends Error {
 
   /**
    * Serializes to the JSON-RPC wire format (`{ code, message, data? }`).
+   *
+   * @returns A plain object suitable for embedding in an `ErrorResponseMessage`.
    */
   toJSON() {
     return {
@@ -115,7 +117,11 @@ export class ResponseError extends Error {
   }
 
   /**
-   * Create a parse error
+   * Create a parse error.
+   *
+   * @param message - Optional override for the default error message.
+   * @param data - Optional machine-readable error details.
+   * @returns A `ResponseError` with code {@link JSONRPCErrorCode.ParseError}.
    */
   static parseError(message?: string, data?: unknown): ResponseError {
     return new ResponseError(
@@ -126,7 +132,11 @@ export class ResponseError extends Error {
   }
 
   /**
-   * Create an invalid request error
+   * Create an invalid request error.
+   *
+   * @param message - Optional override for the default error message.
+   * @param data - Optional machine-readable error details.
+   * @returns A `ResponseError` with code {@link JSONRPCErrorCode.InvalidRequest}.
    */
   static invalidRequest(message?: string, data?: unknown): ResponseError {
     return new ResponseError(
@@ -137,14 +147,22 @@ export class ResponseError extends Error {
   }
 
   /**
-   * Create a method not found error
+   * Create a method not found error.
+   *
+   * @param method - The method name that was not found.
+   * @param data - Optional machine-readable error details.
+   * @returns A `ResponseError` with code {@link JSONRPCErrorCode.MethodNotFound}.
    */
   static methodNotFound(method: string, data?: unknown): ResponseError {
     return new ResponseError(JSONRPCErrorCode.MethodNotFound, `Method not found: ${method}`, data);
   }
 
   /**
-   * Create an invalid params error
+   * Create an invalid params error.
+   *
+   * @param message - Optional override for the default error message.
+   * @param data - Optional machine-readable error details.
+   * @returns A `ResponseError` with code {@link JSONRPCErrorCode.InvalidParams}.
    */
   static invalidParams(message?: string, data?: unknown): ResponseError {
     return new ResponseError(
@@ -155,7 +173,11 @@ export class ResponseError extends Error {
   }
 
   /**
-   * Create an internal error
+   * Create an internal error.
+   *
+   * @param message - Optional override for the default error message.
+   * @param data - Optional machine-readable error details.
+   * @returns A `ResponseError` with code {@link JSONRPCErrorCode.InternalError}.
    */
   static internalError(message?: string, data?: unknown): ResponseError {
     return new ResponseError(
@@ -166,7 +188,10 @@ export class ResponseError extends Error {
   }
 
   /**
-   * Create a server not initialized error
+   * Create a server not initialized error.
+   *
+   * @param data - Optional machine-readable error details.
+   * @returns A `ResponseError` with code {@link JSONRPCErrorCode.ServerNotInitialized}.
    */
   static serverNotInitialized(data?: unknown): ResponseError {
     return new ResponseError(
@@ -177,7 +202,10 @@ export class ResponseError extends Error {
   }
 
   /**
-   * Create a request cancelled error
+   * Create a request cancelled error.
+   *
+   * @param data - Optional machine-readable error details.
+   * @returns A `ResponseError` with code {@link JSONRPCErrorCode.RequestCancelled}.
    */
   static requestCancelled(data?: unknown): ResponseError {
     return new ResponseError(
