@@ -62,7 +62,7 @@
     "@changesets/cli": "^2.31.0",
     "@to-skills/vitepress": "^0.2.18",
     "@types/node": "^25.6.0",
-    "@typescript/native-preview": "7.0.0-dev.20260322.1",
+    "@typescript/native-preview": "7.0.0-dev.20260421.1",
     "@vitest/coverage-v8": "^4.1.5",
     "@vitest/ui": "^4.1.5",
     "camelcase": "^9.0.0",
@@ -76,7 +76,7 @@
     "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.11.0",
     "typedoc-plugin-to-skills": "^1.0.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vite": "^8.0.9",
     "vitest": "^4.1.5"
   },
