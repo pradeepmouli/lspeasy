@@ -83,7 +83,7 @@
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vscode-languageserver-protocol": "^3.17.5",
     "zod": "^4.3.6"
   },
