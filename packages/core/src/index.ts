@@ -18,6 +18,16 @@
  * Node.js transports (`StdioTransport`, `TcpTransport`, `IpcTransport`) are
  * in `@lspeasy/core/node` to avoid importing Node.js builtins in browsers.
  *
+ * ### Transport Selection Guide
+ *
+ * | Need | Transport | Critical Gotcha |
+ * |------|-----------|-----------------|
+ * | Spawn server as child process | `StdioTransport` | `ConsoleLogger` corrupts stdout — use `NullLogger` |
+ * | Browser or remote server | `WebSocketTransport` | Call `send()` only after `isConnected()` is `true` |
+ * | Persistent local daemon | `TcpTransport` | Create a new server instance per client reconnect |
+ * | In-process browser isolation | `DedicatedWorkerTransport` | Monitor `worker.onerror`; crashes are silent |
+ * | Shared worker, multiple tabs | `SharedWorkerTransport` | One worker handles all port connections |
+ *
  * **Middleware** — The {@link Middleware} pipeline runs on every
  * client-to-server and server-to-client message. Use {@link createScopedMiddleware}
  * to limit a middleware to specific methods, and {@link createTypedMiddleware}

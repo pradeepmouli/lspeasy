@@ -232,8 +232,9 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
    * @param transport - The transport to use for the connection.
    * @returns The server's `InitializeResult` including `capabilities` and
    *   optional `serverInfo`.
-   * @throws If the client is already connected, or the `initialize` request
-   *   fails (e.g. server rejects the protocol version).
+   * @throws {Error} When already connected. Fix: call `disconnect()` first, then re-connect with a fresh transport instance.
+   * @throws {Error} When the server rejects the `initialize` request (e.g. unsupported protocol version, missing required capabilities). Fix: inspect the error message for the server's error code; match your `ClientCapabilities` to what the server advertises.
+   * @throws {Error} When the transport closes before `initialize` completes (server crash, TCP reset). Fix: subscribe to `onError` on the transport before calling `connect()` to detect the cause, then retry with a new transport.
    *
    * @category Lifecycle
    */
@@ -352,7 +353,18 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 
   /**
-   * Send a request to the server
+   * Send a request to the server and await its response.
+   *
+   * @param method - The LSP request method name.
+   * @param params - Optional request parameters.
+   * @param token - Optional cancellation token.
+   * @returns A promise resolving to the server's result for the given method.
+   * @throws {Error} When the client is not connected. Fix: ensure `connect()` has resolved before calling `sendRequest()`.
+   * @throws {Error} When the server returns a JSON-RPC error response (e.g. `MethodNotFound`, `InvalidParams`). Fix: check `error.code` against `JSONRPCErrorCode` — if `-32601` (MethodNotFound), the server capability was not declared; gate the call with `serverSupportsRequest()`.
+   * @throws {Error} When the request times out (if `requestTimeout` is configured). Fix: increase `ClientOptions.requestTimeout`, or use `sendCancellableRequest()` to abort early and retry.
+   * @throws {Error} When the token is already cancelled before the call. Fix: check `token.isCancellationRequested` before calling, or handle the rejection in `.catch()`.
+   *
+   * @category Client
    */
   async sendRequest<K extends LSPRequestMethod<'clientToServer'>>(
     method: K,

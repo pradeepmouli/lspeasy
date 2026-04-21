@@ -342,7 +342,16 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 
   /**
-   * Send a server-to-client request.
+   * Send a server-to-client request and await the client's response.
+   *
+   * @param method - The LSP request method name (server-to-client direction).
+   * @param params - Optional request parameters.
+   * @returns A promise resolving to the client's result.
+   * @throws {Error} When not listening (transport not attached). Fix: only call `sendRequest` from inside a handler or after the `listening` event fires.
+   * @throws {Error} When the client returns a JSON-RPC error response. Fix: catch and inspect `error.code`; `window/showMessageRequest` rejections are user-initiated (user dismissed), not bugs.
+   * @throws {Error} When the request times out (if `requestTimeout` is configured). Fix: increase `ServerOptions.requestTimeout` for slow UI interactions like `window/showMessageRequest`.
+   *
+   * @category Server
    */
   async sendRequest<Method extends LSPRequestMethod<'serverToClient'>>(
     method: Method,
@@ -385,7 +394,14 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   }
 
   /**
-   * Send a server-to-client notification.
+   * Send a server-to-client notification (fire-and-forget).
+   *
+   * @param method - The LSP notification method name (server-to-client direction).
+   * @param params - Optional notification parameters.
+   * @throws {Error} When not listening. Fix: only send notifications after `listen()` resolves and before `shutdown()` is called; guard with `isListening()`.
+   * @throws {Error} When the transport's underlying `send()` fails (e.g. broken socket). Fix: subscribe to `server.onError()` to catch transport-level write failures.
+   *
+   * @category Server
    */
   async sendNotification<Method extends LSPNotificationMethod<'serverToClient'>>(
     method: Method,
@@ -424,7 +440,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
    * request from the client. The LSP handshake proceeds automatically.
    *
    * @param transport - The transport to listen on.
-   * @throws If the server is already listening (call `close()` first).
+   * @throws {Error} When already listening. Fix: call `close()` then create a fresh `LSPServer` instance — do not reuse a single instance across connections.
    *
    * @category Lifecycle
    */

@@ -49,7 +49,7 @@ const transport = new StdioTransport();
 await server.listen(transport);
 ```
 
-## Features
+## What You Get
 
 - **Type-Safe Handlers**: Fully typed request and notification handlers with IntelliSense support
 - **Automatic Validation**: Built-in parameter validation using Zod schemas

@@ -1,6 +1,6 @@
 ---
 name: lspeasy-server
-description: "Typed LSP server with capability-aware handler namespaces, automatic initialize/shutdown lifecycle, cancellation support, and partial-result streaming. Use when building a language server daemon that editors connect to via stdio, TCP, or WebSocket — and need the lspeasy SDK (LSPServer, MessageDispatcher, PartialResultSender). Keywords: lsp, language-server-protocol, lsp-server, language-server, lspeasy."
+description: "Build LSP language servers with a simple, fully-typed API Use when: The client sets `partialResultToken` in the request params and you want to.... Also: lsp, language-server-protocol, lsp-server, language-server."
 license: MIT
 ---
 
@@ -18,13 +18,31 @@ ServerOptions, call `registerCapabilities(caps)` to declare what
 the server supports, register handlers with `onRequest` / `onNotification`,
 then call `listen(transport)` to accept the first client connection.
 
-### Choosing a transport
-| Environment | Transport |
-|---|---|
-| Editor stdio/pipe | `StdioTransport` from `@lspeasy/core/node` |
-| TCP socket | `TcpTransport` from `@lspeasy/core/node` |
-| In-process / test | `WebSocketTransport` from `@lspeasy/core` |
-| Web Workers | `DedicatedWorkerTransport` from `@lspeasy/core` |
+### Transport Decision Tree
+
+**Stdio** (`StdioTransport` from `@lspeasy/core/node`)
+— Use when: the client spawns your server as a child process (the canonical
+  VS Code extension pattern). No network, no port management. Failure mode:
+  `ConsoleLogger` writes to stdout and corrupts the LSP stream — always use
+  `NullLogger` or a file-based logger with stdio.
+
+**WebSocket** (`WebSocketTransport` from `@lspeasy/core`)
+— Use when: multiple clients connect over a network, or the server must be
+  browser-accessible. Each accepted WebSocket connection needs its own
+  `LSPServer` instance. Failure mode: one client crash should not affect
+  others — wrap each `wss.on('connection')` callback in try/catch and
+  create a fresh `LSPServer` per socket.
+
+**TCP** (`TcpTransport` from `@lspeasy/core/node`)
+— Use when: building a persistent local daemon (e.g. a formatting server
+  shared across editor sessions). Failure mode: client disconnect fires
+  `close()` on the server instance — use `mode: 'server'` and create a new
+  `LSPServer` on each reconnect.
+
+**DedicatedWorkerTransport** (`DedicatedWorkerTransport` from `@lspeasy/core`)
+— Use when: running the server logic in a Web Worker for in-process browser
+  isolation. Zero serialization overhead. Failure mode: worker crash is
+  silent from the server side — monitor the worker's `onerror` in the host.
 
 ### Typed capability namespaces
 After `registerCapabilities({ hoverProvider: true })`, TypeScript exposes
@@ -37,15 +55,6 @@ handlers for capabilities the server never advertised.
   structured errors, checks `token.isCancellationRequested` for early exit.
 - NotificationHandler — fire-and-forget; unhandled rejections
   surface via `server.onError()`.
-
-## Features
-
-- **Type-Safe Handlers**: Fully typed request and notification handlers with IntelliSense support
-- **Automatic Validation**: Built-in parameter validation using Zod schemas
-- **Lifecycle Management**: Automatic initialize/shutdown handshake handling
-- **Cancellation Support**: Built-in cancellation token support for long-running operations
-- **Error Handling**: Comprehensive error handling with LSP error codes
-- **Chainable API**: Fluent API with method chaining
 
 ## Quick Start
 
@@ -81,28 +90,22 @@ await server.listen(transport);
 ## When to Use
 
 **Use this skill when:**
-- The client sends `partialResultToken` in request params (e.g. `textDocument/references`, `workspace/symbol`) and you want to stream intermediate result batches rather than holding the full set in memory before responding → use `PartialResultSender`. Without streaming, large result sets block the client until the handler returns.
-- A request handler must reject with a machine-readable error code (e.g. `MethodNotFound`, `InvalidParams`) that clients can route programmatically → use `ResponseError`. Throw plain `Error` only for unexpected internal failures (becomes generic `-32603 InternalError`).
-- You need direct control over the JSON-RPC routing table — e.g. inspecting which methods are registered or dispatching manually in tests → use `MessageDispatcher` directly (normally internal to `LSPServer`).
+- The client sets `partialResultToken` in the request params and you want to stream intermediate results (e.g. symbols found so far) rather than waiting for the complete set. → use `PartialResultSender`
+- A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails). → use `ResponseError`
 
 **Do NOT use when:**
-- You want to log a server-side error without sending it to the client — throw a plain `Error` caught by `server.onError()` instead.
-- You need a bare JSON-RPC layer without LSP semantics — use the transport and framing utilities from `@lspeasy/core` directly.
+- You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead.
 
 API surface: 4 classes, 16 types, 1 enums, 2 constants
 
 ## NEVER
 
-- NEVER call `server.shutdown()` or `server.close()` from inside a request or notification handler — the transport is actively dispatching at that point; calling close from within a handler creates a deadlock where the handler awaits close, and close waits for all handlers to finish.
-- NEVER mutate `ServerCapabilities` after the `initialized` notification is received — the client cached `InitializeResult` at handshake time; runtime changes are invisible to it and will cause capability mismatches.
-- NEVER share one `LSPServer` instance across multiple client connections — each connection requires its own instance to maintain independent lifecycle state and ID sequences.
-- NEVER send server-to-client notifications inside the `initialize` request handler — the `initialize` response has not been sent at that point; notifications sent before the response are discarded by clients. Use the `initialized` notification handler for post-handshake setup instead.
 - NEVER register the same method in both the request and notification handler registries — the dispatcher uses separate lookup tables and the method will only match one path, silently ignoring the other.
-- NEVER call `dispatch` before `setClientCapabilities` if your handler reads `context.clientCapabilities` — the value is `undefined` until the `initialize` request is processed.
-- NEVER call `PartialResultSender.send` after the handler has returned a response — the `$/progress` notification arrives after the client has closed the partial-result channel and will be silently discarded or cause a protocol error.
+- NEVER call `dispatch` before calling `setClientCapabilities` if your handler reads `context.clientCapabilities` — the value will be `undefined` until the `initialize` request is processed.
+- NEVER call `send` after the handler has already returned a response — the `$/progress` notification will arrive after the client has closed the partial-result channel, and the client will silently discard or error on it.
 - NEVER send partial results without a `partialResultToken` — the client has no way to correlate the `$/progress` notification to the pending request.
-- NEVER throw `ResponseError` with a code outside the defined JSON-RPC / LSP ranges without documenting it — undocumented codes are opaque to clients and tools that route on error codes.
-- NEVER use `ConsoleLogger` in a stdio LSP server — stdout is the LSP base protocol message channel; any `console.log` / `console.info` / `console.debug` output corrupts the stream framing and breaks all clients. Use `NullLogger` or a file-based logger; send diagnostic text via `window/logMessage` notifications.
+- NEVER throw `ResponseError` with a code outside the defined ranges without documenting it. Undocumented codes are opaque to clients and tools.
+- NEVER use `ConsoleLogger` in a stdio LSP server (`StdioTransport`) — the LSP base protocol uses stdout as the message channel. Any `console.log` / `console.info` / `console.debug` output will corrupt the stdio stream. Use `NullLogger` or a file-based logger instead, and send diagnostic messages via `window/logMessage` notifications.
 
 ## Configuration
 
