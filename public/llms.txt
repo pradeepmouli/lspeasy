@@ -4,6 +4,8 @@
 
 ## @lspeasy/client
 
+> LSP client package for connecting to language servers.
+
 ### API
 
 - `CapabilityGuard`: Validates outgoing client requests and notifications against the server's
@@ -13,26 +15,23 @@ client capabilities declared in the `initialize` request.
 - `ConnectionHealthTracker`: Tracks connection state transitions and message activity timestamps.
 - `HeartbeatMonitor`: Runs interval-based heartbeat checks for active transports.
 - `NotificationWaiter`: Tracks a single wait-for-notification operation and its timeout lifecycle.
-- `LSPClient`: @lspeasy/client - LSP Client for connecting to language servers
+- `LSPClient`: Constructs an LSPClient instance.
 
 ## Optional
 
 ### Types
 
-- `LSPClient`: @lspeasy/client - LSP Client for connecting to language servers
-- `ClientOptions`: Configuration for an `LSPClient` instance.
-- `InitializeResult`: Initialize result from server
+- `LSPClient`: Typed LSP client that connects to a language server, manages the LSP
+handshake, and exposes capability-aware request namespaces.
+- `InitializeResult`: Initialize result from server.
 - `CancellableRequest`: Return value of `LSPClient.sendCancellableRequest`.
-- `NotebookDocumentNamespace`
-- `PartialRequestOptions`: Options for `LSPClient.sendRequestWithPartialResults`.
+- `NotebookDocumentNamespace`: Namespace for sending notebook-document lifecycle notifications to a server.
 - `PartialRequestResult`: Result returned by partial-result enabled requests.
 - `ConnectionHealth`: Aggregated connection health snapshot returned by
 `LSPClient.getConnectionHealth()`.
-- `HeartbeatConfig`: Configuration for optional heartbeat monitoring.
 - `HeartbeatStatus`: Snapshot of the current heartbeat monitoring status.
 - `StateChangeEvent`: Payload emitted when the connection state changes.
 Subscribe via `LSPClient.onConnectionStateChange()`.
-- `NotificationWaitOptions`: Options for `NotificationWaiter` and `LSPClient.waitForNotification`.
 - `Transport`: Pluggable communication layer for JSON-RPC message exchange.
 - `Logger`: Structured logging interface used throughout lspeasy.
 - `Disposable`: Represents a resource that can be explicitly released.
@@ -41,29 +40,39 @@ Subscribe via `LSPClient.onConnectionStateChange()`.
 
 ## @lspeasy/core
 
+> Core types, transports, and utilities shared by all lspeasy packages.
+
 ### API
 
-- `getCapabilityForRequestMethod`: Get the capability key for a given method at runtime
-- `getClientCapabilityForRequestMethod`: Get the client capability key for a given request method at runtime
-- `getCapabilityForNotificationMethod`: Get the capability key for a given notification method at runtime
-- `getClientCapabilityForNotificationMethod`: Get the client capability key for a given notification method at runtime
-- `getDefinitionForRequest`
-- `getDefinitionForNotification`
-- `serverSupportsRequest`: Check if a method is supported by the given server capabilities
-- `serverSupportsNotification`
-- `clientSupportsRequest`: Check if a method is supported by the given client capabilities
-- `clientSupportsNotification`
-- `hasServerCapability`: Check if a server capability is enabled
-- `hasClientCapability`: Check if a client capability is enabled
-- `supportsHover`: Helper to check if hover is supported
-- `supportsCompletion`: Helper to check if completion is supported
-- `supportsDefinition`: Helper to check if definition is supported
-- `supportsReferences`: Helper to check if references are supported
-- `supportsDocumentSymbol`: Helper to check if document symbols are supported
-- `supportsWorkspaceFolders`: Helper to check if workspace folders are supported
-- `supportsNotebookDocumentSync`
-- `supportsFileWatching`: Helper to check if file watching is supported
-- `supportsWorkDoneProgress`: Helper to check if work done progress is supported
+- `getCapabilityForRequestMethod`: Get the server capability key for a given request method at runtime.
+- `getClientCapabilityForRequestMethod`: Get the client capability key for a given request method at runtime.
+- `getCapabilityForNotificationMethod`: Get the server capability key for a given notification method at runtime.
+- `getClientCapabilityForNotificationMethod`: Get the client capability key for a given notification method at runtime.
+- `getDefinitionForRequest`: Retrieves the full definition object for a given LSP request method by
+namespace and method key.
+- `getDefinitionForNotification`: Retrieves the full definition object for a given LSP notification method by
+namespace and method key.
+- `serverSupportsRequest`: Type-guarding predicate that narrows `capabilities` to include the specific
+server capability key required for the given client-to-server request m...
+- `serverSupportsNotification`: Type-guarding predicate that narrows `capabilities` to include the specific
+server capability key required for the given client-to-server notificat...
+- `clientSupportsRequest`: Type-guarding predicate that narrows `capabilities` to include the specific
+client capability key required for the given server-to-client request m...
+- `clientSupportsNotification`: Type-guarding predicate that narrows `capabilities` to include the specific
+client capability key required for the given server-to-client notificat...
+- `hasServerCapability`: Type-guarding predicate that narrows `capabilities` to confirm a specific server capability
+is enabled at a deep dot-notation path.
+- `hasClientCapability`: Type-guarding predicate that narrows `capabilities` to confirm a specific client capability
+is enabled at a deep dot-notation path.
+- `supportsHover`: Returns `true` when `hoverProvider` is declared in the server capabilities.
+- `supportsCompletion`: Returns `true` when `completionProvider` is declared in the server capabilities.
+- `supportsDefinition`: Returns `true` when `definitionProvider` is declared in the server capabilities.
+- `supportsReferences`: Returns `true` when `referencesProvider` is declared in the server capabilities.
+- `supportsDocumentSymbol`: Returns `true` when `documentSymbolProvider` is declared in the server capabilities.
+- `supportsWorkspaceFolders`: Returns `true` when the server supports workspace folders.
+- `supportsNotebookDocumentSync`: Helper to check if notebook document sync is supported by the server.
+- `supportsFileWatching`: Returns `true` when the client supports dynamic file watching registration.
+- `supportsWorkDoneProgress`: Returns `true` when the client supports work done progress notifications.
 - `isRequestMessage`: Returns `true` when `message` is a JSON-RPC request (has `id` + `method`).
 - `isNotificationMessage`: Returns `true` when `message` is a JSON-RPC notification (has `method`,
 no `id`).
@@ -75,32 +84,36 @@ no `id`).
 `Content-Length` and `Content-Type` headers.
 - `createWebSocketClient`: Creates a WebSocket client instance, preferring the native
 `globalThis.
-- `composeMiddleware`
-- `executeMiddlewarePipeline`
-- `createScopedMiddleware`
-- `createTypedMiddleware`
+- `composeMiddleware`: Combines multiple middleware functions into a single middleware that runs
+them left-to-right, each delegating to the next via `next()`.
+- `executeMiddlewarePipeline`: Runs the registered middleware chain for a single JSON-RPC message, then
+calls `finalHandler` if no middleware short-circuits.
+- `createScopedMiddleware`: Wraps a middleware with a filter so it only runs for matching LSP messages.
+- `createTypedMiddleware`: Creates a typed, method-scoped middleware with full TypeScript inference for
+the message params and result.
 - `createFullDidChangeParams`: Builds `DidChangeTextDocumentParams` for a full-document text replacement.
 - `createIncrementalDidChangeParams`: Builds `DidChangeTextDocumentParams` for an incremental (range-based)
 document change notification.
-- `getSchemaForMethod`: Get schema for a given method
-- `createWorkspaceFolder`: Helper to create a WorkspaceFolder
-- `createWorkspaceFoldersChangeEvent`: Helper to create a WorkspaceFoldersChangeEvent
-- `createFileEvent`: Helper to create a FileEvent
-- `createFileSystemWatcher`: Helper to create a FileSystemWatcher
-- `createDidChangeWatchedFilesParams`: Helper to create DidChangeWatchedFilesParams
-- `createProgressBegin`: Helper to create a progress begin notification
-- `createProgressReport`: Helper to create a progress report notification
-- `createProgressEnd`: Helper to create a progress end notification
-- `createProgressCreateParams`: Helper to create progress create params
+- `getSchemaForMethod`: Looks up the Zod validation schema for a given LSP method.
+- `createWorkspaceFolder`: Helper to create a WorkspaceFolder.
+- `createWorkspaceFoldersChangeEvent`: Helper to create a WorkspaceFoldersChangeEvent.
+- `createFileEvent`: Helper to create a FileEvent.
+- `createFileSystemWatcher`: Helper to create a FileSystemWatcher.
+- `createDidChangeWatchedFilesParams`: Helper to create DidChangeWatchedFilesParams.
+- `createProgressBegin`: Creates a `WorkDoneProgressBegin` payload to start a work-done progress notification.
+- `createProgressReport`: Creates a `WorkDoneProgressReport` payload to update an in-progress work-done notification.
+- `createProgressEnd`: Creates a `WorkDoneProgressEnd` payload to close a work-done progress notification.
+- `createProgressCreateParams`: Creates `WorkDoneProgressCreateParams` for a `window/workDoneProgress/create` request.
 - `createProgressToken`: Generate a unique progress token
-- `createPartialResultParams`: Helper to create partial result params
-- `hasPartialResultToken`: Type guard to check if params support partial results
-- `getPartialResultToken`: Helper to extract partial result token from params
+- `createPartialResultParams`: Creates `PartialResultParams` with the given partial result token.
+- `hasPartialResultToken`: Type guard to check if params support partial results.
+- `getPartialResultToken`: Extracts the partial result token from params.
 - `isRegisterCapabilityParams`: Runtime guard for register-capability params.
 - `isUnregisterCapabilityParams`: Runtime guard for unregister-capability params.
 - `isMessage`: Runtime guard for JSON-RPC message envelopes.
 - `isWorkerTransportEnvelope`: Runtime guard for shared worker transport envelope payloads.
-- `buildMethodSets`
+- `buildMethodSets`: Builds the full set of LSP methods and the subset that are always allowed
+(not gated by a capability) for a given capability key.
 - `checkMethod`: Shared validation logic for checking if a method is allowed based on capabilities.
 - `DedicatedWorkerTransport`: JSON-RPC transport backed by a Dedicated Worker instance.
 - `SharedWorkerTransport`: JSON-RPC transport for Shared Worker environments with per-client envelope routing.
@@ -113,10 +126,14 @@ document change notification.
 - `NullLogger`: No-op logger that silently discards all messages.
 - `ResponseError`: An `Error` subclass that maps to a JSON-RPC 2.0 error response.
 - `DocumentVersionTracker`: Tracks monotonically increasing version numbers for open text documents.
-- `RequestMethodMap`
-- `NotificationMethodMap`
-- `ClientRequestMethodToCapabilityMap`
-- `ClientNotificationMethodToCapabilityMap`
+- `RequestMethodMap`: Runtime map from every LSP request method string to its metadata
+(direction, server capability, client capability).
+- `NotificationMethodMap`: Runtime map from every LSP notification method string to its metadata
+(direction, server capability, client capability).
+- `ClientRequestMethodToCapabilityMap`: Runtime map from every LSP request method string to the corresponding
+server capability key (or `undefined` for always-allowed methods).
+- `ClientNotificationMethodToCapabilityMap`: Runtime map from every LSP notification method string to the corresponding
+server capability key (or `undefined` for always-allowed notifications).
 - `requestMessageSchema`: Schema for JSON-RPC 2.0 Request Message
 - `notificationMessageSchema`: Schema for JSON-RPC 2.0 Notification Message
 - `responseErrorSchema`: Schema for JSON-RPC 2.0 Response Error
@@ -149,12 +166,14 @@ Uses discriminated union based on presence of 'method' and 'id'
 - `LSPSchemas`: Schema registry for method-based lookup
 - `WorkspaceFileChangeTypes`: File change types enum for convenience
 - `WatchKinds`: Watch kinds for file system watchers
-- `dynamicRegistrationSchema`
-- `registerCapabilityParamsSchema`
-- `unregisterCapabilitySchema`
-- `unregisterCapabilityParamsSchema`
-- `SERVER_METHODS`
-- `CLIENT_METHODS`
+- `dynamicRegistrationSchema`: Zod schema for validating a single dynamic-registration entry.
+- `registerCapabilityParamsSchema`: Zod schema for validating `client/registerCapability` params.
+- `unregisterCapabilitySchema`: Zod schema for validating a single capability unregistration entry.
+- `unregisterCapabilityParamsSchema`: Zod schema for validating `client/unregisterCapability` params.
+- `SERVER_METHODS`: Pre-built method sets indexed by server capability.
+Used by `CapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
+- `CLIENT_METHODS`: Pre-built method sets indexed by client capability.
+Used by `ClientCapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
 
 ## Optional
 
@@ -164,29 +183,39 @@ Uses discriminated union based on presence of 'method' and 'id'
 - `LSPNotificationMethod`: Union type of all valid LSP notification method names
 - `ParamsForRequest`: Infer request parameters from method name
 - `ResultForRequest`: Infer request result from method name
-- `ServerCapabilityForRequest`
-- `ClientCapabilityForRequest`
+- `ServerCapabilityForRequest`: Resolves the `ServerCapabilities` path key required to enable a given LSP request method.
+- `ClientCapabilityForRequest`: Resolves the `ClientCapabilities` path key required for a client to send a given LSP request.
 - `ParamsForNotification`: Infer notification parameters from method name
-- `ServerCapabilityForNotification`
-- `ClientCapabilityForNotification`
-- `OptionsForRequest`
-- `RegistrationOptionsForRequest`
-- `DirectionForRequest`
-- `DirectionForNotification`
-- `RequestDefinition`
+- `ServerCapabilityForNotification`: Resolves the `ServerCapabilities` path key required to enable a given LSP notification method.
+- `ClientCapabilityForNotification`: Resolves the `ClientCapabilities` path key required for a client to handle a given LSP notification.
+- `OptionsForRequest`: Resolves the registration options type for a given LSP request method.
+- `RegistrationOptionsForRequest`: Resolves the dynamic registration options type for a given LSP request method.
+- `DirectionForRequest`: Resolves the message direction (`'clientToServer'` | `'serverToClient'` | `'both'`)
+for a given LSP request method.
+- `DirectionForNotification`: Resolves the message direction for a given LSP notification method.
+- `RequestDefinition`: The shape of a single LSP request definition entry (method, params, result,
+direction, capability keys).
 - `ClientNotifications`: Client methods for sending requests to server
 Methods are conditionally visible based on ServerCapabilities
-- `ClientRequests`
+- `ClientRequests`: Typed namespace of client-to-server LSP request methods, filtered by the
+server's declared capabilities.
 - `ServerHandlers`: Server handler registration methods (for requests from client)
 Handlers are conditionally visible based on ServerCapabilities
 - `ClientRequestHandlers`: Client handler registration methods (for requests from server)
-- `ClientNotificationHandlers`
-- `ServerSendMethods`
-- `ToRequestSignature`
-- `ToNotificationSignature`
-- `ToRequestHandlerSignature`
-- `ToNotificationHandlerSignature`
-- `AvailableMethods`
+- `ClientNotificationHandlers`: Typed namespace of server-to-client notification handler registration methods,
+filtered by the client's declared capabilities.
+- `ServerSendMethods`: Typed namespace of server-to-client request send methods, filtered by the
+client's declared capabilities.
+- `ToRequestSignature`: Converts an LSP request type definition into a callable method signature
+`(params: P) => Promise<R>`.
+- `ToNotificationSignature`: Converts an LSP notification type definition into a fire-and-forget method
+signature `(params: P) => void`.
+- `ToRequestHandlerSignature`: Converts an LSP request type definition into a handler registration signature
+`(handler: (params: P) => Promise<R> | R) => void`.
+- `ToNotificationHandlerSignature`: Converts an LSP notification type definition into a handler registration
+signature `(handler: (params: P) => void) => void`.
+- `AvailableMethods`: The complete set of available LSP methods for a client/server capability pair,
+split by direction (client send, server send, handlers).
 - `BaseMessage`: Base JSON-RPC 2.0 message discriminant.
 - `RequestMessage`: JSON-RPC 2.0 Request message — expects a response from the peer.
 - `NotificationMessage`: JSON-RPC 2.0 Notification message — no response is expected or sent.
@@ -196,9 +225,6 @@ Handlers are conditionally visible based on ServerCapabilities
 - `Message`: Union of all JSON-RPC 2.0 message types sent over a transport.
 - `ResponseErrorInterface`: JSON-RPC 2.0 error object embedded in an error response.
 - `Transport`: Pluggable communication layer for JSON-RPC message exchange.
-- `DedicatedWorkerTransportOptions`
-- `SharedWorkerTransportOptions`
-- `WebSocketTransportOptions`: Options for configuring a `WebSocketTransport`.
 - `Middleware`: A function that intercepts JSON-RPC messages flowing through `LSPServer`
 or `LSPClient`.
 - `MiddlewareContext`: Execution context passed to every middleware function in the pipeline.
@@ -227,7 +253,8 @@ Use with `createTypedMiddleware` for full type inference.
 - `VersionSource`: Source of version information for helper constructors.
 - `LSPRequest`: LSP Request type definitions organized by namespace
 - `LSPNotification`: LSP Notification type definitions organized by namespace
-- `Client`
+- `Client`: Capability-aware interface for an LSP client, combining typed request send
+methods, notification send methods, and server-to-client handler registr...
 - `AvailableRequests`: Mapped type of all available LSP request methods and their handler signatures
 - `AvailableNotifications`: Mapped type of all available LSP notification methods and their handler signatures
 - `Server`: Combined Server type with handlers and send methods
@@ -235,7 +262,7 @@ Use with `createTypedMiddleware` for full type inference.
 - `AvailableNotifications`: Mapped type of all available LSP notification methods and their handler signatures
 - `WorkDoneProgressValue`: WorkDoneProgress value types
 - `PartialResultParams`: A parameter literal used to pass a partial result token.
-- `DynamicRegistration`
+- `DynamicRegistration`: A single LSP dynamic capability registration entry.
 - `DynamicRegistrationBehavior`: Controls compatibility behavior for dynamic registrations not declared by client capabilities.
 - `RegisterCapabilityParams`: Params payload for `client/registerCapability`.
 - `UnregisterCapability`: Entry used by `client/unregisterCapability`.
@@ -248,30 +275,31 @@ Use with `createTypedMiddleware` for full type inference.
 - `SharedWorkerLike`: Shared worker wrapper exposing a message port.
 - `WorkerMessageEventLike`: Lightweight event shape shared by worker and message port adapters.
 - `WorkerTransportEnvelope`: Envelope used by shared worker transport to preserve client isolation.
-- `CheckMethodOptions`
 - `LogLevel`: Numeric severity levels for filtering log output.
 
 ## @lspeasy/server
 
+> LSP server package for hosting Language Server Protocol (LSP) servers.
+
 ### API
 
-- `MessageDispatcher`: Message dispatcher manages request/notification routing
-- `PartialResultSender`: Helper for emitting typed `$/progress` partial result batches from server handlers.
+- `MessageDispatcher`: Routes incoming JSON-RPC requests and notifications to their registered handlers.
+- `PartialResultSender`: Emits typed `$/progress` partial-result batches from server-side request handlers.
 - `ResponseError`: An `Error` subclass that maps to a JSON-RPC 2.0 error response.
 - `ConsoleLogger`: Logger implementation that writes to the process console with level filtering.
-- `LSPServer`: @lspeasy/server - Build LSP servers with simple, typed API
+- `LSPServer`: Constructs an LSPServer instance.
 - `JSONRPCErrorCode`: Numeric error codes defined by JSON-RPC 2.0 and the LSP specification.
 
 ## Optional
 
 ### Types
 
-- `LSPServer`: @lspeasy/server - Build LSP servers with simple, typed API
-- `ServerOptions`: Configuration for an `LSPServer` instance.
+- `LSPServer`: Full-featured LSP server with automatic lifecycle management, typed handlers,
+capability-aware namespaces, and pluggable middleware.
 - `RequestHandler`: Signature for LSP request handlers registered via `LSPServer.onRequest`.
 - `NotificationHandler`: Signature for LSP notification handlers registered via
 `LSPServer.onNotification`.
-- `NotebookDocumentHandlerNamespace`
+- `NotebookDocumentHandlerNamespace`: Namespace for registering notebook-document lifecycle notification handlers.
 - `RequestContext`: Context provided to request handlers alongside params and the cancellation token.
 - `NotificationContext`: Context provided to notification handlers alongside params.
 - `Server`: Combined Server type with handlers and send methods

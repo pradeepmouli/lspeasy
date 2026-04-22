@@ -1,9 +1,9 @@
 # Variables & Constants
 
-## client
+## Client
 
 ### `LSPClient`
-@lspeasy/client - LSP Client for connecting to language servers
+Constructs an LSPClient instance.
 ```ts
 let LSPClient: (options?: ClientOptions<ClientCaps>) => LSPClient<ClientCaps>
 ```

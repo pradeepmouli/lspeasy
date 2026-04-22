@@ -1,9 +1,9 @@
 # Variables & Constants
 
-## server
+## Server
 
 ### `LSPServer`
-@lspeasy/server - Build LSP servers with simple, typed API
+Constructs an LSPServer instance.
 ```ts
 let LSPServer: (options?: ServerOptions<ServerCaps>) => LSPServer<ServerCaps>
 ```

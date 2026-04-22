@@ -1,31 +1,13 @@
 # Types & Enums
 
-## server
+## Server
 
 ### `LSPServer`
-@lspeasy/server - Build LSP servers with simple, typed API
+Full-featured LSP server with automatic lifecycle management, typed handlers,
+capability-aware namespaces, and pluggable middleware.
 ```ts
 BaseLSPServer<ServerCaps> & Server<ClientCapabilities, ServerCaps>
 ```
-
-## Server
-
-### `ServerOptions`
-Configuration for an `LSPServer` instance.
-**Properties:**
-- `name: string` (optional) — Server name (sent in initialize response)
-- `version: string` (optional) — Server version (sent in initialize response)
-- `logger: Logger` (optional) — Logger instance (defaults to ConsoleLogger)
-- `logLevel: LogLevel` (optional) — Log level (defaults to 'info')
-- `requestTimeout: number` (optional) — Default request timeout in milliseconds for server-initiated requests
-- `onValidationError: (error: ZodError, message: RequestContext | NotificationContext) => void | ResponseError` (optional) — Custom validation error handler
-- `validateParams: boolean` (optional) — Enable parameter validation for requests and notifications
-Defaults to true
-- `capabilities: Capabilities` (optional) — Capabilities to declare during initialization
-- `strictCapabilities: boolean` (optional) — Strict capability checking mode
-When true, throws error if handler registered for unsupported capability
-When false, logs warning and allows registration (default: false)
-- `middleware: (Middleware | ScopedMiddleware)[]` (optional) — Optional middleware chain for clientToServer/serverToClient messages.
 
 ## Handler
 
@@ -42,6 +24,9 @@ Signature for LSP notification handlers registered via
 (params: Params, context: NotificationContext) => void | Promise<void>
 ```
 
+### `NotebookDocumentHandlerNamespace`
+Namespace for registering notebook-document lifecycle notification handlers.
+
 ### `RequestContext`
 Context provided to request handlers alongside params and the cancellation token.
 **Properties:**
@@ -56,10 +41,6 @@ Context provided to notification handlers alongside params.
 - `method: string` — LSP method string, e.g. `'textDocument/didOpen'`.
 - `clientCapabilities: ClientCapabilities` (optional) — Client capabilities received during `initialize`.
 Available after the `initialize` handshake.
-
-## types
-
-### `NotebookDocumentHandlerNamespace`
 
 ## capability-methods.d
 
