@@ -1,0 +1,11 @@
+description = "Sync linked issue status for after_plan hook."
+
+# Source: workflows
+
+prompt = """
+Run:
+
+```bash
+bash .specify/extensions/workflows/scripts/bash/update-linked-issue.sh --event after_plan
+```
+"""
