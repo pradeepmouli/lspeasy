@@ -1,31 +1,19 @@
 # Types & Enums
 
-## client
+## Client
 
 ### `LSPClient`
-@lspeasy/client - LSP Client for connecting to language servers
+Typed LSP client that connects to a language server, manages the LSP
+handshake, and exposes capability-aware request namespaces.
 ```ts
 BaseLSPClient<ClientCaps> & Client<ClientCaps, ServerCapabilities>
 ```
 
-## Client
-
-### `ClientOptions`
-Configuration for an `LSPClient` instance.
+### `InitializeResult`
+Initialize result from server.
 **Properties:**
-- `name: string` (optional) — Client identification (sent in initialize request)
-- `version: string` (optional) — Client version
-- `capabilities: ClientCaps` (optional) — Client capabilities to advertise
-- `logger: Logger` (optional) — Logger instance for client logging
-- `logLevel: LogLevel` (optional) — Log level for built-in console logger
-- `requestTimeout: number` (optional) — Default request timeout in milliseconds for outgoing requests
-- `strictCapabilities: boolean` (optional) — Strict capability checking mode
-When true, throws error if handler registered or request sent for unsupported capability
-When false, logs warning and allows registration/sending (default: false)
-- `middleware: (Middleware | ScopedMiddleware)[]` (optional) — Optional middleware chain for clientToServer/serverToClient messages.
-- `heartbeat: HeartbeatConfig` (optional) — Optional heartbeat configuration (disabled by default).
-- `dynamicRegistration: DynamicRegistrationBehavior` (optional) — Behavior controls for server-driven dynamic registration.
-- `onValidationError: (error: ZodError, response: ResponseMessage) => void` (optional) — Callback for response validation errors
+- `capabilities: ServerCapabilities<any>` — Server capabilities advertised in the `initialize` response.
+- `serverInfo: { name: string; version?: string }` (optional) — Optional server identification returned by the language server.
 
 ### `CancellableRequest`
 Return value of `LSPClient.sendCancellableRequest`.
@@ -33,54 +21,36 @@ Return value of `LSPClient.sendCancellableRequest`.
 - `promise: Promise<T>` — Promise that resolves with the request result or rejects on cancellation.
 - `cancel: () => void` — Cancels the in-flight request and sends `$/cancelRequest` to the server.
 
-### `PartialRequestOptions`
-Options for `LSPClient.sendRequestWithPartialResults`.
-**Properties:**
-- `token: string | number` (optional) — Custom `partialResultToken` value; auto-generated when omitted.
-- `onPartial: (partial: TPartial) => void` — Called for each `$/progress` notification carrying a partial result.
+### `NotebookDocumentNamespace`
+Namespace for sending notebook-document lifecycle notifications to a server.
 
 ### `ConnectionHealth`
 Aggregated connection health snapshot returned by
 `LSPClient.getConnectionHealth()`.
 **Properties:**
-- `state: ConnectionState`
-- `lastMessageSent: Date | null`
-- `lastMessageReceived: Date | null`
-- `heartbeat: HeartbeatStatus` (optional)
-
-### `HeartbeatConfig`
-Configuration for optional heartbeat monitoring.
-**Properties:**
-- `enabled: boolean` (optional) — Whether heartbeat monitoring is active.
-- `interval: number` — Interval between pings in milliseconds.
-- `timeout: number` — Time to wait for a pong response in milliseconds.
+- `state: ConnectionState` — Current lifecycle state of the connection.
+- `lastMessageSent: Date | null` — Timestamp of the last outgoing message, or `null` if none has been sent.
+- `lastMessageReceived: Date | null` — Timestamp of the last incoming message, or `null` if none has been received.
+- `heartbeat: HeartbeatStatus` (optional) — Heartbeat monitoring snapshot, present only when heartbeat is configured.
 
 ### `HeartbeatStatus`
 Snapshot of the current heartbeat monitoring status.
 **Properties:**
-- `enabled: boolean`
-- `interval: number`
-- `timeout: number`
-- `lastPing: Date | null`
-- `lastPong: Date | null`
-- `isResponsive: boolean`
+- `enabled: boolean` — Whether heartbeat monitoring is active.
+- `interval: number` — Interval between pings in milliseconds.
+- `timeout: number` — Timeout in milliseconds before a ping is considered unanswered.
+- `lastPing: Date | null` — Timestamp of the last outgoing ping, or `null` if no ping has been sent.
+- `lastPong: Date | null` — Timestamp of the last received pong, or `null` if no pong has been received.
+- `isResponsive: boolean` — Whether the server responded to the most recent ping within the timeout window.
 
 ### `StateChangeEvent`
 Payload emitted when the connection state changes.
 Subscribe via `LSPClient.onConnectionStateChange()`.
 **Properties:**
-- `previous: ConnectionState`
-- `current: ConnectionState`
-- `timestamp: Date`
-- `reason: string` (optional)
-
-### `NotificationWaitOptions`
-Options for `NotificationWaiter` and `LSPClient.waitForNotification`.
-**Properties:**
-- `timeout: number` — Maximum time to wait in milliseconds before rejecting with a timeout error.
-- `filter: (params: TParams) => boolean` (optional) — Optional predicate to skip notifications that don't match the expected
-content. The waiter continues listening until a matching notification
-arrives or the timeout expires.
+- `previous: ConnectionState` — The state the connection was in before this transition.
+- `current: ConnectionState` — The state the connection has transitioned into.
+- `timestamp: Date` — Wall-clock time at which the state transition occurred.
+- `reason: string` (optional) — Optional human-readable description of why the state changed.
 
 ### `ConnectionState`
 Lifecycle state of an `LSPClient` connection.
@@ -90,14 +60,6 @@ Lifecycle state of an `LSPClient` connection.
 - `Disconnected` = `"disconnected"`
 
 ## types
-
-### `InitializeResult`
-Initialize result from server
-**Properties:**
-- `capabilities: ServerCapabilities<any>`
-- `serverInfo: { name: string; version?: string }` (optional)
-
-### `NotebookDocumentNamespace`
 
 ### `PartialRequestResult`
 Result returned by partial-result enabled requests.

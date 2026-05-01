@@ -4,6 +4,8 @@
 
 ## @lspeasy/client
 
+LSP client package for connecting to language servers.
+
 ### CapabilityGuard
 
 Validates outgoing client requests and notifications against the server's
@@ -14,9 +16,9 @@ constructor(capabilities: Partial<ServerCapabilities>, logger: Logger, strict: b
 ```
 
 **Methods:**
-- `canSendRequest(method: string): boolean` — 
-- `canSendNotification(method: string): boolean` — 
-- `getServerCapabilities(): Partial<ServerCapabilities>` — 
+- `canSendRequest(method: string): boolean` — Returns `true` if the server capability for `method` is declared.
+- `canSendNotification(method: string): boolean` — Returns `true` if the server capability for `method` is declared.
+- `getServerCapabilities(): Partial<ServerCapabilities>` — Returns a defensive copy of the server capabilities this guard was built from.
 
 ### ClientCapabilityGuard
 
@@ -28,8 +30,8 @@ constructor(capabilities: Partial<ClientCapabilities>, logger: Logger, strict: b
 ```
 
 **Methods:**
-- `canRegisterHandler(method: string): boolean` — 
-- `getClientCapabilities(): Partial<ClientCapabilities>` — 
+- `canRegisterHandler(method: string): boolean` — Returns `true` if the client has declared the capability required to handle `method`.
+- `getClientCapabilities(): Partial<ClientCapabilities>` — Returns a defensive copy of the client capabilities this guard was built from.
 
 ### ConnectionHealthTracker
 
@@ -83,19 +85,16 @@ constructor<TParams>(method: string, options: NotificationWaitOptions<TParams>, 
 
 ### LSPClient
 
-@lspeasy/client - LSP Client for connecting to language servers
+Typed LSP client that connects to a language server, manages the LSP
+handshake, and exposes capability-aware request namespaces.
 
 ```ts
 type LSPClient = BaseLSPClient<ClientCaps> & Client<ClientCaps, ServerCapabilities>
 ```
 
-### ClientOptions
-
-Configuration for an `LSPClient` instance.
-
 ### InitializeResult
 
-Initialize result from server
+Initialize result from server.
 
 ### CancellableRequest
 
@@ -103,9 +102,7 @@ Return value of `LSPClient.sendCancellableRequest`.
 
 ### NotebookDocumentNamespace
 
-### PartialRequestOptions
-
-Options for `LSPClient.sendRequestWithPartialResults`.
+Namespace for sending notebook-document lifecycle notifications to a server.
 
 ### PartialRequestResult
 
@@ -120,10 +117,6 @@ type PartialRequestResult = PartialRequestOutcome<TPartial, TResult>
 Aggregated connection health snapshot returned by
 `LSPClient.getConnectionHealth()`.
 
-### HeartbeatConfig
-
-Configuration for optional heartbeat monitoring.
-
 ### HeartbeatStatus
 
 Snapshot of the current heartbeat monitoring status.
@@ -132,10 +125,6 @@ Snapshot of the current heartbeat monitoring status.
 
 Payload emitted when the connection state changes.
 Subscribe via `LSPClient.onConnectionStateChange()`.
-
-### NotificationWaitOptions
-
-Options for `NotificationWaiter` and `LSPClient.waitForNotification`.
 
 ### Transport
 
@@ -170,7 +159,7 @@ Numeric severity levels for filtering log output.
 
 ### LSPClient
 
-@lspeasy/client - LSP Client for connecting to language servers
+Constructs an LSPClient instance.
 
 ```ts
 let LSPClient: (options?: ClientOptions<ClientCaps>) => LSPClient<ClientCaps>
@@ -180,278 +169,298 @@ let LSPClient: (options?: ClientOptions<ClientCaps>) => LSPClient<ClientCaps>
 
 ## @lspeasy/core
 
+Core types, transports, and utilities shared by all lspeasy packages.
+
 ### getCapabilityForRequestMethod
 
-Get the capability key for a given method at runtime
+Get the server capability key for a given request method at runtime.
 
 ```ts
 getCapabilityForRequestMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
 ```
 
 **Parameters:**
-- `method: M` — 
-- `_direction: D` — 
+- `method: M` — The LSP request method string to look up.
+- `_direction: D` — Optional direction filter (currently unused).
 
 **Returns:** `InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
 
 ### getClientCapabilityForRequestMethod
 
-Get the client capability key for a given request method at runtime
+Get the client capability key for a given request method at runtime.
 
 ```ts
 getClientCapabilityForRequestMethod<M, D>(method: M, _direction: D): "alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>
 ```
 
 **Parameters:**
-- `method: M` — 
-- `_direction: D` — 
+- `method: M` — The LSP request method string to look up.
+- `_direction: D` — Optional direction filter (currently unused).
 
 **Returns:** `"alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>`
 
 ### getCapabilityForNotificationMethod
 
-Get the capability key for a given notification method at runtime
+Get the server capability key for a given notification method at runtime.
 
 ```ts
 getCapabilityForNotificationMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
 ```
 
 **Parameters:**
-- `method: M` — 
-- `_direction: D` — 
+- `method: M` — The LSP notification method string to look up.
+- `_direction: D` — Optional direction filter (currently unused).
 
 **Returns:** `InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
 
 ### getClientCapabilityForNotificationMethod
 
-Get the client capability key for a given notification method at runtime
+Get the client capability key for a given notification method at runtime.
 
 ```ts
 getClientCapabilityForNotificationMethod<M, D>(method: M, _direction: D): "alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>
 ```
 
 **Parameters:**
-- `method: M` — 
-- `_direction: D` — 
+- `method: M` — The LSP notification method string to look up.
+- `_direction: D` — Optional direction filter (currently unused).
 
 **Returns:** `"alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>`
 
 ### getDefinitionForRequest
+
+Retrieves the full definition object for a given LSP request method by
+namespace and method key.
 
 ```ts
 getDefinitionForRequest<N, M>(namespace: N, methodKey: M): { CallHierarchy: { IncomingCalls: { Method: "callHierarchy/incomingCalls"; Direction: "clientToServer" }; OutgoingCalls: { Method: "callHierarchy/outgoingCalls"; Direction: "clientToServer" } }; Client: { Registration: { Method: "client/registerCapability"; Direction: "serverToClient" }; Unregistration: { Method: "client/unregisterCapability"; Direction: "serverToClient" } }; CodeAction: { Resolve: { Method: "codeAction/resolve"; Direction: "clientToServer"; ServerCapability: "codeActionProvider.resolveProvider"; ClientCapability: "textDocument.codeAction.resolveSupport" } }; CodeLens: { Resolve: { Method: "codeLens/resolve"; Direction: "clientToServer"; ServerCapability: "codeLensProvider.resolveProvider"; ClientCapability: "textDocument.codeLens.resolveSupport" } }; CompletionItem: { CompletionResolve: { Method: "completionItem/resolve"; Direction: "clientToServer"; ServerCapability: "completionProvider.resolveProvider"; ClientCapability: "textDocument.completion.completionItem.resolveSupport" } }; DocumentLink: { Resolve: { Method: "documentLink/resolve"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider.resolveProvider"; ClientCapability: "textDocument.documentLink" } }; InlayHint: { Resolve: { Method: "inlayHint/resolve"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider.resolveProvider"; ClientCapability: "textDocument.inlayHint.resolveSupport" } }; Lifecycle: { Initialize: { Method: "initialize"; Direction: "clientToServer" }; Shutdown: { Method: "shutdown"; Direction: "clientToServer" } }; TextDocument: { Implementation: { Method: "textDocument/implementation"; Direction: "clientToServer"; ServerCapability: "implementationProvider"; ClientCapability: "textDocument.implementation" }; TypeDefinition: { Method: "textDocument/typeDefinition"; Direction: "clientToServer"; ServerCapability: "typeDefinitionProvider"; ClientCapability: "textDocument.typeDefinition" }; DocumentColor: { Method: "textDocument/documentColor"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; ColorPresentation: { Method: "textDocument/colorPresentation"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; FoldingRange: { Method: "textDocument/foldingRange"; Direction: "clientToServer"; ServerCapability: "foldingRangeProvider"; ClientCapability: "textDocument.foldingRange" }; Declaration: { Method: "textDocument/declaration"; Direction: "clientToServer"; ServerCapability: "declarationProvider"; ClientCapability: "textDocument.declaration" }; SelectionRange: { Method: "textDocument/selectionRange"; Direction: "clientToServer"; ServerCapability: "selectionRangeProvider"; ClientCapability: "textDocument.selectionRange" }; CallHierarchyPrepare: { Method: "textDocument/prepareCallHierarchy"; Direction: "clientToServer"; ServerCapability: "callHierarchyProvider"; ClientCapability: "textDocument.callHierarchy" }; SemanticTokens: { Method: "textDocument/semanticTokens/full"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider"; ClientCapability: "textDocument.semanticTokens"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensDelta: { Method: "textDocument/semanticTokens/full/delta"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.full.delta"; ClientCapability: "textDocument.semanticTokens.requests.full.delta"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensRange: { Method: "textDocument/semanticTokens/range"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.range"; ClientCapability: "textDocument.semanticTokens.requests.range"; RegistrationMethod: "textDocument/semanticTokens" }; LinkedEditingRange: { Method: "textDocument/linkedEditingRange"; Direction: "clientToServer"; ServerCapability: "linkedEditingRangeProvider"; ClientCapability: "textDocument.linkedEditingRange" }; Moniker: { Method: "textDocument/moniker"; Direction: "clientToServer"; ServerCapability: "monikerProvider"; ClientCapability: "textDocument.moniker" }; TypeHierarchyPrepare: { Method: "textDocument/prepareTypeHierarchy"; Direction: "clientToServer"; ServerCapability: "typeHierarchyProvider"; ClientCapability: "textDocument.typeHierarchy" }; InlineValue: { Method: "textDocument/inlineValue"; Direction: "clientToServer"; ServerCapability: "inlineValueProvider"; ClientCapability: "textDocument.inlineValue" }; InlayHint: { Method: "textDocument/inlayHint"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider"; ClientCapability: "textDocument.inlayHint" }; DocumentDiagnostic: { Method: "textDocument/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider"; ClientCapability: "textDocument.diagnostic" }; InlineCompletion: { Method: "textDocument/inlineCompletion"; Direction: "clientToServer"; ServerCapability: "inlineCompletionProvider"; ClientCapability: "textDocument.inlineCompletion" }; WillSaveTextDocumentWaitUntil: { Method: "textDocument/willSaveWaitUntil"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSaveWaitUntil"; ClientCapability: "textDocument.synchronization.willSaveWaitUntil" }; Completion: { Method: "textDocument/completion"; Direction: "clientToServer"; ServerCapability: "completionProvider"; ClientCapability: "textDocument.completion" }; Hover: { Method: "textDocument/hover"; Direction: "clientToServer"; ServerCapability: "hoverProvider"; ClientCapability: "textDocument.hover" }; SignatureHelp: { Method: "textDocument/signatureHelp"; Direction: "clientToServer"; ServerCapability: "signatureHelpProvider"; ClientCapability: "textDocument.signatureHelp" }; Definition: { Method: "textDocument/definition"; Direction: "clientToServer"; ServerCapability: "definitionProvider"; ClientCapability: "textDocument.definition" }; References: { Method: "textDocument/references"; Direction: "clientToServer"; ServerCapability: "referencesProvider"; ClientCapability: "textDocument.references" }; DocumentHighlight: { Method: "textDocument/documentHighlight"; Direction: "clientToServer"; ServerCapability: "documentHighlightProvider"; ClientCapability: "textDocument.documentHighlight" }; DocumentSymbol: { Method: "textDocument/documentSymbol"; Direction: "clientToServer"; ServerCapability: "documentSymbolProvider"; ClientCapability: "textDocument.documentSymbol" }; CodeAction: { Method: "textDocument/codeAction"; Direction: "clientToServer"; ServerCapability: "codeActionProvider"; ClientCapability: "textDocument.codeAction" }; CodeLens: { Method: "textDocument/codeLens"; Direction: "clientToServer"; ServerCapability: "codeLensProvider"; ClientCapability: "textDocument.codeLens" }; DocumentLink: { Method: "textDocument/documentLink"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider"; ClientCapability: "textDocument.documentLink" }; DocumentFormatting: { Method: "textDocument/formatting"; Direction: "clientToServer"; ServerCapability: "documentFormattingProvider"; ClientCapability: "textDocument.formatting" }; DocumentRangeFormatting: { Method: "textDocument/rangeFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider"; ClientCapability: "textDocument.rangeFormatting" }; DocumentRangesFormatting: { Method: "textDocument/rangesFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider.rangesSupport"; ClientCapability: "textDocument.rangeFormatting.rangesSupport" }; DocumentOnTypeFormatting: { Method: "textDocument/onTypeFormatting"; Direction: "clientToServer"; ServerCapability: "documentOnTypeFormattingProvider"; ClientCapability: "textDocument.onTypeFormatting" }; Rename: { Method: "textDocument/rename"; Direction: "clientToServer"; ServerCapability: "renameProvider"; ClientCapability: "textDocument.rename" }; PrepareRename: { Method: "textDocument/prepareRename"; Direction: "clientToServer"; ServerCapability: "renameProvider.prepareProvider"; ClientCapability: "textDocument.rename.prepareSupport" } }; TypeHierarchy: { Supertypes: { Method: "typeHierarchy/supertypes"; Direction: "clientToServer" }; Subtypes: { Method: "typeHierarchy/subtypes"; Direction: "clientToServer" } }; Window: { WorkDoneProgressCreate: { Method: "window/workDoneProgress/create"; Direction: "serverToClient"; ClientCapability: "window.workDoneProgress" }; ShowDocument: { Method: "window/showDocument"; Direction: "serverToClient"; ClientCapability: "window.showDocument.support" }; ShowMessage: { Method: "window/showMessageRequest"; Direction: "serverToClient"; ClientCapability: "window.showMessage" } }; Workspace: { WillCreateFiles: { Method: "workspace/willCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willCreate"; ClientCapability: "workspace.fileOperations.willCreate" }; WillRenameFiles: { Method: "workspace/willRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willRename"; ClientCapability: "workspace.fileOperations.willRename" }; WillDeleteFiles: { Method: "workspace/willDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willDelete"; ClientCapability: "workspace.fileOperations.willDelete" }; Diagnostic: { Method: "workspace/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider.workspaceDiagnostics"; ClientCapability: "workspace.diagnostics" }; TextDocumentContent: { Method: "workspace/textDocumentContent"; Direction: "clientToServer"; ServerCapability: "workspace.textDocumentContent"; ClientCapability: "workspace.textDocumentContent" }; Symbol: { Method: "workspace/symbol"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider"; ClientCapability: "workspace.symbol" }; ExecuteCommand: { Method: "workspace/executeCommand"; Direction: "clientToServer"; ServerCapability: "executeCommandProvider"; ClientCapability: "workspace.executeCommand" }; Folders: { Method: "workspace/workspaceFolders"; Direction: "serverToClient"; ServerCapability: "workspace.workspaceFolders"; ClientCapability: "workspace.workspaceFolders" }; Configuration: { Method: "workspace/configuration"; Direction: "serverToClient"; ClientCapability: "workspace.configuration" }; FoldingRangeRefresh: { Method: "workspace/foldingRange/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.foldingRange.refreshSupport" }; SemanticTokensRefresh: { Method: "workspace/semanticTokens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.semanticTokens.refreshSupport" }; InlineValueRefresh: { Method: "workspace/inlineValue/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlineValue.refreshSupport" }; InlayHintRefresh: { Method: "workspace/inlayHint/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlayHint.refreshSupport" }; DiagnosticRefresh: { Method: "workspace/diagnostic/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.diagnostics.refreshSupport" }; TextDocumentContentRefresh: { Method: "workspace/textDocumentContent/refresh"; Direction: "serverToClient" }; CodeLensRefresh: { Method: "workspace/codeLens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.codeLens" }; ApplyWorkspaceEdit: { Method: "workspace/applyEdit"; Direction: "serverToClient"; ClientCapability: "workspace.applyEdit" } }; WorkspaceSymbol: { Resolve: { Method: "workspaceSymbol/resolve"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider.resolveProvider"; ClientCapability: "workspace.symbol.resolveSupport" } } }[N][M]
 ```
 
 **Parameters:**
-- `namespace: N` — 
-- `methodKey: M` — 
+- `namespace: N` — A top-level key of `LSPRequest` (e.g. `'TextDocument'`).
+- `methodKey: M` — A method key within that namespace (e.g. `'Hover'`).
 
 **Returns:** `{ CallHierarchy: { IncomingCalls: { Method: "callHierarchy/incomingCalls"; Direction: "clientToServer" }; OutgoingCalls: { Method: "callHierarchy/outgoingCalls"; Direction: "clientToServer" } }; Client: { Registration: { Method: "client/registerCapability"; Direction: "serverToClient" }; Unregistration: { Method: "client/unregisterCapability"; Direction: "serverToClient" } }; CodeAction: { Resolve: { Method: "codeAction/resolve"; Direction: "clientToServer"; ServerCapability: "codeActionProvider.resolveProvider"; ClientCapability: "textDocument.codeAction.resolveSupport" } }; CodeLens: { Resolve: { Method: "codeLens/resolve"; Direction: "clientToServer"; ServerCapability: "codeLensProvider.resolveProvider"; ClientCapability: "textDocument.codeLens.resolveSupport" } }; CompletionItem: { CompletionResolve: { Method: "completionItem/resolve"; Direction: "clientToServer"; ServerCapability: "completionProvider.resolveProvider"; ClientCapability: "textDocument.completion.completionItem.resolveSupport" } }; DocumentLink: { Resolve: { Method: "documentLink/resolve"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider.resolveProvider"; ClientCapability: "textDocument.documentLink" } }; InlayHint: { Resolve: { Method: "inlayHint/resolve"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider.resolveProvider"; ClientCapability: "textDocument.inlayHint.resolveSupport" } }; Lifecycle: { Initialize: { Method: "initialize"; Direction: "clientToServer" }; Shutdown: { Method: "shutdown"; Direction: "clientToServer" } }; TextDocument: { Implementation: { Method: "textDocument/implementation"; Direction: "clientToServer"; ServerCapability: "implementationProvider"; ClientCapability: "textDocument.implementation" }; TypeDefinition: { Method: "textDocument/typeDefinition"; Direction: "clientToServer"; ServerCapability: "typeDefinitionProvider"; ClientCapability: "textDocument.typeDefinition" }; DocumentColor: { Method: "textDocument/documentColor"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; ColorPresentation: { Method: "textDocument/colorPresentation"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; FoldingRange: { Method: "textDocument/foldingRange"; Direction: "clientToServer"; ServerCapability: "foldingRangeProvider"; ClientCapability: "textDocument.foldingRange" }; Declaration: { Method: "textDocument/declaration"; Direction: "clientToServer"; ServerCapability: "declarationProvider"; ClientCapability: "textDocument.declaration" }; SelectionRange: { Method: "textDocument/selectionRange"; Direction: "clientToServer"; ServerCapability: "selectionRangeProvider"; ClientCapability: "textDocument.selectionRange" }; CallHierarchyPrepare: { Method: "textDocument/prepareCallHierarchy"; Direction: "clientToServer"; ServerCapability: "callHierarchyProvider"; ClientCapability: "textDocument.callHierarchy" }; SemanticTokens: { Method: "textDocument/semanticTokens/full"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider"; ClientCapability: "textDocument.semanticTokens"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensDelta: { Method: "textDocument/semanticTokens/full/delta"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.full.delta"; ClientCapability: "textDocument.semanticTokens.requests.full.delta"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensRange: { Method: "textDocument/semanticTokens/range"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.range"; ClientCapability: "textDocument.semanticTokens.requests.range"; RegistrationMethod: "textDocument/semanticTokens" }; LinkedEditingRange: { Method: "textDocument/linkedEditingRange"; Direction: "clientToServer"; ServerCapability: "linkedEditingRangeProvider"; ClientCapability: "textDocument.linkedEditingRange" }; Moniker: { Method: "textDocument/moniker"; Direction: "clientToServer"; ServerCapability: "monikerProvider"; ClientCapability: "textDocument.moniker" }; TypeHierarchyPrepare: { Method: "textDocument/prepareTypeHierarchy"; Direction: "clientToServer"; ServerCapability: "typeHierarchyProvider"; ClientCapability: "textDocument.typeHierarchy" }; InlineValue: { Method: "textDocument/inlineValue"; Direction: "clientToServer"; ServerCapability: "inlineValueProvider"; ClientCapability: "textDocument.inlineValue" }; InlayHint: { Method: "textDocument/inlayHint"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider"; ClientCapability: "textDocument.inlayHint" }; DocumentDiagnostic: { Method: "textDocument/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider"; ClientCapability: "textDocument.diagnostic" }; InlineCompletion: { Method: "textDocument/inlineCompletion"; Direction: "clientToServer"; ServerCapability: "inlineCompletionProvider"; ClientCapability: "textDocument.inlineCompletion" }; WillSaveTextDocumentWaitUntil: { Method: "textDocument/willSaveWaitUntil"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSaveWaitUntil"; ClientCapability: "textDocument.synchronization.willSaveWaitUntil" }; Completion: { Method: "textDocument/completion"; Direction: "clientToServer"; ServerCapability: "completionProvider"; ClientCapability: "textDocument.completion" }; Hover: { Method: "textDocument/hover"; Direction: "clientToServer"; ServerCapability: "hoverProvider"; ClientCapability: "textDocument.hover" }; SignatureHelp: { Method: "textDocument/signatureHelp"; Direction: "clientToServer"; ServerCapability: "signatureHelpProvider"; ClientCapability: "textDocument.signatureHelp" }; Definition: { Method: "textDocument/definition"; Direction: "clientToServer"; ServerCapability: "definitionProvider"; ClientCapability: "textDocument.definition" }; References: { Method: "textDocument/references"; Direction: "clientToServer"; ServerCapability: "referencesProvider"; ClientCapability: "textDocument.references" }; DocumentHighlight: { Method: "textDocument/documentHighlight"; Direction: "clientToServer"; ServerCapability: "documentHighlightProvider"; ClientCapability: "textDocument.documentHighlight" }; DocumentSymbol: { Method: "textDocument/documentSymbol"; Direction: "clientToServer"; ServerCapability: "documentSymbolProvider"; ClientCapability: "textDocument.documentSymbol" }; CodeAction: { Method: "textDocument/codeAction"; Direction: "clientToServer"; ServerCapability: "codeActionProvider"; ClientCapability: "textDocument.codeAction" }; CodeLens: { Method: "textDocument/codeLens"; Direction: "clientToServer"; ServerCapability: "codeLensProvider"; ClientCapability: "textDocument.codeLens" }; DocumentLink: { Method: "textDocument/documentLink"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider"; ClientCapability: "textDocument.documentLink" }; DocumentFormatting: { Method: "textDocument/formatting"; Direction: "clientToServer"; ServerCapability: "documentFormattingProvider"; ClientCapability: "textDocument.formatting" }; DocumentRangeFormatting: { Method: "textDocument/rangeFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider"; ClientCapability: "textDocument.rangeFormatting" }; DocumentRangesFormatting: { Method: "textDocument/rangesFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider.rangesSupport"; ClientCapability: "textDocument.rangeFormatting.rangesSupport" }; DocumentOnTypeFormatting: { Method: "textDocument/onTypeFormatting"; Direction: "clientToServer"; ServerCapability: "documentOnTypeFormattingProvider"; ClientCapability: "textDocument.onTypeFormatting" }; Rename: { Method: "textDocument/rename"; Direction: "clientToServer"; ServerCapability: "renameProvider"; ClientCapability: "textDocument.rename" }; PrepareRename: { Method: "textDocument/prepareRename"; Direction: "clientToServer"; ServerCapability: "renameProvider.prepareProvider"; ClientCapability: "textDocument.rename.prepareSupport" } }; TypeHierarchy: { Supertypes: { Method: "typeHierarchy/supertypes"; Direction: "clientToServer" }; Subtypes: { Method: "typeHierarchy/subtypes"; Direction: "clientToServer" } }; Window: { WorkDoneProgressCreate: { Method: "window/workDoneProgress/create"; Direction: "serverToClient"; ClientCapability: "window.workDoneProgress" }; ShowDocument: { Method: "window/showDocument"; Direction: "serverToClient"; ClientCapability: "window.showDocument.support" }; ShowMessage: { Method: "window/showMessageRequest"; Direction: "serverToClient"; ClientCapability: "window.showMessage" } }; Workspace: { WillCreateFiles: { Method: "workspace/willCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willCreate"; ClientCapability: "workspace.fileOperations.willCreate" }; WillRenameFiles: { Method: "workspace/willRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willRename"; ClientCapability: "workspace.fileOperations.willRename" }; WillDeleteFiles: { Method: "workspace/willDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willDelete"; ClientCapability: "workspace.fileOperations.willDelete" }; Diagnostic: { Method: "workspace/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider.workspaceDiagnostics"; ClientCapability: "workspace.diagnostics" }; TextDocumentContent: { Method: "workspace/textDocumentContent"; Direction: "clientToServer"; ServerCapability: "workspace.textDocumentContent"; ClientCapability: "workspace.textDocumentContent" }; Symbol: { Method: "workspace/symbol"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider"; ClientCapability: "workspace.symbol" }; ExecuteCommand: { Method: "workspace/executeCommand"; Direction: "clientToServer"; ServerCapability: "executeCommandProvider"; ClientCapability: "workspace.executeCommand" }; Folders: { Method: "workspace/workspaceFolders"; Direction: "serverToClient"; ServerCapability: "workspace.workspaceFolders"; ClientCapability: "workspace.workspaceFolders" }; Configuration: { Method: "workspace/configuration"; Direction: "serverToClient"; ClientCapability: "workspace.configuration" }; FoldingRangeRefresh: { Method: "workspace/foldingRange/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.foldingRange.refreshSupport" }; SemanticTokensRefresh: { Method: "workspace/semanticTokens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.semanticTokens.refreshSupport" }; InlineValueRefresh: { Method: "workspace/inlineValue/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlineValue.refreshSupport" }; InlayHintRefresh: { Method: "workspace/inlayHint/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlayHint.refreshSupport" }; DiagnosticRefresh: { Method: "workspace/diagnostic/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.diagnostics.refreshSupport" }; TextDocumentContentRefresh: { Method: "workspace/textDocumentContent/refresh"; Direction: "serverToClient" }; CodeLensRefresh: { Method: "workspace/codeLens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.codeLens" }; ApplyWorkspaceEdit: { Method: "workspace/applyEdit"; Direction: "serverToClient"; ClientCapability: "workspace.applyEdit" } }; WorkspaceSymbol: { Resolve: { Method: "workspaceSymbol/resolve"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider.resolveProvider"; ClientCapability: "workspace.symbol.resolveSupport" } } }[N][M]`
 
 ### getDefinitionForNotification
+
+Retrieves the full definition object for a given LSP notification method by
+namespace and method key.
 
 ```ts
 getDefinitionForNotification<N, M>(namespace: N, methodKey: M): { General: { Cancel: { Method: "$/cancelRequest"; Direction: "both" }; Progress: { Method: "$/progress"; Direction: "both" }; SetTrace: { Method: "$/setTrace"; Direction: "clientToServer" }; LogTrace: { Method: "$/logTrace"; Direction: "serverToClient" } }; Lifecycle: { Initialized: { Method: "initialized"; Direction: "clientToServer" }; Exit: { Method: "exit"; Direction: "clientToServer" } }; NotebookDocument: { DidOpenNotebookDocument: { Method: "notebookDocument/didOpen"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidChangeNotebookDocument: { Method: "notebookDocument/didChange"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidSaveNotebookDocument: { Method: "notebookDocument/didSave"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidCloseNotebookDocument: { Method: "notebookDocument/didClose"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" } }; Telemetry: { Event: { Method: "telemetry/event"; Direction: "serverToClient" } }; TextDocument: { DidOpenTextDocument: { Method: "textDocument/didOpen"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidChangeTextDocument: { Method: "textDocument/didChange"; Direction: "clientToServer"; ServerCapability: "textDocumentSync"; ClientCapability: "textDocument.synchronization" }; DidCloseTextDocument: { Method: "textDocument/didClose"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidSaveTextDocument: { Method: "textDocument/didSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.save"; ClientCapability: "textDocument.synchronization.didSave" }; WillSaveTextDocument: { Method: "textDocument/willSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSave"; ClientCapability: "textDocument.synchronization.willSave" }; PublishDiagnostics: { Method: "textDocument/publishDiagnostics"; Direction: "serverToClient"; ClientCapability: "textDocument.publishDiagnostics" } }; Window: { WorkDoneProgressCancel: { Method: "window/workDoneProgress/cancel"; Direction: "clientToServer" }; ShowMessage: { Method: "window/showMessage"; Direction: "serverToClient"; ClientCapability: "window.showMessage" }; LogMessage: { Method: "window/logMessage"; Direction: "serverToClient" } }; Workspace: { DidChangeWorkspaceFolders: { Method: "workspace/didChangeWorkspaceFolders"; Direction: "clientToServer"; ServerCapability: "workspace.workspaceFolders.changeNotifications" }; DidCreateFiles: { Method: "workspace/didCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didCreate"; ClientCapability: "workspace.fileOperations.didCreate" }; DidRenameFiles: { Method: "workspace/didRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didRename"; ClientCapability: "workspace.fileOperations.didRename" }; DidDeleteFiles: { Method: "workspace/didDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didDelete"; ClientCapability: "workspace.fileOperations.didDelete" }; DidChangeConfiguration: { Method: "workspace/didChangeConfiguration"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeConfiguration" }; DidChangeWatchedFiles: { Method: "workspace/didChangeWatchedFiles"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeWatchedFiles" } } }[N][M]
 ```
 
 **Parameters:**
-- `namespace: N` — 
-- `methodKey: M` — 
+- `namespace: N` — A top-level key of `LSPNotification` (e.g. `'TextDocument'`).
+- `methodKey: M` — A method key within that namespace (e.g. `'DidOpen'`).
 
 **Returns:** `{ General: { Cancel: { Method: "$/cancelRequest"; Direction: "both" }; Progress: { Method: "$/progress"; Direction: "both" }; SetTrace: { Method: "$/setTrace"; Direction: "clientToServer" }; LogTrace: { Method: "$/logTrace"; Direction: "serverToClient" } }; Lifecycle: { Initialized: { Method: "initialized"; Direction: "clientToServer" }; Exit: { Method: "exit"; Direction: "clientToServer" } }; NotebookDocument: { DidOpenNotebookDocument: { Method: "notebookDocument/didOpen"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidChangeNotebookDocument: { Method: "notebookDocument/didChange"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidSaveNotebookDocument: { Method: "notebookDocument/didSave"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" }; DidCloseNotebookDocument: { Method: "notebookDocument/didClose"; Direction: "clientToServer"; RegistrationMethod: "notebookDocument/sync" } }; Telemetry: { Event: { Method: "telemetry/event"; Direction: "serverToClient" } }; TextDocument: { DidOpenTextDocument: { Method: "textDocument/didOpen"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidChangeTextDocument: { Method: "textDocument/didChange"; Direction: "clientToServer"; ServerCapability: "textDocumentSync"; ClientCapability: "textDocument.synchronization" }; DidCloseTextDocument: { Method: "textDocument/didClose"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.openClose"; ClientCapability: "textDocument.synchronization" }; DidSaveTextDocument: { Method: "textDocument/didSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.save"; ClientCapability: "textDocument.synchronization.didSave" }; WillSaveTextDocument: { Method: "textDocument/willSave"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSave"; ClientCapability: "textDocument.synchronization.willSave" }; PublishDiagnostics: { Method: "textDocument/publishDiagnostics"; Direction: "serverToClient"; ClientCapability: "textDocument.publishDiagnostics" } }; Window: { WorkDoneProgressCancel: { Method: "window/workDoneProgress/cancel"; Direction: "clientToServer" }; ShowMessage: { Method: "window/showMessage"; Direction: "serverToClient"; ClientCapability: "window.showMessage" }; LogMessage: { Method: "window/logMessage"; Direction: "serverToClient" } }; Workspace: { DidChangeWorkspaceFolders: { Method: "workspace/didChangeWorkspaceFolders"; Direction: "clientToServer"; ServerCapability: "workspace.workspaceFolders.changeNotifications" }; DidCreateFiles: { Method: "workspace/didCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didCreate"; ClientCapability: "workspace.fileOperations.didCreate" }; DidRenameFiles: { Method: "workspace/didRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didRename"; ClientCapability: "workspace.fileOperations.didRename" }; DidDeleteFiles: { Method: "workspace/didDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.didDelete"; ClientCapability: "workspace.fileOperations.didDelete" }; DidChangeConfiguration: { Method: "workspace/didChangeConfiguration"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeConfiguration" }; DidChangeWatchedFiles: { Method: "workspace/didChangeWatchedFiles"; Direction: "clientToServer"; ClientCapability: "workspace.didChangeWatchedFiles" } } }[N][M]`
 
 ### serverSupportsRequest
 
-Check if a method is supported by the given server capabilities
+Type-guarding predicate that narrows `capabilities` to include the specific
+server capability key required for the given client-to-server request method.
 
 ```ts
-serverSupportsRequest<M>(method: M, capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "callHierarchyProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForRequest<M>]>[KeyType] }
+serverSupportsRequest<M>(method: M, capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "callHierarchyProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
-- `method: M` — 
-- `capabilities: ServerCapabilities` — 
+- `method: M` — The LSP request method string (e.g. `'textDocument/hover'`).
+- `capabilities: ServerCapabilities` — The `ServerCapabilities` object to test.
 
-**Returns:** `capabilities is ServerCapabilities<any> & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "callHierarchyProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForRequest<M>]>[KeyType] }`
+**Returns:** `capabilities is ServerCapabilities<any> & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "callHierarchyProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### serverSupportsNotification
 
+Type-guarding predicate that narrows `capabilities` to include the specific
+server capability key required for the given client-to-server notification method.
+
 ```ts
-serverSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForNotification<M>]>[KeyType] }
+serverSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
-- `method: M` — 
-- `capabilities: T` — 
+- `method: M` — The LSP notification method string (e.g. `'textDocument/didOpen'`).
+- `capabilities: T` — The `ServerCapabilities` object to test.
 
-**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForNotification<M>]>[KeyType] }`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### clientSupportsRequest
 
-Check if a method is supported by the given client capabilities
+Type-guarding predicate that narrows `capabilities` to include the specific
+client capability key required for the given server-to-client request method.
 
 ```ts
-clientSupportsRequest<M, T>(method: M, capabilities: T): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.workspaceFolders" | "workspace.configuration" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>[KeyType] }
+clientSupportsRequest<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.workspaceFolders" | "workspace.configuration" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
-- `method: M` — 
-- `capabilities: T` — 
+- `method: M` — The LSP request method string (e.g. `'client/registerCapability'`).
+- `capabilities: T` — The `ClientCapabilities` object to test.
 
-**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.workspaceFolders" | "workspace.configuration" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>[KeyType] }`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.workspaceFolders" | "workspace.configuration" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### clientSupportsNotification
 
+Type-guarding predicate that narrows `capabilities` to include the specific
+client capability key required for the given server-to-client notification method.
+
 ```ts
-clientSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "window.showMessage" | "textDocument.publishDiagnostics"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForNotification<M>]>[KeyType] }
+clientSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "window.showMessage" | "textDocument.publishDiagnostics"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
-- `method: M` — 
-- `capabilities: T` — 
+- `method: M` — The LSP notification method string (e.g. `'window/logMessage'`).
+- `capabilities: T` — The `ClientCapabilities` object to test.
 
-**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in "window.showMessage" | "textDocument.publishDiagnostics"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForNotification<M>]>[KeyType] }`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "window.showMessage" | "textDocument.publishDiagnostics"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### hasServerCapability
 
-Check if a server capability is enabled
+Type-guarding predicate that narrows `capabilities` to confirm a specific server capability
+is enabled at a deep dot-notation path.
 
 ```ts
-hasServerCapability<K, T>(capabilities: T, capability: K): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[K]>[KeyType] }
+hasServerCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
-- `capabilities: T` — 
-- `capability: K` — 
+- `capabilities: T` — The server capabilities to check.
+- `capability: K` — Dot-notation path of the capability (e.g. `'hoverProvider'`).
 
-**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[K]>[KeyType] }`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### hasClientCapability
 
-Check if a client capability is enabled
+Type-guarding predicate that narrows `capabilities` to confirm a specific client capability
+is enabled at a deep dot-notation path.
 
 ```ts
-hasClientCapability<K, T>(capabilities: T, capability: K): capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>[KeyType] }
+hasClientCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
-- `capabilities: T` — 
-- `capability: K` — 
+- `capabilities: T` — The client capabilities to check.
+- `capability: K` — Dot-notation path of the capability (e.g. `'window.workDoneProgress'`).
 
-**Returns:** `capabilities is T & { [KeyType in string | number | symbol]: UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>[KeyType] }`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### supportsHover
 
-Helper to check if hover is supported
+Returns `true` when `hoverProvider` is declared in the server capabilities.
 
 ```ts
 supportsHover(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }
 ```
 
 **Parameters:**
-- `capabilities: ServerCapabilities` — 
+- `capabilities: ServerCapabilities` — The server capabilities to check.
 
 **Returns:** `capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }`
 
 ### supportsCompletion
 
-Helper to check if completion is supported
+Returns `true` when `completionProvider` is declared in the server capabilities.
 
 ```ts
 supportsCompletion(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }
 ```
 
 **Parameters:**
-- `capabilities: ServerCapabilities` — 
+- `capabilities: ServerCapabilities` — The server capabilities to check.
 
 **Returns:** `capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }`
 
 ### supportsDefinition
 
-Helper to check if definition is supported
+Returns `true` when `definitionProvider` is declared in the server capabilities.
 
 ```ts
 supportsDefinition(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }
 ```
 
 **Parameters:**
-- `capabilities: ServerCapabilities` — 
+- `capabilities: ServerCapabilities` — The server capabilities to check.
 
 **Returns:** `capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }`
 
 ### supportsReferences
 
-Helper to check if references are supported
+Returns `true` when `referencesProvider` is declared in the server capabilities.
 
 ```ts
 supportsReferences(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { referencesProvider: NonNullable<boolean | ReferenceOptions | undefined> }
 ```
 
 **Parameters:**
-- `capabilities: ServerCapabilities` — 
+- `capabilities: ServerCapabilities` — The server capabilities to check.
 
 **Returns:** `capabilities is ServerCapabilities<any> & { referencesProvider: NonNullable<boolean | ReferenceOptions | undefined> }`
 
 ### supportsDocumentSymbol
 
-Helper to check if document symbols are supported
+Returns `true` when `documentSymbolProvider` is declared in the server capabilities.
 
 ```ts
 supportsDocumentSymbol(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { documentSymbolProvider: NonNullable<boolean | DocumentSymbolOptions | undefined> }
 ```
 
 **Parameters:**
-- `capabilities: ServerCapabilities` — 
+- `capabilities: ServerCapabilities` — The server capabilities to check.
 
 **Returns:** `capabilities is ServerCapabilities<any> & { documentSymbolProvider: NonNullable<boolean | DocumentSymbolOptions | undefined> }`
 
 ### supportsWorkspaceFolders
 
-Helper to check if workspace folders are supported
+Returns `true` when the server supports workspace folders.
 
 ```ts
 supportsWorkspaceFolders(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { workspace: { workspaceFolders: { supported: true } } }
 ```
 
 **Parameters:**
-- `capabilities: ServerCapabilities` — 
+- `capabilities: ServerCapabilities` — The server capabilities to check.
 
 **Returns:** `capabilities is ServerCapabilities<any> & { workspace: { workspaceFolders: { supported: true } } }`
 
 ### supportsNotebookDocumentSync
+
+Helper to check if notebook document sync is supported by the server.
 
 ```ts
 supportsNotebookDocumentSync(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { notebookDocumentSync: NonNullable<NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | undefined> }
 ```
 
 **Parameters:**
-- `capabilities: ServerCapabilities` — 
+- `capabilities: ServerCapabilities` — The server capabilities to check.
 
 **Returns:** `capabilities is ServerCapabilities<any> & { notebookDocumentSync: NonNullable<NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | undefined> }`
 
 ### supportsFileWatching
 
-Helper to check if file watching is supported
+Returns `true` when the client supports dynamic file watching registration.
 
 ```ts
 supportsFileWatching(capabilities: ClientCapabilities): capabilities is ClientCapabilities & { workspace: { didChangeWatchedFiles: { dynamicRegistration: true } } }
 ```
 
 **Parameters:**
-- `capabilities: ClientCapabilities` — 
+- `capabilities: ClientCapabilities` — The client capabilities to check.
 
 **Returns:** `capabilities is ClientCapabilities & { workspace: { didChangeWatchedFiles: { dynamicRegistration: true } } }`
 
 ### supportsWorkDoneProgress
 
-Helper to check if work done progress is supported
+Returns `true` when the client supports work done progress notifications.
 
 ```ts
 supportsWorkDoneProgress(capabilities: ClientCapabilities): capabilities is ClientCapabilities & { window: { workDoneProgress: true } }
 ```
 
 **Parameters:**
-- `capabilities: ClientCapabilities` — 
+- `capabilities: ClientCapabilities` — The client capabilities to check.
 
 **Returns:** `capabilities is ClientCapabilities & { window: { workDoneProgress: true } }`
 
@@ -464,7 +473,7 @@ isRequestMessage(message: Message): message is RequestMessage
 ```
 
 **Parameters:**
-- `message: Message` — 
+- `message: Message` — The message to test.
 
 **Returns:** `message is RequestMessage`
 
@@ -478,7 +487,7 @@ isNotificationMessage(message: Message): message is NotificationMessage
 ```
 
 **Parameters:**
-- `message: Message` — 
+- `message: Message` — The message to test.
 
 **Returns:** `message is NotificationMessage`
 
@@ -491,7 +500,7 @@ isResponseMessage(message: Message): message is ResponseMessage
 ```
 
 **Parameters:**
-- `message: Message` — 
+- `message: Message` — The message to test.
 
 **Returns:** `message is ResponseMessage`
 
@@ -504,7 +513,7 @@ isSuccessResponse(message: ResponseMessage): message is SuccessResponseMessage
 ```
 
 **Parameters:**
-- `message: ResponseMessage` — 
+- `message: ResponseMessage` — The response message to test.
 
 **Returns:** `message is SuccessResponseMessage`
 
@@ -517,7 +526,7 @@ isErrorResponse(message: ResponseMessage): message is ErrorResponseMessage
 ```
 
 **Parameters:**
-- `message: ResponseMessage` — 
+- `message: ResponseMessage` — The response message to test.
 
 **Returns:** `message is ErrorResponseMessage`
 
@@ -565,51 +574,94 @@ createWebSocketClient(url: string): WebSocketLike
 
 ### composeMiddleware
 
+Combines multiple middleware functions into a single middleware that runs
+them left-to-right, each delegating to the next via `next()`.
+
 ```ts
 composeMiddleware(middlewares: Middleware[]): Middleware
 ```
 
 **Parameters:**
-- `middlewares: Middleware[]` — 
+- `middlewares: Middleware[]` — The middleware functions to compose, in execution order.
 
 **Returns:** `Middleware`
 
+```ts
+import { composeMiddleware } from '@lspeasy/core';
+
+const bundled = composeMiddleware(loggerMiddleware, tracingMiddleware);
+const server = new LSPServer({ middleware: [bundled] });
+```
+
 ### executeMiddlewarePipeline
+
+Runs the registered middleware chain for a single JSON-RPC message, then
+calls `finalHandler` if no middleware short-circuits.
 
 ```ts
 executeMiddlewarePipeline(registrations: MiddlewareRegistration[] | undefined, context: MiddlewareContext, finalHandler: () => Promise<void | MiddlewareResult>): Promise<void | MiddlewareResult>
 ```
 
 **Parameters:**
-- `registrations: MiddlewareRegistration[] | undefined` — 
-- `context: MiddlewareContext` — 
-- `finalHandler: () => Promise<void | MiddlewareResult>` — 
+- `registrations: MiddlewareRegistration[] | undefined` — The list of middleware or scoped-middleware to run.
+- `context: MiddlewareContext` — The shared context for the current message.
+- `finalHandler: () => Promise<void | MiddlewareResult>` — The handler to call after all middleware have run.
 
 **Returns:** `Promise<void | MiddlewareResult>`
 
 ### createScopedMiddleware
+
+Wraps a middleware with a filter so it only runs for matching LSP messages.
 
 ```ts
 createScopedMiddleware(filter: MethodFilter, middleware: Middleware): ScopedMiddleware
 ```
 
 **Parameters:**
-- `filter: MethodFilter` — 
-- `middleware: Middleware` — 
+- `filter: MethodFilter` — A MethodFilter describing which messages to intercept.
+- `middleware: Middleware` — The middleware function to run when the filter matches.
 
 **Returns:** `ScopedMiddleware`
 
+```ts
+import { createScopedMiddleware } from '@lspeasy/core';
+
+const hoverLogger = createScopedMiddleware(
+  { methods: ['textDocument/hover'], direction: 'clientToServer' },
+  async (ctx, next) => {
+    console.log('hover params:', ctx.message);
+    return next();
+  }
+);
+```
+
 ### createTypedMiddleware
+
+Creates a typed, method-scoped middleware with full TypeScript inference for
+the message params and result.
 
 ```ts
 createTypedMiddleware<M>(method: M, middleware: TypedMiddleware<M>): ScopedMiddleware
 ```
 
 **Parameters:**
-- `method: M` — 
-- `middleware: TypedMiddleware<M>` — 
+- `method: M` — The exact LSP method string to intercept (e.g. `'textDocument/hover'`).
+- `middleware: TypedMiddleware<M>` — The typed middleware function to run for that method.
 
 **Returns:** `ScopedMiddleware`
+
+```ts
+import { createTypedMiddleware } from '@lspeasy/core';
+
+const hoverMiddleware = createTypedMiddleware(
+  'textDocument/hover',
+  async (ctx, next) => {
+    // ctx.params is typed as HoverParams
+    console.log('hover at', ctx.params.position);
+    return next();
+  }
+);
+```
 
 ### createFullDidChangeParams
 
@@ -644,140 +696,140 @@ createIncrementalDidChangeParams(uri: string, changes: IncrementalChange[], sour
 
 ### getSchemaForMethod
 
-Get schema for a given method
+Looks up the Zod validation schema for a given LSP method.
 
 ```ts
 getSchemaForMethod(method: string): ZodType<any, unknown, $ZodTypeInternals<any, unknown>> | undefined
 ```
 
 **Parameters:**
-- `method: string` — 
+- `method: string` — The LSP method string to look up (e.g. `'textDocument/hover'`).
 
 **Returns:** `ZodType<any, unknown, $ZodTypeInternals<any, unknown>> | undefined`
 
 ### createWorkspaceFolder
 
-Helper to create a WorkspaceFolder
+Helper to create a WorkspaceFolder.
 
 ```ts
 createWorkspaceFolder(uri: string, name: string): WorkspaceFolder
 ```
 
 **Parameters:**
-- `uri: string` — 
-- `name: string` — 
+- `uri: string` — The URI of the workspace folder (e.g. `'file:///home/user/project'`).
+- `name: string` — Human-readable name displayed in the editor.
 
 **Returns:** `WorkspaceFolder`
 
 ### createWorkspaceFoldersChangeEvent
 
-Helper to create a WorkspaceFoldersChangeEvent
+Helper to create a WorkspaceFoldersChangeEvent.
 
 ```ts
 createWorkspaceFoldersChangeEvent(added: WorkspaceFolder[], removed: WorkspaceFolder[]): WorkspaceFoldersChangeEvent
 ```
 
 **Parameters:**
-- `added: WorkspaceFolder[]` — 
-- `removed: WorkspaceFolder[]` — 
+- `added: WorkspaceFolder[]` — Workspace folders that were added.
+- `removed: WorkspaceFolder[]` — Workspace folders that were removed.
 
 **Returns:** `WorkspaceFoldersChangeEvent`
 
 ### createFileEvent
 
-Helper to create a FileEvent
+Helper to create a FileEvent.
 
 ```ts
 createFileEvent(uri: string, type: FileChangeType): FileEvent
 ```
 
 **Parameters:**
-- `uri: string` — 
-- `type: FileChangeType` — 
+- `uri: string` — The URI of the changed file.
+- `type: FileChangeType` — The type of file change (created, changed, or deleted).
 
 **Returns:** `FileEvent`
 
 ### createFileSystemWatcher
 
-Helper to create a FileSystemWatcher
+Helper to create a FileSystemWatcher.
 
 ```ts
 createFileSystemWatcher(globPattern: string, kind?: number): FileSystemWatcher
 ```
 
 **Parameters:**
-- `globPattern: string` — 
-- `kind: number` (optional) — 
+- `globPattern: string` — Glob pattern to watch (e.g. "**/*.ts").
+- `kind: number` (optional) — The watch kinds to subscribe to; defaults to all (create, change, delete).
 
 **Returns:** `FileSystemWatcher`
 
 ### createDidChangeWatchedFilesParams
 
-Helper to create DidChangeWatchedFilesParams
+Helper to create DidChangeWatchedFilesParams.
 
 ```ts
 createDidChangeWatchedFilesParams(changes: FileEvent[]): DidChangeWatchedFilesParams
 ```
 
 **Parameters:**
-- `changes: FileEvent[]` — 
+- `changes: FileEvent[]` — Array of file events describing each changed file.
 
 **Returns:** `DidChangeWatchedFilesParams`
 
 ### createProgressBegin
 
-Helper to create a progress begin notification
+Creates a `WorkDoneProgressBegin` payload to start a work-done progress notification.
 
 ```ts
 createProgressBegin(title: string, cancellable?: boolean, message?: string, percentage?: number): WorkDoneProgressBegin
 ```
 
 **Parameters:**
-- `title: string` — 
-- `cancellable: boolean` (optional) — 
-- `message: string` (optional) — 
-- `percentage: number` (optional) — 
+- `title: string` — Short, human-readable title for the progress operation (required).
+- `cancellable: boolean` (optional) — Whether the client should offer a cancel button.
+- `message: string` (optional) — Optional initial status message shown below the title.
+- `percentage: number` (optional) — Optional initial progress percentage (0–100).
 
 **Returns:** `WorkDoneProgressBegin`
 
 ### createProgressReport
 
-Helper to create a progress report notification
+Creates a `WorkDoneProgressReport` payload to update an in-progress work-done notification.
 
 ```ts
 createProgressReport(message?: string, percentage?: number, cancellable?: boolean): WorkDoneProgressReport
 ```
 
 **Parameters:**
-- `message: string` (optional) — 
-- `percentage: number` (optional) — 
-- `cancellable: boolean` (optional) — 
+- `message: string` (optional) — Updated status text; omit to keep the previous message.
+- `percentage: number` (optional) — Updated progress percentage (0–100); omit for indeterminate.
+- `cancellable: boolean` (optional) — Whether the cancel button should be shown/hidden.
 
 **Returns:** `WorkDoneProgressReport`
 
 ### createProgressEnd
 
-Helper to create a progress end notification
+Creates a `WorkDoneProgressEnd` payload to close a work-done progress notification.
 
 ```ts
 createProgressEnd(message?: string): WorkDoneProgressEnd
 ```
 
 **Parameters:**
-- `message: string` (optional) — 
+- `message: string` (optional) — Optional final status message displayed when progress ends.
 
 **Returns:** `WorkDoneProgressEnd`
 
 ### createProgressCreateParams
 
-Helper to create progress create params
+Creates `WorkDoneProgressCreateParams` for a `window/workDoneProgress/create` request.
 
 ```ts
 createProgressCreateParams(token: ProgressToken): WorkDoneProgressCreateParams
 ```
 
 **Parameters:**
-- `token: ProgressToken` — 
+- `token: ProgressToken` — The progress token to associate with this progress notification.
 
 **Returns:** `WorkDoneProgressCreateParams`
 
@@ -793,40 +845,40 @@ createProgressToken(): ProgressToken
 
 ### createPartialResultParams
 
-Helper to create partial result params
+Creates `PartialResultParams` with the given partial result token.
 
 ```ts
 createPartialResultParams(token: ProgressToken): PartialResultParams
 ```
 
 **Parameters:**
-- `token: ProgressToken` — 
+- `token: ProgressToken` — The progress token the client will use to correlate `$/progress` notifications.
 
 **Returns:** `PartialResultParams`
 
 ### hasPartialResultToken
 
-Type guard to check if params support partial results
+Type guard to check if params support partial results.
 
 ```ts
 hasPartialResultToken(params: unknown): params is PartialResultParams
 ```
 
 **Parameters:**
-- `params: unknown` — 
+- `params: unknown` — The unknown value to test.
 
 **Returns:** `params is PartialResultParams`
 
 ### getPartialResultToken
 
-Helper to extract partial result token from params
+Extracts the partial result token from params.
 
 ```ts
 getPartialResultToken(params: PartialResultParams): ProgressToken | undefined
 ```
 
 **Parameters:**
-- `params: PartialResultParams` — 
+- `params: PartialResultParams` — The request params that may carry a `partialResultToken`.
 
 **Returns:** `ProgressToken | undefined`
 
@@ -839,7 +891,7 @@ isRegisterCapabilityParams(value: unknown): value is RegisterCapabilityParams
 ```
 
 **Parameters:**
-- `value: unknown` — 
+- `value: unknown` — The unknown value to test.
 
 **Returns:** `value is RegisterCapabilityParams`
 
@@ -852,7 +904,7 @@ isUnregisterCapabilityParams(value: unknown): value is UnregisterCapabilityParam
 ```
 
 **Parameters:**
-- `value: unknown` — 
+- `value: unknown` — The unknown value to test.
 
 **Returns:** `value is UnregisterCapabilityParams`
 
@@ -865,7 +917,7 @@ isMessage(value: unknown): value is Message
 ```
 
 **Parameters:**
-- `value: unknown` — 
+- `value: unknown` — The unknown value to test.
 
 **Returns:** `value is Message`
 
@@ -878,18 +930,21 @@ isWorkerTransportEnvelope(value: unknown): value is WorkerTransportEnvelope
 ```
 
 **Parameters:**
-- `value: unknown` — 
+- `value: unknown` — The unknown value to test.
 
 **Returns:** `value is WorkerTransportEnvelope`
 
 ### buildMethodSets
+
+Builds the full set of LSP methods and the subset that are always allowed
+(not gated by a capability) for a given capability key.
 
 ```ts
 buildMethodSets(capabilityKey: CapabilityKey): { all: Set<string>; alwaysAllowed: Set<string> }
 ```
 
 **Parameters:**
-- `capabilityKey: CapabilityKey` — 
+- `capabilityKey: CapabilityKey` — Whether to index by `'ServerCapability'` or `'ClientCapability'`.
 
 **Returns:** `{ all: Set<string>; alwaysAllowed: Set<string> }`
 
@@ -897,14 +952,14 @@ buildMethodSets(capabilityKey: CapabilityKey): { all: Set<string>; alwaysAllowed
 
 Shared validation logic for checking if a method is allowed based on capabilities.
 
-Returns true if allowed, false if disallowed (non-strict), or throws (strict).
+Returns `true` if allowed, `false` if disallowed in non-strict mode, or throws in strict mode.
 
 ```ts
 checkMethod(opts: CheckMethodOptions): boolean
 ```
 
 **Parameters:**
-- `opts: CheckMethodOptions` — 
+- `opts: CheckMethodOptions` — Validation options including the method, capability lookup helpers, and logger.
 
 **Returns:** `boolean`
 
@@ -952,12 +1007,12 @@ constructor(options: WebSocketTransportOptions): WebSocketTransport
 
 **Methods:**
 - `send(message: Message): Promise<void>` — Send a message through the WebSocket
-- `onMessage(handler: (message: Message) => void): Disposable` — Register a handler for incoming messages
-- `onError(handler: (error: Error) => void): Disposable` — Register a handler for transport errors
-- `onClose(handler: () => void): Disposable` — Register a handler for transport closure
+- `onMessage(handler: (message: Message) => void): Disposable` — Register a handler for incoming messages.
+- `onError(handler: (error: Error) => void): Disposable` — Register a handler for transport errors.
+- `onClose(handler: () => void): Disposable` — Register a handler for transport closure.
 - `close(): Promise<void>` — Close the WebSocket connection
 - `isConnected(): boolean` — Check if the transport is currently connected
-- `getReconnectAttempts(): number` — Get the current reconnection attempt count
+- `getReconnectAttempts(): number` — Get the current reconnection attempt count.
 - `isReconnectEnabled(): boolean` — Check if reconnection is enabled
 
 ### TransportEventEmitter
@@ -987,7 +1042,7 @@ constructor(): DisposableStore
 ```
 
 **Methods:**
-- `add<T>(disposable: T): T` — Add a disposable to the store
+- `add<T>(disposable: T): T` — Add a disposable to the store.
 - `dispose(): void` — Dispose all resources in the store
 - `isDisposed(): boolean` — Check if store is disposed
 - `clear(): void` — Clear all disposables without disposing them
@@ -1074,13 +1129,13 @@ not capture any frames.
 - `cause: unknown` — 
 
 **Methods:**
-- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error
-- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error
-- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error
-- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error
-- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error
-- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error
-- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error
+- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error.
+- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error.
+- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error.
+- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error.
+- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error.
+- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error.
+- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error.
 - `captureStackTrace(targetObject: object, constructorOpt?: Function): void` — Creates a `.stack` property on `targetObject`, which when accessed returns
 a string representing the location in the code at which
 `Error.captureStackTrace()` was called.
@@ -1175,11 +1230,15 @@ type ResultForRequest = M extends LSPRequestMethod ? FlatRequestMap[M]["Result"]
 
 ### ServerCapabilityForRequest
 
+Resolves the `ServerCapabilities` path key required to enable a given LSP request method.
+
 ```ts
 type ServerCapabilityForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { ServerCapability: infer C } ? C : never : never
 ```
 
 ### ClientCapabilityForRequest
+
+Resolves the `ClientCapabilities` path key required for a client to send a given LSP request.
 
 ```ts
 type ClientCapabilityForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { ClientCapability: infer C } ? C : never : never
@@ -1195,11 +1254,15 @@ type ParamsForNotification = M extends LSPNotificationMethod ? FlatNotificationM
 
 ### ServerCapabilityForNotification
 
+Resolves the `ServerCapabilities` path key required to enable a given LSP notification method.
+
 ```ts
 type ServerCapabilityForNotification = M extends LSPNotificationMethod ? FlatNotificationMap[M] extends { ServerCapability: infer C } ? C : never : never
 ```
 
 ### ClientCapabilityForNotification
+
+Resolves the `ClientCapabilities` path key required for a client to handle a given LSP notification.
 
 ```ts
 type ClientCapabilityForNotification = M extends LSPNotificationMethod ? FlatNotificationMap[M] extends { ClientCapability: infer C } ? C : never : never
@@ -1207,11 +1270,15 @@ type ClientCapabilityForNotification = M extends LSPNotificationMethod ? FlatNot
 
 ### OptionsForRequest
 
+Resolves the registration options type for a given LSP request method.
+
 ```ts
 type OptionsForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { Options: infer O } ? O : never : never
 ```
 
 ### RegistrationOptionsForRequest
+
+Resolves the dynamic registration options type for a given LSP request method.
 
 ```ts
 type RegistrationOptionsForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { RegistrationOptions: infer R } ? R : never : never
@@ -1219,17 +1286,26 @@ type RegistrationOptionsForRequest = M extends LSPRequestMethod ? FlatRequestMap
 
 ### DirectionForRequest
 
+Resolves the message direction (`'clientToServer'` | `'serverToClient'` | `'both'`)
+for a given LSP request method.
+
 ```ts
 type DirectionForRequest = M extends LSPRequestMethod ? FlatRequestMap[M] extends { Direction: infer D } ? D : never : never
 ```
 
 ### DirectionForNotification
 
+Resolves the message direction for a given LSP notification method.
+
 ```ts
 type DirectionForNotification = M extends LSPNotificationMethod ? FlatNotificationMap[M] extends { Direction: infer D } ? D : never : never
 ```
 
 ### RequestDefinition
+
+The shape of a single LSP request definition entry (method, params, result,
+direction, capability keys). Represents the structure of entries in the
+`LSPRequest` namespace objects.
 
 ```ts
 type RequestDefinition = typeof IncomingCalls
@@ -1245,6 +1321,9 @@ type ClientNotifications = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPR
 ```
 
 ### ClientRequests
+
+Typed namespace of client-to-server LSP request methods, filtered by the
+server's declared capabilities.
 
 ```ts
 type ClientRequests = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in ConditionalKeys<LSPRequest[Namespace], { Direction: "clientToServer" | "both" }> as CamelCase<Method>]: TransformToClientSendMethod<LSPRequest[Namespace][Method], ServerCaps> }> }>>
@@ -1264,16 +1343,22 @@ type ServerHandlers = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPReques
 Client handler registration methods (for requests from server)
 
 ```ts
-type ClientRequestHandlers = RemoveNever<{ [Namespace in keyof LSPRequest as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPRequest[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Request`]: TransformToClientHandler<LSPRequest[Namespace][Method], _ClientCaps> } }>
+type ClientRequestHandlers = RemoveNever<{ [Namespace in keyof LSPRequest as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPRequest[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Request`]: TransformToClientHandler<LSPRequest[Namespace][Method & keyof LSPRequest[Namespace]], _ClientCaps> } }>
 ```
 
 ### ClientNotificationHandlers
 
+Typed namespace of server-to-client notification handler registration methods,
+filtered by the client's declared capabilities.
+
 ```ts
-type ClientNotificationHandlers = RemoveNever<{ [Namespace in keyof LSPNotification as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPNotification[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Notification`]: TransformToClientHandler<LSPNotification[Namespace][Method], _ClientCaps> } }>
+type ClientNotificationHandlers = RemoveNever<{ [Namespace in keyof LSPNotification as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPNotification[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Notification`]: TransformToClientHandler<LSPNotification[Namespace][Method & keyof LSPNotification[Namespace]], _ClientCaps> } }>
 ```
 
 ### ServerSendMethods
+
+Typed namespace of server-to-client request send methods, filtered by the
+client's declared capabilities.
 
 ```ts
 type ServerSendMethods = Simplify<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNever<{ [Method in keyof LSPRequest[Namespace] as CamelCase<Method & string>]: TransformToServerSendMethod<LSPRequest[Namespace][Method], _ClientCaps> }> }>
@@ -1281,11 +1366,17 @@ type ServerSendMethods = Simplify<{ [Namespace in KeyAsString<LSPRequest> as Cam
 
 ### ToRequestSignature
 
+Converts an LSP request type definition into a callable method signature
+`(params: P) => Promise<R>`.
+
 ```ts
 type ToRequestSignature = T extends { Method: string; Params: infer P; Result?: infer R } ? (params: P) => Promise<R> : never
 ```
 
 ### ToNotificationSignature
+
+Converts an LSP notification type definition into a fire-and-forget method
+signature `(params: P) => void`.
 
 ```ts
 type ToNotificationSignature = T extends { Method: string; Params: infer P } ? (params: P) => void : never
@@ -1293,17 +1384,26 @@ type ToNotificationSignature = T extends { Method: string; Params: infer P } ? (
 
 ### ToRequestHandlerSignature
 
+Converts an LSP request type definition into a handler registration signature
+`(handler: (params: P) => Promise<R> | R) => void`.
+
 ```ts
 type ToRequestHandlerSignature = T extends { Method: string; Params: infer P; Result?: infer R } ? (handler: (params: P) => Promise<R> | R) => void : never
 ```
 
 ### ToNotificationHandlerSignature
 
+Converts an LSP notification type definition into a handler registration
+signature `(handler: (params: P) => void) => void`.
+
 ```ts
 type ToNotificationHandlerSignature = T extends { Method: string; Params: infer P } ? (handler: (params: P) => void) => void : never
 ```
 
 ### AvailableMethods
+
+The complete set of available LSP methods for a client/server capability pair,
+split by direction (client send, server send, handlers).
 
 ### BaseMessage
 
@@ -1348,14 +1448,6 @@ JSON-RPC 2.0 error object embedded in an error response.
 ### Transport
 
 Pluggable communication layer for JSON-RPC message exchange.
-
-### DedicatedWorkerTransportOptions
-
-### SharedWorkerTransportOptions
-
-### WebSocketTransportOptions
-
-Options for configuring a `WebSocketTransport`.
 
 ### Middleware
 
@@ -1489,6 +1581,9 @@ LSP Notification type definitions organized by namespace
 
 ### Client
 
+Capability-aware interface for an LSP client, combining typed request send
+methods, notification send methods, and server-to-client handler registrations.
+
 ```ts
 type Client = SimplifyDeep<{ [K in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["requests"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["requests"][K]]: ToRequestSignature<AvailableMethods<ClientCaps, ServerCaps>["client"]["requests"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["notifications"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["notifications"][K]]: ToNotificationSignature<AvailableMethods<ClientCaps, ServerCaps>["client"]["notifications"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["requestHandlers"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["requestHandlers"][K] as `on${PascalCase<string & Q, { preserveConsecutiveUppercase: true }>}`]: ToRequestHandlerSignature<AvailableMethods<ClientCaps, ServerCaps>["client"]["requestHandlers"][K][Q]> } } & { [K in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["notificationHandlers"]]: { [Q in keyof AvailableMethods<ClientCaps, ServerCaps>["client"]["notificationHandlers"][K] as `on${PascalCase<string & Q, { preserveConsecutiveUppercase: true }>}`]: ToNotificationHandlerSignature<AvailableMethods<ClientCaps, ServerCaps>["client"]["notificationHandlers"][K][Q]> } }>
 ```
@@ -1547,6 +1642,8 @@ A parameter literal used to pass a partial result token.
 
 ### DynamicRegistration
 
+A single LSP dynamic capability registration entry.
+
 ### DynamicRegistrationBehavior
 
 Controls compatibility behavior for dynamic registrations not declared by client capabilities.
@@ -1599,8 +1696,6 @@ Lightweight event shape shared by worker and message port adapters.
 
 Envelope used by shared worker transport to preserve client isolation.
 
-### CheckMethodOptions
-
 ### LogLevel
 
 Numeric severity levels for filtering log output.
@@ -1613,11 +1708,17 @@ Numeric severity levels for filtering log output.
 
 ### RequestMethodMap
 
+Runtime map from every LSP request method string to its metadata
+(direction, server capability, client capability).
+
 ```ts
 const RequestMethodMap: Map<LSPRequestMethod, { Direction: DirectionForRequest<LSPRequestMethod>; ServerCapability?: ServerCapabilityForRequest<LSPRequestMethod>; ClientCapability?: ClientCapabilityForRequest<LSPRequestMethod> }>
 ```
 
 ### NotificationMethodMap
+
+Runtime map from every LSP notification method string to its metadata
+(direction, server capability, client capability).
 
 ```ts
 const NotificationMethodMap: Map<LSPNotificationMethod, { Direction: DirectionForNotification<LSPNotificationMethod>; ServerCapability?: ServerCapabilityForNotification<LSPNotificationMethod>; ClientCapability?: ClientCapabilityForNotification<LSPNotificationMethod> }>
@@ -1625,11 +1726,17 @@ const NotificationMethodMap: Map<LSPNotificationMethod, { Direction: DirectionFo
 
 ### ClientRequestMethodToCapabilityMap
 
+Runtime map from every LSP request method string to the corresponding
+server capability key (or `undefined` for always-allowed methods).
+
 ```ts
 const ClientRequestMethodToCapabilityMap: Map<string, string | undefined>
 ```
 
 ### ClientNotificationMethodToCapabilityMap
+
+Runtime map from every LSP notification method string to the corresponding
+server capability key (or `undefined` for always-allowed notifications).
 
 ```ts
 const ClientNotificationMethodToCapabilityMap: Map<string, string | undefined>
@@ -1886,11 +1993,15 @@ const WatchKinds: { Create: number; Change: number; Delete: number; All: number 
 
 ### dynamicRegistrationSchema
 
+Zod schema for validating a single dynamic-registration entry.
+
 ```ts
 const dynamicRegistrationSchema: ZodObject<{ id: ZodString; method: ZodString; registerOptions: ZodOptional<ZodUnknown> }, $strip>
 ```
 
 ### registerCapabilityParamsSchema
+
+Zod schema for validating `client/registerCapability` params.
 
 ```ts
 const registerCapabilityParamsSchema: ZodObject<{ registrations: ZodArray<ZodObject<{ id: ZodString; method: ZodString; registerOptions: ZodOptional<ZodUnknown> }, $strip>> }, $strip>
@@ -1898,11 +2009,15 @@ const registerCapabilityParamsSchema: ZodObject<{ registrations: ZodArray<ZodObj
 
 ### unregisterCapabilitySchema
 
+Zod schema for validating a single capability unregistration entry.
+
 ```ts
 const unregisterCapabilitySchema: ZodObject<{ id: ZodString; method: ZodString }, $strip>
 ```
 
 ### unregisterCapabilityParamsSchema
+
+Zod schema for validating `client/unregisterCapability` params.
 
 ```ts
 const unregisterCapabilityParamsSchema: ZodObject<{ unregisterations: ZodArray<ZodObject<{ id: ZodString; method: ZodString }, $strip>> }, $strip>
@@ -1910,11 +2025,17 @@ const unregisterCapabilityParamsSchema: ZodObject<{ unregisterations: ZodArray<Z
 
 ### SERVER_METHODS
 
+Pre-built method sets indexed by server capability.
+Used by `CapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
+
 ```ts
 const SERVER_METHODS: { all: Set<string>; alwaysAllowed: Set<string> }
 ```
 
 ### CLIENT_METHODS
+
+Pre-built method sets indexed by client capability.
+Used by `ClientCapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
 
 ```ts
 const CLIENT_METHODS: { all: Set<string>; alwaysAllowed: Set<string> }
@@ -1924,34 +2045,36 @@ const CLIENT_METHODS: { all: Set<string>; alwaysAllowed: Set<string> }
 
 ## @lspeasy/server
 
+LSP server package for hosting Language Server Protocol (LSP) servers.
+
 ### MessageDispatcher
 
-Message dispatcher manages request/notification routing
+Routes incoming JSON-RPC requests and notifications to their registered handlers.
 
 ```ts
 constructor(logger: Logger): MessageDispatcher
 ```
 
 **Methods:**
-- `registerRequest<Params, Result>(method: string, handler: RequestHandler<Params, Result>): void` — Register a request handler
-- `registerNotification<Params>(method: string, handler: NotificationHandler<Params>): void` — Register a notification handler
-- `unregisterRequest(method: string): void` — Unregister a request handler
-- `unregisterNotification(method: string): void` — Unregister a notification handler
+- `registerRequest<Params, Result>(method: string, handler: RequestHandler<Params, Result>): void` — Register a typed request handler for the given LSP method.
+- `registerNotification<Params>(method: string, handler: NotificationHandler<Params>): void` — Register a typed notification handler for the given LSP method.
+- `unregisterRequest(method: string): void` — Unregister a request handler.
+- `unregisterNotification(method: string): void` — Unregister a notification handler.
 - `setClientCapabilities(capabilities: ClientCapabilities): void` — Set client capabilities (from initialize request)
-- `dispatch(message: Message, transport: Transport, cancellationTokens: Map<string | number, AbortController>): Promise<void>` — Dispatch an incoming message
-- `cancelRequest(id: string | number): void` — Cancel a pending request
+- `dispatch(message: Message, transport: Transport, cancellationTokens: Map<string | number, AbortController>): Promise<void>` — Dispatch an incoming message to the registered handler.
+- `cancelRequest(id: string | number): void` — Cancel a pending request.
 - `clear(): void` — Clear all handlers
 
 ### PartialResultSender
 
-Helper for emitting typed `$/progress` partial result batches from server handlers.
+Emits typed `$/progress` partial-result batches from server-side request handlers.
 
 ```ts
 constructor(server: BaseLSPServer): PartialResultSender
 ```
 
 **Methods:**
-- `send<T>(token: ProgressToken, value: T): Promise<void>` — 
+- `send<T>(token: ProgressToken, value: T): Promise<void>` — Send a batch of partial results to the client.
 
 ### ResponseError
 
@@ -1979,13 +2102,13 @@ not capture any frames.
 - `cause: unknown` — 
 
 **Methods:**
-- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error
-- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error
-- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error
-- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error
-- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error
-- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error
-- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error
+- `parseError(message?: string, data?: unknown): ResponseError` — Create a parse error.
+- `invalidRequest(message?: string, data?: unknown): ResponseError` — Create an invalid request error.
+- `methodNotFound(method: string, data?: unknown): ResponseError` — Create a method not found error.
+- `invalidParams(message?: string, data?: unknown): ResponseError` — Create an invalid params error.
+- `internalError(message?: string, data?: unknown): ResponseError` — Create an internal error.
+- `serverNotInitialized(data?: unknown): ResponseError` — Create a server not initialized error.
+- `requestCancelled(data?: unknown): ResponseError` — Create a request cancelled error.
 - `captureStackTrace(targetObject: object, constructorOpt?: Function): void` — Creates a `.stack` property on `targetObject`, which when accessed returns
 a string representing the location in the code at which
 `Error.captureStackTrace()` was called.
@@ -2049,15 +2172,12 @@ constructor(level?: LogLevel): ConsoleLogger
 
 ### LSPServer
 
-@lspeasy/server - Build LSP servers with simple, typed API
+Full-featured LSP server with automatic lifecycle management, typed handlers,
+capability-aware namespaces, and pluggable middleware.
 
 ```ts
 type LSPServer = BaseLSPServer<ServerCaps> & Server<ClientCapabilities, ServerCaps>
 ```
-
-### ServerOptions
-
-Configuration for an `LSPServer` instance.
 
 ### RequestHandler
 
@@ -2077,6 +2197,8 @@ type NotificationHandler = (params: Params, context: NotificationContext) => voi
 ```
 
 ### NotebookDocumentHandlerNamespace
+
+Namespace for registering notebook-document lifecycle notification handlers.
 
 ### RequestContext
 
@@ -2170,7 +2292,7 @@ Lifecycle state of an `LSPServer` instance.
 
 ### LSPServer
 
-@lspeasy/server - Build LSP servers with simple, typed API
+Constructs an LSPServer instance.
 
 ```ts
 let LSPServer: (options?: ServerOptions<ServerCaps>) => LSPServer<ServerCaps>

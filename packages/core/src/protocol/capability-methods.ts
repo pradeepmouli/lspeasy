@@ -202,7 +202,7 @@ export type ClientRequestHandlers<_ClientCaps extends Partial<ClientCapabilities
       LSPRequest[Namespace],
       { Direction: 'serverToClient' | 'both' }
     > as `on${Method & string}Request`]: TransformToClientHandler<
-      LSPRequest[Namespace][Method],
+      LSPRequest[Namespace][Method & keyof LSPRequest[Namespace]],
       _ClientCaps
     >;
   };
@@ -221,7 +221,7 @@ export type ClientNotificationHandlers<_ClientCaps extends Partial<ClientCapabil
         LSPNotification[Namespace],
         { Direction: 'serverToClient' | 'both' }
       > as `on${Method & string}Notification`]: TransformToClientHandler<
-        LSPNotification[Namespace][Method],
+        LSPNotification[Namespace][Method & keyof LSPNotification[Namespace]],
         _ClientCaps
       >;
     };

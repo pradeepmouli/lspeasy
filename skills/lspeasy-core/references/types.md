@@ -113,14 +113,14 @@ Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namesp
 ### `ClientRequestHandlers`
 Client handler registration methods (for requests from server)
 ```ts
-RemoveNever<{ [Namespace in keyof LSPRequest as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPRequest[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Request`]: TransformToClientHandler<LSPRequest[Namespace][Method], _ClientCaps> } }>
+RemoveNever<{ [Namespace in keyof LSPRequest as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPRequest[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Request`]: TransformToClientHandler<LSPRequest[Namespace][Method & keyof LSPRequest[Namespace]], _ClientCaps> } }>
 ```
 
 ### `ClientNotificationHandlers`
 Typed namespace of server-to-client notification handler registration methods,
 filtered by the client's declared capabilities.
 ```ts
-RemoveNever<{ [Namespace in keyof LSPNotification as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPNotification[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Notification`]: TransformToClientHandler<LSPNotification[Namespace][Method], _ClientCaps> } }>
+RemoveNever<{ [Namespace in keyof LSPNotification as CamelCase<Namespace>]: { [Method in keyof ConditionalPick<LSPNotification[Namespace], { Direction: "serverToClient" | "both" }> as `on${Method & string}Notification`]: TransformToClientHandler<LSPNotification[Namespace][Method & keyof LSPNotification[Namespace]], _ClientCaps> } }>
 ```
 
 ### `ServerSendMethods`
@@ -305,9 +305,5 @@ JSON-RPC 2.0 error response to a prior request.
 ### `ResponseMessage`
 JSON-RPC 2.0 Response message — either a success result or an error.
 ```ts
-SuccessResponseMessage | ErrorResponseMessage
-```
-
-### `Message`
 
 <!-- truncated -->

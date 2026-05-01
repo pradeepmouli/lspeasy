@@ -1,85 +1,102 @@
 ---
 name: lspeasy-core
-description: Documentation site for lspeasy
+description: "Documentation site for lspeasy Use when: You are building a browser-based LSP client, a WebSocket-backed language...."
 ---
 
 # @lspeasy/core
 
 Documentation site for lspeasy
 
+`@lspeasy/core` is the shared foundation for the lspeasy SDK. It contains
+everything needed to build custom LSP integrations, and re-exports the
+most-used pieces from `@lspeasy/client` and `@lspeasy/server`.
+
+### Key areas
+
+**JSON-RPC 2.0** — Message types (RequestMessage, NotificationMessage,
+ResponseMessage), framing (parseMessage, serializeMessage),
+and Zod schemas for validation.
+
+**Transports** — The Transport interface plus browser-compatible
+implementations: WebSocketTransport, DedicatedWorkerTransport,
+SharedWorkerTransport.
+Node.js transports (`StdioTransport`, `TcpTransport`, `IpcTransport`) are
+in `@lspeasy/core/node` to avoid importing Node.js builtins in browsers.
+
+### Transport Selection Guide
+
+| Need | Transport | Critical Gotcha |
+|------|-----------|-----------------|
+| Spawn server as child process | `StdioTransport` | `ConsoleLogger` corrupts stdout — use `NullLogger` |
+| Browser or remote server | `WebSocketTransport` | Call `send()` only after `isConnected()` is `true` |
+| Persistent local daemon | `TcpTransport` | Create a new server instance per client reconnect |
+| In-process browser isolation | `DedicatedWorkerTransport` | Monitor `worker.onerror`; crashes are silent |
+| Shared worker, multiple tabs | `SharedWorkerTransport` | One worker handles all port connections |
+
+**Middleware** — The Middleware pipeline runs on every
+client-to-server and server-to-client message. Use createScopedMiddleware
+to limit a middleware to specific methods, and createTypedMiddleware
+for full param/result type inference.
+
+**LSP protocol** — LSPRequest and LSPNotification namespaces
+expose every standard LSP method with its params and result types.
+LSPRequestMethod / LSPNotificationMethod are the union types
+for string-literal method names.
+
+**Utilities** — CancellationTokenSource for request cancellation,
+DisposableStore for lifecycle management, ResponseError for
+structured JSON-RPC errors, DocumentVersionTracker for document sync.
+
 ## When to Use
 
-- API surface: 202 functions, 52 classes, 570 types, 7 enums, 500 constants
+**Use this skill when:**
+- You are building a browser-based LSP client, a WebSocket-backed language server, or any LSP integration that must run over HTTP/HTTPS infrastructure. → use `WebSocketTransport`
+- You register multiple handlers (hover, completion, definition) that share the same lifetime → use `DisposableStore` — collect them all into one store and dispose the store on shutdown or feature toggle.
+- A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails). → use `ResponseError`
+- You are building an LSP client that sends `textDocument/didChange` notifications and need to track per-document version counters. → use `DocumentVersionTracker`
+
+**Do NOT use when:**
+- You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. (`WebSocketTransport`)
+- You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. (`ResponseError`)
+
+API surface: 55 functions, 11 classes, 77 types, 1 enums, 41 constants
+
+## NEVER
+
+- NEVER set `enableReconnect: true` in server mode (`socket` provided) — the option is silently ignored (reconnect has no URL to reconnect to), but the intent is misleading and suggests lifecycle management will be handled when it is not.
+- NEVER send messages before `isConnected()` returns `true`. In client mode the socket is in CONNECTING state immediately after construction; `send()` will throw until the open event fires.
+- NEVER use `ConsoleLogger` in a stdio LSP server (`StdioTransport`) — the LSP base protocol uses stdout as the message channel. Any `console.log` / `console.info` / `console.debug` output will corrupt the stdio stream. Use `NullLogger` or a file-based logger instead, and send diagnostic messages via `window/logMessage` notifications.
+- NEVER throw `ResponseError` with a code outside the defined ranges without documenting it. Undocumented codes are opaque to clients and tools.
+- NEVER send a `textDocument/didChange` with the same version number as a previous change for the same document. The server may reject the change as a no-op or apply it out of order, causing text state desync.
+
+## Configuration
+
+4 configuration interfaces — see references/config.md for details.
 
 ## Quick Reference
 
-**main.d:** `is`, `is`, `is`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `is`, `create`, `is`, `create`, `is`, `replace`, `insert`, `del`, `is`, `create`, `is`, `is`, `replace`, `insert`, `del`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `is`, `is`, `create`, `is`, `is`, `create`, `create`, `fromPlainText`, `is`, `is`, `create`, `create`, `create`, `create`, `create`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `create`, `is`, `is`, `create`, `is`, `create`, `is`, `createSnippet`, `create`, `create`, `create`, `create`, `create`, `is`, `applyEdits`, `is`, `is`, `WorkspaceChange`, `DocumentUri`, `URI`, `integer`, `uinteger`, `decimal`, `LSPAny`, `LSPObject`, `LSPArray`, `Position`, `Range`, `Location`, `LocationLink`, `Color`, `ColorInformation`, `ColorPresentation`, `FoldingRangeKind`, `FoldingRange`, `DiagnosticRelatedInformation`, `DiagnosticSeverity`, `DiagnosticTag`, `CodeDescription`, `Diagnostic`, `Command`, `TextEdit`, `ChangeAnnotation`, `ChangeAnnotationIdentifier`, `AnnotatedTextEdit`, `TextDocumentEdit`, `CreateFileOptions`, `CreateFile`, `RenameFileOptions`, `RenameFile`, `DeleteFileOptions`, `DeleteFile`, `TextEditChange`, `TextDocumentIdentifier`, `VersionedTextDocumentIdentifier`, `OptionalVersionedTextDocumentIdentifier`, `TextDocumentItem`, `MarkupKind`, `MarkupContent`, `CompletionItemKind`, `InsertTextFormat`, `CompletionItemTag`, `InsertReplaceEdit`, `InsertTextMode`, `CompletionItemLabelDetails`, `CompletionItem`, `CompletionList`, `MarkedString`, `Hover`, `ParameterInformation`, `SignatureInformation`, `SignatureHelp`, `Definition`, `DefinitionLink`, `Declaration`, `DeclarationLink`, `ReferenceContext`, `DocumentHighlightKind`, `DocumentHighlight`, `SymbolKind`, `SymbolTag`, `BaseSymbolInformation`, `SymbolInformation`, `WorkspaceSymbol`, `DocumentSymbol`, `CodeActionKind`, `CodeActionTriggerKind`, `CodeActionContext`, `CodeAction`, `CodeLens`, `FormattingOptions`, `DocumentLink`, `SelectionRange`, `CallHierarchyItem`, `CallHierarchyIncomingCall`, `CallHierarchyOutgoingCall`, `SemanticTokensLegend`, `SemanticTokens`, `SemanticTokensEdit`, `SemanticTokensDelta`, `TypeHierarchyItem`, `InlineValueText`, `InlineValueVariableLookup`, `InlineValueEvaluatableExpression`, `InlineValue`, `InlineValueContext`, `InlayHintKind`, `InlayHintLabelPart`, `InlayHint`, `StringValue`, `InlineCompletionItem`, `InlineCompletionList`, `InlineCompletionTriggerKind`, `SelectedCompletionInfo`, `InlineCompletionContext`, `TextDocument`, `WorkspaceFolder`, `WorkspaceEdit`, `SemanticTokenTypes`, `SemanticTokenModifiers`, `MIN_VALUE`, `MAX_VALUE`, `MIN_VALUE`, `MAX_VALUE`, `Comment`, `Imports`, `Region`, `Error`, `Warning`, `Information`, `Hint`, `Unnecessary`, `Deprecated`, `PlainText`, `Markdown`, `Text`, `Method`, `Function`, `Constructor`, `Field`, `Variable`, `Class`, `Interface`, `Module`, `Property`, `Unit`, `Value`, `Enum`, `Keyword`, `Snippet`, `Color`, `File`, `Reference`, `Folder`, `EnumMember`, `Constant`, `Struct`, `Event`, `Operator`, `TypeParameter`, `PlainText`, `Snippet`, `Deprecated`, `asIs`, `adjustIndentation`, `Text`, `Read`, `Write`, `File`, `Module`, `Namespace`, `Package`, `Class`, `Method`, `Property`, `Field`, `Constructor`, `Enum`, `Interface`, `Function`, `Variable`, `Constant`, `String`, `Number`, `Boolean`, `Array`, `Object`, `Key`, `Null`, `EnumMember`, `Struct`, `Event`, `Operator`, `TypeParameter`, `Deprecated`, `Empty`, `QuickFix`, `Refactor`, `RefactorExtract`, `RefactorInline`, `RefactorRewrite`, `Source`, `SourceOrganizeImports`, `SourceFixAll`, `Invoked`, `Automatic`, `Type`, `Parameter`, `Invoked`, `Automatic`, `EOL`
-**protocol.d:** `is`, `is`, `is`, `is`, `hasId`, `is`, `isIncremental`, `isFull`, `is`, `is`, `hasWorkDoneProgress`, `TextDocumentFilter`, `NotebookDocumentFilter`, `NotebookCellTextDocumentFilter`, `DocumentFilter`, `DocumentSelector`, `Registration`, `RegistrationParams`, `HandlerSignature`, `Unregistration`, `UnregistrationParams`, `HandlerSignature`, `TextDocumentPositionParams`, `ResourceOperationKind`, `FailureHandlingKind`, `WorkspaceClientCapabilities`, `TextDocumentClientCapabilities`, `WindowClientCapabilities`, `RegularExpressionsClientCapabilities`, `MarkdownClientCapabilities`, `PositionEncodingKind`, `GeneralClientCapabilities`, `NotebookDocumentClientCapabilities`, `ClientCapabilities`, `StaticRegistrationOptions`, `TextDocumentRegistrationOptions`, `SaveOptions`, `ServerCapabilities`, `_InitializeParams`, `InitializeParams`, `InitializeResult`, `InitializeErrorCodes`, `InitializeError`, `InitializedParams`, `DidChangeConfigurationClientCapabilities`, `DidChangeConfigurationRegistrationOptions`, `DidChangeConfigurationParams`, `MessageType`, `ShowMessageParams`, `ShowMessageRequestClientCapabilities`, `MessageActionItem`, `ShowMessageRequestParams`, `LogMessageParams`, `TextDocumentSyncClientCapabilities`, `TextDocumentSyncKind`, `TextDocumentSyncOptions`, `DidOpenTextDocumentParams`, `TextDocumentContentChangeEvent`, `DidChangeTextDocumentParams`, `TextDocumentChangeRegistrationOptions`, `DidCloseTextDocumentParams`, `DidSaveTextDocumentParams`, `TextDocumentSaveRegistrationOptions`, `TextDocumentSaveReason`, `WillSaveTextDocumentParams`, `DidChangeWatchedFilesClientCapabilities`, `DidChangeWatchedFilesRegistrationOptions`, `Pattern`, `RelativePattern`, `GlobPattern`, `PublishDiagnosticsClientCapabilities`, `PublishDiagnosticsParams`, `CompletionClientCapabilities`, `CompletionTriggerKind`, `CompletionContext`, `CompletionParams`, `CompletionOptions`, `CompletionRegistrationOptions`, `HoverClientCapabilities`, `HoverOptions`, `HoverParams`, `HoverRegistrationOptions`, `SignatureHelpClientCapabilities`, `SignatureHelpOptions`, `SignatureHelpTriggerKind`, `SignatureHelpContext`, `SignatureHelpParams`, `SignatureHelpRegistrationOptions`, `DefinitionClientCapabilities`, `DefinitionOptions`, `DefinitionParams`, `DefinitionRegistrationOptions`, `ReferenceClientCapabilities`, `ReferenceParams`, `ReferenceOptions`, `ReferenceRegistrationOptions`, `DocumentHighlightClientCapabilities`, `DocumentHighlightParams`, `DocumentHighlightOptions`, `DocumentHighlightRegistrationOptions`, `DocumentSymbolClientCapabilities`, `DocumentSymbolParams`, `DocumentSymbolOptions`, `DocumentSymbolRegistrationOptions`, `CodeActionClientCapabilities`, `CodeActionParams`, `CodeActionOptions`, `CodeActionRegistrationOptions`, `WorkspaceSymbolClientCapabilities`, `WorkspaceSymbolParams`, `WorkspaceSymbolOptions`, `WorkspaceSymbolRegistrationOptions`, `CodeLensClientCapabilities`, `CodeLensWorkspaceClientCapabilities`, `CodeLensParams`, `CodeLensOptions`, `CodeLensRegistrationOptions`, `DocumentLinkClientCapabilities`, `DocumentLinkParams`, `DocumentLinkOptions`, `DocumentLinkRegistrationOptions`, `DocumentFormattingClientCapabilities`, `DocumentFormattingParams`, `DocumentFormattingOptions`, `DocumentFormattingRegistrationOptions`, `DocumentRangeFormattingClientCapabilities`, `DocumentRangeFormattingParams`, `DocumentRangesFormattingParams`, `DocumentRangeFormattingOptions`, `DocumentRangeFormattingRegistrationOptions`, `DocumentOnTypeFormattingClientCapabilities`, `DocumentOnTypeFormattingParams`, `DocumentOnTypeFormattingOptions`, `DocumentOnTypeFormattingRegistrationOptions`, `PrepareSupportDefaultBehavior`, `RenameClientCapabilities`, `RenameParams`, `RenameOptions`, `RenameRegistrationOptions`, `PrepareRenameParams`, `PrepareRenameResult`, `ExecuteCommandClientCapabilities`, `ExecuteCommandParams`, `ExecuteCommandOptions`, `ExecuteCommandRegistrationOptions`, `WorkspaceEditClientCapabilities`, `ApplyWorkspaceEditResponse`, `ApplyWorkspaceEditParams`, `ApplyWorkspaceEditResult`, `DidChangeWatchedFilesParams`, `FileEvent`, `FileChangeType`, `FileSystemWatcher`, `WatchKind`, `WorkDoneProgressParams`, `WorkDoneProgressOptions`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `Create`, `Rename`, `Delete`, `Abort`, `Transactional`, `TextOnlyTransactional`, `Undo`, `UTF8`, `UTF16`, `UTF32`, `method`, `messageDirection`, `type`, `unknownProtocolVersion`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `Error`, `Warning`, `Info`, `Log`, `Debug`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `None`, `Full`, `Incremental`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `Manual`, `AfterDelay`, `FocusOut`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `Invoked`, `TriggerCharacter`, `TriggerForIncompleteCompletions`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `Invoked`, `TriggerCharacter`, `ContentChange`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `Identifier`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `Created`, `Changed`, `Deleted`, `Create`, `Change`, `Delete`
-**infer:** `getCapabilityForRequestMethod`, `getClientCapabilityForRequestMethod`, `getCapabilityForNotificationMethod`, `getClientCapabilityForNotificationMethod`, `getDefinitionForRequest`, `getDefinitionForNotification`, `LSPRequestMethod`, `LSPNotificationMethod`, `ParamsForRequest`, `ResultForRequest`, `ServerCapabilityForRequest`, `ClientCapabilityForRequest`, `ParamsForNotification`, `ServerCapabilityForNotification`, `ClientCapabilityForNotification`, `OptionsForRequest`, `RegistrationOptionsForRequest`, `DirectionForRequest`, `DirectionForNotification`, `RequestDefinition`, `RequestMethodMap`, `NotificationMethodMap`
-**capabilities:** `serverSupportsRequest`, `serverSupportsNotification`, `clientSupportsRequest`, `clientSupportsNotification`, `hasServerCapability`, `hasClientCapability`, `supportsHover`, `supportsCompletion`, `supportsDefinition`, `supportsReferences`, `supportsDocumentSymbol`, `supportsWorkspaceFolders`, `supportsNotebookDocumentSync`, `supportsFileWatching`, `supportsWorkDoneProgress`
-**JSON-RPC:** `isRequestMessage`, `isNotificationMessage`, `isResponseMessage`, `isSuccessResponse`, `isErrorResponse`, `parseMessage`, `serializeMessage`, `BaseMessage`, `RequestMessage`, `NotificationMessage`, `SuccessResponseMessage`, `ErrorResponseMessage`, `ResponseMessage`, `Message`, `ResponseErrorInterface`
-**Transport:** `createWebSocketClient`, `WebSocketTransport`, `Transport`, `WebSocketTransportOptions`
-**compose:** `composeMiddleware`
-**pipeline:** `executeMiddlewarePipeline`
-**scoped:** `createScopedMiddleware`
-**typed:** `createTypedMiddleware`
-**Document:** `createFullDidChangeParams`, `createIncrementalDidChangeParams`, `DocumentVersionTracker`
-**schemas:** `getSchemaForMethod`, `requestMessageSchema`, `notificationMessageSchema`, `responseErrorSchema`, `successResponseMessageSchema`, `errorResponseMessageSchema`, `responseMessageSchema`, `messageSchema`, `PositionSchema`, `RangeSchema`, `TextDocumentIdentifierSchema`, `HoverParamsSchema`, `HoverSchema`, `CompletionParamsSchema`, `CompletionItemSchema`, `CompletionListSchema`, `DefinitionParamsSchema`, `ReferenceParamsSchema`, `DocumentSymbolParamsSchema`, `DocumentSymbolSchema`, `InitializeParamsSchema`, `DidOpenTextDocumentParamsSchema`, `DidChangeTextDocumentParamsSchema`, `DidCloseTextDocumentParamsSchema`, `DidSaveTextDocumentParamsSchema`, `LSPSchemas`
-**workspace:** `createWorkspaceFolder`, `createWorkspaceFoldersChangeEvent`, `WorkspaceFileChangeTypes`
-**watching:** `createFileEvent`, `createFileSystemWatcher`, `createDidChangeWatchedFilesParams`, `WatchKinds`
-**connection.d:** `is`, `createProtocolConnection`, `is`, `is`, `createMessageConnection`, `fromString`, `toString`, `fromString`, `is`, `is`, `is`, `is`, `ProgressType`, `ConnectionError`, `ProgressToken`, `ProtocolConnection`, `ConnectionStrategy`, `ConnectionOptions`, `MessageConnection`, `HandlerResult`, `StarRequestHandler`, `GenericRequestHandler`, `RequestHandler0`, `RequestHandler`, `RequestHandler1`, `RequestHandler2`, `RequestHandler3`, `RequestHandler4`, `RequestHandler5`, `RequestHandler6`, `RequestHandler7`, `RequestHandler8`, `RequestHandler9`, `StarNotificationHandler`, `GenericNotificationHandler`, `NotificationHandler0`, `NotificationHandler`, `NotificationHandler1`, `NotificationHandler2`, `NotificationHandler3`, `NotificationHandler4`, `NotificationHandler5`, `NotificationHandler6`, `NotificationHandler7`, `NotificationHandler8`, `NotificationHandler9`, `TraceValues`, `TraceOptions`, `SetTraceParams`, `LogTraceParams`, `Tracer`, `CancellationId`, `CancellationReceiverStrategy`, `CancellationSenderStrategy`, `CancellationStrategy`, `MessageStrategy`, `Trace`, `TraceFormat`, `ConnectionErrors`, `Off`, `Messages`, `Compact`, `Verbose`, `type`, `type`, `Message`, `Message`, `Message`
-**progress:** `createProgressBegin`, `createProgressReport`, `createProgressEnd`, `createProgressCreateParams`, `createProgressToken`, `WorkDoneProgressValue`
-**partial:** `createPartialResultParams`, `hasPartialResultToken`, `getPartialResultToken`, `PartialResultParams`
-**dynamic-registration:** `isRegisterCapabilityParams`, `isUnregisterCapabilityParams`, `DynamicRegistration`, `DynamicRegistrationBehavior`, `RegisterCapabilityParams`, `UnregisterCapability`, `UnregisterCapabilityParams`, `dynamicRegistrationSchema`, `registerCapabilityParamsSchema`, `unregisterCapabilitySchema`, `unregisterCapabilityParamsSchema`
-**worker-types:** `isMessage`, `isWorkerTransportEnvelope`, `WorkerLike`, `MessagePortLike`, `SharedWorkerLike`, `WorkerMessageEventLike`, `WorkerTransportEnvelope`
-**capability-guard:** `buildMethodSets`, `checkMethod`, `CheckMethodOptions`, `SERVER_METHODS`, `CLIENT_METHODS`
-**ral.d:** `RAL`, `install`, `RAL`, `MessageBuffer`, `MessageBufferEncoding`, `ReadableStream`, `WritableStream`, `DuplexStream`
-**messageReader.d:** `is`, `AbstractMessageReader`, `ReadableStreamMessageReader`, `MessageReader`, `DataCallback`, `MessageReaderOptions`, `PartialMessageInfo`
-**messageWriter.d:** `is`, `AbstractMessageWriter`, `WriteableStreamMessageWriter`, `MessageWriter`, `MessageWriterOptions`
-**protocol.progress.d:** `is`, `WorkDoneProgressBegin`, `WorkDoneProgressReport`, `WorkDoneProgressEnd`, `WorkDoneProgressCreateParams`, `HandlerSignature`, `WorkDoneProgressCancelParams`, `HandlerSignature`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**protocol.diagnostic.d:** `is`, `DiagnosticClientCapabilities`, `DiagnosticOptions`, `DiagnosticRegistrationOptions`, `DiagnosticServerCancellationData`, `DocumentDiagnosticParams`, `DocumentDiagnosticReportKind`, `FullDocumentDiagnosticReport`, `RelatedFullDocumentDiagnosticReport`, `UnchangedDocumentDiagnosticReport`, `RelatedUnchangedDocumentDiagnosticReport`, `DocumentDiagnosticReport`, `DocumentDiagnosticReportPartialResult`, `HandlerSignature`, `PreviousResultId`, `WorkspaceDiagnosticParams`, `WorkspaceFullDocumentDiagnosticReport`, `WorkspaceUnchangedDocumentDiagnosticReport`, `WorkspaceDocumentDiagnosticReport`, `WorkspaceDiagnosticReport`, `WorkspaceDiagnosticReportPartialResult`, `HandlerSignature`, `HandlerSignature`, `Full`, `Unchanged`, `method`, `messageDirection`, `type`, `partialResult`, `method`, `messageDirection`, `type`, `partialResult`, `method`, `messageDirection`, `type`
-**protocol.notebook.d:** `is`, `create`, `is`, `equals`, `create`, `is`, `diff`, `create`, `is`, `is`, `create`, `NotebookDocumentSyncClientCapabilities`, `NotebookCellKind`, `ExecutionSummary`, `NotebookCell`, `NotebookDocument`, `NotebookDocumentIdentifier`, `VersionedNotebookDocumentIdentifier`, `NotebookDocumentSyncOptions`, `NotebookDocumentSyncRegistrationOptions`, `DidOpenNotebookDocumentParams`, `NotebookCellArrayChange`, `NotebookDocumentChangeEvent`, `DidChangeNotebookDocumentParams`, `DidSaveNotebookDocumentParams`, `DidCloseNotebookDocumentParams`, `Markup`, `Code`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `registrationMethod`, `method`, `messageDirection`, `type`, `registrationMethod`, `method`, `messageDirection`, `type`, `registrationMethod`, `method`, `messageDirection`, `type`, `registrationMethod`
-**messages.d:** `RegistrationType`, `ProtocolRequestType0`, `ProtocolRequestType`, `ProtocolNotificationType0`, `ProtocolNotificationType`, `RequestType`, `RequestType0`, `RequestType1`, `RequestType2`, `RequestType3`, `RequestType4`, `RequestType5`, `RequestType6`, `RequestType7`, `RequestType8`, `RequestType9`, `NotificationType`, `NotificationType0`, `NotificationType1`, `NotificationType2`, `NotificationType3`, `NotificationType4`, `NotificationType5`, `NotificationType6`, `NotificationType7`, `NotificationType8`, `NotificationType9`, `ParameterStructures`, `MessageSignature`, `ErrorCodes`, `_EM`, `MessageDirection`, `ParseError`, `InvalidRequest`, `MethodNotFound`, `InvalidParams`, `InternalError`, `jsonrpcReservedErrorRangeStart`, `serverErrorStart`, `MessageWriteError`, `MessageReadError`, `PendingResponseRejected`, `ConnectionInactive`, `ServerNotInitialized`, `UnknownErrorCode`, `jsonrpcReservedErrorRangeEnd`, `serverErrorEnd`
-**dedicated-worker:** `DedicatedWorkerTransport`, `DedicatedWorkerTransportOptions`
-**shared-worker:** `SharedWorkerTransport`, `SharedWorkerTransportOptions`
-**events:** `TransportEventEmitter`
-**Lifecycle:** `DisposableStore`, `CancellationTokenSource`, `Disposable`, `CancellationToken`
-**disposable-event-emitter:** `DisposableEventEmitter`
-**Logging:** `ConsoleLogger`, `NullLogger`, `Logger`, `LogLevel`
-**Errors:** `ResponseError`, `JSONRPCErrorCode`
-**linkedMap.d:** `LinkedMap`, `LRUCache`, `Touch`, `None`, `First`, `AsOld`, `Last`, `AsNew`
-**events.d:** `Emitter`, `Event`, `None`
-**sharedArrayCancellation.d:** `SharedArraySenderStrategy`, `SharedArrayReceiverStrategy`
-**messageBuffer.d:** `AbstractMessageBuffer`
-**types:** `TextDocumentContentParams`, `TextDocumentContent`, `TextDocumentContentResult`, `TextDocumentContentRegistrationOptions`, `TextDocumentContentRefreshParams`, `CancelParams`, `ProgressParams`
-**api.d:** `LSPErrorCodes`, `lspReservedErrorRangeStart`, `RequestFailed`, `ServerCancelled`, `ContentModified`, `RequestCancelled`, `lspReservedErrorRangeEnd`
-**capability-methods:** `ClientNotifications`, `ClientRequests`, `ServerHandlers`, `ClientRequestHandlers`, `ClientNotificationHandlers`, `ServerSendMethods`, `ToRequestSignature`, `ToNotificationSignature`, `ToRequestHandlerSignature`, `ToNotificationHandlerSignature`, `AvailableMethods`, `Client`, `AvailableRequests`, `AvailableNotifications`, `Server`, `AvailableRequests`, `AvailableNotifications`, `ClientRequestMethodToCapabilityMap`, `ClientNotificationMethodToCapabilityMap`
-**Middleware:** `Middleware`, `MiddlewareContext`, `MiddlewareDirection`, `MiddlewareMessage`, `MiddlewareMessageType`, `MiddlewareNext`, `MiddlewareResult`, `MethodFilter`, `ScopedMiddleware`, `TypedMiddleware`, `TypedMiddlewareContext`, `TypedParams`, `TypedResult`, `LSPMethod`
-**cancellation:** `CancellationToken`
-**document:** `IncrementalChange`, `VersionSource`
-**namespaces:** `LSPRequest`, `LSPNotification`, `LSPRequest`, `LSPNotification`
-**protocol.workspaceFolder.d:** `WorkspaceFoldersChangeEvent`, `DidChangeWorkspaceFoldersParams`, `HandlerSignature`, `MiddlewareSignature`, `HandlerSignature`, `MiddlewareSignature`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**partial-results:** `CancelledPartialResult`, `CompletedPartialResult`, `PartialRequestOutcome`
-**cancellation.d:** `AbstractCancellationTokenSource`
-**encoding.d:** `ContentTypeEncoderOptions`, `ContentEncoder`, `ContentTypeEncoder`, `ContentTypeDecoderOptions`, `ContentDecoder`, `ContentTypeDecoder`
-**protocol.implementation.d:** `HandlerSignature`, `ImplementationParams`, `ImplementationRegistrationOptions`, `ImplementationOptions`, `method`, `messageDirection`, `type`
-**protocol.typeDefinition.d:** `HandlerSignature`, `TypeDefinitionParams`, `TypeDefinitionRegistrationOptions`, `TypeDefinitionOptions`, `method`, `messageDirection`, `type`
-**protocol.configuration.d:** `HandlerSignature`, `MiddlewareSignature`, `ConfigurationParams`, `ConfigurationItem`, `method`, `messageDirection`, `type`
-**protocol.colorProvider.d:** `HandlerSignature`, `HandlerSignature`, `DocumentColorOptions`, `DocumentColorParams`, `ColorPresentationParams`, `DocumentColorRegistrationOptions`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**protocol.foldingRange.d:** `FoldingRangeClientCapabilities`, `FoldingRangeOptions`, `HandlerSignature`, `FoldingRangeParams`, `FoldingRangeRegistrationOptions`, `HandlerSignature`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**protocol.declaration.d:** `DeclarationClientCapabilities`, `HandlerSignature`, `DeclarationParams`, `DeclarationRegistrationOptions`, `DeclarationOptions`, `method`, `messageDirection`, `type`
-**protocol.selectionRange.d:** `SelectionRangeClientCapabilities`, `SelectionRangeOptions`, `SelectionRangeParams`, `HandlerSignature`, `SelectionRangeRegistrationOptions`, `method`, `messageDirection`, `type`
-**protocol.callHierarchy.d:** `CallHierarchyClientCapabilities`, `CallHierarchyOptions`, `CallHierarchyRegistrationOptions`, `CallHierarchyIncomingCallsParams`, `HandlerSignature`, `CallHierarchyOutgoingCallsParams`, `HandlerSignature`, `CallHierarchyPrepareParams`, `HandlerSignature`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**protocol.semanticTokens.d:** `SemanticTokensPartialResult`, `SemanticTokensDeltaPartialResult`, `TokenFormat`, `SemanticTokensClientCapabilities`, `SemanticTokensOptions`, `SemanticTokensRegistrationOptions`, `SemanticTokensParams`, `HandlerSignature`, `SemanticTokensDeltaParams`, `HandlerSignature`, `SemanticTokensRangeParams`, `HandlerSignature`, `HandlerSignature`, `Relative`, `method`, `messageDirection`, `type`, `registrationMethod`, `method`, `messageDirection`, `type`, `registrationMethod`, `method`, `messageDirection`, `type`, `registrationMethod`, `method`, `messageDirection`, `type`, `method`, `type`
-**protocol.showDocument.d:** `ShowDocumentParams`, `HandlerSignature`, `MiddlewareSignature`, `ShowDocumentResult`, `ShowDocumentClientCapabilities`, `method`, `messageDirection`, `type`
-**protocol.linkedEditingRange.d:** `LinkedEditingRangeClientCapabilities`, `LinkedEditingRanges`, `LinkedEditingRangeOptions`, `LinkedEditingRangeParams`, `LinkedEditingRangeRegistrationOptions`, `HandlerSignature`, `method`, `messageDirection`, `type`
-**protocol.fileOperations.d:** `FileOperationOptions`, `FileOperationClientCapabilities`, `FileOperationRegistrationOptions`, `FileOperationPatternOptions`, `FileOperationPatternKind`, `HandlerSignature`, `CreateFilesParams`, `FileCreate`, `HandlerSignature`, `HandlerSignature`, `RenameFilesParams`, `FileRename`, `HandlerSignature`, `HandlerSignature`, `DeleteFilesParams`, `FileDelete`, `HandlerSignature`, `file`, `folder`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**protocol.moniker.d:** `UniquenessLevel`, `MonikerKind`, `Moniker`, `MonikerClientCapabilities`, `MonikerOptions`, `MonikerRegistrationOptions`, `MonikerParams`, `document`, `project`, `group`, `scheme`, `global`, `$import`, `$export`, `local`, `method`, `messageDirection`, `type`
-**protocol.typeHierarchy.d:** `TypeHierarchyClientCapabilities`, `TypeHierarchyOptions`, `TypeHierarchyRegistrationOptions`, `TypeHierarchyPrepareParams`, `HandlerSignature`, `TypeHierarchySubtypesParams`, `HandlerSignature`, `TypeHierarchySupertypesParams`, `HandlerSignature`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**protocol.inlineValue.d:** `InlineValueClientCapabilities`, `InlineValueOptions`, `InlineValueRegistrationOptions`, `InlineValueWorkspaceClientCapabilities`, `InlineValueParams`, `HandlerSignature`, `HandlerSignature`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**protocol.inlayHint.d:** `InlayHintClientCapabilities`, `InlayHintOptions`, `InlayHintRegistrationOptions`, `InlayHintWorkspaceClientCapabilities`, `InlayHintParams`, `HandlerSignature`, `HandlerSignature`, `HandlerSignature`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`, `method`, `messageDirection`, `type`
-**protocol.inlineCompletion.d:** `InlineCompletionClientCapabilities`, `InlineCompletionOptions`, `InlineCompletionParams`, `InlineCompletionRegistrationOptions`, `HandlerSignature`, `method`, `messageDirection`, `type`
-**errors:** `ErrorMessage`
+**Key functions:** `isRequestMessage` (Returns `true` when `message` is a JSON-RPC request (has `id` + `method`)), `isNotificationMessage` (Returns `true` when `message` is a JSON-RPC notification (has `method`,
+no `id`)), `isResponseMessage` (Returns `true` when `message` is a JSON-RPC response (has `id`, no `method`)), `isSuccessResponse` (Returns `true` when `response` carries a `result` (success case)), `isErrorResponse` (Returns `true` when `response` carries an `error` (error case)), `parseMessage` (Parses a single framed JSON-RPC 2), `serializeMessage` (Serializes a JSON-RPC 2), `createWebSocketClient` (Creates a WebSocket client instance, preferring the native
+`globalThis), `composeMiddleware` (Combines multiple middleware functions into a single middleware that runs
+them left-to-right, each delegating to the next via `next()`), `executeMiddlewarePipeline` (Runs the registered middleware chain for a single JSON-RPC message, then
+calls `finalHandler` if no middleware short-circuits), `createScopedMiddleware` (Wraps a middleware with a filter so it only runs for matching LSP messages), `createTypedMiddleware` (Creates a typed, method-scoped middleware with full TypeScript inference for
+the message params and result), `createFullDidChangeParams` (Builds `DidChangeTextDocumentParams` for a full-document text replacement), `createIncrementalDidChangeParams` (Builds `DidChangeTextDocumentParams` for an incremental (range-based)
+document change notification), `createProgressBegin` (Creates a `WorkDoneProgressBegin` payload to start a work-done progress notification), `createProgressReport` (Creates a `WorkDoneProgressReport` payload to update an in-progress work-done notification), `buildMethodSets` (Builds the full set of LSP methods and the subset that are always allowed
+(not gated by a capability) for a given capability key)
+**Key classes:** `WebSocketTransport` (WebSocket-based transport for LSP communication), `DisposableStore` (Collects multiple `Disposable` instances and releases them together), `CancellationTokenSource` (Controller that creates and manages a `CancellationToken`), `ConsoleLogger` (Logger implementation that writes to the process console with level filtering), `NullLogger` (No-op logger that silently discards all messages), `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `DocumentVersionTracker` (Tracks monotonically increasing version numbers for open text documents)
+
+*185 exports total — see references/ for full API.*
+
+## References
+
+Load these on demand — do NOT read all at once:
+
+- When calling any function → read `references/functions.md` for full signatures, parameters, and return types
+- When using a class → read `references/classes/` for properties, methods, and inheritance
+- When defining typed variables or function parameters → read `references/types.md`
+- When using enum values → read `references/enums.md`
+- When using exported constants → read `references/variables.md`
+- When configuring options → read `references/config.md` for all settings and defaults
 
 ## Links
 

@@ -289,42 +289,6 @@
       ],
       "installed_at": "2026-04-16T02:06:42.993265+00:00"
     },
-    "optimize": {
-      "version": "1.0.0",
-      "source": "local",
-      "manifest_hash": "sha256:011bc93e18ca788185271fc493d658d66c2544b99c131fcd293b136442af30f1",
-      "enabled": true,
-      "priority": 10,
-      "registered_commands": {
-        "amp": [
-          "speckit.optimize.run",
-          "speckit.optimize.tokens",
-          "speckit.optimize.learn"
-        ],
-        "claude": [
-          "speckit.optimize.run",
-          "speckit.optimize.tokens",
-          "speckit.optimize.learn"
-        ],
-        "codex": [
-          "speckit.optimize.run",
-          "speckit.optimize.tokens",
-          "speckit.optimize.learn"
-        ],
-        "copilot": [
-          "speckit.optimize.run",
-          "speckit.optimize.tokens",
-          "speckit.optimize.learn"
-        ],
-        "gemini": [
-          "speckit.optimize.run",
-          "speckit.optimize.tokens",
-          "speckit.optimize.learn"
-        ]
-      },
-      "registered_skills": [],
-      "installed_at": "2026-04-16T14:15:53.185875+00:00"
-    },
     "workflows": {
       "version": "3.4.1",
       "source": "local",
@@ -332,6 +296,48 @@
       "enabled": true,
       "priority": 10,
       "registered_commands": {
+        "agy": [
+          "speckit.workflows.bugfix",
+          "speckit.bugfix",
+          "speckit.workflows.hotfix",
+          "speckit.hotfix",
+          "speckit.workflows.enhance",
+          "speckit.enhance",
+          "speckit.workflows.refactor",
+          "speckit.refactor",
+          "speckit.workflows.deprecate",
+          "speckit.deprecate",
+          "speckit.workflows.modify",
+          "speckit.modify",
+          "speckit.workflows.baseline",
+          "speckit.baseline",
+          "speckit.workflows.cleanup",
+          "speckit.cleanup",
+          "speckit.workflows.review",
+          "speckit.review",
+          "speckit.workflows.phasestoissues",
+          "speckit.phasestoissues",
+          "speckit.workflows.incorporate",
+          "speckit.incorporate",
+          "speckit.workflows.ultraplan-tasks",
+          "speckit.ultraplan.tasks",
+          "speckit.workflows.issue-sync-before-specify",
+          "speckit.issuesync.before-specify",
+          "speckit.workflows.issue-sync-after-specify",
+          "speckit.issuesync.after-specify",
+          "speckit.workflows.issue-sync-before-plan",
+          "speckit.issuesync.before-plan",
+          "speckit.workflows.issue-sync-after-plan",
+          "speckit.issuesync.after-plan",
+          "speckit.workflows.issue-sync-before-tasks",
+          "speckit.issuesync.before-tasks",
+          "speckit.workflows.issue-sync-after-tasks",
+          "speckit.issuesync.after-tasks",
+          "speckit.workflows.issue-sync-before-implement",
+          "speckit.issuesync.before-implement",
+          "speckit.workflows.issue-sync-after-implement",
+          "speckit.issuesync.after-implement"
+        ],
         "amp": [
           "speckit.workflows.bugfix",
           "speckit.bugfix",
@@ -544,7 +550,7 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-04-16T23:57:26.691176+00:00"
+      "installed_at": "2026-04-24T15:27:26.997531+00:00"
     },
     "sync": {
       "version": "0.1.0",
@@ -553,6 +559,14 @@
       "enabled": true,
       "priority": 10,
       "registered_commands": {
+        "agy": [
+          "speckit.sync.analyze",
+          "speckit.drift",
+          "speckit.sync.propose",
+          "speckit.sync.apply",
+          "speckit.sync.conflicts",
+          "speckit.sync.backfill"
+        ],
         "amp": [
           "speckit.sync.analyze",
           "speckit.drift",
@@ -595,7 +609,7 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-04-16T23:57:28.052866+00:00"
+      "installed_at": "2026-04-24T15:27:28.385075+00:00"
     },
     "review": {
       "version": "1.0.1",
@@ -604,6 +618,15 @@
       "enabled": true,
       "priority": 10,
       "registered_commands": {
+        "agy": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ],
         "amp": [
           "speckit.review.run",
           "speckit.review.code",
@@ -651,7 +674,7 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-04-16T23:57:28.563960+00:00"
+      "installed_at": "2026-04-24T15:27:28.891257+00:00"
     },
     "doctor": {
       "version": "1.0.0",
@@ -660,6 +683,10 @@
       "enabled": true,
       "priority": 10,
       "registered_commands": {
+        "agy": [
+          "speckit.doctor.check",
+          "speckit.doctor"
+        ],
         "amp": [
           "speckit.doctor.check",
           "speckit.doctor"
@@ -682,7 +709,7 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-04-16T23:57:28.974084+00:00"
+      "installed_at": "2026-04-24T15:27:29.449855+00:00"
     },
     "verify": {
       "version": "1.0.3",
@@ -691,6 +718,9 @@
       "enabled": true,
       "priority": 10,
       "registered_commands": {
+        "agy": [
+          "speckit.verify.run"
+        ],
         "amp": [
           "speckit.verify.run"
         ],
@@ -708,7 +738,48 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-04-16T23:57:30.914166+00:00"
+      "installed_at": "2026-04-24T15:27:31.320158+00:00"
+    },
+    "optimize": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:011bc93e18ca788185271fc493d658d66c2544b99c131fcd293b136442af30f1",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "agy": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "amp": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "claude": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "codex": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "copilot": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ],
+        "gemini": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-04-24T15:27:31.820601+00:00"
     }
   }
 }

@@ -69,8 +69,10 @@ These extensions bring spec-kit's structured approach to all development activit
 
 **Step 1: Initialize spec-kit** (if not already done):
 ```bash
-specify init --here --ai claude
+specify init --here --integration claude
 ```
+
+`--ai` remains accepted for compatibility on current releases, but newer spec-kit versions prefer `--integration`.
 
 **Step 2: Install extensions** (recommended):
 ```bash
@@ -377,7 +379,7 @@ specify workflow run workflows/bugfix-lifecycle/workflow.yml --input request="lo
 ### spec-kit Versions
 
 - **Required**: spec-kit v0.3.1+ (with extension system support)
-- **Tested**: spec-kit v0.5.1, v0.6.0, and v0.7.0
+- **Tested**: spec-kit v0.5.1, v0.6.0, v0.7.0, v0.7.4, and v0.8.0
 - Install from source: `uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git"`
 
 ### AI Agents
@@ -397,7 +399,7 @@ Commands are registered by spec-kit's extension system and work with any support
 ### Component Versions
 
 - **Extension** (v3.4.1) — Workflows, commands, templates, and scripts
-- **CLI Tool** (v2.5.1) — `specify-extend` installation and patching tool
+- **CLI Tool** (v2.5.3) — `specify-extend` installation and patching tool
 
 ## FAQ
 
@@ -410,7 +412,11 @@ No! Use only what you need. Common combinations:
 
 ### Why use `specify-extend --all` instead of `specify extension add`?
 
-`specify-extend --all` additionally patches spec-kit's `common.sh` to support extension branch patterns (`bugfix/`, `hotfix/`, `refactor/`, etc.). Without this patch, spec-kit's branch validation will reject these branch names. Once spec-kit natively supports alternate branch patterns, `specify extension add` alone will be sufficient.
+`specify-extend --all` installs the workflows extension and companion extensions that handle branch behavior natively (`git-core` + `branch-convention`) so extension subpaths like `bugfix/` and `hotfix/` are accepted without monkey patching.
+
+It also reconciles upstream spec-kit integrations for resolved agents in the same run (so you don't need a second `specify integration install ...` step). Use `--no-reconcile-integrations` to opt out.
+
+For older or custom installs, you can still force legacy monkey patching with `--legacy-patch`.
 
 ### Can I customize the workflows?
 
