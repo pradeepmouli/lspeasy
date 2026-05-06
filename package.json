@@ -60,7 +60,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.31.0",
-    "@to-skills/vitepress": "^0.2.18",
+    "@to-skills/vitepress": "^0.2.25",
     "@types/node": "^25.6.0",
     "@typescript/native-preview": "7.0.0-dev.20260505.1",
     "@vitest/coverage-v8": "^4.1.5",
