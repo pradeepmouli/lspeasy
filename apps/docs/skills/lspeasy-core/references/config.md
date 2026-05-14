@@ -6,15 +6,11 @@
 
 #### worker
 
-
-
 **Type:** `WorkerLike`
 
 **Required:** yes
 
 #### terminateOnClose
-
-
 
 **Type:** `boolean`
 
@@ -24,19 +20,13 @@
 
 #### port
 
-
-
 **Type:** `MessagePortLike`
 
 #### worker
 
-
-
 **Type:** `SharedWorkerLike`
 
 #### clientId
-
-
 
 **Type:** `string`
 
@@ -102,15 +92,11 @@ Multiplier for exponential back-off between reconnection attempts.
 
 #### method
 
-
-
 **Type:** `string`
 
 **Required:** yes
 
 #### methodSets
-
-
 
 **Type:** `{ all: Set<string>; alwaysAllowed: Set<string> }`
 
@@ -118,15 +104,11 @@ Multiplier for exponential back-off between reconnection attempts.
 
 #### getCapabilityKey
 
-
-
 **Type:** `(method: string) => string | null | undefined`
 
 **Required:** yes
 
 #### hasCapability
-
-
 
 **Type:** `(key: string) => boolean`
 
@@ -134,15 +116,11 @@ Multiplier for exponential back-off between reconnection attempts.
 
 #### actionLabel
 
-
-
 **Type:** `string`
 
 **Required:** yes
 
 #### capabilityLabel
-
-
 
 **Type:** `string`
 
@@ -150,15 +128,11 @@ Multiplier for exponential back-off between reconnection attempts.
 
 #### logger
 
-
-
 **Type:** `Logger`
 
 **Required:** yes
 
 #### strict
-
-
 
 **Type:** `boolean`
 

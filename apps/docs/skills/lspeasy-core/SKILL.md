@@ -1,6 +1,6 @@
 ---
-name: lspeasy-core
 description: "Documentation site for lspeasy Use when: You are building a browser-based LSP client, a WebSocket-backed language...."
+name: lspeasy-core
 ---
 
 # @lspeasy/core
@@ -91,10 +91,9 @@ document change notification), `createProgressBegin` (Creates a `WorkDoneProgres
 
 Load these on demand — do NOT read all at once:
 
-- When calling any function → read `references/functions.md` for full signatures, parameters, and return types
-- When using a class → read `references/classes/` for properties, methods, and inheritance
+- When calling any function → browse `references/functions/` for grouped indexes, full signatures, parameters, and return types
+- When using a class → read `references/classes.md` for properties, methods, and inheritance
 - When defining typed variables or function parameters → read `references/types.md`
-- When using enum values → read `references/enums.md`
 - When using exported constants → read `references/variables.md`
 - When configuring options → read `references/config.md` for all settings and defaults
 
