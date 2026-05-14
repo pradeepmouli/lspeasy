@@ -1,6 +1,6 @@
 ---
-name: lspeasy-server
 description: "Documentation site for lspeasy Use when: The client sets `partialResultToken` in the request params and you want to...."
+name: lspeasy-server
 ---
 
 # @lspeasy/server
@@ -96,9 +96,8 @@ capability-aware namespaces, and pluggable middleware), `LSPServer` (Constructs 
 
 Load these on demand — do NOT read all at once:
 
-- When using a class → read `references/classes/` for properties, methods, and inheritance
+- When using a class → read `references/classes.md` for properties, methods, and inheritance
 - When defining typed variables or function parameters → read `references/types.md`
-- When using enum values → read `references/enums.md`
 - When using exported constants → read `references/variables.md`
 - When configuring options → read `references/config.md` for all settings and defaults
 
