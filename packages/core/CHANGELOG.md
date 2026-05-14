@@ -1,5 +1,11 @@
 # @lspeasy/core
 
+## 2.1.3
+
+### Patch Changes
+
+- [`496936a`](https://github.com/pradeepmouli/lspeasy/commit/496936aa66bb1b7b5ddd1f336a7ef2ae4d6a59d4) Thanks [@pradeepmouli](https://github.com/pradeepmouli)! - Fix trailing comma in core package.json that caused ERR_PNPM_JSON_PARSE on install; remove duplicate zod devDependency entry that shadowed the optionalDependency range.
+
 ## 2.1.2
 
 ### Patch Changes
