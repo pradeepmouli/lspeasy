@@ -54,6 +54,24 @@ export interface ClientOptions<
   capabilities?: ClientCaps;
 
   /**
+   * Workspace root URI sent in the `initialize` request (`rootUri`).
+   *
+   * Defaults to `null`. Although `rootUri` is deprecated in the LSP spec in
+   * favour of `workspaceFolders`, many servers (e.g. typescript-language-server)
+   * still read it to locate the project root, so set it for reliable indexing.
+   */
+  rootUri?: string | null;
+
+  /**
+   * Workspace folders sent in the `initialize` request.
+   *
+   * The modern replacement for `rootUri`. When omitted and `rootUri` is set,
+   * the client does not synthesize folders — pass them explicitly if the server
+   * relies on `workspaceFolders`.
+   */
+  workspaceFolders?: Array<{ uri: string; name: string }> | null;
+
+  /**
    * Logger instance for client logging
    */
   logger?: Logger;

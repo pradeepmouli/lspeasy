@@ -123,6 +123,33 @@ import { PartialResultCollector } from './connection/partial-result-collector.js
  * @template ClientCaps - Client capabilities shape, defaults to `ClientCapabilities`.
  * @category Client
  */
+
+/**
+ * Expand a numeric `textDocumentSync` server capability into its object form.
+ *
+ * Servers may declare `textDocumentSync` as either a `TextDocumentSyncKind`
+ * number or a `TextDocumentSyncOptions` object (LSP spec). The number form
+ * (`1` Full / `2` Incremental — `0` None is the exception) implies the server
+ * wants document open/close and change notifications. Downstream capability
+ * checks address `textDocumentSync.openClose`; against a raw number that path
+ * resolves to `undefined` and (incorrectly) blocks `textDocument/didOpen`.
+ * Normalizing once at receipt keeps every check correct without per-path hacks.
+ */
+function normalizeServerCapabilities(capabilities: ServerCapabilities): ServerCapabilities {
+  const sync = capabilities.textDocumentSync;
+  if (typeof sync === 'number') {
+    return {
+      ...capabilities,
+      textDocumentSync: {
+        // `0` (None) means no sync; otherwise the number implies open/close.
+        openClose: sync !== 0,
+        change: sync
+      }
+    };
+  }
+  return capabilities;
+}
+
 class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities> {
   private transport?: Transport;
   private connected: boolean;
@@ -147,6 +174,8 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     strictCapabilities: boolean;
     heartbeat: HeartbeatConfig | undefined;
     dynamicRegistration: DynamicRegistrationBehavior;
+    rootUri: string | null;
+    workspaceFolders: Array<{ uri: string; name: string }> | null;
   };
   private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
@@ -181,7 +210,9 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
       heartbeat: options.heartbeat,
       dynamicRegistration: options.dynamicRegistration ?? {
         allowUndeclaredDynamicRegistration: false
-      }
+      },
+      rootUri: options.rootUri ?? null,
+      workspaceFolders: options.workspaceFolders ?? null
     };
 
     this.logger = this.options.logger;
@@ -264,12 +295,24 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
           version: this.options.version
         },
         capabilities: this.capabilities ?? {},
-        rootUri: null
+        rootUri: this.options.rootUri,
+        ...(this.options.workspaceFolders
+          ? { workspaceFolders: this.options.workspaceFolders }
+          : {})
       };
 
       const result = await this.sendRequest('initialize', initializeParams);
 
-      this.serverCapabilities = result.capabilities;
+      // Normalize a numeric `textDocumentSync` (TextDocumentSyncKind) into its
+      // object form. Per the LSP spec a server may declare text sync as either
+      // a `TextDocumentSyncKind` number or a `TextDocumentSyncOptions` object;
+      // the number form implies open/close + change support. Expanding it here
+      // means capability checks for `textDocumentSync.openClose` (e.g. before
+      // sending `textDocument/didOpen`) resolve correctly instead of failing
+      // against a number that has no `openClose` property.
+      const normalizedCapabilities = normalizeServerCapabilities(result.capabilities);
+
+      this.serverCapabilities = normalizedCapabilities;
       if (result.serverInfo) {
         this.serverInfo = result.serverInfo;
       }
@@ -277,7 +320,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
 
       // Create capability guard to validate outgoing requests
       this.capabilityGuard = new CapabilityGuard(
-        result.capabilities,
+        normalizedCapabilities,
         this.logger,
         this.options.strictCapabilities
       );
