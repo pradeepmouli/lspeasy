@@ -26,19 +26,20 @@ afterEach(() => {
 });
 
 describe('applyWorkspaceEdit', () => {
-  it('applies a text edit to a file that a rename also moves (text first, then move)', () => {
-    // Reproduces the move-into-subdir shape: the moved file gets a self-import
-    // text edit keyed to its OLD uri, plus a rename op. If the rename ran first
-    // the text edit would target a missing path and throw.
+  it('processes documentChanges in array order: rename old→new, then edit on NEW', () => {
+    // The canonical move-into-subdir shape: a rename moves core.ts → sub/core.ts,
+    // then a text edit keyed to the NEW uri rewrites the self-import. The edit
+    // must read the file at its post-rename path, so ordering is honored
+    // literally — the rename runs first.
     writeFileSync(join(dir, 'core.ts'), `import { DEP } from './dep.js';\n`);
     mkdirSync(join(dir, 'sub'), { recursive: true });
 
     const edit: WorkspaceEdit = {
       documentChanges: [
-        // intentionally list the rename BEFORE the text edit to prove ordering
         { kind: 'rename', oldUri: uri('core.ts'), newUri: uri('sub/core.ts') },
         {
-          textDocument: { uri: uri('core.ts') },
+          // keyed to the NEW uri — only readable once the rename has run
+          textDocument: { uri: uri('sub/core.ts') },
           edits: [
             {
               // replace the exact `'./dep.js'` span (chars 20..30)
@@ -57,18 +58,31 @@ describe('applyWorkspaceEdit', () => {
     expect(readFileSync(join(dir, 'sub/core.ts'), 'utf8')).toBe(
       `import { DEP } from '../dep.js';\n`
     );
-    expect(applied.map((c) => c.kind)).toEqual(['edit', 'rename']);
+    expect(applied.map((c) => c.kind)).toEqual(['rename', 'edit']);
   });
 
-  it('creates a file before a text edit fills it', () => {
+  it('honors order: an edit keyed to a path a PRIOR rename moved away throws', () => {
+    // The mirror of the above: if a server emits [rename old→new, edit on OLD]
+    // the edit targets a path the rename already vacated. Sequential processing
+    // surfaces that as a read error rather than silently hoisting the edit.
+    writeFileSync(join(dir, 'core.ts'), 'x\n');
     const edit: WorkspaceEdit = {
       documentChanges: [
-        // text edit listed before the create — must still create first
+        { kind: 'rename', oldUri: uri('core.ts'), newUri: uri('moved.ts') },
+        { textDocument: { uri: uri('core.ts') }, edits: [wholeLineEdit(0, 'y')] }
+      ]
+    };
+    expect(() => applyWorkspaceEdit(edit)).toThrow(/cannot read/);
+  });
+
+  it('creates a file before a later text edit fills it', () => {
+    const edit: WorkspaceEdit = {
+      documentChanges: [
+        { kind: 'create', uri: uri('new.ts') },
         {
           textDocument: { uri: uri('new.ts') },
           edits: [wholeLineEdit(0, 'export const x = 1;\n')]
-        },
-        { kind: 'create', uri: uri('new.ts') }
+        }
       ]
     };
 
@@ -76,6 +90,117 @@ describe('applyWorkspaceEdit', () => {
 
     expect(readFileSync(join(dir, 'new.ts'), 'utf8')).toBe('export const x = 1;\n');
     expect(applied.map((c) => c.kind)).toEqual(['create', 'edit']);
+  });
+
+  it('fails a create on an existing path without overwrite/ignoreIfExists', () => {
+    writeFileSync(join(dir, 'exists.ts'), 'PRE\n');
+    const edit: WorkspaceEdit = {
+      documentChanges: [{ kind: 'create', uri: uri('exists.ts') }]
+    };
+    expect(() => applyWorkspaceEdit(edit)).toThrow(/already exists/);
+    // the pre-existing content must be untouched
+    expect(readFileSync(join(dir, 'exists.ts'), 'utf8')).toBe('PRE\n');
+  });
+
+  it('skips a create on an existing path with ignoreIfExists (content preserved)', () => {
+    writeFileSync(join(dir, 'exists.ts'), 'PRE\n');
+    const edit: WorkspaceEdit = {
+      documentChanges: [
+        { kind: 'create', uri: uri('exists.ts'), options: { ignoreIfExists: true } }
+      ]
+    };
+    const applied = applyWorkspaceEdit(edit);
+    expect(applied).toEqual([]);
+    expect(readFileSync(join(dir, 'exists.ts'), 'utf8')).toBe('PRE\n');
+  });
+
+  it('truncates an existing path on create when overwrite is set (overwrite wins)', () => {
+    writeFileSync(join(dir, 'exists.ts'), 'PRE\n');
+    const edit: WorkspaceEdit = {
+      documentChanges: [
+        // overwrite takes precedence over ignoreIfExists per the LSP spec
+        {
+          kind: 'create',
+          uri: uri('exists.ts'),
+          options: { overwrite: true, ignoreIfExists: true }
+        }
+      ]
+    };
+    const applied = applyWorkspaceEdit(edit);
+    expect(applied.map((c) => c.kind)).toEqual(['create']);
+    expect(readFileSync(join(dir, 'exists.ts'), 'utf8')).toBe('');
+  });
+
+  it('fails a rename whose destination exists without overwrite/ignoreIfExists', () => {
+    writeFileSync(join(dir, 'from.ts'), 'FROM\n');
+    writeFileSync(join(dir, 'to.ts'), 'TO\n');
+    const edit: WorkspaceEdit = {
+      documentChanges: [{ kind: 'rename', oldUri: uri('from.ts'), newUri: uri('to.ts') }]
+    };
+    expect(() => applyWorkspaceEdit(edit)).toThrow(/already exists/);
+    // neither file is clobbered
+    expect(readFileSync(join(dir, 'from.ts'), 'utf8')).toBe('FROM\n');
+    expect(readFileSync(join(dir, 'to.ts'), 'utf8')).toBe('TO\n');
+  });
+
+  it('skips a rename onto an existing destination with ignoreIfExists', () => {
+    writeFileSync(join(dir, 'from.ts'), 'FROM\n');
+    writeFileSync(join(dir, 'to.ts'), 'TO\n');
+    const edit: WorkspaceEdit = {
+      documentChanges: [
+        {
+          kind: 'rename',
+          oldUri: uri('from.ts'),
+          newUri: uri('to.ts'),
+          options: { ignoreIfExists: true }
+        }
+      ]
+    };
+    const applied = applyWorkspaceEdit(edit);
+    expect(applied).toEqual([]);
+    expect(readFileSync(join(dir, 'from.ts'), 'utf8')).toBe('FROM\n');
+    expect(readFileSync(join(dir, 'to.ts'), 'utf8')).toBe('TO\n');
+  });
+
+  it('clobbers an existing rename destination when overwrite is set', () => {
+    writeFileSync(join(dir, 'from.ts'), 'FROM\n');
+    writeFileSync(join(dir, 'to.ts'), 'TO\n');
+    const edit: WorkspaceEdit = {
+      documentChanges: [
+        {
+          kind: 'rename',
+          oldUri: uri('from.ts'),
+          newUri: uri('to.ts'),
+          options: { overwrite: true }
+        }
+      ]
+    };
+    const applied = applyWorkspaceEdit(edit);
+    expect(applied.map((c) => c.kind)).toEqual(['rename']);
+    expect(existsSync(join(dir, 'from.ts'))).toBe(false);
+    expect(readFileSync(join(dir, 'to.ts'), 'utf8')).toBe('FROM\n');
+  });
+
+  it('applies two edits on the same line correctly (reused line map)', () => {
+    // Guards the per-file lineStarts reuse: both edits resolve against the same
+    // original line map and splice in reverse offset order.
+    writeFileSync(join(dir, 'a.ts'), 'const ab = 1;\n');
+    const edit: WorkspaceEdit = {
+      changes: {
+        [uri('a.ts')]: [
+          {
+            range: { start: { line: 0, character: 6 }, end: { line: 0, character: 7 } },
+            newText: 'X'
+          },
+          {
+            range: { start: { line: 0, character: 7 }, end: { line: 0, character: 8 } },
+            newText: 'Y'
+          }
+        ]
+      }
+    };
+    applyWorkspaceEdit(edit);
+    expect(readFileSync(join(dir, 'a.ts'), 'utf8')).toBe('const XY = 1;\n');
   });
 
   it('aborts before any write when a text-edit target cannot be read', () => {

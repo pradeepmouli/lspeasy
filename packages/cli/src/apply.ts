@@ -2,9 +2,11 @@
  * Apply an LSP {@link WorkspaceEdit} to disk.
  *
  * Handles both representations a server may return:
- * - `changes`: a `{ uri -> TextEdit[] }` map (text-only).
- * - `documentChanges`: an ordered array that may interleave `TextDocumentEdit`
- *   entries with resource operations (`create` / `rename` / `delete`).
+ * - `changes`: a `{ uri -> TextEdit[] }` map (text-only, unordered → applied as
+ *   a transactional batch).
+ * - `documentChanges`: an ORDERED array that may interleave `TextDocumentEdit`
+ *   entries with resource operations (`create` / `rename` / `delete`). The array
+ *   order is significant and is honored literally (sequential application).
  *
  * TextEdits are applied per file by converting each `{line, character}` to an
  * absolute offset and splicing in REVERSE offset order so earlier edits do not
@@ -69,25 +71,46 @@ export interface AppliedChange {
   toPath?: string;
 }
 
-/** Convert a `{line, character}` position to an absolute string offset. */
-function positionToOffset(text: string, pos: LspPosition): number {
+/**
+ * Compute the absolute offset of each line start (the index just past every
+ * `\n`, plus `0` for line 0). Built ONCE per file so offset lookups are O(1);
+ * rebuilding it per call made {@link applyTextEdits} O(N·E) on the file length.
+ *
+ * Column values are LSP-spec UTF-16 code units, which is exactly how JavaScript
+ * strings are indexed, so `lineStart + character` is correct even across
+ * surrogate pairs — no extra code-point translation is needed.
+ */
+function computeLineStarts(text: string): number[] {
   const lineStarts = [0];
   for (let i = 0; i < text.length; i++) {
     if (text[i] === '\n') lineStarts.push(i + 1);
   }
-  const lineStart = lineStarts[pos.line] ?? text.length;
+  return lineStarts;
+}
+
+/** Convert a `{line, character}` position to an absolute string offset. */
+function positionToOffset(lineStarts: number[], textLength: number, pos: LspPosition): number {
+  const lineStart = lineStarts[pos.line] ?? textLength;
   return lineStart + pos.character;
 }
 
-/** Apply text edits to a string, splicing in reverse offset order. */
+/**
+ * Apply text edits to a string, splicing in reverse offset order so earlier
+ * edits do not invalidate the offsets of later ones.
+ *
+ * `lineStarts` is computed once from the original `text` and reused for both the
+ * sort and the splice loop. This is correct because edits apply in reverse
+ * offset order: a later splice never shifts the line map of an earlier (smaller)
+ * offset, so the original line map stays valid for every remaining edit.
+ */
 export function applyTextEdits(text: string, edits: LspTextEdit[]): string {
-  const sorted = [...edits].sort(
-    (a, b) => positionToOffset(text, b.range.start) - positionToOffset(text, a.range.start)
-  );
+  const lineStarts = computeLineStarts(text);
+  const offset = (pos: LspPosition) => positionToOffset(lineStarts, text.length, pos);
+  const sorted = [...edits].sort((a, b) => offset(b.range.start) - offset(a.range.start));
   let out = text;
   for (const e of sorted) {
-    const start = positionToOffset(out, e.range.start);
-    const end = positionToOffset(out, e.range.end);
+    const start = offset(e.range.start);
+    const end = offset(e.range.end);
     out = out.slice(0, start) + e.newText + out.slice(end);
   }
   return out;
@@ -154,99 +177,138 @@ interface TextWrite {
   edits: LspTextEdit[];
 }
 
+/** Read a text-edit target, throwing a clear error if it cannot be read. */
+function readForEdit(path: string): string {
+  try {
+    return readFileSync(path, 'utf8');
+  } catch (err) {
+    throw new Error(
+      `cannot read ${path} for text edits: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+}
+
+/**
+ * Perform a single `create` resource op, honoring LSP `overwrite` /
+ * `ignoreIfExists` precedence. Returns the {@link AppliedChange} when the file
+ * was created, or `undefined` when the op was skipped per `ignoreIfExists`.
+ *
+ * Per the LSP spec, `overwrite` takes precedence over `ignoreIfExists`. With
+ * neither flag set, a `create` op on an EXISTING path is an error — silently
+ * skipping it (the old behaviour) let a later text edit run against the
+ * pre-existing file the server expected to have freshly created.
+ */
+function applyCreate(op: CreateFileOp): AppliedChange | undefined {
+  const p = fileURLToPath(op.uri);
+  if (existsSync(p)) {
+    if (op.options?.overwrite) {
+      // proceed: truncate to an empty file
+    } else if (op.options?.ignoreIfExists) {
+      return undefined;
+    } else {
+      throw new Error(`cannot create ${p}: already exists (no overwrite/ignoreIfExists)`);
+    }
+  }
+  mkdirSync(dirname(p), { recursive: true });
+  writeFileSync(p, '');
+  return { kind: 'create', path: p };
+}
+
+/**
+ * Perform a single `rename` resource op, honoring LSP `overwrite` /
+ * `ignoreIfExists` precedence. A rename whose destination already exists is an
+ * error unless `overwrite` is set (clobber) or `ignoreIfExists` is set (skip).
+ * The old code called `renameSync` unconditionally, which clobbers on POSIX.
+ */
+function applyRename(op: RenameFileOp): AppliedChange | undefined {
+  const from = fileURLToPath(op.oldUri);
+  const to = fileURLToPath(op.newUri);
+  if (existsSync(to)) {
+    if (op.options?.overwrite) {
+      // proceed: renameSync replaces the destination
+    } else if (op.options?.ignoreIfExists) {
+      return undefined;
+    } else {
+      throw new Error(`cannot rename to ${to}: already exists (no overwrite/ignoreIfExists)`);
+    }
+  }
+  mkdirSync(dirname(to), { recursive: true });
+  renameSync(from, to);
+  return { kind: 'rename', path: from, toPath: to };
+}
+
+/** Perform a single `delete` resource op, honoring `ignoreIfNotExists`. */
+function applyDelete(op: DeleteFileOp): AppliedChange | undefined {
+  const p = fileURLToPath(op.uri);
+  if (!existsSync(p) && op.options?.ignoreIfNotExists) return undefined;
+  rmSync(p, { recursive: op.options?.recursive ?? false });
+  return { kind: 'delete', path: p };
+}
+
+/** Apply a single resolved text write to disk. */
+function applyTextWrite(w: TextWrite): AppliedChange {
+  const after = applyTextEdits(readForEdit(w.path), w.edits);
+  writeFileSync(w.path, after);
+  return { kind: 'edit', path: w.path, editCount: w.edits.length };
+}
+
 /**
  * Apply a {@link WorkspaceEdit} to disk and return what was changed.
  *
- * ### Ordering
- * A `documentChanges` array may interleave text edits with resource operations
- * in any order. LSP makes the array order significant, but servers are not
- * uniformly careful: a text edit may be keyed to a file that a later `rename`
- * op moves, or a text edit may target a file an earlier-listed `create` op must
- * make first. To be robust regardless of emission order we apply in three
- * phases:
+ * ### `documentChanges` — sequential, order significant
+ * Per the LSP spec the `documentChanges` array order is SIGNIFICANT: each entry
+ * (text edit or resource op) is applied in the exact order the server emitted
+ * it. This is the only correct interpretation — e.g. `[rename old→new, textEdit
+ * on new]` requires the rename to run first so the edit can read `new`. (An
+ * earlier three-phase model hoisted all resource ops into separate passes,
+ * which silently reordered a server's ops and broke exactly that shape.)
  *
- *   1. **creates** — so a text edit can fill a freshly created file;
- *   2. **text edits** — read every target up-front, then write (any edit keyed
- *      to a file that is *also* being renamed is applied at the file's CURRENT
- *      path, before the move);
- *   3. **renames / deletes** — last, so no text edit ever targets a path a
- *      rename already moved.
+ * Because order is honored literally, a failure partway through `documentChanges`
+ * (e.g. a text edit keyed to a not-yet-created path) may leave earlier ops
+ * applied — that is inherent to respecting server-specified order.
  *
- * ### Transactional-ish behaviour
- * All text-edit targets are read and their new contents computed in memory
- * before any text edit is written. If a read fails (e.g. a missing source file)
- * the function throws before any text edit is applied, so a failed edit never
- * leaves files half-edited. (Phase-1 `create` ops run first, so a create
- * followed by a failed read can leave an empty created file — no live server
- * emits that shape; the guarantee covers the text-edit phase.)
+ * ### `changes` map — unordered, transactional
+ * The `changes` map carries no resource ops and no defined ordering, so it is
+ * applied as a batch: every target is read and its new content computed in
+ * memory BEFORE any write. If a read fails the function throws before any write,
+ * so a failed edit never leaves the tree half-applied.
  */
 export function applyWorkspaceEdit(edit: WorkspaceEdit): AppliedChange[] {
   const applied: AppliedChange[] = [];
 
-  // Normalize both representations into resource ops + text writes.
-  const creates: CreateFileOp[] = [];
-  const renames: RenameFileOp[] = [];
-  const deletes: DeleteFileOp[] = [];
-  const textWrites: TextWrite[] = [];
-
   if (edit.documentChanges) {
+    // Sequential: honor the server-specified order literally.
     for (const dc of edit.documentChanges) {
       if ('kind' in dc) {
-        if (dc.kind === 'create') creates.push(dc);
-        else if (dc.kind === 'rename') renames.push(dc);
-        else if (dc.kind === 'delete') deletes.push(dc);
+        const change =
+          dc.kind === 'create'
+            ? applyCreate(dc)
+            : dc.kind === 'rename'
+              ? applyRename(dc)
+              : applyDelete(dc);
+        if (change) applied.push(change);
       } else {
-        textWrites.push({ path: fileURLToPath(dc.textDocument.uri), edits: dc.edits });
+        applied.push(applyTextWrite({ path: fileURLToPath(dc.textDocument.uri), edits: dc.edits }));
       }
     }
-  } else if (edit.changes) {
-    for (const uri of Object.keys(edit.changes).sort()) {
-      textWrites.push({ path: fileURLToPath(uri), edits: edit.changes[uri]! });
+    return applied;
+  }
+
+  if (edit.changes) {
+    // Unordered text-only map: read every target and compute new content BEFORE
+    // writing anything, so a failed read aborts without a half-applied tree.
+    const writes: TextWrite[] = Object.keys(edit.changes)
+      .sort()
+      .map((uri) => ({ path: fileURLToPath(uri), edits: edit.changes![uri]! }));
+    const pending = writes.map((w) => ({
+      path: w.path,
+      after: applyTextEdits(readForEdit(w.path), w.edits),
+      count: w.edits.length
+    }));
+    for (const w of pending) {
+      writeFileSync(w.path, w.after);
+      applied.push({ kind: 'edit', path: w.path, editCount: w.count });
     }
-  }
-
-  // Phase 1: creates first, so subsequent text edits can fill them.
-  for (const op of creates) {
-    const p = fileURLToPath(op.uri);
-    if (existsSync(p) && op.options?.ignoreIfExists) continue;
-    if (existsSync(p) && !op.options?.overwrite) continue;
-    mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, '');
-    applied.push({ kind: 'create', path: p });
-  }
-
-  // Phase 2: read every text-edit target and compute new content BEFORE writing
-  // anything, so a failed read aborts without a half-applied tree.
-  const pending = textWrites.map((w) => {
-    let before: string;
-    try {
-      before = readFileSync(w.path, 'utf8');
-    } catch (err) {
-      throw new Error(
-        `cannot read ${w.path} for text edits: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
-    return { path: w.path, after: applyTextEdits(before, w.edits), count: w.edits.length };
-  });
-  for (const w of pending) {
-    writeFileSync(w.path, w.after);
-    applied.push({ kind: 'edit', path: w.path, editCount: w.count });
-  }
-
-  // Phase 3: renames and deletes last — never move a path a text edit targeted.
-  for (const op of renames) {
-    const from = fileURLToPath(op.oldUri);
-    const to = fileURLToPath(op.newUri);
-    if (existsSync(to) && op.options?.ignoreIfExists) continue;
-    mkdirSync(dirname(to), { recursive: true });
-    renameSync(from, to);
-    applied.push({ kind: 'rename', path: from, toPath: to });
-  }
-  for (const op of deletes) {
-    const p = fileURLToPath(op.uri);
-    if (!existsSync(p) && op.options?.ignoreIfNotExists) continue;
-    rmSync(p, { recursive: op.options?.recursive ?? false });
-    applied.push({ kind: 'delete', path: p });
   }
 
   return applied;
