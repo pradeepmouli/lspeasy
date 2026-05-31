@@ -3,9 +3,11 @@
  * as the base (not process.cwd), and out-of-root targets must be refused.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { sep } from 'node:path';
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, sep } from 'node:path';
 
-import { resolvePathArg, summarizeChanges } from './io.js';
+import { isInsideRoot, resolvePathArg, summarizeChanges } from './io.js';
 import type { AppliedChange } from './apply.js';
 
 const flags = (root: string, allowOutsideRoot = false) => ({ root, json: false, allowOutsideRoot });
@@ -62,6 +64,49 @@ describe('resolvePathArg', () => {
   it('permits an out-of-root arg when allowOutsideRoot is set', () => {
     const out = resolvePathArg(`${sep}repoA${sep}foo.ts`, flags(`${sep}repoB`, true));
     expect(out).toBe(`${sep}repoA${sep}foo.ts`);
+  });
+});
+
+describe('isInsideRoot — symlink-aware containment', () => {
+  let root: string;
+  let external: string;
+
+  afterEach(() => {
+    if (root) rmSync(root, { recursive: true, force: true });
+    if (external) rmSync(external, { recursive: true, force: true });
+  });
+
+  it('refuses a path that traverses a symlink escaping --root', () => {
+    // root/outside -> /tmp/external. A lexical check accepts root/outside/x;
+    // realpath canonicalization must follow the link and refuse it.
+    root = realpathSync(mkdtempSync(join(tmpdir(), 'lspeasy-root-')));
+    external = realpathSync(mkdtempSync(join(tmpdir(), 'lspeasy-ext-')));
+    symlinkSync(external, join(root, 'outside'));
+
+    // Destination does NOT exist yet — guard must realpath the existing parent.
+    expect(isInsideRoot(join(root, 'outside', 'dest.ts'), root)).toBe(false);
+
+    // And via resolvePathArg the symlink-escaping arg is refused (exit non-zero).
+    const exit = vi.spyOn(process, 'exit').mockImplementation(((): never => {
+      throw new Error('exit');
+    }) as never);
+    vi.spyOn(process.stderr, 'write').mockImplementation((() => true) as never);
+    expect(() =>
+      resolvePathArg(join(root, 'outside', 'dest.ts'), {
+        root,
+        json: false,
+        allowOutsideRoot: false
+      })
+    ).toThrow('exit');
+    expect(exit).toHaveBeenCalledWith(1);
+  });
+
+  it('accepts a genuine in-root path (including a not-yet-existing leaf)', () => {
+    root = realpathSync(mkdtempSync(join(tmpdir(), 'lspeasy-root-')));
+    mkdirSync(join(root, 'src'));
+    writeFileSync(join(root, 'src', 'a.ts'), 'x\n');
+    expect(isInsideRoot(join(root, 'src', 'a.ts'), root)).toBe(true);
+    expect(isInsideRoot(join(root, 'src', 'new', 'b.ts'), root)).toBe(true);
   });
 });
 
