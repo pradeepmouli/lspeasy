@@ -62,6 +62,61 @@ const CLIENT_CAPABILITIES = {
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /**
+ * Split a server launch command into argv tokens, honoring single- and
+ * double-quoted spans so an argument containing spaces survives intact (e.g.
+ * `node "/path with spaces/server.js" --stdio`). A naive `split(/\s+/)` shredded
+ * such commands into broken fragments.
+ *
+ * This is a deliberately small, dependency-free tokenizer (matching the repo's
+ * "no extra dependency" ethos): quotes group, a `\` escapes the next character,
+ * and unquoted whitespace separates tokens. It is not a full POSIX shell parser
+ * (no variable/glob expansion) — only the quoting needed to pass paths/args.
+ */
+export function tokenizeCommand(command: string): string[] {
+  const tokens: string[] = [];
+  let current = '';
+  let inToken = false;
+  let quote: '"' | "'" | undefined;
+
+  for (let i = 0; i < command.length; i++) {
+    const ch = command[i]!;
+    if (quote) {
+      if (ch === '\\' && quote === '"' && i + 1 < command.length) {
+        // In double quotes a backslash escapes the next character.
+        current += command[++i]!;
+      } else if (ch === quote) {
+        quote = undefined;
+      } else {
+        current += ch;
+      }
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      inToken = true;
+      continue;
+    }
+    if (ch === '\\' && i + 1 < command.length) {
+      current += command[++i]!;
+      inToken = true;
+      continue;
+    }
+    if (/\s/.test(ch)) {
+      if (inToken) {
+        tokens.push(current);
+        current = '';
+        inToken = false;
+      }
+      continue;
+    }
+    current += ch;
+    inToken = true;
+  }
+  if (inToken) tokens.push(current);
+  return tokens;
+}
+
+/**
  * Logger that routes everything to **stderr**, keeping stdout clean for the
  * CLI's own output (critical for `--json`).
  */
@@ -108,7 +163,7 @@ export class RefactorSession {
 
   /** Spawn the server and complete the LSP handshake. */
   async start(): Promise<void> {
-    const [cmd, ...args] = this.opts.serverCommand.split(/\s+/).filter(Boolean);
+    const [cmd, ...args] = tokenizeCommand(this.opts.serverCommand);
     if (!cmd) throw new Error('Empty --server command');
 
     this.log(`spawning: ${this.opts.serverCommand} (cwd ${this.opts.root})`);
