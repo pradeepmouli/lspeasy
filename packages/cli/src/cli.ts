@@ -13,6 +13,7 @@
 
 import { parseArgs } from 'node:util';
 import { argv } from 'node:process';
+import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { fail, type GlobalFlags } from './io.js';
@@ -174,12 +175,21 @@ async function main(): Promise<void> {
   }
 }
 
-/** True when this module is the process entry point (vs. imported by a test). */
+/**
+ * True when this module is the process entry point (vs. imported by a test).
+ *
+ * Compares the resolved REAL paths of `import.meta.url` and `argv[1]`. The bin
+ * (`lspeasy`) is installed as a symlink to `dist/cli.js`, so `argv[1]` is the
+ * symlink path while `import.meta.url` is Node's realpath — a plain string
+ * compare would mismatch and silently never run `main()` (the CLI would print
+ * nothing and exit 0). `realpathSync` on both sides makes the symlinked-bin and
+ * direct-invocation cases agree.
+ */
 function isEntryPoint(): boolean {
   const entry = argv[1];
   if (!entry) return false;
   try {
-    return fileURLToPath(import.meta.url) === entry;
+    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(entry);
   } catch {
     return false;
   }
