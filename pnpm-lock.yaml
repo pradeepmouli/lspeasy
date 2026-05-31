@@ -93,6 +93,19 @@ importers:
         specifier: ^3.5.34
         version: 3.5.34(typescript@6.0.3)
 
+  packages/cli:
+    dependencies:
+      '@lspeasy/client':
+        specifier: workspace:*
+        version: link:../client
+      '@lspeasy/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   packages/client:
     dependencies:
       '@lspeasy/core':
