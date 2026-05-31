@@ -18,6 +18,8 @@ export interface GlobalFlags {
   verbose: boolean;
   waitMs: number;
   allowOutsideRoot: boolean;
+  /** Permit move-file to replace an existing destination (default: OFF). */
+  overwrite: boolean;
 }
 
 /**

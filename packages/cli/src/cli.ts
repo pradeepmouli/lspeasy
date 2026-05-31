@@ -12,8 +12,10 @@
  */
 
 import { parseArgs } from 'node:util';
+import { argv } from 'node:process';
+import { fileURLToPath } from 'node:url';
 
-import type { GlobalFlags } from './io.js';
+import { fail, type GlobalFlags } from './io.js';
 import { runRename } from './commands/rename.js';
 import { runMoveFile } from './commands/move-file.js';
 import { runMoveSymbol } from './commands/move-symbol.js';
@@ -33,10 +35,11 @@ Global flags:
   --server <cmd>   LSP server launch command  (default: "typescript-language-server --stdio")
   --root <dir>     Project root               (default: current working directory)
   --dry-run        Print the WorkspaceEdit / affected files; change nothing
-  --apply          Apply changes to disk      (default)
+  --apply          Apply changes to disk      (default; conflicts with --dry-run)
   --json           Emit machine-readable JSON on stdout
   --wait <ms>      Index wait before requests  (default: 15000)
   --verbose        Progress logging to stderr
+  --overwrite      move-file: replace an existing destination (default: OFF)
   --allow-outside-root  Permit file-path args that resolve outside --root (default: OFF)
   -h, --help       Show this help
 
@@ -53,9 +56,61 @@ const OPTION_CONFIG = {
   json: { type: 'boolean' as const, default: false },
   wait: { type: 'string' as const, default: '15000' },
   verbose: { type: 'boolean' as const, default: false },
+  overwrite: { type: 'boolean' as const, default: false },
   'allow-outside-root': { type: 'boolean' as const, default: false },
   help: { type: 'boolean' as const, short: 'h', default: false }
 };
+
+/** Parsed `--flag` values as `util.parseArgs` returns them for {@link OPTION_CONFIG}. */
+export type ParsedOptionValues = {
+  server?: string;
+  root?: string;
+  'dry-run'?: boolean;
+  apply?: boolean;
+  json?: boolean;
+  wait?: string;
+  verbose?: boolean;
+  overwrite?: boolean;
+  'allow-outside-root'?: boolean;
+};
+
+/**
+ * Validate raw `--flag` values and project them onto {@link GlobalFlags}.
+ *
+ * Enforces two precedence rules that were previously silent footguns:
+ *  - `--apply` and `--dry-run` are mutually exclusive (both default to the
+ *    documented behaviour, so passing both is ambiguous → error). This is also
+ *    the only place that reads `--apply`, which was declared but never consulted.
+ *  - `--wait` must parse to a finite, non-negative number; otherwise a typo like
+ *    `--wait abc` became `NaN`, which `setTimeout` coerces to `0`, silently
+ *    skipping the index wait the refactor requests depend on.
+ *
+ * On a validation failure it calls {@link fail} (writes the error and exits
+ * non-zero); the `never`-returning branch keeps the happy path well-typed.
+ */
+export function buildFlags(values: ParsedOptionValues): GlobalFlags {
+  const json = values.json === true;
+
+  if (values.apply === true && values['dry-run'] === true) {
+    fail('--apply and --dry-run are mutually exclusive', json);
+  }
+
+  const waitMs = Number(values.wait ?? '15000');
+  if (!Number.isFinite(waitMs) || waitMs < 0) {
+    fail(`--wait must be a non-negative number of milliseconds, got "${values.wait}"`, json);
+  }
+
+  return {
+    server: values.server ?? 'typescript-language-server --stdio',
+    root: values.root ? values.root : process.cwd(),
+    dryRun: values['dry-run'] === true,
+    json,
+    verbose: values.verbose === true,
+    waitMs,
+    allowOutsideRoot: values['allow-outside-root'] === true,
+    overwrite: values.overwrite === true
+  };
+}
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({
@@ -69,15 +124,7 @@ async function main(): Promise<void> {
     process.exit(values.help ? 0 : 1);
   }
 
-  const flags: GlobalFlags = {
-    server: values.server ?? 'typescript-language-server --stdio',
-    root: values.root ? values.root : process.cwd(),
-    dryRun: values['dry-run'] === true,
-    json: values.json === true,
-    verbose: values.verbose === true,
-    waitMs: Number(values.wait ?? '15000'),
-    allowOutsideRoot: values['allow-outside-root'] === true
-  };
+  const flags = buildFlags(values);
 
   const [command, ...rest] = positionals;
 
@@ -127,7 +174,20 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((err) => {
-  process.stderr.write(`error: ${err instanceof Error ? err.message : String(err)}\n`);
-  process.exit(1);
-});
+/** True when this module is the process entry point (vs. imported by a test). */
+function isEntryPoint(): boolean {
+  const entry = argv[1];
+  if (!entry) return false;
+  try {
+    return fileURLToPath(import.meta.url) === entry;
+  } catch {
+    return false;
+  }
+}
+
+if (isEntryPoint()) {
+  main().catch((err) => {
+    process.stderr.write(`error: ${err instanceof Error ? err.message : String(err)}\n`);
+    process.exit(1);
+  });
+}

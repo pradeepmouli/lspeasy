@@ -30,11 +30,19 @@ function isGitTracked(root: string, path: string): boolean {
   }
 }
 
-function physicallyMove(root: string, from: string, to: string, dryRun: boolean): AppliedChange {
+function physicallyMove(
+  root: string,
+  from: string,
+  to: string,
+  dryRun: boolean,
+  overwrite: boolean
+): AppliedChange {
   if (!dryRun) {
     mkdirSync(dirname(to), { recursive: true });
     if (isGitTracked(root, from)) {
-      execFileSync('git', ['mv', from, to], { cwd: root });
+      // `git mv` refuses an existing destination; `-f` is required to clobber.
+      const gitArgs = overwrite ? ['mv', '-f', from, to] : ['mv', from, to];
+      execFileSync('git', gitArgs, { cwd: root });
     } else {
       renameSync(from, to);
     }
@@ -49,6 +57,13 @@ export async function runMoveFile(
   const from = resolvePathArg(args.oldPath, flags);
   const to = resolvePathArg(args.newPath, flags);
   if (!existsSync(from)) fail(`source file not found: ${from}`, flags.json);
+  // Refuse to clobber an existing destination unless --overwrite was given.
+  // `renameSync` (the untracked-file path) silently destroys the destination on
+  // POSIX, and `git mv` (without -f) refuses — so guard up-front, before
+  // spawning the server, so dry-run predicts the refusal too.
+  if (existsSync(to) && !flags.overwrite) {
+    fail(`destination already exists: ${to} (pass --overwrite to replace)`, flags.json);
+  }
 
   const session = new RefactorSession({
     serverCommand: flags.server,
@@ -79,7 +94,7 @@ export async function runMoveFile(
         : applyWorkspaceEdit(importerEdit)
       : [];
 
-    const moveChange = physicallyMove(flags.root, from, to, flags.dryRun);
+    const moveChange = physicallyMove(flags.root, from, to, flags.dryRun, flags.overwrite);
 
     emitResult('move-file', [...importerChanges, moveChange], flags, {
       importerFilesUpdated: importerChanges.length
