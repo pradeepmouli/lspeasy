@@ -5,7 +5,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { sep } from 'node:path';
 
-import { resolvePathArg } from './io.js';
+import { resolvePathArg, summarizeChanges } from './io.js';
+import type { AppliedChange } from './apply.js';
 
 const flags = (root: string, allowOutsideRoot = false) => ({ root, json: false, allowOutsideRoot });
 
@@ -61,5 +62,36 @@ describe('resolvePathArg', () => {
   it('permits an out-of-root arg when allowOutsideRoot is set', () => {
     const out = resolvePathArg(`${sep}repoA${sep}foo.ts`, flags(`${sep}repoB`, true));
     expect(out).toBe(`${sep}repoA${sep}foo.ts`);
+  });
+});
+
+describe('summarizeChanges', () => {
+  it('strips the root prefix with the platform separator (path.relative)', () => {
+    // Using path.relative makes the prefix-strip separator-correct on every
+    // platform, where a hardcoded '/' would leave Windows paths un-shortened.
+    const root = `${sep}repo`;
+    const changes: AppliedChange[] = [
+      { kind: 'edit', path: `${sep}repo${sep}src${sep}a.ts`, editCount: 2 },
+      { kind: 'rename', path: `${sep}repo${sep}old.ts`, toPath: `${sep}repo${sep}sub${sep}new.ts` }
+    ];
+    const out = summarizeChanges(changes, root, false);
+    const rel = ['src', 'a.ts'].join(sep);
+    const relOld = 'old.ts';
+    const relNew = ['sub', 'new.ts'].join(sep);
+    expect(out).toContain(`edit   2\t${rel}`);
+    expect(out).toContain(`rename  \t${relOld} -> ${relNew}`);
+    // the absolute root prefix must be gone
+    expect(out).not.toContain(`${sep}repo${sep}src`);
+  });
+
+  it('renders an out-of-root path as a platform-correct relative path', () => {
+    const out = summarizeChanges(
+      [{ kind: 'edit', path: `${sep}elsewhere${sep}x.ts`, editCount: 1 }],
+      `${sep}repo`,
+      true
+    );
+    // path.relative('/repo', '/elsewhere/x.ts') === '../elsewhere/x.ts'
+    expect(out).toContain(['..', 'elsewhere', 'x.ts'].join(sep));
+    expect(out).toContain('[dry-run]');
   });
 });

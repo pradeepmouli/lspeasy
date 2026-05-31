@@ -6,7 +6,7 @@
  * **stderr** so piped `--json` consumers get clean input.
  */
 
-import { isAbsolute, resolve, sep } from 'node:path';
+import { isAbsolute, relative, resolve, sep } from 'node:path';
 
 import type { AppliedChange } from './apply.js';
 
@@ -75,7 +75,11 @@ export function fail(message: string, json: boolean): never {
 
 /** Render a list of applied/planned changes for human output. */
 export function summarizeChanges(changes: AppliedChange[], root: string, dryRun: boolean): string {
-  const rel = (p: string) => p.replace(resolve(root) + '/', '');
+  // Use path.relative so the root prefix is stripped with the platform
+  // separator (a hardcoded '/' left Windows paths un-shortened). Fall back to
+  // the absolute path for anything that resolves outside root.
+  const resolvedRoot = resolve(root);
+  const rel = (p: string) => relative(resolvedRoot, p) || p;
   const lines: string[] = [];
   const verb = dryRun ? 'would change' : 'changed';
   const totalEdits = changes.reduce((n, c) => n + (c.editCount ?? 0), 0);
