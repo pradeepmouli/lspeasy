@@ -16,7 +16,7 @@
  *     file rather than prompting for a new one.
  */
 
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 import { applyWorkspaceEdit, planWorkspaceEdit, type WorkspaceEdit } from '../apply.js';
@@ -94,7 +94,7 @@ export async function runMoveSymbol(
           uri: pathToFileURL(targetFile).href,
           languageId: 'typescript',
           version: 1,
-          text: (await import('node:fs')).readFileSync(targetFile, 'utf8')
+          text: readFileSync(targetFile, 'utf8')
         }
       });
     }
