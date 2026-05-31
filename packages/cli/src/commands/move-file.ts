@@ -84,14 +84,17 @@ export async function runMoveFile(
     );
 
     // A null edit just means no importers needed updating — still do the move.
-    // Strip any resource op the server folded in: we own the single physical
-    // move below (so `git mv` history is preserved); applying a server rename
-    // here too would double-move and break a re-run with "source not found".
-    const importerEdit = edit ? stripResourceOps(edit) : undefined;
+    // Strip ONLY the rename the server folded in that duplicates our physical
+    // move below (so `git mv` history is preserved); applying that rename here
+    // too would double-move and break a re-run with "source not found". Other
+    // resource ops the server emits (e.g. a `create shim.ts`) are preserved.
+    const importerEdit = edit ? stripResourceOps(edit, { from, to }) : undefined;
+    // Validate the SERVER-RETURNED edit against --root before applying it.
+    const guard = { root: flags.root, allowOutsideRoot: flags.allowOutsideRoot };
     const importerChanges = importerEdit
       ? flags.dryRun
-        ? planWorkspaceEdit(importerEdit)
-        : applyWorkspaceEdit(importerEdit)
+        ? planWorkspaceEdit(importerEdit, guard)
+        : applyWorkspaceEdit(importerEdit, guard)
       : [];
 
     const moveChange = physicallyMove(flags.root, from, to, flags.dryRun, flags.overwrite);

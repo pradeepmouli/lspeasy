@@ -49,7 +49,11 @@ export async function runRename(
     if (!edit)
       fail('rename returned no edit (symbol not renamable, or project not indexed)', flags.json);
 
-    const changes = flags.dryRun ? planWorkspaceEdit(edit) : applyWorkspaceEdit(edit);
+    // Validate the SERVER-RETURNED edit against --root: a server can return a
+    // URI/resource op outside the project; applying it unguarded would bypass
+    // the --root safety guarantee. The guard refuses unless --allow-outside-root.
+    const guard = { root: flags.root, allowOutsideRoot: flags.allowOutsideRoot };
+    const changes = flags.dryRun ? planWorkspaceEdit(edit, guard) : applyWorkspaceEdit(edit, guard);
     emitResult('rename', changes, flags, { newName: args.newName });
   } finally {
     await session.stop();
