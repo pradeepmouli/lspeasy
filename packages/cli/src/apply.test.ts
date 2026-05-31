@@ -227,20 +227,109 @@ describe('applyWorkspaceEdit', () => {
 });
 
 describe('stripResourceOps', () => {
-  it('removes resource ops but keeps text edits', () => {
+  it('drops ONLY the rename matching the physical move, keeping text edits', () => {
+    const from = join(dir, 'a.ts');
+    const to = join(dir, 'b.ts');
     const edit: WorkspaceEdit = {
       documentChanges: [
         { kind: 'rename', oldUri: uri('a.ts'), newUri: uri('b.ts') },
         { textDocument: { uri: uri('c.ts') }, edits: [wholeLineEdit(0, 'x')] }
       ]
     };
-    const out = stripResourceOps(edit);
+    const out = stripResourceOps(edit, { from, to });
     expect(out.documentChanges).toHaveLength(1);
     expect(out.documentChanges![0]).toHaveProperty('textDocument');
   });
 
+  it('preserves UNRELATED resource ops (e.g. a server create) and their order', () => {
+    // A server's willRenameFiles may emit `create shim.ts` + a text edit for it,
+    // alongside the rename that duplicates our physical move. Only the matching
+    // rename is stripped; the create and its edit survive, in order.
+    const from = join(dir, 'old.ts');
+    const to = join(dir, 'new.ts');
+    const edit: WorkspaceEdit = {
+      documentChanges: [
+        { kind: 'create', uri: uri('shim.ts') },
+        { kind: 'rename', oldUri: uri('old.ts'), newUri: uri('new.ts') },
+        { textDocument: { uri: uri('shim.ts') }, edits: [wholeLineEdit(0, 'export {};\n')] }
+      ]
+    };
+    const out = stripResourceOps(edit, { from, to });
+    expect(out.documentChanges).toHaveLength(2);
+    expect(out.documentChanges![0]).toMatchObject({ kind: 'create', uri: uri('shim.ts') });
+    expect(out.documentChanges![1]).toHaveProperty('textDocument');
+  });
+
+  it('keeps a rename that does NOT match the physical move', () => {
+    const from = join(dir, 'a.ts');
+    const to = join(dir, 'b.ts');
+    const edit: WorkspaceEdit = {
+      documentChanges: [{ kind: 'rename', oldUri: uri('x.ts'), newUri: uri('y.ts') }]
+    };
+    const out = stripResourceOps(edit, { from, to });
+    expect(out.documentChanges).toHaveLength(1);
+  });
+
   it('passes a changes-map edit through unchanged', () => {
     const edit: WorkspaceEdit = { changes: { [uri('a.ts')]: [wholeLineEdit(0, 'x')] } };
-    expect(stripResourceOps(edit)).toBe(edit);
+    expect(stripResourceOps(edit, { from: 'x', to: 'y' })).toBe(edit);
+  });
+});
+
+describe('applyWorkspaceEdit — root boundary on server-returned edits', () => {
+  it('refuses a server edit whose target escapes --root', () => {
+    // Write a file outside the project root and target it via a changes map.
+    const outside = mkdtempSync(join(tmpdir(), 'lspeasy-outside-'));
+    try {
+      writeFileSync(join(outside, 'victim.ts'), 'secret\n');
+      const edit: WorkspaceEdit = {
+        changes: {
+          [pathToFileURL(join(outside, 'victim.ts')).href]: [wholeLineEdit(0, 'pwned ')]
+        }
+      };
+      const guard = { root: dir, allowOutsideRoot: false };
+      expect(() => applyWorkspaceEdit(edit, guard)).toThrow(/outside --root/);
+      // The external file must be untouched.
+      expect(readFileSync(join(outside, 'victim.ts'), 'utf8')).toBe('secret\n');
+    } finally {
+      rmSync(outside, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a server rename whose destination escapes --root (validated pre-flight)', () => {
+    const outside = mkdtempSync(join(tmpdir(), 'lspeasy-outside-'));
+    try {
+      writeFileSync(join(dir, 'in.ts'), 'x\n');
+      const edit: WorkspaceEdit = {
+        documentChanges: [
+          {
+            kind: 'rename',
+            oldUri: uri('in.ts'),
+            newUri: pathToFileURL(join(outside, 'out.ts')).href
+          }
+        ]
+      };
+      const guard = { root: dir, allowOutsideRoot: false };
+      expect(() => applyWorkspaceEdit(edit, guard)).toThrow(/outside --root/);
+      // The source must NOT have been moved — refusal happens before any op.
+      expect(existsSync(join(dir, 'in.ts'))).toBe(true);
+    } finally {
+      rmSync(outside, { recursive: true, force: true });
+    }
+  });
+
+  it('permits an out-of-root server edit when allowOutsideRoot is set', () => {
+    const outside = mkdtempSync(join(tmpdir(), 'lspeasy-outside-'));
+    try {
+      writeFileSync(join(outside, 'ok.ts'), 'old\n');
+      const edit: WorkspaceEdit = {
+        changes: { [pathToFileURL(join(outside, 'ok.ts')).href]: [wholeLineEdit(0, 'new ')] }
+      };
+      const guard = { root: dir, allowOutsideRoot: true };
+      expect(() => applyWorkspaceEdit(edit, guard)).not.toThrow();
+      expect(readFileSync(join(outside, 'ok.ts'), 'utf8')).toBe('new old\n');
+    } finally {
+      rmSync(outside, { recursive: true, force: true });
+    }
   });
 });

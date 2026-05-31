@@ -17,6 +17,8 @@ import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync 
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { assertTargetsInsideRoot } from './io.js';
+
 export interface LspPosition {
   line: number;
   character: number;
@@ -59,6 +61,52 @@ type DocumentChange = TextDocumentEdit | CreateFileOp | RenameFileOp | DeleteFil
 export interface WorkspaceEdit {
   changes?: Record<string, LspTextEdit[]>;
   documentChanges?: DocumentChange[];
+}
+
+/**
+ * Root-boundary inputs threaded into the apply pipeline so SERVER-RETURNED
+ * edits are validated against `--root` before anything touches disk.
+ */
+export interface BoundaryGuard {
+  root: string;
+  allowOutsideRoot: boolean;
+}
+
+/**
+ * Collect every absolute filesystem path a {@link WorkspaceEdit} would touch —
+ * text-edit targets, `create` uri, `rename` old AND new uri, and `delete` uri —
+ * so the root-boundary guard can refuse the whole edit before applying any op.
+ */
+function collectEditTargets(edit: WorkspaceEdit): string[] {
+  const targets: string[] = [];
+  if (edit.documentChanges) {
+    for (const dc of edit.documentChanges) {
+      if ('kind' in dc) {
+        if (dc.kind === 'create') targets.push(fileURLToPath(dc.uri));
+        else if (dc.kind === 'rename') {
+          targets.push(fileURLToPath(dc.oldUri), fileURLToPath(dc.newUri));
+        } else if (dc.kind === 'delete') targets.push(fileURLToPath(dc.uri));
+      } else {
+        targets.push(fileURLToPath(dc.textDocument.uri));
+      }
+    }
+  }
+  if (edit.changes) {
+    for (const uri of Object.keys(edit.changes)) targets.push(fileURLToPath(uri));
+  }
+  return targets;
+}
+
+/**
+ * Pre-flight a server-returned {@link WorkspaceEdit} against the root boundary,
+ * refusing (throw) if any planned target escapes `--root`. Runs BEFORE any
+ * mutation so a single out-of-root op cannot slip through after earlier ops have
+ * already hit disk. Shared by {@link planWorkspaceEdit} and
+ * {@link applyWorkspaceEdit} so dry-run predicts the same refusal.
+ */
+function guardEditTargets(edit: WorkspaceEdit, guard?: BoundaryGuard): void {
+  if (!guard) return;
+  assertTargetsInsideRoot(collectEditTargets(edit), guard);
 }
 
 /** A single change the apply pipeline performed, for reporting / dry-run output. */
@@ -120,7 +168,8 @@ export function applyTextEdits(text: string, edits: LspTextEdit[]): string {
  * Normalize a {@link WorkspaceEdit} into an ordered list of changes without
  * touching disk. Useful for `--dry-run` and `--json` reporting.
  */
-export function planWorkspaceEdit(edit: WorkspaceEdit): AppliedChange[] {
+export function planWorkspaceEdit(edit: WorkspaceEdit, guard?: BoundaryGuard): AppliedChange[] {
+  guardEditTargets(edit, guard);
   const changes: AppliedChange[] = [];
 
   if (edit.documentChanges) {
@@ -157,18 +206,36 @@ export function planWorkspaceEdit(edit: WorkspaceEdit): AppliedChange[] {
 }
 
 /**
- * Return a copy of `edit` with all resource operations (create / rename /
- * delete) removed, keeping only text edits.
+ * Return a copy of `edit` with ONLY the rename resource op that duplicates the
+ * CLI-owned physical move removed — preserving every other resource op (e.g. a
+ * server's `create shim.ts`) and its position in the ordered array.
  *
  * Used by `move-file`: the CLI performs the single physical move itself (via
- * `git mv` when possible), so any rename op a server folds into the
+ * `git mv` when possible), so the matching rename a server folds into the
  * `willRenameFiles` result must be dropped to avoid a double-move (which would
- * leave the source missing on a second run).
+ * leave the source missing on a second run). The client advertises support for
+ * `create` / `rename` / `delete`, so a server may legitimately emit OTHER
+ * resource ops alongside the move; dropping those broke valid edits (a `create
+ * shim.ts` stripped out, then the text edit for `shim.ts` failed to read it).
+ *
+ * Match is on the resolved old/new paths (via `fileURLToPath`), not raw URI
+ * strings, so encoding differences don't defeat it.
  */
-export function stripResourceOps(edit: WorkspaceEdit): WorkspaceEdit {
+export function stripResourceOps(
+  edit: WorkspaceEdit,
+  move?: { from: string; to: string }
+): WorkspaceEdit {
   if (!edit.documentChanges) return edit;
-  const textOnly = edit.documentChanges.filter((dc): dc is TextDocumentEdit => !('kind' in dc));
-  return { documentChanges: textOnly };
+  const filtered = edit.documentChanges.filter((dc) => {
+    if (!('kind' in dc)) return true; // keep all text edits
+    if (!move) return false; // legacy: no move identity → strip every resource op
+    if (dc.kind !== 'rename') return true; // preserve unrelated create/delete ops
+    const old = fileURLToPath(dc.oldUri);
+    const neu = fileURLToPath(dc.newUri);
+    // Drop only the rename that duplicates our physical move.
+    return !(old === move.from && neu === move.to);
+  });
+  return { documentChanges: filtered };
 }
 
 /** Internal: a text-edit unit resolved to an absolute path, ready to write. */
@@ -200,18 +267,25 @@ function readForEdit(path: string): string {
  */
 function applyCreate(op: CreateFileOp): AppliedChange | undefined {
   const p = fileURLToPath(op.uri);
-  if (existsSync(p)) {
-    if (op.options?.overwrite) {
-      // proceed: truncate to an empty file
-    } else if (op.options?.ignoreIfExists) {
-      return undefined;
-    } else {
+  mkdirSync(dirname(p), { recursive: true });
+  if (op.options?.overwrite) {
+    // overwrite wins over ignoreIfExists: truncate (or create) unconditionally.
+    writeFileSync(p, '');
+    return { kind: 'create', path: p };
+  }
+  // Atomic exclusive create — no check-then-act TOCTOU window. The kernel
+  // rejects the open with EEXIST if the path appeared between calls, which we
+  // then map to LSP `ignoreIfExists` (skip) vs error.
+  try {
+    writeFileSync(p, '', { flag: 'wx' });
+    return { kind: 'create', path: p };
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'EEXIST') {
+      if (op.options?.ignoreIfExists) return undefined;
       throw new Error(`cannot create ${p}: already exists (no overwrite/ignoreIfExists)`);
     }
+    throw err;
   }
-  mkdirSync(dirname(p), { recursive: true });
-  writeFileSync(p, '');
-  return { kind: 'create', path: p };
 }
 
 /**
@@ -223,16 +297,21 @@ function applyCreate(op: CreateFileOp): AppliedChange | undefined {
 function applyRename(op: RenameFileOp): AppliedChange | undefined {
   const from = fileURLToPath(op.oldUri);
   const to = fileURLToPath(op.newUri);
-  if (existsSync(to)) {
-    if (op.options?.overwrite) {
-      // proceed: renameSync replaces the destination
-    } else if (op.options?.ignoreIfExists) {
-      return undefined;
-    } else {
-      throw new Error(`cannot rename to ${to}: already exists (no overwrite/ignoreIfExists)`);
-    }
-  }
   mkdirSync(dirname(to), { recursive: true });
+  if (op.options?.overwrite) {
+    // overwrite requested: renameSync replaces the destination atomically.
+    renameSync(from, to);
+    return { kind: 'rename', path: from, toPath: to };
+  }
+  // No-overwrite rename. Node exposes no atomic no-clobber rename (there is no
+  // binding for renameat2/RENAME_NOREPLACE), so a residual TOCTOU window between
+  // this existence check and renameSync is unavoidable in pure Node. We keep the
+  // window as small as possible (check immediately precedes the syscall) and
+  // accept it: this is a local CLI refactor tool, not a privilege boundary.
+  if (existsSync(to)) {
+    if (op.options?.ignoreIfExists) return undefined;
+    throw new Error(`cannot rename to ${to}: already exists (no overwrite/ignoreIfExists)`);
+  }
   renameSync(from, to);
   return { kind: 'rename', path: from, toPath: to };
 }
@@ -273,7 +352,11 @@ function applyTextWrite(w: TextWrite): AppliedChange {
  * memory BEFORE any write. If a read fails the function throws before any write,
  * so a failed edit never leaves the tree half-applied.
  */
-export function applyWorkspaceEdit(edit: WorkspaceEdit): AppliedChange[] {
+export function applyWorkspaceEdit(edit: WorkspaceEdit, guard?: BoundaryGuard): AppliedChange[] {
+  // Pre-flight EVERY target against the root boundary before mutating anything,
+  // so an out-of-root op late in documentChanges can't run after earlier ops
+  // already hit disk.
+  guardEditTargets(edit, guard);
   const applied: AppliedChange[] = [];
 
   if (edit.documentChanges) {
