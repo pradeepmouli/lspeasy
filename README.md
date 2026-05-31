@@ -142,7 +142,52 @@ At the lowest layer, `@lspeasy/core` models JSON-RPC 2.0 messages (request / not
 | [`@lspeasy/core`](packages/core) | JSON-RPC 2.0, framing, transports, LSP protocol types, middleware pipeline |
 | [`@lspeasy/server`](packages/server) | Server class with lifecycle, capability-aware handler registration, progress/cancellation |
 | [`@lspeasy/client`](packages/client) | Client with typed `textDocument.*` / `workspace.*` request API |
+| [`@lspeasy/cli`](packages/cli) | Standalone refactor CLI (`lspeasy` bin): project-wide rename, file-move-with-importer-updates, move-symbol |
 | [`@lspeasy/middleware`](packages/middleware) | Shared middleware building blocks |
+
+## Refactor CLI
+
+`@lspeasy/cli` is a standalone, server-agnostic CLI that drives any LSP server to perform
+**write-side** refactors — the things read-only tooling (including Claude Code's built-in LSP
+tool) can't do. It's built on `@lspeasy/client`: it spawns the language server over the stdio
+transport, runs the LSP handshake, and applies the returned `WorkspaceEdit` to disk. Because
+the language server sees the whole program, it updates references a text search misses —
+re-exports, aliased and type-only imports, and `{@link}` doc references.
+
+```bash
+# zero-install
+npx @lspeasy/cli rename src/math.ts 1:17 sumValues --root .
+# or install the bin
+pnpm add -g @lspeasy/cli
+```
+
+Commands (positions are **1-based** `line:col`, editor-style):
+
+| Command | What it does |
+|---|---|
+| `lspeasy rename <file> <line:col> <newName>` | `textDocument/rename` → apply the WorkspaceEdit project-wide |
+| `lspeasy move-file <oldPath> <newPath>` | `workspace/willRenameFiles` → update importers, then `git mv` the file |
+| `lspeasy move-symbol <file> <line:col> <targetFile>` | `refactor.move` code action → move the symbol into `targetFile`, fix importers |
+| `lspeasy query <definition\|references\|hover> <file> <line:col>` | Read-only parity ops |
+
+Flags: `--server <cmd>` (default `typescript-language-server --stdio`; works for any LSP
+advertising rename / codeAction / willRenameFiles), `--root <dir>` (default cwd),
+`--dry-run` (print the affected files, change nothing), `--json` (machine-readable stdout;
+diagnostics go to stderr), `--wait <ms>` (index wait, default 15000), `--verbose`.
+
+### Claude Code plugin
+
+This repo also ships a thin Claude Code plugin (`lsp-refactor`) that knows when and how to
+call the CLI for you — so rename/file-move/move-symbol requests in Claude Code route through
+the language server instead of error-prone hand edits.
+
+```
+/plugin marketplace add pradeepmouli/lspeasy
+/plugin install lsp-refactor@lspeasy
+```
+
+The plugin lives in [`.claude-plugin/`](.claude-plugin) (manifest + marketplace) and
+[`skills/lsp-refactor/`](skills/lsp-refactor); the skill body just invokes `@lspeasy/cli`.
 
 ## Related Projects
 
