@@ -36,12 +36,68 @@ interface LspCommand {
   command: string;
   arguments?: unknown[];
 }
+/**
+ * A `textDocument/codeAction` response item. Per the LSP spec the response is
+ * `(Command | CodeAction)[]`, so an item may be a full {@link CodeAction} OR a
+ * raw {@link LspCommand} — the latter carries its payload in a TOP-LEVEL
+ * `arguments` field (and `command` is then a `string`). We model both so a
+ * command-only action's `arguments` are not dropped.
+ */
 interface CodeAction {
   title: string;
   kind?: string;
   edit?: WorkspaceEdit;
+  /** Nested command (CodeAction shape) or a command name (raw Command shape). */
   command?: LspCommand | string;
+  /** Present only on the raw `Command` shape, alongside a string `command`. */
+  arguments?: unknown[];
   data?: unknown;
+}
+
+/**
+ * Normalize the `command` of a code action into an {@link LspCommand}, preserving
+ * arguments for BOTH shapes:
+ *  - nested object command → used as-is;
+ *  - raw `Command` (string `command`) → its top-level `arguments` are retained
+ *    (dropping them left command-only `_typescript.applyRefactoring` moves with
+ *    an empty arg list, so the refactor could not run).
+ */
+export function toLspCommand(action: CodeAction): LspCommand | undefined {
+  if (!action.command) return undefined;
+  if (typeof action.command === 'string') {
+    const cmd: LspCommand = { title: action.title, command: action.command };
+    if (action.arguments !== undefined) cmd.arguments = action.arguments;
+    return cmd;
+  }
+  return action.command;
+}
+
+/**
+ * Resolve the ordered list of {@link WorkspaceEdit}s a `refactor.move` action
+ * produces, honoring the LSP `edit` + `command` contract:
+ *  - if the action has an inline `edit`, it is applied FIRST;
+ *  - if it also (or instead) has a `command`, the command is executed AFTER the
+ *    inline edit, and EVERY edit the server then pushes via `workspace/applyEdit`
+ *    (possibly several, in sequence) is appended in arrival order.
+ *
+ * Pure with respect to disk: it only sequences edits. `execute` runs the command
+ * (injecting the move target); `drainCapturedEdits` returns all server-pushed
+ * edits captured since the last drain.
+ */
+export async function resolveMoveEdits(
+  action: CodeAction,
+  targetFile: string,
+  execute: (cmd: LspCommand) => Promise<void>,
+  drainCapturedEdits: () => WorkspaceEdit[]
+): Promise<WorkspaceEdit[]> {
+  const edits: WorkspaceEdit[] = [];
+  if (action.edit) edits.push(action.edit);
+  const cmd = toLspCommand(action);
+  if (cmd) {
+    await execute(injectTargetFile(cmd, targetFile));
+    edits.push(...drainCapturedEdits());
+  }
+  return edits;
 }
 
 /** Inject the move destination into a tsserver `_typescript.applyRefactoring`
@@ -123,27 +179,32 @@ export async function runMoveSymbol(
       if (resolved) action = resolved;
     }
 
-    let edit: WorkspaceEdit | undefined = action.edit;
+    // Validate every server-returned edit against --root before applying.
+    const guard = { root: flags.root, allowOutsideRoot: flags.allowOutsideRoot };
+    const applyEdit = (e: WorkspaceEdit) =>
+      flags.dryRun ? planWorkspaceEdit(e, guard) : applyWorkspaceEdit(e, guard);
 
-    if (!edit && action.command) {
-      const cmd =
-        typeof action.command === 'string'
-          ? { title: action.title, command: action.command }
-          : action.command;
-      const withTarget = injectTargetFile(cmd, targetFile);
-      await session.lsp.sendRequest('workspace/executeCommand', {
-        command: withTarget.command,
-        arguments: withTarget.arguments ?? []
-      });
-      // The server pushes the edit via workspace/applyEdit; the session captured it.
-      edit = session.takeCapturedEdit();
-    }
+    // Per the LSP spec, a CodeAction may carry BOTH an inline `edit` and a
+    // `command`: apply the edit FIRST, then execute the command (not either/or).
+    // The command may itself push further edits via workspace/applyEdit, possibly
+    // several in sequence — drain them ALL in order. (See resolveMoveEdits.)
+    const edits = await resolveMoveEdits(
+      action,
+      targetFile,
+      async (cmd) => {
+        await session.lsp.sendRequest('workspace/executeCommand', {
+          command: cmd.command,
+          arguments: cmd.arguments ?? []
+        });
+      },
+      () => session.takeCapturedEdits()
+    );
 
-    if (!edit) {
+    if (edits.length === 0) {
       fail('move-symbol produced no edit (server did not return or apply one)', flags.json);
     }
 
-    const changes = flags.dryRun ? planWorkspaceEdit(edit) : applyWorkspaceEdit(edit);
+    const changes = edits.flatMap(applyEdit);
     emitResult('move-symbol', changes, flags, { targetFile });
   } finally {
     await session.stop();
