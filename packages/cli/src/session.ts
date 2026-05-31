@@ -62,15 +62,41 @@ const CLIENT_CAPABILITIES = {
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 /**
+ * An ordered queue of edits the server pushed via `workspace/applyEdit`.
+ *
+ * A server implementing `executeCommand` may send MORE THAN ONE sequential
+ * applyEdit request for a single command. The old "single field" capture
+ * overwrote earlier edits while still acking each `applied: true`, silently
+ * dropping every edit but the last. This queue preserves them all in arrival
+ * order; {@link drain} returns and clears the batch.
+ */
+export class CapturedEdits {
+  private edits: WorkspaceEdit[] = [];
+  /** Record an edit the server pushed (handler must NOT drop it). */
+  push(edit: WorkspaceEdit): void {
+    this.edits.push(edit);
+  }
+  /** Return all captured edits in order and reset the queue. */
+  drain(): WorkspaceEdit[] {
+    const out = this.edits;
+    this.edits = [];
+    return out;
+  }
+}
+
+/**
  * Split a server launch command into argv tokens, honoring single- and
  * double-quoted spans so an argument containing spaces survives intact (e.g.
  * `node "/path with spaces/server.js" --stdio`). A naive `split(/\s+/)` shredded
  * such commands into broken fragments.
  *
  * This is a deliberately small, dependency-free tokenizer (matching the repo's
- * "no extra dependency" ethos): quotes group, a `\` escapes the next character,
- * and unquoted whitespace separates tokens. It is not a full POSIX shell parser
- * (no variable/glob expansion) — only the quoting needed to pass paths/args.
+ * "no extra dependency" ethos): quotes group and unquoted whitespace separates
+ * tokens. Crucially, a backslash is a LITERAL path separator (so Windows paths
+ * like `"C:\Program Files\server.exe"` survive intact) — it escapes ONLY a
+ * following quote character (`\"` inside a double-quoted span yields a literal
+ * `"`). It is not a full POSIX shell parser (no variable/glob expansion) — only
+ * the quoting needed to pass paths/args.
  */
 export function tokenizeCommand(command: string): string[] {
   const tokens: string[] = [];
@@ -81,8 +107,9 @@ export function tokenizeCommand(command: string): string[] {
   for (let i = 0; i < command.length; i++) {
     const ch = command[i]!;
     if (quote) {
-      if (ch === '\\' && quote === '"' && i + 1 < command.length) {
-        // In double quotes a backslash escapes the next character.
+      if (ch === '\\' && quote === '"' && (command[i + 1] === '"' || command[i + 1] === '\\')) {
+        // Inside double quotes a backslash escapes ONLY a following quote or
+        // backslash. Otherwise it stays a literal separator (Windows paths).
         current += command[++i]!;
       } else if (ch === quote) {
         quote = undefined;
@@ -96,7 +123,9 @@ export function tokenizeCommand(command: string): string[] {
       inToken = true;
       continue;
     }
-    if (ch === '\\' && i + 1 < command.length) {
+    if (ch === '\\' && command[i + 1] === '"') {
+      // Outside quotes, a backslash escapes a following quote; elsewhere it is a
+      // literal path separator (do NOT consume the next char).
       current += command[++i]!;
       inToken = true;
       continue;
@@ -146,8 +175,13 @@ export class RefactorSession {
   private readonly opts: Required<SessionOptions>;
   private proc?: ChildProcessWithoutNullStreams;
   private client?: LSPClient;
-  /** Captured edit pushed by the server via `workspace/applyEdit`. */
-  private capturedApplyEdit: WorkspaceEdit | undefined = undefined;
+  /**
+   * Edits pushed by the server via `workspace/applyEdit`, in arrival order. A
+   * server implementing `executeCommand` may send MORE THAN ONE sequential
+   * applyEdit; we queue them all (rather than overwriting) so none is dropped
+   * after the server was told `applied: true`.
+   */
+  private readonly capturedEdits = new CapturedEdits();
 
   constructor(opts: SessionOptions) {
     this.opts = {
@@ -191,8 +225,11 @@ export class RefactorSession {
     this.client = client;
 
     // Intercept server-pushed edits (tsserver's refactor.move applies this way).
+    // Queue every pushed edit in order — a server may send several sequential
+    // applyEdit requests for one command, and acking `applied:true` for an edit
+    // we then dropped would be a lie that loses changes.
     client.onRequest('workspace/applyEdit', (params: { edit: WorkspaceEdit }) => {
-      this.capturedApplyEdit = params.edit;
+      this.capturedEdits.push(params.edit);
       return { applied: true };
     });
 
@@ -229,11 +266,13 @@ export class RefactorSession {
     return (res ?? null) as R | null;
   }
 
-  /** The edit most recently pushed by the server via `workspace/applyEdit`. */
-  takeCapturedEdit(): WorkspaceEdit | undefined {
-    const e = this.capturedApplyEdit;
-    this.capturedApplyEdit = undefined;
-    return e;
+  /**
+   * Drain ALL edits pushed by the server via `workspace/applyEdit` since the
+   * last drain, in arrival order. Returns an empty array if none were pushed.
+   * Callers apply them in order so a multi-applyEdit command is fully honored.
+   */
+  takeCapturedEdits(): WorkspaceEdit[] {
+    return this.capturedEdits.drain();
   }
 
   get lsp(): LSPClient {
