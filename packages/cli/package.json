@@ -1,0 +1,62 @@
+{
+  "name": "@lspeasy/cli",
+  "version": "0.1.0",
+  "description": "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and move-symbol",
+  "private": false,
+  "keywords": [
+    "lsp",
+    "language-server-protocol",
+    "refactor",
+    "rename",
+    "codemod",
+    "move-symbol",
+    "cli",
+    "typescript"
+  ],
+  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
+  "bugs": {
+    "url": "https://github.com/pradeepmouli/lspeasy/issues"
+  },
+  "license": "MIT",
+  "author": "Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeepmouli/lspeasy.git",
+    "directory": "packages/cli"
+  },
+  "type": "module",
+  "bin": {
+    "lspeasy": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsgo --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "dev": "tsgo --build --watch",
+    "type-check": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@lspeasy/client": "workspace:*",
+    "@lspeasy/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
