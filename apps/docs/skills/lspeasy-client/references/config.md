@@ -27,6 +27,26 @@ Client capabilities to advertise
 
 **Type:** `ClientCaps`
 
+#### rootUri
+
+Workspace root URI sent in the `initialize` request (`rootUri`).
+
+Defaults to `null`. Although `rootUri` is deprecated in the LSP spec in
+favour of `workspaceFolders`, many servers (e.g. typescript-language-server)
+still read it to locate the project root, so set it for reliable indexing.
+
+**Type:** `string | null`
+
+#### workspaceFolders
+
+Workspace folders sent in the `initialize` request.
+
+The modern replacement for `rootUri`. When omitted and `rootUri` is set,
+the client does not synthesize folders — pass them explicitly if the server
+relies on `workspaceFolders`.
+
+**Type:** `{ uri: string; name: string }[] | null`
+
 #### logger
 
 Logger instance for client logging
