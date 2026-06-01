@@ -44,7 +44,7 @@
     "pino": "^9.0.0"
   },
   "devDependencies": {
-    "@lspeasy/core": "workspace:*",
+    "@lspeasy/core": "workspace:^",
     "typescript": "^6.0.3"
   },
   "engines": {
