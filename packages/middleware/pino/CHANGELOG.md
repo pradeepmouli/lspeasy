@@ -1,5 +1,12 @@
 # @lspeasy/middleware-pino
 
+## 5.0.0
+
+### Patch Changes
+
+- Updated dependencies [[`c1d8792`](https://github.com/pradeepmouli/lspeasy/commit/c1d8792b653440cfe0f7611c1460b5e4c726fc42)]:
+  - @lspeasy/core@2.2.0
+
 ## 4.0.0
 
 ### Minor Changes
