@@ -272,7 +272,7 @@ export function zodToCommander(
   session: RefactorSession,
   flags: GlobalFlags
 ): Command {
-  const subcommand = method.split('/')[1] ?? method;
+  const subcommand = method.split('/').slice(1).join('-') || method;
   const cmd = new Command(subcommand);
   const pattern = detectArgPattern(schema);
 
@@ -358,13 +358,18 @@ export function zodToCommander(
       const weResult = NonEmptyWorkspaceEditSchema.safeParse(result);
       const teResult = TextEditArraySchema.safeParse(result);
       const caResult = CodeActionArraySchema.safeParse(result);
-      const inlineCodeActionEdit: WorkspaceEdit | null = caResult.success
-        ? ((caResult.data
+      // Only auto-apply when exactly one code action carries an edit; if multiple
+      // edit-bearing actions are returned, fall through to JSON printing so the
+      // caller can choose rather than silently applying the wrong quick-fix.
+      const inlineCodeActionEdits = caResult.success
+        ? caResult.data
             .map((a) => a.edit)
-            .find((e) => e != null && NonEmptyWorkspaceEditSchema.safeParse(e).success) as
-            | WorkspaceEdit
-            | undefined) ?? null)
-        : null;
+            .filter((e) => e != null && NonEmptyWorkspaceEditSchema.safeParse(e).success)
+        : [];
+      const inlineCodeActionEdit: WorkspaceEdit | null =
+        inlineCodeActionEdits.length === 1
+          ? (inlineCodeActionEdits[0] as unknown as WorkspaceEdit)
+          : null;
       const directEdit: WorkspaceEdit | null = weResult.success
         ? (weResult.data as unknown as WorkspaceEdit)
         : teResult.success && teResult.data.length > 0

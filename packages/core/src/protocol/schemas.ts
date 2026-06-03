@@ -249,7 +249,7 @@ export const PositionEncodingKindSchema = z.union([
   z.string()
 ]);
 export const FileChangeTypeSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
-export const WatchKindSchema = z.union([z.literal(1), z.literal(2), z.literal(4), z.string()]);
+export const WatchKindSchema = z.union([z.literal(1), z.literal(2), z.literal(4), z.number()]);
 export const DiagnosticSeveritySchema = z.union([
   z.literal(1),
   z.literal(2),

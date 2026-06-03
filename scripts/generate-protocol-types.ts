@@ -610,8 +610,11 @@ export type ProgressParams = {
         const literals = en.values.map((v) =>
           build.literal(v.value as string | number | boolean | null).text()
         );
-        // Open enums (supportsCustomValues) accept any string beyond the known literals.
-        if (en.supportsCustomValues) literals.push(build.string().text());
+        // Open enums (supportsCustomValues) widen with the enum's base type so
+        // numeric enums (e.g. ErrorCodes, WatchKind) accept numbers, not strings.
+        if (en.supportsCustomValues) {
+          literals.push(en.type.name === 'string' ? build.string().text() : build.number().text());
+        }
         const schema =
           literals.length === 1
             ? literals[0]
