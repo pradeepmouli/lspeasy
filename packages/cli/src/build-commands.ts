@@ -18,26 +18,84 @@ function getNestedValue(obj: unknown, path: string): unknown {
     );
 }
 
+function capabilityObject(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null;
+}
+
+function stringArray(value: unknown): string[] | null {
+  return Array.isArray(value) && value.length > 0 ? (value as string[]) : null;
+}
+
 /**
- * Enrich a subcommand's help text with runtime-discovered capability metadata.
- * Currently handles: textDocument/codeAction → lists supported code action kinds
- * from capabilities.codeActionProvider.codeActionKinds.
+ * Enrich subcommand help text with runtime-discovered capability metadata.
+ * Called after zodToCommander so the command exists but before it is added to
+ * the namespace. Each case reads the relevant provider from ServerCapabilities
+ * and appends an "after" help block listing discovered values.
  */
 function enrichCommandFromCapabilities(
   method: string,
   cmd: Command,
   capabilities: ServerCapabilities
 ): void {
-  if (method === 'textDocument/codeAction') {
-    const provider = capabilities.codeActionProvider;
-    if (typeof provider === 'object' && provider !== null) {
-      const kinds = (provider as Record<string, unknown>)['codeActionKinds'];
-      if (Array.isArray(kinds) && kinds.length > 0) {
+  switch (method) {
+    case 'textDocument/codeAction': {
+      const kinds = stringArray(
+        capabilityObject(capabilities.codeActionProvider)?.['codeActionKinds']
+      );
+      if (kinds)
         cmd.addHelpText(
           'after',
-          `\nServer-supported kinds (--code-action-only):\n  ${(kinds as string[]).join(', ')}`
+          `\nServer-supported kinds (--code-action-only):\n  ${kinds.join(', ')}`
         );
+      break;
+    }
+    case 'textDocument/completion': {
+      const chars = stringArray(
+        capabilityObject(capabilities.completionProvider)?.['triggerCharacters']
+      );
+      if (chars)
+        cmd.addHelpText(
+          'after',
+          `\nTrigger characters: ${chars.map((c) => JSON.stringify(c)).join('  ')}`
+        );
+      break;
+    }
+    case 'textDocument/signatureHelp': {
+      const provider = capabilityObject(capabilities.signatureHelpProvider);
+      const trigger = stringArray(provider?.['triggerCharacters']);
+      const retrigger = stringArray(provider?.['retriggerCharacters']);
+      const lines: string[] = [];
+      if (trigger)
+        lines.push(`Trigger characters:   ${trigger.map((c) => JSON.stringify(c)).join('  ')}`);
+      if (retrigger)
+        lines.push(`Retrigger characters: ${retrigger.map((c) => JSON.stringify(c)).join('  ')}`);
+      if (lines.length) cmd.addHelpText('after', `\n${lines.join('\n')}`);
+      break;
+    }
+    case 'textDocument/onTypeFormatting': {
+      const provider = capabilityObject(capabilities.documentOnTypeFormattingProvider);
+      if (provider) {
+        const first = provider['firstTriggerCharacter'];
+        const more = stringArray(provider['moreTriggerCharacter']);
+        const all = [first, ...(more ?? [])].filter(Boolean) as string[];
+        if (all.length)
+          cmd.addHelpText(
+            'after',
+            `\n--ch must be one of: ${all.map((c) => JSON.stringify(c)).join('  ')}`
+          );
       }
+      break;
+    }
+    case 'workspace/executeCommand': {
+      const commands = stringArray(
+        capabilityObject(capabilities.executeCommandProvider)?.['commands']
+      );
+      if (commands)
+        cmd.addHelpText(
+          'after',
+          `\nServer-supported commands (--command):\n  ${commands.join('\n  ')}`
+        );
+      break;
     }
   }
 }
