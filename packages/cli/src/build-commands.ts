@@ -70,8 +70,8 @@ export function buildCommandTree(
     if (!getNestedValue(capabilities, capPath as string)) continue;
 
     const parts = (method as string).split('/');
-    if (parts.length !== 2) continue;
-    const [namespace] = parts as [string, string];
+    if (parts.length < 2) continue;
+    const [namespace] = parts as [string, ...string[]];
 
     let nsCmd = program.commands.find((c) => c.name() === namespace);
     if (!nsCmd) {

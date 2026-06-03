@@ -177,6 +177,7 @@ export {
   DocumentSymbolSchema,
   CodeActionContextSchema,
   CodeActionParamsSchema,
+  CodeActionSchema,
   FormattingOptionsSchema,
   DocumentFormattingParamsSchema,
   DocumentRangeFormattingParamsSchema,

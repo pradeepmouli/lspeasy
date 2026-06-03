@@ -108,34 +108,47 @@ async function main(): Promise<void> {
 
   // positionals[0] = namespace, positionals[1] = method/command.
   // The source file can only appear at positionals[2] (the first subcommand
-  // argument). Scanning further with .find() risks picking up --params JSON
-  // payloads or query strings that parseArgs left in positionals.
-  const isFileLike = (p: string) => extname(p) !== '' && !p.startsWith('{') && !p.startsWith('[');
+  // argument). A value is file-like only when it has an extension AND is not
+  // a JSON literal (--params values that parseArgs left in positionals).
+  const isFileLike = (p: string) =>
+    extname(p) !== '' && !p.startsWith('{') && !p.startsWith('[') && !p.startsWith('"');
   const firstSubArg = positionals[2];
   const subArgFile = firstSubArg !== undefined && isFileLike(firstSubArg) ? firstSubArg : undefined;
 
   if (flags.server) {
     serverCommand = flags.server;
+    // Infer languageId from the file extension when --server bypasses discovery.
+    if (subArgFile) {
+      const ext = extname(subArgFile);
+      const discovered = discoverServer(flags.root, ext);
+      if (discovered) languageId = discovered.languageId;
+    }
   } else {
-    const fileArg = subArgFile;
-    const ext = fileArg ? extname(fileArg) : '';
+    const ext = subArgFile ? extname(subArgFile) : '';
 
     if (!ext) {
-      fail('Cannot determine language: pass a file argument or use --server <cmd>.', flags.json);
+      // No file argument — try lsp.json discovery with a wildcard lookup so
+      // file-less commands (e.g. workspace/symbol) can still find a server.
+      const discovered = discoverServer(flags.root, '');
+      if (discovered) {
+        serverCommand = discovered.serverCommand;
+        languageId = discovered.languageId;
+      } else {
+        fail('Cannot determine language: pass a file argument or use --server <cmd>.', flags.json);
+      }
+    } else {
+      const discovered = discoverServer(flags.root, ext);
+      if (!discovered) {
+        fail(
+          `No LSP server configured for ${ext} files.\n` +
+            'Add an lsp.json to your project (or ~/.claude/lsp.json) or use --server <cmd>.\n' +
+            'Format: { "lspServers": { "lang": { "command": "...", "args": [...], "fileExtensions": { ".ext": "languageId" } } } }',
+          flags.json
+        );
+      }
+      serverCommand = discovered.serverCommand;
+      languageId = discovered.languageId;
     }
-
-    const discovered = discoverServer(flags.root, ext);
-    if (!discovered) {
-      fail(
-        `No LSP server configured for ${ext} files.\n` +
-          'Add an lsp.json to your project (or ~/.claude/lsp.json) or use --server <cmd>.\n' +
-          'Format: { "lspServers": { "lang": { "command": "...", "args": [...], "fileExtensions": { ".ext": "languageId" } } } }',
-        flags.json
-      );
-    }
-
-    serverCommand = discovered.serverCommand;
-    languageId = discovered.languageId;
   }
 
   const session = new RefactorSession({

@@ -72,8 +72,8 @@ importers:
         specifier: ^4.1.7
         version: 4.1.7(@types/node@25.9.1)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(tsx@4.22.3)(yaml@2.9.0))
       x-to-zod:
-        specifier: file:/Users/pmouli/GitHub.nosync/active/ts/x-to-zod
-        version: file:../x-to-zod
+        specifier: ^0.10.3
+        version: 0.10.3
 
   apps/docs:
     devDependencies:
@@ -2540,9 +2540,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  x-to-zod@file:../x-to-zod:
-    resolution: {directory: ../x-to-zod, type: directory}
-    engines: {node: '>=22.0.0', pnpm: '>=11.0.0'}
+  x-to-zod@0.10.3:
+    resolution: {integrity: sha512-tDdNmmboWjikE/NP8zfyJJ+7JYgeIUEa5qApvT6nc+S/9M2jUO1hkrK08ebzx1hVRjm8H54kuIZ/MV0/55QHpw==}
     hasBin: true
 
   yaml@2.9.0:
@@ -4624,7 +4623,7 @@ snapshots:
 
   ws@8.20.1: {}
 
-  x-to-zod@file:../x-to-zod:
+  x-to-zod@0.10.3:
     dependencies:
       json-schema-typed: 8.0.2
       tinyglobby: 0.2.17

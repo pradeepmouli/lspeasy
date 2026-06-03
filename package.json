@@ -79,7 +79,7 @@
     "typescript": "^6.0.3",
     "vite": "^8.0.14",
     "vitest": "^4.1.7",
-    "x-to-zod": "file:/Users/pmouli/GitHub.nosync/active/ts/x-to-zod"
+    "x-to-zod": "^0.10.3"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged",

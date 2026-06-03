@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { parseLineCol, toLspPosition, resolvePathArg } from './io.js';
 import type { GlobalFlags } from './io.js';
 import type { RefactorSession } from './session.js';
-import { WorkspaceEditSchema, TextEditSchema } from '@lspeasy/core';
+import { WorkspaceEditSchema, TextEditSchema, CodeActionSchema } from '@lspeasy/core';
 import {
   applyWorkspaceEdit,
   planWorkspaceEdit,
@@ -198,6 +198,17 @@ export function marshalParams(
 }
 
 const TextEditArraySchema = z.array(TextEditSchema);
+const CodeActionArraySchema = z.array(CodeActionSchema);
+
+// WorkspaceEdit has all optional fields, so safeParse succeeds on any plain
+// object. Require at least one edit-bearing key so hover/completion results
+// don't get misclassified as empty workspace edits.
+const NonEmptyWorkspaceEditSchema = WorkspaceEditSchema.refine(
+  (e) =>
+    (e.changes != null && Object.keys(e.changes).length > 0) ||
+    (e.documentChanges != null && e.documentChanges.length > 0),
+  'not a workspace edit'
+);
 
 /**
  * Wrap a TextEdit[] result as a single-file WorkspaceEdit using the
@@ -337,19 +348,39 @@ export function zodToCommander(
         session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>
       )(method, params);
 
-      // Collect workspace edits from up to three sources:
+      // Collect workspace edits from up to four sources:
       // 1. Direct WorkspaceEdit result (e.g. textDocument/rename)
       // 2. TextEdit[] result (e.g. textDocument/formatting) — wrapped using the
       //    textDocument.uri already in rawParams
-      // 3. Server-pushed edits via workspace/applyEdit (e.g. workspace/executeCommand)
+      // 3. CodeAction[].edit — inline edits embedded in code action results
+      // 4. Server-pushed edits via workspace/applyEdit (e.g. workspace/executeCommand)
       const capturedEdits = session.takeCapturedEdits();
-      const weResult = WorkspaceEditSchema.safeParse(result);
+      const weResult = NonEmptyWorkspaceEditSchema.safeParse(result);
       const teResult = TextEditArraySchema.safeParse(result);
+      const caResult = CodeActionArraySchema.safeParse(result);
+      const inlineCodeActionEdit: WorkspaceEdit | null = caResult.success
+        ? ((caResult.data
+            .map((a) => a.edit)
+            .find((e) => e != null && NonEmptyWorkspaceEditSchema.safeParse(e).success) as
+            | WorkspaceEdit
+            | undefined) ?? null)
+        : null;
       const directEdit: WorkspaceEdit | null = weResult.success
         ? (weResult.data as unknown as WorkspaceEdit)
         : teResult.success && teResult.data.length > 0
           ? textEditsToWorkspaceEdit(teResult.data, rawParams)
-          : null;
+          : inlineCodeActionEdit;
+
+      // For methods that produce edits (rename, formatting, codeAction), a null
+      // result means the server could not fulfil the request — treat as an error.
+      const isEditMethod =
+        method === 'textDocument/rename' ||
+        method === 'textDocument/formatting' ||
+        method === 'textDocument/rangeFormatting' ||
+        method === 'textDocument/codeAction';
+      if (isEditMethod && result === null && capturedEdits.length === 0) {
+        throw new Error(`${method} returned null — server could not fulfil the request`);
+      }
 
       if (directEdit || capturedEdits.length > 0) {
         const guard: BoundaryGuard = {

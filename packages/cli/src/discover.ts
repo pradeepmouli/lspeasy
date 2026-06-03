@@ -36,15 +36,22 @@ function findLspJsonPath(root: string): string | null {
   return existsSync(global) ? global : null;
 }
 
+function buildServerCommand(entry: LspServerEntry): string {
+  const parts = [entry.command, ...(entry.args ?? [])].filter(Boolean);
+  // Always quote every token so backslashes and spaces are handled uniformly.
+  // tokenizeCommand treats \\ inside double-quotes as a literal backslash.
+  return parts.map((t) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(' ');
+}
+
 export function selectServer(config: LspJson, fileExt: string): ResolvedServer | null {
   for (const entry of Object.values(config.lspServers)) {
-    const languageId = entry.fileExtensions[fileExt];
-    if (languageId) {
-      const parts = [entry.command, ...(entry.args ?? [])].filter(Boolean);
-      // Always quote every token so backslashes and spaces are handled uniformly.
-      // tokenizeCommand treats \\ inside double-quotes as a literal backslash.
-      const quoted = parts.map((t) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`);
-      return { serverCommand: quoted.join(' '), languageId };
+    if (!fileExt) {
+      // No extension — return the first configured server with its first languageId.
+      const languageId = Object.values(entry.fileExtensions)[0];
+      if (languageId) return { serverCommand: buildServerCommand(entry), languageId };
+    } else {
+      const languageId = entry.fileExtensions[fileExt];
+      if (languageId) return { serverCommand: buildServerCommand(entry), languageId };
     }
   }
   return null;
