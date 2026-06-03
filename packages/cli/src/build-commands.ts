@@ -28,76 +28,31 @@ function stringArray(value: unknown): string[] | null {
 
 /**
  * Enrich subcommand help text with runtime-discovered capability metadata.
- * Called after zodToCommander so the command exists but before it is added to
- * the namespace. Each case reads the relevant provider from ServerCapabilities
- * and appends an "after" help block listing discovered values.
+ * Resolves the server capability provider for the method, then scans its
+ * string and string-array fields — booleans and nested objects are skipped.
+ * Works generically for any LSP method; no per-method hardcoding required.
  */
 function enrichCommandFromCapabilities(
   method: string,
   cmd: Command,
   capabilities: ServerCapabilities
 ): void {
-  switch (method) {
-    case 'textDocument/codeAction': {
-      const kinds = stringArray(
-        capabilityObject(capabilities.codeActionProvider)?.['codeActionKinds']
-      );
-      if (kinds)
-        cmd.addHelpText(
-          'after',
-          `\nServer-supported kinds (--code-action-only):\n  ${kinds.join(', ')}`
-        );
-      break;
-    }
-    case 'textDocument/completion': {
-      const chars = stringArray(
-        capabilityObject(capabilities.completionProvider)?.['triggerCharacters']
-      );
-      if (chars)
-        cmd.addHelpText(
-          'after',
-          `\nTrigger characters: ${chars.map((c) => JSON.stringify(c)).join('  ')}`
-        );
-      break;
-    }
-    case 'textDocument/signatureHelp': {
-      const provider = capabilityObject(capabilities.signatureHelpProvider);
-      const trigger = stringArray(provider?.['triggerCharacters']);
-      const retrigger = stringArray(provider?.['retriggerCharacters']);
-      const lines: string[] = [];
-      if (trigger)
-        lines.push(`Trigger characters:   ${trigger.map((c) => JSON.stringify(c)).join('  ')}`);
-      if (retrigger)
-        lines.push(`Retrigger characters: ${retrigger.map((c) => JSON.stringify(c)).join('  ')}`);
-      if (lines.length) cmd.addHelpText('after', `\n${lines.join('\n')}`);
-      break;
-    }
-    case 'textDocument/onTypeFormatting': {
-      const provider = capabilityObject(capabilities.documentOnTypeFormattingProvider);
-      if (provider) {
-        const first = provider['firstTriggerCharacter'];
-        const more = stringArray(provider['moreTriggerCharacter']);
-        const all = [first, ...(more ?? [])].filter(Boolean) as string[];
-        if (all.length)
-          cmd.addHelpText(
-            'after',
-            `\n--ch must be one of: ${all.map((c) => JSON.stringify(c)).join('  ')}`
-          );
-      }
-      break;
-    }
-    case 'workspace/executeCommand': {
-      const commands = stringArray(
-        capabilityObject(capabilities.executeCommandProvider)?.['commands']
-      );
-      if (commands)
-        cmd.addHelpText(
-          'after',
-          `\nServer-supported commands (--command):\n  ${commands.join('\n  ')}`
-        );
-      break;
+  const capPath = getCapabilityForRequestMethod(method as any);
+  if (capPath === 'alwaysOn') return;
+
+  const obj = capabilityObject(getNestedValue(capabilities, capPath as string));
+  if (!obj) return;
+
+  const lines: string[] = [];
+  for (const [key, val] of Object.entries(obj)) {
+    const arr = stringArray(val);
+    if (arr) {
+      lines.push(`${key}: ${arr.map((v) => JSON.stringify(v)).join('  ')}`);
+    } else if (typeof val === 'string' && val.length > 0) {
+      lines.push(`${key}: ${JSON.stringify(val)}`);
     }
   }
+  if (lines.length) cmd.addHelpText('after', `\nCapability options:\n  ${lines.join('\n  ')}`);
 }
 
 export function buildCommandTree(
