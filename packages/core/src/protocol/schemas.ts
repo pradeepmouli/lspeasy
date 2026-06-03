@@ -180,6 +180,75 @@ export const DocumentSymbolParamsSchema = z.object({
   textDocument: TextDocumentIdentifierSchema
 });
 
+/** Rename params — file + position + new symbol name */
+export const RenameParamsSchema = TextDocumentPositionParamsSchema.extend({
+  newName: z.string()
+});
+
+/** Code action context */
+export const CodeActionContextSchema = z.object({
+  diagnostics: z.array(DiagnosticSchema),
+  only: z.array(z.string()).optional(),
+  triggerKind: z.number().int().optional()
+});
+
+/** Code action params — file + range + context */
+export const CodeActionParamsSchema = z.object({
+  textDocument: TextDocumentIdentifierSchema,
+  range: RangeSchema,
+  context: CodeActionContextSchema
+});
+
+/** Shared formatting options */
+export const FormattingOptionsSchema = z.object({
+  tabSize: z.number().int(),
+  insertSpaces: z.boolean(),
+  trimTrailingWhitespace: z.boolean().optional(),
+  insertFinalNewline: z.boolean().optional(),
+  trimFinalNewlines: z.boolean().optional()
+});
+
+/** Document formatting params — file + options */
+export const DocumentFormattingParamsSchema = z.object({
+  textDocument: TextDocumentIdentifierSchema,
+  options: FormattingOptionsSchema
+});
+
+/** Document range formatting params — file + range + options */
+export const DocumentRangeFormattingParamsSchema = z.object({
+  textDocument: TextDocumentIdentifierSchema,
+  range: RangeSchema,
+  options: FormattingOptionsSchema
+});
+
+/** Workspace symbol params — query string only */
+export const WorkspaceSymbolParamsSchema = z.object({
+  query: z.string()
+});
+
+/** Folding range params — file only */
+export const FoldingRangeParamsSchema = z.object({
+  textDocument: TextDocumentIdentifierSchema
+});
+
+/** Inlay hint params — file + range */
+export const InlayHintParamsSchema = z.object({
+  textDocument: TextDocumentIdentifierSchema,
+  range: RangeSchema
+});
+
+/** Code lens params — file only */
+export const CodeLensParamsSchema = z.object({
+  textDocument: TextDocumentIdentifierSchema
+});
+
+// These all share the TextDocumentPositionParams shape:
+export const SignatureHelpParamsSchema = TextDocumentPositionParamsSchema;
+export const TypeDefinitionParamsSchema = TextDocumentPositionParamsSchema;
+export const ImplementationParamsSchema = TextDocumentPositionParamsSchema;
+export const DeclarationParamsSchema = TextDocumentPositionParamsSchema;
+export const DocumentHighlightParamsSchema = TextDocumentPositionParamsSchema;
+
 /**
  * Symbol kind
  */
@@ -282,7 +351,7 @@ export const DidSaveTextDocumentParamsSchema = z.object({
  * Schema registry for method-based lookup
  */
 export const LSPSchemas = {
-  // Request params
+  // Request params (existing)
   'textDocument/hover': HoverParamsSchema,
   'textDocument/completion': CompletionParamsSchema,
   'textDocument/definition': DefinitionParamsSchema,
@@ -290,7 +359,22 @@ export const LSPSchemas = {
   'textDocument/documentSymbol': DocumentSymbolParamsSchema,
   initialize: InitializeParamsSchema,
 
-  // Notification params
+  // New request params
+  'textDocument/rename': RenameParamsSchema,
+  'textDocument/codeAction': CodeActionParamsSchema,
+  'textDocument/signatureHelp': SignatureHelpParamsSchema,
+  'textDocument/typeDefinition': TypeDefinitionParamsSchema,
+  'textDocument/implementation': ImplementationParamsSchema,
+  'textDocument/declaration': DeclarationParamsSchema,
+  'textDocument/documentHighlight': DocumentHighlightParamsSchema,
+  'textDocument/formatting': DocumentFormattingParamsSchema,
+  'textDocument/rangeFormatting': DocumentRangeFormattingParamsSchema,
+  'textDocument/foldingRange': FoldingRangeParamsSchema,
+  'textDocument/inlayHint': InlayHintParamsSchema,
+  'textDocument/codeLens': CodeLensParamsSchema,
+  'workspace/symbol': WorkspaceSymbolParamsSchema,
+
+  // Notification params (existing)
   'textDocument/didOpen': DidOpenTextDocumentParamsSchema,
   'textDocument/didChange': DidChangeTextDocumentParamsSchema,
   'textDocument/didClose': DidCloseTextDocumentParamsSchema,
