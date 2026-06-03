@@ -5,8 +5,21 @@ import { pathToFileURL } from 'node:url';
 import { parseLineCol, toLspPosition, resolvePathArg } from './io.js';
 import type { GlobalFlags } from './io.js';
 import type { RefactorSession } from './session.js';
+import {
+  applyWorkspaceEdit,
+  planWorkspaceEdit,
+  type WorkspaceEdit,
+  type AppliedChange,
+  type BoundaryGuard
+} from './apply.js';
 
-export type ArgPattern = 'file-position-newname' | 'file-position' | 'file-range' | 'file' | 'raw';
+export type ArgPattern =
+  | 'file-position-newname'
+  | 'file-position'
+  | 'file-range'
+  | 'file'
+  | 'query'
+  | 'raw';
 
 function isZodObjectLike(schema: z.ZodType<unknown>): schema is z.ZodObject<z.ZodRawShape> {
   return (
@@ -26,6 +39,7 @@ export function detectArgPattern(schema: z.ZodType<unknown>): ArgPattern {
   if ('textDocument' in shape && 'position' in shape) return 'file-position';
   if ('textDocument' in shape && 'range' in shape) return 'file-range';
   if ('textDocument' in shape) return 'file';
+  if ('query' in shape) return 'query';
   return 'raw';
 }
 
@@ -69,8 +83,36 @@ export function marshalParams(
       const file = resolvePathArg(positional[0]!, flags);
       return { textDocument: { uri: pathToFileURL(file).href } };
     }
+    case 'query':
+      return { query: positional[0] ?? '' };
     case 'raw':
       throw new Error('This method requires --params <json>');
+  }
+}
+
+function isWorkspaceEdit(v: unknown): v is WorkspaceEdit {
+  return typeof v === 'object' && v !== null && ('changes' in v || 'documentChanges' in v);
+}
+
+function printAppliedChanges(
+  changes: AppliedChange[],
+  method: string,
+  dryRun: boolean,
+  json: boolean
+): void {
+  if (json) {
+    process.stdout.write(JSON.stringify({ ok: true, method, dryRun, changes }) + '\n');
+  } else {
+    const label = dryRun ? '[dry-run]' : '[applied]';
+    for (const c of changes) {
+      const detail =
+        c.kind === 'rename'
+          ? `${c.path} → ${c.toPath}`
+          : c.kind === 'edit'
+            ? `${c.path} (${c.editCount} edit${c.editCount !== 1 ? 's' : ''})`
+            : c.path;
+      process.stdout.write(`${label} ${c.kind} ${detail}\n`);
+    }
   }
 }
 
@@ -119,6 +161,9 @@ export function zodToCommander(
     case 'file':
       cmd.argument('<file>', 'file path (relative to --root)');
       break;
+    case 'query':
+      cmd.argument('<query>', 'search query string');
+      break;
     case 'raw':
       break;
   }
@@ -135,10 +180,33 @@ export function zodToCommander(
       const result = await (
         session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>
       )(method, params);
-      if (flags.json) {
-        process.stdout.write(JSON.stringify({ ok: true, method, result }) + '\n');
+
+      // Collect workspace edits from two sources:
+      // 1. Direct result (e.g. textDocument/rename returns WorkspaceEdit)
+      // 2. Server-pushed edits via workspace/applyEdit (e.g. workspace/executeCommand)
+      const capturedEdits = session.takeCapturedEdits();
+      const directEdit = isWorkspaceEdit(result) ? result : null;
+
+      if (directEdit || capturedEdits.length > 0) {
+        const guard: BoundaryGuard = {
+          root: flags.root,
+          allowOutsideRoot: flags.allowOutsideRoot
+        };
+        const allChanges: AppliedChange[] = [];
+        const edits = directEdit ? [directEdit, ...capturedEdits] : capturedEdits;
+        for (const edit of edits) {
+          const changes = flags.dryRun
+            ? planWorkspaceEdit(edit, guard)
+            : applyWorkspaceEdit(edit, guard);
+          allChanges.push(...changes);
+        }
+        printAppliedChanges(allChanges, method, flags.dryRun, flags.json);
       } else {
-        process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+        if (flags.json) {
+          process.stdout.write(JSON.stringify({ ok: true, method, result }) + '\n');
+        } else {
+          process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+        }
       }
     } catch (err) {
       if (flags.json) {

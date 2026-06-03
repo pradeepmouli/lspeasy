@@ -38,8 +38,8 @@ describe('detectArgPattern', () => {
     expect(detectArgPattern(InlayHintParamsSchema)).toBe('file-range');
   });
 
-  it('returns raw for schemas without textDocument', () => {
-    expect(detectArgPattern(WorkspaceSymbolParamsSchema)).toBe('raw');
+  it('returns query for schemas with query field but no textDocument', () => {
+    expect(detectArgPattern(WorkspaceSymbolParamsSchema)).toBe('query');
   });
 
   it('returns raw for non-ZodObject schema', () => {
@@ -102,6 +102,11 @@ describe('marshalParams', () => {
       FLAGS
     );
     expect(result).toEqual(raw);
+  });
+
+  it('builds query object for query pattern', () => {
+    const result = marshalParams('query', ['mySymbol'], {}, FLAGS);
+    expect(result).toEqual({ query: 'mySymbol' });
   });
 
   it('throws for raw pattern without --params', () => {

@@ -25,7 +25,7 @@ describe('capability → command → dispatch integration', () => {
   });
   it('dispatches textDocument/hover with correct LSP params', async () => {
     const sendRequest = vi.fn(async () => ({ contents: { kind: 'markdown', value: 'hello' } }));
-    const fakeSession = { lsp: { sendRequest } } as any;
+    const fakeSession = { lsp: { sendRequest }, takeCapturedEdits: () => [] } as any;
 
     const program = new Command().exitOverride();
     buildCommandTree(program, { hoverProvider: true } as any, fakeSession, FLAGS);
@@ -51,7 +51,7 @@ describe('capability → command → dispatch integration', () => {
 
   it('dispatches textDocument/rename with file + position + newName', async () => {
     const sendRequest = vi.fn(async () => ({ changes: {} }));
-    const fakeSession = { lsp: { sendRequest } } as any;
+    const fakeSession = { lsp: { sendRequest }, takeCapturedEdits: () => [] } as any;
 
     const program = new Command().exitOverride();
     buildCommandTree(program, { renameProvider: true } as any, fakeSession, FLAGS);

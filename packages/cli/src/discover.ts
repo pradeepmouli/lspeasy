@@ -35,7 +35,10 @@ export function selectServer(config: LspJson, fileExt: string): ResolvedServer |
     const languageId = entry.fileExtensions[fileExt];
     if (languageId) {
       const parts = [entry.command, ...(entry.args ?? [])].filter(Boolean);
-      return { serverCommand: parts.join(' '), languageId };
+      // Quote tokens containing spaces so tokenizeCommand in session.ts can
+      // round-trip them without splitting on the embedded whitespace.
+      const quoted = parts.map((t) => (t.includes(' ') ? `"${t.replace(/"/g, '\\"')}"` : t));
+      return { serverCommand: quoted.join(' '), languageId };
     }
   }
   return null;

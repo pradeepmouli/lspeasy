@@ -142,7 +142,7 @@ async function main(): Promise<void> {
     await session.start();
 
     const fileArg = positionals.find((p) => extname(p) !== '');
-    if (fileArg) {
+    if (fileArg && !values.help) {
       const absPath = resolvePathArg(fileArg, flags);
       await session.openAndWait(absPath);
     }
