@@ -44,11 +44,12 @@ export function selectServer(config: LspJson, fileExt: string): ResolvedServer |
 export function discoverServer(root: string, fileExt: string): ResolvedServer | null {
   const lspJsonPath = findLspJsonPath(root);
   if (!lspJsonPath) return null;
-  let config: LspJson;
+  let parsed: unknown;
   try {
-    config = JSON.parse(readFileSync(lspJsonPath, 'utf8')) as LspJson;
+    parsed = JSON.parse(readFileSync(lspJsonPath, 'utf8'));
   } catch {
     return null;
   }
-  return selectServer(config, fileExt);
+  if (!parsed || typeof (parsed as Record<string, unknown>)['lspServers'] !== 'object') return null;
+  return selectServer(parsed as LspJson, fileExt);
 }

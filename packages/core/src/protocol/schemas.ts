@@ -242,7 +242,6 @@ export const CodeLensParamsSchema = z.object({
   textDocument: TextDocumentIdentifierSchema
 });
 
-// These all share the TextDocumentPositionParams shape:
 export const SignatureHelpParamsSchema = TextDocumentPositionParamsSchema;
 export const TypeDefinitionParamsSchema = TextDocumentPositionParamsSchema;
 export const ImplementationParamsSchema = TextDocumentPositionParamsSchema;

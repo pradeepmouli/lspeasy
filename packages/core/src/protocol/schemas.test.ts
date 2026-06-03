@@ -1,13 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  RenameParamsSchema,
-  CodeActionParamsSchema,
-  WorkspaceSymbolParamsSchema,
-  FormattingOptionsSchema,
-  DocumentFormattingParamsSchema,
-  DocumentRangeFormattingParamsSchema,
-  LSPSchemas
-} from './schemas.js';
+import { RenameParamsSchema, WorkspaceSymbolParamsSchema, LSPSchemas } from './schemas.js';
 
 describe('expanded LSPSchemas', () => {
   it('exports RenameParamsSchema with newName', () => {

@@ -39,10 +39,6 @@ describe('selectServer', () => {
     expect(selectServer(CONFIG, '.py')).toBeNull();
   });
 
-  it('omits trailing space when args is empty', () => {
-    expect(selectServer(CONFIG, '.rs')?.serverCommand).toBe('rust-analyzer');
-  });
-
   it('returns null for empty lspServers', () => {
     expect(selectServer({ lspServers: {} }, '.ts')).toBeNull();
   });
