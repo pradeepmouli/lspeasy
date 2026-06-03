@@ -71,6 +71,9 @@ importers:
       vitest:
         specifier: ^4.1.7
         version: 4.1.7(@types/node@25.9.1)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(vite@8.0.14(@types/node@25.9.1)(esbuild@0.28.0)(tsx@4.22.3)(yaml@2.9.0))
+      x-to-zod:
+        specifier: file:/Users/pmouli/GitHub.nosync/active/ts/x-to-zod
+        version: file:../x-to-zod
 
   apps/docs:
     devDependencies:
@@ -1743,6 +1746,9 @@ packages:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
     hasBin: true
 
+  json-schema-typed@8.0.2:
+    resolution: {integrity: sha512-fQhoXdcvc3V28x7C7BMs4P5+kNlgUURe2jmUT1T//oBRMDrqy1QPelJimwZGo7Hg9VPV3EQV5Bnq4hbFy2vetA==}
+
   jsonfile@4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
 
@@ -2533,6 +2539,11 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+
+  x-to-zod@file:../x-to-zod:
+    resolution: {directory: ../x-to-zod, type: directory}
+    engines: {node: '>=22.0.0', pnpm: '>=11.0.0'}
+    hasBin: true
 
   yaml@2.9.0:
     resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
@@ -3841,6 +3852,8 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
+  json-schema-typed@8.0.2: {}
+
   jsonfile@4.0.0:
     optionalDependencies:
       graceful-fs: 4.2.11
@@ -4610,6 +4623,11 @@ snapshots:
       strip-ansi: 7.2.0
 
   ws@8.20.1: {}
+
+  x-to-zod@file:../x-to-zod:
+    dependencies:
+      json-schema-typed: 8.0.2
+      tinyglobby: 0.2.17
 
   yaml@2.9.0: {}
 

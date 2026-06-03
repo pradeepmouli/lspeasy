@@ -4,7 +4,6 @@
  * Auto-generated from metaModel.json
  * DO NOT EDIT MANUALLY
  */
-/* oxlint-disable typescript-eslint/no-duplicate-enum-values */
 export enum ApplyKind {
   Replace = 1,
   Merge = 2

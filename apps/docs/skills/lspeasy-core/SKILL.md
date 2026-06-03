@@ -59,7 +59,7 @@ structured JSON-RPC errors, DocumentVersionTracker for document sync.
 - You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. (`WebSocketTransport`)
 - You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. (`ResponseError`)
 
-API surface: 55 functions, 11 classes, 77 types, 1 enums, 41 constants
+API surface: 55 functions, 11 classes, 77 types, 1 enums, 67 constants
 
 ## NEVER
 
@@ -85,7 +85,7 @@ document change notification), `createProgressBegin` (Creates a `WorkDoneProgres
 (not gated by a capability) for a given capability key)
 **Key classes:** `WebSocketTransport` (WebSocket-based transport for LSP communication), `DisposableStore` (Collects multiple `Disposable` instances and releases them together), `CancellationTokenSource` (Controller that creates and manages a `CancellationToken`), `ConsoleLogger` (Logger implementation that writes to the process console with level filtering), `NullLogger` (No-op logger that silently discards all messages), `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `DocumentVersionTracker` (Tracks monotonically increasing version numbers for open text documents)
 
-*185 exports total — see references/ for full API.*
+*211 exports total — see references/ for full API.*
 
 ## References
 
