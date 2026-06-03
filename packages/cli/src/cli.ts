@@ -1,189 +1,180 @@
 #!/usr/bin/env node
 /**
- * `lspeasy` — standalone LSP-driven refactor CLI.
+ * lspeasy CLI entry point.
  *
- * Drives any LSP server that advertises rename / codeAction / willRenameFiles
- * to perform write-side refactors that read-only tooling cannot: project-wide
- * rename, file move with importer updates, and move-symbol.
- *
- * Built on `@lspeasy/client` (SDK) over the stdio transport from
- * `@lspeasy/core/node`. Arg parsing uses Node's built-in `util.parseArgs`
- * (no extra dependency).
+ * Two-pass parse: util.parseArgs extracts global flags first (no Commander),
+ * then the CLI connects to the server, reads capabilities, builds a
+ * namespace/subcommand Commander tree, and hands process.argv back to
+ * Commander for final dispatch.
  */
 
 import { parseArgs } from 'node:util';
-import { argv } from 'node:process';
+import { argv, exit } from 'node:process';
+import { extname } from 'node:path';
 import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { Command } from 'commander';
 
-import { fail, type GlobalFlags } from './io.js';
-import { runRename } from './commands/rename.js';
-import { runMoveFile } from './commands/move-file.js';
-import { runMoveSymbol } from './commands/move-symbol.js';
-import { runQuery } from './commands/query.js';
+import { fail, resolvePathArg, type GlobalFlags } from './io.js';
+import { discoverServer } from './discover.js';
+import { RefactorSession } from './session.js';
+import { buildCommandTree } from './build-commands.js';
 
-const USAGE = `lspeasy — LSP-driven refactor CLI
+const STATIC_HELP = `lspeasy — LSP-driven CLI
 
 Usage:
-  lspeasy rename <file> <line:col> <newName>        Rename a symbol project-wide
-  lspeasy move-file <oldPath> <newPath>             Move a file, update importers
-  lspeasy move-symbol <file> <line:col> <target>    Move a symbol into <target> file
-  lspeasy query <op> <file> <line:col>              Read op: definition|references|hover
+  lspeasy <namespace> <command> [args]
+  lspeasy call <method> --params <json>
 
-Positions are 1-based (editor style), e.g. 12:7.
+Available commands depend on the connected server's advertised capabilities.
+Run with a file argument to see available commands for that language:
+  lspeasy textDocument hover --help src/foo.ts
 
 Global flags:
-  --server <cmd>   LSP server launch command  (default: "typescript-language-server --stdio")
-  --root <dir>     Project root               (default: current working directory)
-  --dry-run        Print the WorkspaceEdit / affected files; change nothing
-  --apply          Apply changes to disk      (default; conflicts with --dry-run)
-  --json           Emit machine-readable JSON on stdout
-  --wait <ms>      Index wait before requests  (default: 15000)
-  --verbose        Progress logging to stderr
-  --overwrite      move-file: replace an existing destination (default: OFF)
-  --allow-outside-root  Permit file-path args that resolve outside --root (default: OFF)
-  -h, --help       Show this help
-
-Relative file-path arguments are resolved against --root (NOT the current
-directory), so running from an unrelated checkout cannot touch the wrong one.
-Paths that resolve outside --root are refused unless --allow-outside-root.
+  --server <cmd>        LSP server launch command (overrides lsp.json discovery)
+  --root <dir>          Project root (default: cwd)
+  --dry-run             Print changes; do not write
+  --json                Machine-readable JSON on stdout; diagnostics to stderr
+  --wait <ms>           Server index wait in ms (default: 15000)
+  --verbose             Progress logging to stderr
+  --allow-outside-root  Allow file paths outside --root
+  -h, --help            Show this help
 `;
 
-const OPTION_CONFIG = {
-  server: { type: 'string' as const, default: 'typescript-language-server --stdio' },
+const GLOBAL_OPTION_CONFIG = {
+  server: { type: 'string' as const },
   root: { type: 'string' as const },
   'dry-run': { type: 'boolean' as const, default: false },
-  apply: { type: 'boolean' as const, default: false },
   json: { type: 'boolean' as const, default: false },
   wait: { type: 'string' as const, default: '15000' },
   verbose: { type: 'boolean' as const, default: false },
-  overwrite: { type: 'boolean' as const, default: false },
   'allow-outside-root': { type: 'boolean' as const, default: false },
   help: { type: 'boolean' as const, short: 'h', default: false }
 };
 
-/** Parsed `--flag` values as `util.parseArgs` returns them for {@link OPTION_CONFIG}. */
+/** Parsed raw flag values from the first pass. */
 export type ParsedOptionValues = {
   server?: string;
   root?: string;
   'dry-run'?: boolean;
-  apply?: boolean;
   json?: boolean;
   wait?: string;
   verbose?: boolean;
-  overwrite?: boolean;
   'allow-outside-root'?: boolean;
 };
 
 /**
- * Validate raw `--flag` values and project them onto {@link GlobalFlags}.
+ * Validate raw flag values and project them onto {@link GlobalFlags}.
  *
- * Enforces two precedence rules that were previously silent footguns:
- *  - `--apply` and `--dry-run` are mutually exclusive (both default to the
- *    documented behaviour, so passing both is ambiguous → error). This is also
- *    the only place that reads `--apply`, which was declared but never consulted.
- *  - `--wait` must parse to a finite, non-negative number; otherwise a typo like
- *    `--wait abc` became `NaN`, which `setTimeout` coerces to `0`, silently
- *    skipping the index wait the refactor requests depend on.
- *
- * On a validation failure it calls {@link fail} (writes the error and exits
- * non-zero); the `never`-returning branch keeps the happy path well-typed.
+ * `--wait` must parse to a finite, non-negative number; a typo like
+ * `--wait abc` would otherwise become NaN, which setTimeout coerces to 0,
+ * silently skipping the index wait refactor requests depend on.
  */
 export function buildFlags(values: ParsedOptionValues): GlobalFlags {
   const json = values.json === true;
-
-  if (values.apply === true && values['dry-run'] === true) {
-    fail('--apply and --dry-run are mutually exclusive', json);
-  }
-
   const waitMs = Number(values.wait ?? '15000');
   if (!Number.isFinite(waitMs) || waitMs < 0) {
     fail(`--wait must be a non-negative number of milliseconds, got "${values.wait}"`, json);
   }
-
   return {
-    server: values.server ?? 'typescript-language-server --stdio',
-    root: values.root ? values.root : process.cwd(),
+    server: values.server ?? '',
+    root: values.root ?? process.cwd(),
     dryRun: values['dry-run'] === true,
     json,
     verbose: values.verbose === true,
     waitMs,
     allowOutsideRoot: values['allow-outside-root'] === true,
-    overwrite: values.overwrite === true
+    overwrite: false
   };
 }
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({
-    args: process.argv.slice(2),
-    options: OPTION_CONFIG,
-    allowPositionals: true
+    args: argv.slice(2),
+    options: GLOBAL_OPTION_CONFIG,
+    allowPositionals: true,
+    strict: false
   });
 
-  if (values.help || positionals.length === 0) {
-    process.stdout.write(USAGE);
-    process.exit(values.help ? 0 : 1);
+  if ((values.help && !positionals.length) || (!positionals.length && argv.length <= 2)) {
+    process.stdout.write(STATIC_HELP);
+    exit(0);
   }
 
-  const flags = buildFlags(values);
+  const flags = buildFlags(values as ParsedOptionValues);
 
-  const [command, ...rest] = positionals;
+  let serverCommand: string;
+  let languageId = 'plaintext';
 
-  switch (command) {
-    case 'rename': {
-      const [file, position, newName] = rest;
-      if (!file || !position || !newName) {
-        process.stderr.write('usage: lspeasy rename <file> <line:col> <newName>\n');
-        process.exit(1);
-      }
-      await runRename({ file, position, newName }, flags);
-      break;
+  if (flags.server) {
+    serverCommand = flags.server;
+  } else {
+    const fileArg = positionals.find((p) => p.includes('.'));
+    const ext = fileArg ? extname(fileArg) : '';
+
+    if (!ext) {
+      fail('Cannot determine language: pass a file argument or use --server <cmd>.', flags.json);
     }
-    case 'move-file': {
-      const [oldPath, newPath] = rest;
-      if (!oldPath || !newPath) {
-        process.stderr.write('usage: lspeasy move-file <oldPath> <newPath>\n');
-        process.exit(1);
-      }
-      await runMoveFile({ oldPath, newPath }, flags);
-      break;
+
+    const discovered = discoverServer(flags.root, ext);
+    if (!discovered) {
+      fail(
+        `No LSP server configured for ${ext} files.\n` +
+          'Add an lsp.json to your project (or ~/.claude/lsp.json) or use --server <cmd>.\n' +
+          'Format: { "lspServers": { "lang": { "command": "...", "args": [...], "fileExtensions": { ".ext": "languageId" } } } }',
+        flags.json
+      );
     }
-    case 'move-symbol': {
-      const [file, position, targetFile] = rest;
-      if (!file || !position || !targetFile) {
-        process.stderr.write('usage: lspeasy move-symbol <file> <line:col> <targetFile>\n');
-        process.exit(1);
-      }
-      await runMoveSymbol({ file, position, targetFile }, flags);
-      break;
+
+    serverCommand = discovered.serverCommand;
+    languageId = discovered.languageId;
+  }
+
+  const session = new RefactorSession({
+    serverCommand,
+    languageId,
+    root: flags.root,
+    indexWaitMs: flags.waitMs,
+    verbose: flags.verbose
+  });
+
+  try {
+    await session.start();
+
+    const fileArg = positionals.find((p) => p.includes('.'));
+    if (fileArg) {
+      const absPath = resolvePathArg(fileArg, flags);
+      await session.openAndWait(absPath);
     }
-    case 'query': {
-      const [op, file, position] = rest;
-      if (!op || !file || !position) {
-        process.stderr.write('usage: lspeasy query <op> <file> <line:col>\n');
-        process.exit(1);
-      }
-      await runQuery({ op, file, position }, flags);
-      break;
-    }
-    case 'help':
-      process.stdout.write(USAGE);
-      break;
-    default:
-      process.stderr.write(`unknown command: ${command}\n\n${USAGE}`);
-      process.exit(1);
+
+    const program = new Command('lspeasy');
+
+    // Declare global options so Commander does not reject them in pass 2
+    program
+      .option('--server <cmd>')
+      .option('--root <dir>')
+      .option('--dry-run')
+      .option('--json')
+      .option('--wait <ms>')
+      .option('--verbose')
+      .option('--allow-outside-root');
+
+    buildCommandTree(program, session.capabilities, session, flags);
+
+    await program.parseAsync(argv);
+  } finally {
+    await session.stop();
   }
 }
 
 /**
  * True when this module is the process entry point (vs. imported by a test).
  *
- * Compares the resolved REAL paths of `import.meta.url` and `argv[1]`. The bin
- * (`lspeasy`) is installed as a symlink to `dist/cli.js`, so `argv[1]` is the
- * symlink path while `import.meta.url` is Node's realpath — a plain string
- * compare would mismatch and silently never run `main()` (the CLI would print
- * nothing and exit 0). `realpathSync` on both sides makes the symlinked-bin and
- * direct-invocation cases agree.
+ * Compares resolved real paths of import.meta.url and argv[1]. The bin
+ * (lspeasy) is installed as a symlink to dist/cli.js, so argv[1] is the
+ * symlink path while import.meta.url is Node's realpath — a plain compare
+ * would mismatch and never run main(). realpathSync on both sides makes the
+ * symlinked-bin and direct-invocation cases agree.
  */
 function isEntryPoint(): boolean {
   const entry = argv[1];
@@ -197,7 +188,7 @@ function isEntryPoint(): boolean {
 
 if (isEntryPoint()) {
   main().catch((err) => {
-    process.stderr.write(`error: ${err instanceof Error ? err.message : String(err)}\n`);
-    process.exit(1);
+    process.stderr.write(`fatal: ${err instanceof Error ? err.message : String(err)}\n`);
+    exit(1);
   });
 }
