@@ -18,6 +18,30 @@ function getNestedValue(obj: unknown, path: string): unknown {
     );
 }
 
+/**
+ * Enrich a subcommand's help text with runtime-discovered capability metadata.
+ * Currently handles: textDocument/codeAction → lists supported code action kinds
+ * from capabilities.codeActionProvider.codeActionKinds.
+ */
+function enrichCommandFromCapabilities(
+  method: string,
+  cmd: Command,
+  capabilities: ServerCapabilities
+): void {
+  if (method === 'textDocument/codeAction') {
+    const provider = capabilities.codeActionProvider;
+    if (typeof provider === 'object' && provider !== null) {
+      const kinds = (provider as Record<string, unknown>)['codeActionKinds'];
+      if (Array.isArray(kinds) && kinds.length > 0) {
+        cmd.addHelpText(
+          'after',
+          `\nServer-supported kinds (--code-action-only):\n  ${(kinds as string[]).join(', ')}`
+        );
+      }
+    }
+  }
+}
+
 export function buildCommandTree(
   program: Command,
   capabilities: ServerCapabilities,
@@ -42,7 +66,9 @@ export function buildCommandTree(
       program.addCommand(nsCmd);
     }
 
-    nsCmd.addCommand(zodToCommander(method as string, schema, session, flags));
+    const subCmd = zodToCommander(method as string, schema, session, flags);
+    enrichCommandFromCapabilities(method as string, subCmd, capabilities);
+    nsCmd.addCommand(subCmd);
   }
 
   program
