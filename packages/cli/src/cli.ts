@@ -106,16 +106,18 @@ async function main(): Promise<void> {
   let serverCommand: string;
   let languageId = 'plaintext';
 
-  // Exclude JSON-looking tokens (--params values that parseArgs left in
-  // positionals when strict:false doesn't recognize --params as a string
-  // option) so `call ... --params '{"textDocument":...}'` doesn't mistake
-  // the JSON payload for the anchor file.
+  // positionals[0] = namespace, positionals[1] = method/command.
+  // The source file can only appear at positionals[2] (the first subcommand
+  // argument). Scanning further with .find() risks picking up --params JSON
+  // payloads or query strings that parseArgs left in positionals.
   const isFileLike = (p: string) => extname(p) !== '' && !p.startsWith('{') && !p.startsWith('[');
+  const firstSubArg = positionals[2];
+  const subArgFile = firstSubArg !== undefined && isFileLike(firstSubArg) ? firstSubArg : undefined;
 
   if (flags.server) {
     serverCommand = flags.server;
   } else {
-    const fileArg = positionals.find(isFileLike);
+    const fileArg = subArgFile;
     const ext = fileArg ? extname(fileArg) : '';
 
     if (!ext) {
@@ -147,9 +149,8 @@ async function main(): Promise<void> {
   try {
     await session.start();
 
-    const fileArg = positionals.find(isFileLike);
-    if (fileArg && !values.help) {
-      const absPath = resolvePathArg(fileArg, flags);
+    if (subArgFile && !values.help) {
+      const absPath = resolvePathArg(subArgFile, flags);
       await session.openAndWait(absPath);
     }
 

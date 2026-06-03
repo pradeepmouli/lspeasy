@@ -61,6 +61,17 @@ export const TextEditSchema = z.object({
 });
 
 /**
+ * Workspace edit — either a `changes` map of uri→TextEdit[] or a sequential
+ * `documentChanges` array. `documentChanges` items may be text edits or
+ * resource operations (create/rename/delete); they are typed as `unknown` here
+ * so consumers can narrow them with their own guards.
+ */
+export const WorkspaceEditSchema = z.object({
+  changes: z.record(z.string(), z.array(TextEditSchema)).optional(),
+  documentChanges: z.array(z.unknown()).optional()
+});
+
+/**
  * Diagnostic severity
  */
 export const DiagnosticSeveritySchema = z.union([
