@@ -84,7 +84,7 @@ export function buildFlags(values: ParsedOptionValues): GlobalFlags {
     verbose: values.verbose === true,
     waitMs,
     allowOutsideRoot: values['allow-outside-root'] === true,
-    overwrite: false
+    overwrite: false // move-file removed; the flag is kept in GlobalFlags for io.ts compatibility
   };
 }
 
@@ -96,7 +96,7 @@ async function main(): Promise<void> {
     strict: false
   });
 
-  if ((values.help && !positionals.length) || (!positionals.length && argv.length <= 2)) {
+  if (!positionals.length) {
     process.stdout.write(STATIC_HELP);
     exit(0);
   }
@@ -109,7 +109,7 @@ async function main(): Promise<void> {
   if (flags.server) {
     serverCommand = flags.server;
   } else {
-    const fileArg = positionals.find((p) => p.includes('.'));
+    const fileArg = positionals.find((p) => extname(p) !== '');
     const ext = fileArg ? extname(fileArg) : '';
 
     if (!ext) {
@@ -141,7 +141,7 @@ async function main(): Promise<void> {
   try {
     await session.start();
 
-    const fileArg = positionals.find((p) => p.includes('.'));
+    const fileArg = positionals.find((p) => extname(p) !== '');
     if (fileArg) {
       const absPath = resolvePathArg(fileArg, flags);
       await session.openAndWait(absPath);
