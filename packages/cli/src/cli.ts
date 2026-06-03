@@ -106,10 +106,16 @@ async function main(): Promise<void> {
   let serverCommand: string;
   let languageId = 'plaintext';
 
+  // Exclude JSON-looking tokens (--params values that parseArgs left in
+  // positionals when strict:false doesn't recognize --params as a string
+  // option) so `call ... --params '{"textDocument":...}'` doesn't mistake
+  // the JSON payload for the anchor file.
+  const isFileLike = (p: string) => extname(p) !== '' && !p.startsWith('{') && !p.startsWith('[');
+
   if (flags.server) {
     serverCommand = flags.server;
   } else {
-    const fileArg = positionals.find((p) => extname(p) !== '');
+    const fileArg = positionals.find(isFileLike);
     const ext = fileArg ? extname(fileArg) : '';
 
     if (!ext) {
@@ -141,7 +147,7 @@ async function main(): Promise<void> {
   try {
     await session.start();
 
-    const fileArg = positionals.find((p) => extname(p) !== '');
+    const fileArg = positionals.find(isFileLike);
     if (fileArg && !values.help) {
       const absPath = resolvePathArg(fileArg, flags);
       await session.openAndWait(absPath);

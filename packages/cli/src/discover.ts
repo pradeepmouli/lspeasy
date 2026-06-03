@@ -37,7 +37,13 @@ export function selectServer(config: LspJson, fileExt: string): ResolvedServer |
       const parts = [entry.command, ...(entry.args ?? [])].filter(Boolean);
       // Quote tokens containing spaces so tokenizeCommand in session.ts can
       // round-trip them without splitting on the embedded whitespace.
-      const quoted = parts.map((t) => (t.includes(' ') ? `"${t.replace(/"/g, '\\"')}"` : t));
+      // Escape backslashes first, then double-quotes: tokenizeCommand treats \\
+      // inside double-quotes as a literal backslash, so a trailing backslash in a
+      // Windows path like "C:\Program Files\" must become "C:\Program Files\\"
+      // to avoid the closing " being consumed as \" (an escaped quote).
+      const quoted = parts.map((t) =>
+        t.includes(' ') ? `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"` : t
+      );
       return { serverCommand: quoted.join(' '), languageId };
     }
   }

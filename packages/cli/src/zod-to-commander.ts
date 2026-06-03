@@ -10,7 +10,8 @@ import {
   planWorkspaceEdit,
   type WorkspaceEdit,
   type AppliedChange,
-  type BoundaryGuard
+  type BoundaryGuard,
+  type LspTextEdit
 } from './apply.js';
 
 export type ArgPattern =
@@ -92,6 +93,26 @@ export function marshalParams(
 
 function isWorkspaceEdit(v: unknown): v is WorkspaceEdit {
   return typeof v === 'object' && v !== null && ('changes' in v || 'documentChanges' in v);
+}
+
+/** Detect a TextEdit[] result from formatting/rangeFormatting/onTypeFormatting. */
+function isTextEditArray(v: unknown): v is LspTextEdit[] {
+  if (!Array.isArray(v) || v.length === 0) return false;
+  const first = v[0] as Record<string, unknown>;
+  return typeof first === 'object' && first !== null && 'range' in first && 'newText' in first;
+}
+
+/**
+ * Wrap a flat TextEdit[] as a single-file WorkspaceEdit using the
+ * `textDocument.uri` already present in the marshaled params. Returns null
+ * when the params don't carry a recognizable URI (raw-pattern calls).
+ */
+function textEditsToWorkspaceEdit(edits: LspTextEdit[], params: unknown): WorkspaceEdit | null {
+  if (typeof params !== 'object' || params === null) return null;
+  const td = (params as Record<string, unknown>)['textDocument'];
+  const uri = typeof td === 'object' && td !== null ? (td as Record<string, unknown>)['uri'] : null;
+  if (typeof uri !== 'string') return null;
+  return { changes: { [uri]: edits } };
 }
 
 function printAppliedChanges(
@@ -181,11 +202,17 @@ export function zodToCommander(
         session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>
       )(method, params);
 
-      // Collect workspace edits from two sources:
-      // 1. Direct result (e.g. textDocument/rename returns WorkspaceEdit)
-      // 2. Server-pushed edits via workspace/applyEdit (e.g. workspace/executeCommand)
+      // Collect workspace edits from up to three sources:
+      // 1. Direct WorkspaceEdit result (e.g. textDocument/rename)
+      // 2. TextEdit[] result (e.g. textDocument/formatting) — wrapped using the
+      //    textDocument.uri already in rawParams
+      // 3. Server-pushed edits via workspace/applyEdit (e.g. workspace/executeCommand)
       const capturedEdits = session.takeCapturedEdits();
-      const directEdit = isWorkspaceEdit(result) ? result : null;
+      const directEdit = isWorkspaceEdit(result)
+        ? result
+        : isTextEditArray(result)
+          ? textEditsToWorkspaceEdit(result, rawParams)
+          : null;
 
       if (directEdit || capturedEdits.length > 0) {
         const guard: BoundaryGuard = {
