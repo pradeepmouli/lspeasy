@@ -104,6 +104,9 @@ importers:
       commander:
         specifier: ^12.1.0
         version: 12.1.0
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       typescript:
         specifier: ^6.0.3
@@ -4610,7 +4613,6 @@ snapshots:
 
   yaml@2.9.0: {}
 
-  zod@4.4.3:
-    optional: true
+  zod@4.4.3: {}
 
   zwitch@2.0.4: {}
