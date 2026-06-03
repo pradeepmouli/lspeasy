@@ -51,7 +51,8 @@
   },
   "dependencies": {
     "@lspeasy/client": "workspace:*",
-    "@lspeasy/core": "workspace:*"
+    "@lspeasy/core": "workspace:*",
+    "commander": "^12.1.0"
   },
   "devDependencies": {
     "typescript": "^6.0.3"

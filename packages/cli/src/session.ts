@@ -16,7 +16,12 @@ import { basename, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { LSPClient } from '@lspeasy/client';
-import { NullLogger, type ClientCapabilities, type Logger } from '@lspeasy/core';
+import {
+  NullLogger,
+  type ClientCapabilities,
+  type Logger,
+  type ServerCapabilities
+} from '@lspeasy/core';
 import { StdioTransport } from '@lspeasy/core/node';
 
 import type { WorkspaceEdit } from './apply.js';
@@ -26,6 +31,8 @@ export interface SessionOptions {
   serverCommand: string;
   /** Absolute project root directory. */
   root: string;
+  /** languageId for textDocument/didOpen (e.g. 'typescript', 'rust'). */
+  languageId?: string;
   /** Milliseconds to wait for the server to index before the first request. */
   indexWaitMs?: number;
   /** Emit `[lspeasy] …` progress lines to stderr. */
@@ -187,6 +194,7 @@ export class RefactorSession {
     this.opts = {
       indexWaitMs: 15000,
       verbose: false,
+      languageId: 'plaintext',
       ...opts
     };
   }
@@ -238,12 +246,12 @@ export class RefactorSession {
   }
 
   /** Open an anchor file and wait for the server to index the project. */
-  async openAndWait(anchorFile: string, languageId = 'typescript'): Promise<void> {
+  async openAndWait(anchorFile: string): Promise<void> {
     const client = this.requireClient();
     await client.sendNotification('textDocument/didOpen', {
       textDocument: {
         uri: pathToFileURL(anchorFile).href,
-        languageId,
+        languageId: this.opts.languageId,
         version: 1,
         text: readFileSync(anchorFile, 'utf8')
       }
@@ -277,6 +285,10 @@ export class RefactorSession {
 
   get lsp(): LSPClient {
     return this.requireClient();
+  }
+
+  get capabilities(): ServerCapabilities {
+    return this.requireClient().getServerCapabilities() ?? ({} as ServerCapabilities);
   }
 
   private requireClient(): LSPClient {
