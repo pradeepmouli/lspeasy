@@ -74,6 +74,24 @@ export function marshalParams(
   }
 }
 
+function injectRequiredDefaults(method: string, params: unknown): unknown {
+  if (typeof params !== 'object' || params === null) return params;
+  const p = params as Record<string, unknown>;
+  if (method === 'textDocument/references' && !('context' in p)) {
+    return { ...p, context: { includeDeclaration: true } };
+  }
+  if (method === 'textDocument/codeAction' && !('context' in p)) {
+    return { ...p, context: { diagnostics: [] } };
+  }
+  if (
+    (method === 'textDocument/formatting' || method === 'textDocument/rangeFormatting') &&
+    !('options' in p)
+  ) {
+    return { ...p, options: { tabSize: 2, insertSpaces: true } };
+  }
+  return params;
+}
+
 export function zodToCommander(
   method: string,
   schema: z.ZodType<unknown>,
@@ -112,7 +130,8 @@ export function zodToCommander(
     const positional = cmdArgs.slice(0, -1).map(String);
 
     try {
-      const params = marshalParams(pattern, positional, cmdOpts, flags);
+      const rawParams = marshalParams(pattern, positional, cmdOpts, flags);
+      const params = injectRequiredDefaults(method, rawParams);
       const result = await (
         session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>
       )(method, params);
