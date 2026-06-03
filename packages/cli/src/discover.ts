@@ -21,7 +21,7 @@ export interface ResolvedServer {
 
 const SEARCH_PATHS = ['lsp.json', '.claude/lsp.json', '.github/lsp.json'];
 
-export function findLspJsonPath(root: string): string | null {
+function findLspJsonPath(root: string): string | null {
   for (const rel of SEARCH_PATHS) {
     const full = join(root, rel);
     if (existsSync(full)) return full;
