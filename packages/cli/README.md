@@ -1,67 +1,142 @@
 # @lspeasy/cli
 
-Standalone, server-agnostic refactor CLI that drives any Language Server Protocol
-server to perform **write-side** refactors — project-wide rename, file-move with
-importer updates, and move-symbol. These are the operations read-only tooling
-(including Claude Code's built-in LSP tool) cannot do.
-
-Built on [`@lspeasy/client`](../client): the CLI spawns the language server over the
-stdio transport from `@lspeasy/core/node`, performs the LSP `initialize` /
-`initialized` handshake, opens an anchor file, waits for the project to index, sends
-the write request, and applies the returned `WorkspaceEdit` to disk. Because the
-server sees the whole program, it updates references a text search misses —
-re-exports, aliased and type-only imports, and `{@link}` doc references.
+LSP-driven CLI that connects to any Language Server Protocol server and exposes
+its capabilities as typed subcommands — hover, rename, format, find-references,
+code actions, and more. The command surface is built at runtime from the server's
+advertised capabilities, so it works with any LSP server out of the box.
 
 ## Install
 
 ```bash
-npx @lspeasy/cli rename src/math.ts 1:17 sumValues --root .   # zero-install
-pnpm add -g @lspeasy/cli                                       # or install the bin
+npx @lspeasy/cli textDocument hover src/foo.ts 12:7   # zero-install
+pnpm add -g @lspeasy/cli                               # or install globally
 ```
 
-## Commands
+## Usage
 
-Positions are **1-based** (`line:col`, editor-style) and refer to the symbol's identifier.
+```
+lspeasy <namespace> <command> [args] [flags]
+lspeasy call <method> --params <json>
+```
+
+Commands are built from the server's capabilities at startup:
 
 ```bash
-lspeasy rename <file> <line:col> <newName>
-lspeasy move-file <oldPath> <newPath>
-lspeasy move-symbol <file> <line:col> <targetFile>
-lspeasy query <definition|references|hover> <file> <line:col>
+lspeasy textDocument hover       src/foo.ts 12:7
+lspeasy textDocument rename      src/foo.ts 12:7 newName
+lspeasy textDocument references  src/foo.ts 12:7
+lspeasy textDocument definition  src/foo.ts 12:7
+lspeasy textDocument formatting  src/foo.ts
+lspeasy textDocument rangeFormatting src/foo.ts 1:1-50:1
+lspeasy textDocument codeAction  src/foo.ts 12:1-12:20
+lspeasy textDocument onTypeFormatting src/foo.ts 12:7 --ch ";" --tab-size 2 --insert-spaces
+lspeasy workspace   symbol       MyClass
+lspeasy call        textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
 ```
 
-| Command | LSP request(s) used |
-|---|---|
-| `rename` | `textDocument/rename` |
-| `move-file` | `workspace/willRenameFiles` (+ physical `git mv` / rename) |
-| `move-symbol` | `textDocument/codeAction` (`refactor.move`) → `workspace/executeCommand` |
-| `query` | `textDocument/definition` \| `references` \| `hover` |
+Positions are **1-based** (`line:col`, editor-style).  
+Write-side commands (`rename`, `formatting`, code actions that produce edits)
+apply changes to disk automatically. Pass `--dry-run` to preview instead.
 
-## Flags
+## Server discovery — `lsp.json`
+
+Without `--server`, the CLI discovers which server to launch by looking for an
+`lsp.json` file, walking up from `--root` (default: cwd) to the filesystem root,
+then falling back to `~/.claude/lsp.json`.
+
+**Search order within each directory:**
+1. `lsp.json`
+2. `.claude/lsp.json`
+3. `.github/lsp.json`
+
+### Format
+
+```json
+{
+  "lspServers": {
+    "<name>": {
+      "command": "<binary>",
+      "args": ["<arg>", "…"],
+      "fileExtensions": {
+        ".<ext>": "<languageId>"
+      }
+    }
+  }
+}
+```
+
+### Example — multi-language project
+
+```json
+{
+  "lspServers": {
+    "typescript": {
+      "command": "typescript-language-server",
+      "args": ["--stdio"],
+      "fileExtensions": {
+        ".ts":  "typescript",
+        ".tsx": "typescriptreact",
+        ".js":  "javascript",
+        ".jsx": "javascriptreact"
+      }
+    },
+    "rust": {
+      "command": "rust-analyzer",
+      "args": [],
+      "fileExtensions": {
+        ".rs": "rust"
+      }
+    },
+    "python": {
+      "command": "pylsp",
+      "args": [],
+      "fileExtensions": {
+        ".py": "python"
+      }
+    },
+    "tailwind": {
+      "command": "tailwindcss-language-server",
+      "args": ["--stdio"],
+      "fileExtensions": {
+        ".css":    "css",
+        ".html":   "html",
+        ".tsx":    "typescriptreact",
+        ".jsx":    "javascriptreact",
+        ".svelte": "svelte",
+        ".vue":    "vue"
+      }
+    }
+  }
+}
+```
+
+> **Note:** install language servers separately — e.g.  
+> `npm i -g typescript-language-server typescript`  
+> `rustup component add rust-analyzer`  
+> `pip install python-lsp-server`  
+> `npm i -g @tailwindcss/language-server`
+
+The first entry whose `fileExtensions` map contains the file's extension wins.
+Use `--server <cmd>` to bypass discovery entirely.
+
+## Global flags
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--server <cmd>` | `typescript-language-server --stdio` | LSP server launch command (any server advertising rename / codeAction / willRenameFiles) |
-| `--root <dir>` | cwd | Project root (point at the package whose tsconfig owns the file) |
-| `--dry-run` | off | Print affected files / edit counts; change nothing |
-| `--apply` | on | Apply changes to disk (default) |
-| `--json` | off | Machine-readable JSON on stdout (diagnostics go to stderr) |
+| `--server <cmd>` | — | LSP server launch command (overrides `lsp.json`) |
+| `--root <dir>` | cwd | Project root used for server discovery and path resolution |
+| `--dry-run` | off | Print changes; do not write to disk |
+| `--json` | off | Machine-readable JSON on stdout; diagnostics to stderr |
 | `--wait <ms>` | `15000` | Index wait before sending requests |
 | `--verbose` | off | Progress logging to stderr |
-| `--allow-outside-root` | off | Permit file-path args that resolve outside `--root` |
+| `--allow-outside-root` | off | Allow file-path args that resolve outside `--root` |
 
-### Path resolution & root safety
+### Path resolution
 
-`--root` is the single base for the server *and* the file-path arguments. Relative
-path args are resolved against `--root`, **not** the current working directory — so
-running the CLI from an unrelated checkout (e.g. a different git worktree of the same
-project) cannot silently operate on the wrong one. Any path that resolves outside
-`--root` is refused (error, non-zero exit, no changes) unless `--allow-outside-root`
-is passed.
+Relative paths are resolved against `--root`, not cwd. Any path resolving
+outside `--root` is rejected unless `--allow-outside-root` is set.
 
 ## Programmatic use
-
-The reusable internals are also exported:
 
 ```ts
 import { RefactorSession, applyWorkspaceEdit, planWorkspaceEdit } from '@lspeasy/cli';
