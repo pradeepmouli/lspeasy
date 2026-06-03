@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { Command } from 'commander';
 import { buildCommandTree } from './build-commands.js';
 import type { GlobalFlags } from './io.js';
@@ -20,6 +20,9 @@ const FLAGS: GlobalFlags = {
 };
 
 describe('capability → command → dispatch integration', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
   it('dispatches textDocument/hover with correct LSP params', async () => {
     const sendRequest = vi.fn(async () => ({ contents: { kind: 'markdown', value: 'hello' } }));
     const fakeSession = { lsp: { sendRequest } } as any;
@@ -44,8 +47,6 @@ describe('capability → command → dispatch integration', () => {
         position: { line: 4, character: 9 }
       })
     );
-
-    vi.restoreAllMocks();
   });
 
   it('dispatches textDocument/rename with file + position + newName', async () => {
@@ -63,10 +64,12 @@ describe('capability → command → dispatch integration', () => {
 
     expect(sendRequest).toHaveBeenCalledWith(
       'textDocument/rename',
-      expect.objectContaining({ newName: 'newBar' })
+      expect.objectContaining({
+        textDocument: expect.objectContaining({ uri: expect.stringContaining('bar.ts') }),
+        position: { line: 2, character: 4 },
+        newName: 'newBar'
+      })
     );
-
-    vi.restoreAllMocks();
   });
 
   it('dispatches via generic call command', async () => {
@@ -97,7 +100,5 @@ describe('capability → command → dispatch integration', () => {
         textDocument: { uri: 'file:///x.ts' }
       })
     );
-
-    vi.restoreAllMocks();
   });
 });
