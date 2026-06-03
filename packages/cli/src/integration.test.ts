@@ -74,7 +74,7 @@ describe('capability → command → dispatch integration', () => {
 
   it('dispatches via generic call command', async () => {
     const sendRequest = vi.fn(async () => null);
-    const fakeSession = { lsp: { sendRequest } } as any;
+    const fakeSession = { lsp: { sendRequest }, takeCapturedEdits: vi.fn(() => []) } as any;
 
     const program = new Command().exitOverride();
     buildCommandTree(program, {} as any, fakeSession, FLAGS);

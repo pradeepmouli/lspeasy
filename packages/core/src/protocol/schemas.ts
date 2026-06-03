@@ -31,7 +31,8 @@ export const SemanticTokenTypesSchema = z.union([
   z.literal('regexp'),
   z.literal('operator'),
   z.literal('decorator'),
-  z.literal('label')
+  z.literal('label'),
+  z.string()
 ]);
 export const SemanticTokenModifiersSchema = z.union([
   z.literal('declaration'),
@@ -43,7 +44,8 @@ export const SemanticTokenModifiersSchema = z.union([
   z.literal('async'),
   z.literal('modification'),
   z.literal('documentation'),
-  z.literal('defaultLibrary')
+  z.literal('defaultLibrary'),
+  z.string()
 ]);
 export const DocumentDiagnosticReportKindSchema = z.union([
   z.literal('full'),
@@ -56,18 +58,21 @@ export const ErrorCodesSchema = z.union([
   z.literal(-32602),
   z.literal(-32603),
   z.literal(-32002),
-  z.literal(-32001)
+  z.literal(-32001),
+  z.string()
 ]);
 export const LSPErrorCodesSchema = z.union([
   z.literal(-32803),
   z.literal(-32802),
   z.literal(-32801),
-  z.literal(-32800)
+  z.literal(-32800),
+  z.string()
 ]);
 export const FoldingRangeKindSchema = z.union([
   z.literal('comment'),
   z.literal('imports'),
-  z.literal('region')
+  z.literal('region'),
+  z.string()
 ]);
 export const SymbolKindSchema = z.union([
   z.literal(1),
@@ -162,7 +167,8 @@ export const CodeActionKindSchema = z.union([
   z.literal('source'),
   z.literal('source.organizeImports'),
   z.literal('source.fixAll'),
-  z.literal('notebook')
+  z.literal('notebook'),
+  z.string()
 ]);
 export const CodeActionTagSchema = z.literal(1);
 export const TraceValueSchema = z.union([
@@ -232,16 +238,18 @@ export const LanguageKindSchema = z.union([
   z.literal('vb'),
   z.literal('xml'),
   z.literal('xsl'),
-  z.literal('yaml')
+  z.literal('yaml'),
+  z.string()
 ]);
 export const InlineCompletionTriggerKindSchema = z.union([z.literal(1), z.literal(2)]);
 export const PositionEncodingKindSchema = z.union([
   z.literal('utf-8'),
   z.literal('utf-16'),
-  z.literal('utf-32')
+  z.literal('utf-32'),
+  z.string()
 ]);
 export const FileChangeTypeSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
-export const WatchKindSchema = z.union([z.literal(1), z.literal(2), z.literal(4)]);
+export const WatchKindSchema = z.union([z.literal(1), z.literal(2), z.literal(4), z.string()]);
 export const DiagnosticSeveritySchema = z.union([
   z.literal(1),
   z.literal(2),

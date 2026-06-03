@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 export interface LspServerEntry {
   command: string;
@@ -22,9 +22,15 @@ export interface ResolvedServer {
 const SEARCH_PATHS = ['lsp.json', '.claude/lsp.json', '.github/lsp.json'];
 
 function findLspJsonPath(root: string): string | null {
-  for (const rel of SEARCH_PATHS) {
-    const full = join(root, rel);
-    if (existsSync(full)) return full;
+  let dir = root;
+  while (true) {
+    for (const rel of SEARCH_PATHS) {
+      const full = join(dir, rel);
+      if (existsSync(full)) return full;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break; // reached filesystem root
+    dir = parent;
   }
   const global = join(homedir(), '.claude', 'lsp.json');
   return existsSync(global) ? global : null;
@@ -35,15 +41,9 @@ export function selectServer(config: LspJson, fileExt: string): ResolvedServer |
     const languageId = entry.fileExtensions[fileExt];
     if (languageId) {
       const parts = [entry.command, ...(entry.args ?? [])].filter(Boolean);
-      // Quote tokens containing spaces so tokenizeCommand in session.ts can
-      // round-trip them without splitting on the embedded whitespace.
-      // Escape backslashes first, then double-quotes: tokenizeCommand treats \\
-      // inside double-quotes as a literal backslash, so a trailing backslash in a
-      // Windows path like "C:\Program Files\" must become "C:\Program Files\\"
-      // to avoid the closing " being consumed as \" (an escaped quote).
-      const quoted = parts.map((t) =>
-        t.includes(' ') ? `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"` : t
-      );
+      // Always quote every token so backslashes and spaces are handled uniformly.
+      // tokenizeCommand treats \\ inside double-quotes as a literal backslash.
+      const quoted = parts.map((t) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`);
       return { serverCommand: quoted.join(' '), languageId };
     }
   }

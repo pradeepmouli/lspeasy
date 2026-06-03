@@ -610,6 +610,8 @@ export type ProgressParams = {
         const literals = en.values.map((v) =>
           build.literal(v.value as string | number | boolean | null).text()
         );
+        // Open enums (supportsCustomValues) accept any string beyond the known literals.
+        if (en.supportsCustomValues) literals.push(build.string().text());
         const schema =
           literals.length === 1
             ? literals[0]

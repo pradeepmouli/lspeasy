@@ -21,7 +21,7 @@ describe('selectServer', () => {
   it('returns matching server for .ts extension', () => {
     const result = selectServer(CONFIG, '.ts');
     expect(result).toEqual({
-      serverCommand: 'typescript-language-server --stdio',
+      serverCommand: '"typescript-language-server" "--stdio"',
       languageId: 'typescript'
     });
   });
@@ -32,7 +32,7 @@ describe('selectServer', () => {
 
   it('matches rust server for .rs extension', () => {
     const result = selectServer(CONFIG, '.rs');
-    expect(result).toEqual({ serverCommand: 'rust-analyzer', languageId: 'rust' });
+    expect(result).toEqual({ serverCommand: '"rust-analyzer"', languageId: 'rust' });
   });
 
   it('returns null for unknown extension', () => {

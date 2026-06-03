@@ -2,7 +2,9 @@ import { Command } from 'commander';
 import { LSPSchemas, getSchemaForMethod, getCapabilityForRequestMethod } from '@lspeasy/core';
 import type { ServerCapabilities } from '@lspeasy/core';
 
-import { zodToCommander } from './zod-to-commander.js';
+import { zodToCommander, printAppliedChanges } from './zod-to-commander.js';
+import { applyWorkspaceEdit, planWorkspaceEdit } from './apply.js';
+import type { BoundaryGuard } from './apply.js';
 import type { RefactorSession } from './session.js';
 import type { GlobalFlags } from './io.js';
 
@@ -53,7 +55,17 @@ export function buildCommandTree(
         const result = await (
           session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>
         )(method, params);
-        if (flags.json) {
+        const capturedEdits = session.takeCapturedEdits();
+        if (capturedEdits.length > 0) {
+          const guard: BoundaryGuard = {
+            root: flags.root,
+            allowOutsideRoot: flags.allowOutsideRoot
+          };
+          const allChanges = capturedEdits.flatMap((edit) =>
+            flags.dryRun ? planWorkspaceEdit(edit, guard) : applyWorkspaceEdit(edit, guard)
+          );
+          printAppliedChanges(allChanges, method, flags.dryRun, flags.json);
+        } else if (flags.json) {
           process.stdout.write(JSON.stringify({ ok: true, method, result }) + '\n');
         } else {
           process.stdout.write(JSON.stringify(result, null, 2) + '\n');
