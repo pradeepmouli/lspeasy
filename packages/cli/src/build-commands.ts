@@ -32,7 +32,7 @@ export function buildCommandTree(
 
     const parts = (method as string).split('/');
     if (parts.length !== 2) continue;
-    const [namespace, subcommand] = parts as [string, string];
+    const [namespace] = parts as [string, string];
 
     let nsCmd = program.commands.find((c) => c.name() === namespace);
     if (!nsCmd) {
@@ -48,8 +48,8 @@ export function buildCommandTree(
     .description('Send any LSP request by method name with raw JSON params')
     .option('--params <json>', 'LSP params as JSON')
     .action(async (method: string, opts: { params?: string }) => {
-      const params = opts.params ? JSON.parse(opts.params) : {};
       try {
+        const params = opts.params ? JSON.parse(opts.params) : {};
         const result = await (
           session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>
         )(method, params);
