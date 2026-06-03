@@ -55,17 +55,36 @@ function toCamelCase(str: string): string {
   return str.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
 }
 
+// Suffixes stripped when deriving the CLI prefix for an object-typed field.
+// e.g. "formatting" + "options" → "formatting-options" → strip "-options" → "formatting"
+// so sub-fields become --formatting-tab-size, --formatting-insert-spaces.
+const STRIP_SUFFIXES = ['-options', '-context', '-params', '-config', '-settings'];
+
+/**
+ * Derive the CLI key prefix for an object-typed schema field.
+ * Concatenates the command name and field name (both kebab-cased), then strips
+ * any known generic suffix so users see --formatting-tab-size rather than
+ * --formatting-options-tab-size or a bare --tab-size.
+ * For non-object (primitive) fields the field name is used directly.
+ */
+function fieldCliKey(subcommand: string, fieldName: string, isObject: boolean): string {
+  if (!isObject) return toKebabCase(fieldName);
+  const combined = `${toKebabCase(subcommand)}-${toKebabCase(fieldName)}`;
+  for (const suffix of STRIP_SUFFIXES) {
+    if (combined.endsWith(suffix)) return combined.slice(0, -suffix.length);
+  }
+  return combined;
+}
+
 /**
  * Register Commander options for a schema field not covered by the positional
- * pattern. Object-typed fields are always transparent: their sub-fields are
- * promoted directly to the CLI namespace without a prefix. This is driven
- * entirely by the runtime schema type — no name-based whitelist needed.
- * e.g. `ch` → `--ch <value>`, `options.tabSize` → `--tab-size <value>`,
- * `context.only` → `--only <value>`.
+ * pattern. `cliKey` is the pre-computed kebab-case prefix (see `fieldCliKey`).
+ * Object-typed fields are expanded one level deep: sub-fields become
+ * `--<cliKey>-<sub-field>`. Primitive fields become `--<cliKey> <value>`.
  */
 function addFieldOptions(
   cmd: Command,
-  fieldName: string,
+  cliKey: string,
   schema: z.ZodType<unknown>,
   depth = 0
 ): void {
@@ -74,11 +93,11 @@ function addFieldOptions(
     for (const [sub, subSchema] of Object.entries(
       inner.shape as Record<string, z.ZodType<unknown>>
     )) {
-      addFieldOptions(cmd, toKebabCase(sub), subSchema, depth + 1);
+      addFieldOptions(cmd, `${cliKey}-${toKebabCase(sub)}`, subSchema, depth + 1);
     }
     return;
   }
-  cmd.option(`--${toKebabCase(fieldName)} <value>`, fieldName);
+  cmd.option(`--${cliKey} <value>`, cliKey);
 }
 
 /**
@@ -88,7 +107,7 @@ function addFieldOptions(
  */
 function extractFieldValue(
   opts: Record<string, unknown>,
-  fieldName: string,
+  cliKey: string,
   schema: z.ZodType<unknown>,
   depth = 0
 ): unknown {
@@ -99,7 +118,7 @@ function extractFieldValue(
     for (const [sub, subSchema] of Object.entries(
       inner.shape as Record<string, z.ZodType<unknown>>
     )) {
-      const val = extractFieldValue(opts, toKebabCase(sub), subSchema, depth + 1);
+      const val = extractFieldValue(opts, `${cliKey}-${toKebabCase(sub)}`, subSchema, depth + 1);
       if (val !== undefined) {
         result[sub] = val;
         hasAny = true;
@@ -107,7 +126,7 @@ function extractFieldValue(
     }
     return hasAny ? result : undefined;
   }
-  const raw = opts[toCamelCase(fieldName)];
+  const raw = opts[toCamelCase(cliKey)];
   if (raw === undefined) return undefined;
   if (typeof raw === 'string') {
     try {
@@ -273,13 +292,17 @@ export function zodToCommander(
   cmd.option('--params <json>', 'raw LSP params as JSON, overrides positional args');
 
   // Add Commander options for schema fields not covered by the positional pattern.
-  // Object-typed fields are transparent: sub-fields are promoted without prefix.
+  // Object-typed fields are expanded one level deep via hyphenation.
   if (pattern !== 'raw' && isZodObjectLike(schema)) {
     const covered = PATTERN_FIELDS[pattern];
     for (const [field, fieldSchema] of Object.entries(
       schema.shape as Record<string, z.ZodType<unknown>>
     )) {
-      if (!covered.has(field)) addFieldOptions(cmd, field, fieldSchema);
+      if (!covered.has(field)) {
+        const inner = unwrapOptional(fieldSchema);
+        const cliKey = fieldCliKey(subcommand, field, isZodObjectLike(inner));
+        addFieldOptions(cmd, cliKey, fieldSchema);
+      }
     }
   }
 
@@ -302,7 +325,9 @@ export function zodToCommander(
           schema.shape as Record<string, z.ZodType<unknown>>
         )) {
           if (covered.has(field)) continue;
-          const val = extractFieldValue(cmdOpts, field, fieldSchema);
+          const inner = unwrapOptional(fieldSchema);
+          const cliKey = fieldCliKey(subcommand, field, isZodObjectLike(inner));
+          const val = extractFieldValue(cmdOpts, cliKey, fieldSchema);
           if (val !== undefined) (rawParams as Record<string, unknown>)[field] = val;
         }
       }
