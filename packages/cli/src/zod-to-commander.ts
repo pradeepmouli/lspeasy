@@ -55,16 +55,13 @@ function toCamelCase(str: string): string {
   return str.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
 }
 
-// Field names whose sub-fields are promoted to the top-level CLI namespace.
-// e.g. `options.tabSize` → `--tab-size` instead of `--options-tab-size`.
-const TRANSPARENT_FIELDS = new Set(['options']);
-
 /**
  * Register Commander options for a schema field not covered by the positional
- * pattern. Object-typed fields are expanded one level deep using hyphenation
- * (e.g. `ch` → `--ch <value>`, `options.tabSize` → `--tab-size <value>`).
- * Fields in TRANSPARENT_FIELDS have their prefix suppressed so sub-fields are
- * promoted directly to the CLI namespace.
+ * pattern. Object-typed fields are always transparent: their sub-fields are
+ * promoted directly to the CLI namespace without a prefix. This is driven
+ * entirely by the runtime schema type — no name-based whitelist needed.
+ * e.g. `ch` → `--ch <value>`, `options.tabSize` → `--tab-size <value>`,
+ * `context.only` → `--only <value>`.
  */
 function addFieldOptions(
   cmd: Command,
@@ -74,12 +71,10 @@ function addFieldOptions(
 ): void {
   const inner = unwrapOptional(schema);
   if (depth < 1 && isZodObjectLike(inner)) {
-    const transparent = TRANSPARENT_FIELDS.has(fieldName);
     for (const [sub, subSchema] of Object.entries(
       inner.shape as Record<string, z.ZodType<unknown>>
     )) {
-      const subName = transparent ? toKebabCase(sub) : `${fieldName}-${toKebabCase(sub)}`;
-      addFieldOptions(cmd, subName, subSchema, depth + 1);
+      addFieldOptions(cmd, toKebabCase(sub), subSchema, depth + 1);
     }
     return;
   }
@@ -99,14 +94,12 @@ function extractFieldValue(
 ): unknown {
   const inner = unwrapOptional(schema);
   if (depth < 1 && isZodObjectLike(inner)) {
-    const transparent = TRANSPARENT_FIELDS.has(fieldName);
     const result: Record<string, unknown> = {};
     let hasAny = false;
     for (const [sub, subSchema] of Object.entries(
       inner.shape as Record<string, z.ZodType<unknown>>
     )) {
-      const subKey = transparent ? toKebabCase(sub) : `${fieldName}-${toKebabCase(sub)}`;
-      const val = extractFieldValue(opts, subKey, subSchema, depth + 1);
+      const val = extractFieldValue(opts, toKebabCase(sub), subSchema, depth + 1);
       if (val !== undefined) {
         result[sub] = val;
         hasAny = true;
@@ -280,8 +273,7 @@ export function zodToCommander(
   cmd.option('--params <json>', 'raw LSP params as JSON, overrides positional args');
 
   // Add Commander options for schema fields not covered by the positional pattern.
-  // Object-typed fields are expanded one level deep via hyphenation so users can
-  // write --options-tab-size 2 instead of --options '{"tabSize":2}'.
+  // Object-typed fields are transparent: sub-fields are promoted without prefix.
   if (pattern !== 'raw' && isZodObjectLike(schema)) {
     const covered = PATTERN_FIELDS[pattern];
     for (const [field, fieldSchema] of Object.entries(
