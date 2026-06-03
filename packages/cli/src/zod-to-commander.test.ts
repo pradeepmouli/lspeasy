@@ -54,13 +54,20 @@ describe('marshalParams', () => {
       ['/project/src/foo.ts', '5:10'],
       {},
       FLAGS
-    ) as any;
-    expect(result.position).toEqual({ line: 4, character: 9 });
+    ) as Record<string, unknown>;
+    expect(result['position']).toEqual({ line: 4, character: 9 });
   });
 
   it('includes URI for file-position', () => {
-    const result = marshalParams('file-position', ['/project/src/foo.ts', '1:1'], {}, FLAGS) as any;
-    expect(result.textDocument.uri).toMatch(/foo\.ts$/);
+    const result = marshalParams(
+      'file-position',
+      ['/project/src/foo.ts', '1:1'],
+      {},
+      FLAGS
+    ) as Record<string, unknown>;
+    const td = result['textDocument'] as Record<string, unknown>;
+    expect(td['uri']).toMatch(/^file:\/\/\//);
+    expect(td['uri']).toMatch(/foo\.ts$/);
   });
 
   it('includes newName for file-position-newname', () => {
@@ -69,8 +76,8 @@ describe('marshalParams', () => {
       ['/project/src/foo.ts', '5:10', 'newFoo'],
       {},
       FLAGS
-    ) as any;
-    expect(result.newName).toBe('newFoo');
+    ) as Record<string, unknown>;
+    expect(result['newName']).toBe('newFoo');
   });
 
   it('builds range for file-range', () => {
@@ -79,8 +86,8 @@ describe('marshalParams', () => {
       ['/project/src/foo.ts', '2:1-4:5'],
       {},
       FLAGS
-    ) as any;
-    expect(result.range).toEqual({
+    ) as Record<string, unknown>;
+    expect(result['range']).toEqual({
       start: { line: 1, character: 0 },
       end: { line: 3, character: 4 }
     });

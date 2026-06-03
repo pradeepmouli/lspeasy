@@ -113,7 +113,9 @@ export function zodToCommander(
 
     try {
       const params = marshalParams(pattern, positional, cmdOpts, flags);
-      const result = await session.lsp.sendRequest(method as never, params as never);
+      const result = await (
+        session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>
+      )(method, params);
       if (flags.json) {
         process.stdout.write(JSON.stringify({ ok: true, method, result }) + '\n');
       } else {
