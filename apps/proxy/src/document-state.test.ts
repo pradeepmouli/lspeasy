@@ -1,6 +1,6 @@
 // apps/proxy/src/document-state.test.ts
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { DocumentStateManager, type DidOpenAction } from './document-state.js';
+import { DocumentStateManager } from './document-state.js';
 
 describe('DocumentStateManager', () => {
   afterEach(() => vi.useRealTimers());
