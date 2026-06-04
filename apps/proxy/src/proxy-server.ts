@@ -1,5 +1,5 @@
 // apps/proxy/src/proxy-server.ts
-import { createServer, type Server, type Socket } from 'node:net';
+import { createServer, createConnection, type Server, type Socket } from 'node:net';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { socketToTransport } from '@lspeasy/core/node';
@@ -49,8 +49,6 @@ export class ProxyServer {
   async start(): Promise<void> {
     mkdirSync(dirname(this.sockPath), { recursive: true });
 
-    if (existsSync(this.sockPath)) unlinkSync(this.sockPath);
-
     const srv = createServer((socket) => {
       this.activeSockets.add(socket);
       socket.on('close', () => this.activeSockets.delete(socket));
@@ -70,7 +68,20 @@ export class ProxyServer {
 
     this.server = srv;
     await new Promise<void>((resolve, reject) => {
-      srv.on('error', reject);
+      srv.on('error', async (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EADDRINUSE') {
+          const live = await this.isSocketLive(this.sockPath);
+          if (live) {
+            process.stderr.write('[lsproxy] socket already in use — another daemon is running\n');
+            process.exit(0);
+          }
+          // Stale socket from a crashed daemon — remove and retry once
+          unlinkSync(this.sockPath);
+          srv.listen(this.sockPath, resolve);
+        } else {
+          reject(err);
+        }
+      });
       srv.listen(this.sockPath, resolve);
     });
 
@@ -111,6 +122,17 @@ export class ProxyServer {
       process.stderr.write('[lsproxy] idle timeout — shutting down\n');
       this.stop().then(() => process.exit(0));
     }, this.idleTimeoutMs);
+  }
+
+  private isSocketLive(sockPath: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const sock = createConnection({ path: sockPath });
+      sock.once('connect', () => {
+        sock.destroy();
+        resolve(true);
+      });
+      sock.once('error', () => resolve(false));
+    });
   }
 
   private async lazyCloseUri(uri: string): Promise<void> {
