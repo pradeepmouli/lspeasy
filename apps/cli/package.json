@@ -1,5 +1,5 @@
 {
-  "name": "@lspeasy/cli",
+  "name": "@lsproxy/cli",
   "version": "0.2.0",
   "description": "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and move-symbol",
   "private": false,
@@ -22,7 +22,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/pradeepmouli/lspeasy.git",
-    "directory": "packages/cli"
+    "directory": "apps/cli"
   },
   "type": "module",
   "bin": {
