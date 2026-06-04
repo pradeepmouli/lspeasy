@@ -61,7 +61,6 @@ export async function connectViaProxy(opts: ConnectOptions): Promise<RefactorSes
   if (opts.verbose) process.stderr.write(`[lspeasy] connecting via proxy ${sockPath}\n`);
 
   const sessionOpts: SessionOptions = {
-    serverCommand: '',
     root: opts.root,
     languageId: opts.languageId,
     indexWaitMs: opts.indexWaitMs,
