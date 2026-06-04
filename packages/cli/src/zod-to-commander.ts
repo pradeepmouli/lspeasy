@@ -198,7 +198,6 @@ export function marshalParams(
 }
 
 const TextEditArraySchema = z.array(TextEditSchema);
-const CodeActionArraySchema = z.array(CodeActionSchema);
 
 // WorkspaceEdit has all optional fields, so safeParse succeeds on any plain
 // object. Require at least one edit-bearing key so hover/completion results
@@ -357,15 +356,20 @@ export function zodToCommander(
       const capturedEdits = session.takeCapturedEdits();
       const weResult = NonEmptyWorkspaceEditSchema.safeParse(result);
       const teResult = TextEditArraySchema.safeParse(result);
-      const caResult = CodeActionArraySchema.safeParse(result);
+      // LSP allows codeAction results to be (Command | CodeAction)[]. Parse each
+      // item individually so Command entries don't cause the whole parse to fail.
+      const codeActionItems = Array.isArray(result)
+        ? result.flatMap((item) => {
+            const parsed = CodeActionSchema.safeParse(item);
+            return parsed.success ? [parsed.data] : [];
+          })
+        : [];
       // Only auto-apply when exactly one code action carries an edit; if multiple
       // edit-bearing actions are returned, fall through to JSON printing so the
       // caller can choose rather than silently applying the wrong quick-fix.
-      const inlineCodeActionEdits = caResult.success
-        ? caResult.data
-            .map((a) => a.edit)
-            .filter((e) => e != null && NonEmptyWorkspaceEditSchema.safeParse(e).success)
-        : [];
+      const inlineCodeActionEdits = codeActionItems
+        .map((a) => a.edit)
+        .filter((e) => e != null && NonEmptyWorkspaceEditSchema.safeParse(e).success);
       const inlineCodeActionEdit: WorkspaceEdit | null =
         inlineCodeActionEdits.length === 1
           ? (inlineCodeActionEdits[0] as unknown as WorkspaceEdit)

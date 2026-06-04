@@ -110,8 +110,17 @@ async function main(): Promise<void> {
   // The source file can only appear at positionals[2] (the first subcommand
   // argument). A value is file-like only when it has an extension AND is not
   // a JSON literal (--params values that parseArgs left in positionals).
-  const isFileLike = (p: string) =>
-    extname(p) !== '' && !p.startsWith('{') && !p.startsWith('[') && !p.startsWith('"');
+  const isFileLike = (p: string) => {
+    const ext = extname(p);
+    // Reject dotted identifiers like React.Component — real extensions are lowercase.
+    return (
+      ext !== '' &&
+      ext === ext.toLowerCase() &&
+      !p.startsWith('{') &&
+      !p.startsWith('[') &&
+      !p.startsWith('"')
+    );
+  };
   const firstSubArg = positionals[2];
   const subArgFile = firstSubArg !== undefined && isFileLike(firstSubArg) ? firstSubArg : undefined;
 

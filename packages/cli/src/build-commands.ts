@@ -55,6 +55,15 @@ function enrichCommandFromCapabilities(
   if (lines.length) cmd.addHelpText('after', `\nCapability options:\n  ${lines.join('\n  ')}`);
 }
 
+// Some methods share a top-level capability path with sibling methods, so the
+// top-level check alone is insufficient. Map those methods to a more specific
+// sub-path that must also be truthy before exposing the command.
+// e.g. semanticTokens/full shares 'semanticTokensProvider' with range/delta,
+// but requires 'semanticTokensProvider.full' to actually be supported.
+const CAPABILITY_REFINEMENTS: Readonly<Partial<Record<string, string>>> = {
+  'textDocument/semanticTokens/full': 'semanticTokensProvider.full'
+};
+
 export function buildCommandTree(
   program: Command,
   capabilities: ServerCapabilities,
@@ -68,6 +77,8 @@ export function buildCommandTree(
     const capPath = getCapabilityForRequestMethod(method as any);
     if (capPath === 'alwaysOn') continue;
     if (!getNestedValue(capabilities, capPath as string)) continue;
+    const refinedCapPath = CAPABILITY_REFINEMENTS[method as string];
+    if (refinedCapPath && !getNestedValue(capabilities, refinedCapPath)) continue;
 
     const parts = (method as string).split('/');
     if (parts.length < 2) continue;
