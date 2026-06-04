@@ -176,6 +176,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
     dynamicRegistration: DynamicRegistrationBehavior;
     rootUri: string | null;
     workspaceFolders: Array<{ uri: string; name: string }> | null;
+    initializationOptions: unknown;
   };
   private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
@@ -212,7 +213,8 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
         allowUndeclaredDynamicRegistration: false
       },
       rootUri: options.rootUri ?? null,
-      workspaceFolders: options.workspaceFolders ?? null
+      workspaceFolders: options.workspaceFolders ?? null,
+      initializationOptions: options.initializationOptions
     };
 
     this.logger = this.options.logger;
@@ -298,6 +300,9 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
         rootUri: this.options.rootUri,
         ...(this.options.workspaceFolders
           ? { workspaceFolders: this.options.workspaceFolders }
+          : {}),
+        ...(this.options.initializationOptions !== undefined
+          ? { initializationOptions: this.options.initializationOptions }
           : {})
       };
 

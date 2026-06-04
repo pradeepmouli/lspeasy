@@ -16,41 +16,114 @@ import { basename, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { LSPClient } from '@lspeasy/client';
-import { NullLogger, type ClientCapabilities, type Logger } from '@lspeasy/core';
+import {
+  NullLogger,
+  tokenizeCommand,
+  type ClientCapabilities,
+  type Logger,
+  type ServerCapabilities,
+  type Transport
+} from '@lspeasy/core';
 import { StdioTransport } from '@lspeasy/core/node';
 
 import type { WorkspaceEdit } from './apply.js';
 
 export interface SessionOptions {
-  /** Server launch command, e.g. `typescript-language-server --stdio`. */
-  serverCommand: string;
+  /** Server launch command, e.g. `typescript-language-server --stdio`. Required unless `transport` is supplied. */
+  serverCommand?: string;
   /** Absolute project root directory. */
   root: string;
+  /** languageId for textDocument/didOpen (e.g. 'typescript', 'rust'). */
+  languageId?: string;
   /** Milliseconds to wait for the server to index before the first request. */
   indexWaitMs?: number;
   /** Emit `[lspeasy] …` progress lines to stderr. */
   verbose?: boolean;
+  /**
+   * Pre-built transport to use instead of spawning a server process.
+   *
+   * When supplied, `serverCommand` is ignored and no child process is spawned.
+   * Used by the proxy path to reuse all downstream session logic unchanged.
+   */
+  transport?: Transport;
 }
 
-/** Client capabilities advertised at `initialize`. Generous so the server
- * gates none of the refactor features we rely on. */
+// Advertise the full set of capabilities the CLI can dispatch so servers do
+// not gate their ServerCapabilities on a narrow client declaration. Each entry
+// corresponds to a ClientCapability path used by getCapabilityForRequestMethod;
+// a missing entry silently suppresses the matching command from the command tree.
 const CLIENT_CAPABILITIES = {
   textDocument: {
     synchronization: { dynamicRegistration: false },
+    // Navigation
+    definition: { dynamicRegistration: false },
+    declaration: { dynamicRegistration: false },
+    typeDefinition: { dynamicRegistration: false },
+    implementation: { dynamicRegistration: false },
+    references: { dynamicRegistration: false },
+    documentHighlight: { dynamicRegistration: false },
+    documentSymbol: { dynamicRegistration: false },
+    // Hover / completion / signature
+    hover: { dynamicRegistration: false },
+    completion: { dynamicRegistration: false },
+    signatureHelp: { dynamicRegistration: false },
+    // Refactor / actions / rename
     rename: { dynamicRegistration: false, prepareSupport: true },
     codeAction: {
       dynamicRegistration: false,
-      codeActionLiteralSupport: { codeActionKind: { valueSet: ['', 'refactor', 'refactor.move'] } },
+      codeActionLiteralSupport: {
+        codeActionKind: {
+          valueSet: [
+            '',
+            'quickfix',
+            'refactor',
+            'refactor.extract',
+            'refactor.inline',
+            'refactor.move',
+            'refactor.rewrite',
+            'source',
+            'source.organizeImports',
+            'source.fixAll'
+          ]
+        }
+      },
       resolveSupport: { properties: ['edit'] },
       dataSupport: true
     },
-    definition: { dynamicRegistration: false },
-    references: { dynamicRegistration: false },
-    hover: { dynamicRegistration: false }
+    codeLens: { dynamicRegistration: false },
+    // Formatting
+    formatting: { dynamicRegistration: false },
+    rangeFormatting: { dynamicRegistration: false },
+    onTypeFormatting: { dynamicRegistration: false },
+    // Semantic tokens — needed for servers to advertise semanticTokensProvider
+    semanticTokens: {
+      dynamicRegistration: false,
+      requests: { full: { delta: true }, range: true },
+      tokenTypes: [],
+      tokenModifiers: [],
+      formats: ['relative' as const],
+      overlappingTokenSupport: false,
+      multilineTokenSupport: false
+    },
+    // Hierarchy / navigation
+    callHierarchy: { dynamicRegistration: false },
+    typeHierarchy: { dynamicRegistration: false },
+    selectionRange: { dynamicRegistration: false },
+    foldingRange: { dynamicRegistration: false },
+    linkedEditingRange: { dynamicRegistration: false },
+    // Lenses / hints
+    inlayHint: { dynamicRegistration: false, resolveSupport: { properties: [] } },
+    inlineValue: { dynamicRegistration: false },
+    // Diagnostics / misc
+    diagnostic: { dynamicRegistration: false },
+    colorProvider: { dynamicRegistration: false },
+    documentLink: { dynamicRegistration: false },
+    moniker: { dynamicRegistration: false }
   },
   workspace: {
     applyEdit: true,
     executeCommand: { dynamicRegistration: false },
+    symbol: { dynamicRegistration: false },
     workspaceEdit: {
       documentChanges: true,
       resourceOperations: ['create', 'rename', 'delete'] as Array<'create' | 'rename' | 'delete'>
@@ -85,67 +158,6 @@ export class CapturedEdits {
 }
 
 /**
- * Split a server launch command into argv tokens, honoring single- and
- * double-quoted spans so an argument containing spaces survives intact (e.g.
- * `node "/path with spaces/server.js" --stdio`). A naive `split(/\s+/)` shredded
- * such commands into broken fragments.
- *
- * This is a deliberately small, dependency-free tokenizer (matching the repo's
- * "no extra dependency" ethos): quotes group and unquoted whitespace separates
- * tokens. Crucially, a backslash is a LITERAL path separator (so Windows paths
- * like `"C:\Program Files\server.exe"` survive intact) — it escapes ONLY a
- * following quote character (`\"` inside a double-quoted span yields a literal
- * `"`). It is not a full POSIX shell parser (no variable/glob expansion) — only
- * the quoting needed to pass paths/args.
- */
-export function tokenizeCommand(command: string): string[] {
-  const tokens: string[] = [];
-  let current = '';
-  let inToken = false;
-  let quote: '"' | "'" | undefined;
-
-  for (let i = 0; i < command.length; i++) {
-    const ch = command[i]!;
-    if (quote) {
-      if (ch === '\\' && quote === '"' && (command[i + 1] === '"' || command[i + 1] === '\\')) {
-        // Inside double quotes a backslash escapes ONLY a following quote or
-        // backslash. Otherwise it stays a literal separator (Windows paths).
-        current += command[++i]!;
-      } else if (ch === quote) {
-        quote = undefined;
-      } else {
-        current += ch;
-      }
-      continue;
-    }
-    if (ch === '"' || ch === "'") {
-      quote = ch;
-      inToken = true;
-      continue;
-    }
-    if (ch === '\\' && command[i + 1] === '"') {
-      // Outside quotes, a backslash escapes a following quote; elsewhere it is a
-      // literal path separator (do NOT consume the next char).
-      current += command[++i]!;
-      inToken = true;
-      continue;
-    }
-    if (/\s/.test(ch)) {
-      if (inToken) {
-        tokens.push(current);
-        current = '';
-        inToken = false;
-      }
-      continue;
-    }
-    current += ch;
-    inToken = true;
-  }
-  if (inToken) tokens.push(current);
-  return tokens;
-}
-
-/**
  * Logger that routes everything to **stderr**, keeping stdout clean for the
  * CLI's own output (critical for `--json`).
  */
@@ -171,8 +183,12 @@ class StderrLogger implements Logger {
   }
 }
 
+/** Internal resolved options — all fields except `serverCommand` and `transport` have defaults. */
+type ResolvedSessionOptions = Required<Omit<SessionOptions, 'transport' | 'serverCommand'>> &
+  Pick<SessionOptions, 'transport' | 'serverCommand'>;
+
 export class RefactorSession {
-  private readonly opts: Required<SessionOptions>;
+  private readonly opts: ResolvedSessionOptions;
   private proc?: ChildProcessWithoutNullStreams;
   private client?: LSPClient;
   /**
@@ -187,6 +203,7 @@ export class RefactorSession {
     this.opts = {
       indexWaitMs: 15000,
       verbose: false,
+      languageId: 'plaintext',
       ...opts
     };
   }
@@ -195,30 +212,37 @@ export class RefactorSession {
     if (this.opts.verbose) process.stderr.write(`[lspeasy] ${msg}\n`);
   }
 
-  /** Spawn the server and complete the LSP handshake. */
+  /** Spawn the server (or reuse a pre-built transport) and complete the LSP handshake. */
   async start(): Promise<void> {
-    const [cmd, ...args] = tokenizeCommand(this.opts.serverCommand);
-    if (!cmd) throw new Error('Empty --server command');
-
-    this.log(`spawning: ${this.opts.serverCommand} (cwd ${this.opts.root})`);
-    const proc = spawn(cmd, args, { cwd: this.opts.root }) as ChildProcessWithoutNullStreams;
-    this.proc = proc;
-    proc.on('error', (e) => {
-      process.stderr.write(`[lspeasy] server spawn error: ${e.message}\n`);
-    });
-
     // Derive the workspace root URI + folders from --root so the server indexes
     // the right project (rootUri:null is fragile for non-tsserver servers).
     const rootDir = resolve(this.opts.root);
     const rootUri = pathToFileURL(rootDir).href;
 
-    const transport = new StdioTransport({ input: proc.stdout, output: proc.stdin });
+    let transport: Transport;
+    if (this.opts.transport) {
+      transport = this.opts.transport;
+      this.log(`using pre-built transport (proxy)`);
+    } else {
+      const [cmd, ...args] = tokenizeCommand(this.opts.serverCommand ?? '');
+      if (!cmd) throw new Error('Empty --server command');
+
+      this.log(`spawning: ${this.opts.serverCommand} (cwd ${this.opts.root})`);
+      const proc = spawn(cmd, args, { cwd: this.opts.root }) as ChildProcessWithoutNullStreams;
+      this.proc = proc;
+      proc.on('error', (e) => {
+        process.stderr.write(`[lspeasy] server spawn error: ${e.message}\n`);
+      });
+      transport = new StdioTransport({ input: proc.stdout, output: proc.stdin });
+    }
+
     const client: LSPClient = new LSPClient<ClientCapabilities>({
       name: 'lspeasy-cli',
       version: '0.1.0',
       capabilities: CLIENT_CAPABILITIES as ClientCapabilities,
       rootUri,
       workspaceFolders: [{ uri: rootUri, name: basename(rootDir) }],
+      initializationOptions: { languageId: this.opts.languageId },
       // Keep stdout clean; route the SDK's own logging to stderr (or silence it).
       logger: this.opts.verbose ? new StderrLogger() : new NullLogger()
     });
@@ -237,33 +261,42 @@ export class RefactorSession {
     this.log('connected (initialize/initialized handshake complete)');
   }
 
-  /** Open an anchor file and wait for the server to index the project. */
-  async openAndWait(anchorFile: string, languageId = 'typescript'): Promise<void> {
+  /** Notify the server that an anchor file is open. */
+  async open(anchorFile: string): Promise<void> {
     const client = this.requireClient();
     await client.sendNotification('textDocument/didOpen', {
       textDocument: {
         uri: pathToFileURL(anchorFile).href,
-        languageId,
+        languageId: this.opts.languageId,
         version: 1,
         text: readFileSync(anchorFile, 'utf8')
       }
     });
-    this.log(`didOpen ${anchorFile}; waiting ${this.opts.indexWaitMs}ms for indexing…`);
-    await sleep(this.opts.indexWaitMs);
+    this.log(`didOpen ${anchorFile}`);
   }
 
   /**
-   * Run a request that may return `null` while the project is still warming up.
-   * Retries once after another index wait. Returns the (possibly null) result.
+   * Run a request immediately and retry with exponential backoff while the
+   * server returns null (i.e. it is still indexing). Gives up after
+   * `indexWaitMs` total elapsed time and returns null.
+   *
+   * Initial retry delay: 250 ms, doubling each round, capped at 5 s per
+   * attempt. The first attempt is always immediate so fast servers pay no
+   * extra latency at all.
    */
   async requestWithRetry<R>(run: () => Promise<R | null | undefined>): Promise<R | null> {
-    let res = await run();
-    if (res === null || res === undefined) {
-      this.log(`null result — retrying after ${this.opts.indexWaitMs}ms`);
-      await sleep(this.opts.indexWaitMs);
-      res = await run();
+    const deadline = Date.now() + this.opts.indexWaitMs;
+    let delay = 250;
+    while (true) {
+      const res = await run();
+      if (res !== null && res !== undefined) return res as R;
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) return null;
+      const wait = Math.min(delay, remaining);
+      this.log(`null result — retrying in ${wait}ms (${remaining}ms remaining)`);
+      await sleep(wait);
+      delay = Math.min(delay * 2, 5000);
     }
-    return (res ?? null) as R | null;
   }
 
   /**
@@ -277,6 +310,10 @@ export class RefactorSession {
 
   get lsp(): LSPClient {
     return this.requireClient();
+  }
+
+  get capabilities(): ServerCapabilities {
+    return this.requireClient().getServerCapabilities() ?? ({} as ServerCapabilities);
   }
 
   private requireClient(): LSPClient {

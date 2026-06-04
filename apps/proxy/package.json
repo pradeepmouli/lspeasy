@@ -1,0 +1,23 @@
+{
+  "name": "@lsproxy/proxy",
+  "version": "0.1.0",
+  "description": "Per-root LSP proxy daemon — holds warm language server connections for @lsproxy/cli",
+  "type": "module",
+  "bin": { "lsproxy": "./dist/main.js" },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsgo --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "type-check": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@lspeasy/client": "workspace:*",
+    "@lspeasy/core": "workspace:*"
+  },
+  "devDependencies": { "typescript": "^6.0.3" },
+  "engines": { "node": ">=22.0.0" }
+}

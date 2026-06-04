@@ -100,6 +100,7 @@ await client.disconnect();
 |-----------|--------|-------|
 | `StdioTransport` | `@lspeasy/core/node` | stdin/stdout, child processes |
 | `TcpTransport` | `@lspeasy/core/node` | TCP client/server with optional reconnect |
+| `SocketTransport` | `@lspeasy/core/node` | Unix domain socket or TCP; used by the proxy daemon |
 | `IpcTransport` | `@lspeasy/core/node` | Node parent/child IPC |
 | `WebSocketTransport` | `@lspeasy/core` | Native `globalThis.WebSocket` (Node ≥22.4 or browsers) |
 | `DedicatedWorkerTransport` | `@lspeasy/core` | Browser dedicated worker |
@@ -142,52 +143,73 @@ At the lowest layer, `@lspeasy/core` models JSON-RPC 2.0 messages (request / not
 | [`@lspeasy/core`](packages/core) | JSON-RPC 2.0, framing, transports, LSP protocol types, middleware pipeline |
 | [`@lspeasy/server`](packages/server) | Server class with lifecycle, capability-aware handler registration, progress/cancellation |
 | [`@lspeasy/client`](packages/client) | Client with typed `textDocument.*` / `workspace.*` request API |
-| [`@lspeasy/cli`](packages/cli) | Standalone refactor CLI (`lspeasy` bin): project-wide rename, file-move-with-importer-updates, move-symbol |
 | [`@lspeasy/middleware`](packages/middleware) | Shared middleware building blocks |
+| [`@lsproxy/cli`](apps/cli) | Language-agnostic CLI (`lspeasy` bin) — builds subcommands at runtime from the server's advertised capabilities |
+| [`@lsproxy/proxy`](apps/proxy) | Per-root Unix socket daemon — holds warm LSP connections so each CLI invocation reconnects in milliseconds |
 
-## Refactor CLI
+## CLI
 
-`@lspeasy/cli` is a standalone, server-agnostic CLI that drives any LSP server to perform
-**write-side** refactors — the things read-only tooling (including Claude Code's built-in LSP
-tool) can't do. It's built on `@lspeasy/client`: it spawns the language server over the stdio
-transport, runs the LSP handshake, and applies the returned `WorkspaceEdit` to disk. Because
-the language server sees the whole program, it updates references a text search misses —
-re-exports, aliased and type-only imports, and `{@link}` doc references.
+`@lsproxy/cli` is a language-agnostic CLI that connects to any LSP server and exposes
+its capabilities as typed subcommands — hover, rename, formatting, code actions, symbol
+search, and more. The command surface is built at runtime from the server's advertised
+capabilities, so it works out of the box with any LSP server.
 
 ```bash
-# zero-install
-npx @lspeasy/cli rename src/math.ts 1:17 sumValues --root .
-# or install the bin
-pnpm add -g @lspeasy/cli
+pnpm add -g @lsproxy/cli          # install once
+lspeasy textDocument hover src/foo.ts 12:7
+lspeasy textDocument rename src/foo.ts 12:7 newName
+lspeasy textDocument formatting src/foo.ts
+lspeasy workspace symbol MyClass
+lspeasy call textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
 ```
 
-Commands (positions are **1-based** `line:col`, editor-style):
+Positions are **1-based** `line:col` (editor-style). Write-side commands (`rename`, `formatting`,
+code actions that produce edits) apply changes to disk automatically; pass `--dry-run` to preview.
 
-| Command | What it does |
-|---|---|
-| `lspeasy rename <file> <line:col> <newName>` | `textDocument/rename` → apply the WorkspaceEdit project-wide |
-| `lspeasy move-file <oldPath> <newPath>` | `workspace/willRenameFiles` → update importers, then `git mv` the file |
-| `lspeasy move-symbol <file> <line:col> <targetFile>` | `refactor.move` code action → move the symbol into `targetFile`, fix importers |
-| `lspeasy query <definition\|references\|hover> <file> <line:col>` | Read-only parity ops |
+Server discovery reads `lsp.json` walking up from `--root`, or use `--server <cmd>` to override.
 
-Flags: `--server <cmd>` (default `typescript-language-server --stdio`; works for any LSP
-advertising rename / codeAction / willRenameFiles), `--root <dir>` (default cwd),
-`--dry-run` (print the affected files, change nothing), `--json` (machine-readable stdout;
-diagnostics go to stderr), `--wait <ms>` (index wait, default 15000), `--verbose`.
+```json
+{
+  "lspServers": {
+    "typescript": {
+      "command": "typescript-language-server",
+      "args": ["--stdio"],
+      "fileExtensions": { ".ts": "typescript", ".tsx": "typescriptreact" }
+    }
+  }
+}
+```
+
+See [`apps/cli/README.md`](apps/cli/README.md) for the full flag reference.
+
+### Proxy daemon
+
+`@lsproxy/proxy` runs as a background daemon per project root, holding warm LSP server
+connections in a pool. The CLI connects to it over a Unix domain socket — subsequent
+invocations skip the `initialize` handshake and respond in milliseconds instead of seconds.
+
+```bash
+# first call — spawns the daemon automatically, ~1-3s
+lspeasy textDocument hover src/foo.ts 1:1
+# subsequent calls — reconnects via socket, <100ms
+lspeasy textDocument hover src/foo.ts 2:5
+
+lspeasy --no-proxy textDocument hover src/foo.ts 1:1   # bypass daemon
+```
+
+The daemon exits automatically after 30 minutes of idle time.
 
 ### Claude Code plugin
 
-This repo also ships a thin Claude Code plugin (`lsp-refactor`) that knows when and how to
-call the CLI for you — so rename/file-move/move-symbol requests in Claude Code route through
-the language server instead of error-prone hand edits.
+This repo ships a thin Claude Code plugin (`lsp-refactor`) that routes rename, move-file,
+and move-symbol requests through the language server instead of hand edits.
 
 ```
 /plugin marketplace add pradeepmouli/lspeasy
 /plugin install lsp-refactor@lspeasy
 ```
 
-The plugin lives in [`.claude-plugin/`](.claude-plugin) (manifest + marketplace) and
-[`skills/lsp-refactor/`](skills/lsp-refactor); the skill body just invokes `@lspeasy/cli`.
+The plugin lives in [`.claude-plugin/`](.claude-plugin) and [`skills/lsp-refactor/`](skills/lsp-refactor).
 
 ## Related Projects
 

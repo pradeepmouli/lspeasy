@@ -146,23 +146,49 @@ Uses discriminated union based on presence of 'method' and 'id'
 - `ErrorMessage`: Error messages for each error code
 - `LSPRequest`: LSP Request methods organized by namespace
 - `LSPNotification`: LSP Notification methods organized by namespace
-- `PositionSchema`: Position in a text document expressed as zero-based line and character offset
-- `RangeSchema`: Range in a text document expressed as (zero-based) start and end positions
-- `TextDocumentIdentifierSchema`: Text document identifier
-- `HoverParamsSchema`: Hover params
-- `HoverSchema`: Hover result
-- `CompletionParamsSchema`: Completion params
-- `CompletionItemSchema`: Completion item
-- `CompletionListSchema`: Completion list
-- `DefinitionParamsSchema`: Definition params
-- `ReferenceParamsSchema`: Reference params
-- `DocumentSymbolParamsSchema`: Document symbol params
-- `DocumentSymbolSchema`: Document symbol
-- `InitializeParamsSchema`: Initialize params
-- `DidOpenTextDocumentParamsSchema`: Did open text document params
-- `DidChangeTextDocumentParamsSchema`: Did change text document params
-- `DidCloseTextDocumentParamsSchema`: Did close text document params
-- `DidSaveTextDocumentParamsSchema`: Did save text document params
+- `PositionSchema`
+- `RangeSchema`
+- `TextDocumentIdentifierSchema`
+- `VersionedTextDocumentIdentifierSchema`
+- `TextDocumentPositionParamsSchema`
+- `LocationSchema`
+- `TextEditSchema`
+- `WorkspaceEditSchema`
+- `DiagnosticSeveritySchema`
+- `DiagnosticSchema`
+- `HoverParamsSchema`
+- `MarkupContentSchema`
+- `HoverSchema`
+- `CompletionParamsSchema`
+- `CompletionItemKindSchema`
+- `CompletionItemSchema`
+- `CompletionListSchema`
+- `DefinitionParamsSchema`
+- `ReferenceParamsSchema`
+- `RenameParamsSchema`
+- `DocumentSymbolParamsSchema`
+- `DocumentSymbolSchema`
+- `CodeActionContextSchema`
+- `CodeActionParamsSchema`
+- `FormattingOptionsSchema`
+- `DocumentFormattingParamsSchema`
+- `DocumentRangeFormattingParamsSchema`
+- `WorkspaceSymbolParamsSchema`
+- `FoldingRangeParamsSchema`
+- `InlayHintParamsSchema`
+- `CodeLensParamsSchema`
+- `SignatureHelpParamsSchema`
+- `TypeDefinitionParamsSchema`
+- `ImplementationParamsSchema`
+- `DeclarationParamsSchema`
+- `DocumentHighlightParamsSchema`
+- `SymbolKindSchema`
+- `TextDocumentContentChangeEventSchema`
+- `InitializeParamsSchema`
+- `DidOpenTextDocumentParamsSchema`
+- `DidChangeTextDocumentParamsSchema`
+- `DidCloseTextDocumentParamsSchema`
+- `DidSaveTextDocumentParamsSchema`
 - `LSPSchemas`: Schema registry for method-based lookup
 - `WorkspaceFileChangeTypes`: File change types enum for convenience
 - `WatchKinds`: Watch kinds for file system watchers

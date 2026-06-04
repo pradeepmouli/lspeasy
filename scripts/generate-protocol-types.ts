@@ -21,7 +21,9 @@ import {
   type CodeBlockWriter
 } from 'ts-morph';
 import * as path from 'node:path';
+import * as fs from 'node:fs';
 import camelCase from 'camelcase';
+import { ZodBuilder as ZB, type Builder as ZodSchemaBuilder } from 'x-to-zod';
 import { fetchMetaModel } from './fetch-metamodel.ts';
 import { MetaModelParser } from './lib/metamodel-parser.ts';
 import type {
@@ -29,14 +31,19 @@ import type {
   Request,
   Notification,
   Type,
+  BaseTypes,
+  ReferenceType,
   ArrayType,
   OrType,
   AndType,
   TupleType,
   LiteralType,
   StringLiteralTypeReference,
-  MapType
+  MapType,
+  Property
 } from './lib/metamodel-types.ts';
+
+const { buildV4: build } = ZB;
 
 interface CategoryInfo {
   name: string;
@@ -91,6 +98,7 @@ class ProtocolTypeGenerator {
   private readonly typesOutputPath: string;
   private readonly namespacesOutputPath: string;
   private readonly enumsOutputPath: string;
+  private readonly schemasOutputPath: string;
 
   constructor() {
     // Initialize ts-morph project for output generation (import management)
@@ -114,6 +122,7 @@ class ProtocolTypeGenerator {
       'packages/core/src/protocol/namespaces.ts'
     );
     this.enumsOutputPath = path.join(process.cwd(), 'packages/core/src/protocol/enums.ts');
+    this.schemasOutputPath = path.join(process.cwd(), 'packages/core/src/protocol/schemas.ts');
   }
 
   async generate() {
@@ -130,6 +139,9 @@ class ProtocolTypeGenerator {
 
     // Step 3b: Generate enums.ts
     await this.generateEnumsFile();
+
+    // Step 3c: Generate schemas.ts
+    this.generateSchemasFile();
 
     // Step 4: Generate namespaces.ts
     await this.generateNamespacesFile();
@@ -408,6 +420,265 @@ export type ProgressParams = {
 
     console.log(`   ✅ Generated ${this.namespacesOutputPath}`);
     console.log(`   ✅ Generated ${this.categories.size} namespaces\n`);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Schema generation helpers
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /** Collect all properties for a structure, merging extends + mixins recursively. */
+  private collectAllProperties(structName: string, visiting = new Set<string>()): Property[] {
+    if (visiting.has(structName)) return [];
+    visiting.add(structName);
+    const struct = this.parser.getStructure(structName);
+    if (!struct) return [];
+
+    const inherited: Property[] = [
+      ...(struct.extends ?? []).flatMap((e) =>
+        e.kind === 'reference' ? this.collectAllProperties((e as ReferenceType).name, visiting) : []
+      ),
+      ...(struct.mixins ?? []).flatMap((m) =>
+        m.kind === 'reference' ? this.collectAllProperties((m as ReferenceType).name, visiting) : []
+      )
+    ];
+
+    const byName = new Map<string, Property>();
+    for (const p of inherited) byName.set(p.name, p);
+    for (const p of struct.properties) byName.set(p.name, p);
+    return [...byName.values()];
+  }
+
+  /** Collect all named type references from a Type tree. */
+  private collectTypeRefs(t: Type, refs: Set<string>): void {
+    if (t.kind === 'reference') refs.add((t as ReferenceType).name);
+    else if (t.kind === 'array') this.collectTypeRefs((t as ArrayType).element, refs);
+    else if (t.kind === 'or') (t as OrType).items.forEach((i) => this.collectTypeRefs(i, refs));
+    else if (t.kind === 'and') (t as AndType).items.forEach((i) => this.collectTypeRefs(i, refs));
+    else if (t.kind === 'tuple')
+      (t as TupleType).items.forEach((i) => this.collectTypeRefs(i, refs));
+    else if (t.kind === 'map') {
+      this.collectTypeRefs((t as MapType).key, refs);
+      this.collectTypeRefs((t as MapType).value, refs);
+    }
+  }
+
+  /**
+   * Convert a metaModel Type to a ZodBuilder using the x-to-zod builder API.
+   *
+   * @param selfName – name of the enclosing schema (self-reference → z.lazy)
+   * @param lazyRefs – schema names that must use z.lazy() due to forward/cyclic refs
+   */
+  private typeToBuilder(type: Type, selfName?: string, lazyRefs?: Set<string>): ZodSchemaBuilder {
+    switch (type.kind) {
+      case 'base': {
+        const n = (type as BaseTypes).name;
+        if (n === 'string' || n === 'URI' || n === 'DocumentUri' || n === 'RegExp')
+          return build.string();
+        if (n === 'integer') return build.number().int();
+        if (n === 'uinteger') return build.number().int().min(0);
+        if (n === 'decimal') return build.number();
+        if (n === 'boolean') return build.boolean();
+        if (n === 'null') return build.literal(null);
+        return build.unknown();
+      }
+      case 'reference': {
+        const refName = (type as ReferenceType).name;
+        const ref = build.raw(`${refName}Schema`);
+        const needsLazy = selfName === refName || (lazyRefs !== undefined && lazyRefs.has(refName));
+        return needsLazy ? build.lazy(ref) : ref;
+      }
+      case 'array':
+        return build.array(this.typeToBuilder((type as ArrayType).element, selfName, lazyRefs));
+      case 'map': {
+        const mt = type as MapType;
+        return build.record(
+          this.typeToBuilder(mt.key, selfName, lazyRefs),
+          this.typeToBuilder(mt.value, selfName, lazyRefs)
+        );
+      }
+      case 'or': {
+        const items = (type as OrType).items.map((t) => this.typeToBuilder(t, selfName, lazyRefs));
+        return items.length === 1 ? items[0] : build.union(items);
+      }
+      case 'and': {
+        const items = (type as AndType).items.map((t) => this.typeToBuilder(t, selfName, lazyRefs));
+        return items.reduce((acc, cur) => build.intersection(acc, cur));
+      }
+      case 'tuple':
+        return build.tuple(
+          (type as TupleType).items.map((t) => this.typeToBuilder(t, selfName, lazyRefs))
+        );
+      case 'literal': {
+        const inner = (type as LiteralType).value as { kind: string; value: unknown };
+        return build.literal(inner.value as string | number | boolean | null);
+      }
+      case 'stringLiteral':
+        return build.literal((type as StringLiteralTypeReference).value);
+      default:
+        return build.unknown();
+    }
+  }
+
+  /** Generate `schemas.ts` — Zod schemas for all LSP structures, enumerations, and type aliases. */
+  private generateSchemasFile(): void {
+    console.log('📝 Generating schemas.ts...');
+
+    const structures = this.parser.getAllStructures();
+    const enumerations = this.parser.getAllEnumerations();
+    const typeAliases = this.parser.getAllTypeAliases();
+    const requests = this.parser.getAllRequests();
+    const notifications = this.parser.getAllNotifications();
+
+    // ── Unified topological sort across all schema kinds ──────────────────
+    // Enums are dependency sinks (no deps of their own).
+    type SchemaKind = 'enum' | 'struct' | 'alias';
+    const allSchemas = new Map<string, SchemaKind>();
+    for (const e of enumerations) allSchemas.set(e.name, 'enum');
+    for (const s of structures) allSchemas.set(s.name, 'struct');
+    for (const a of typeAliases) allSchemas.set(a.name, 'alias');
+
+    const schemaDeps = (name: string): string[] => {
+      const kind = allSchemas.get(name);
+      if (!kind || kind === 'enum') return [];
+      const refs = new Set<string>();
+      if (kind === 'struct') {
+        for (const p of this.collectAllProperties(name)) this.collectTypeRefs(p.type, refs);
+      } else {
+        const ta = typeAliases.find((a) => a.name === name)!;
+        this.collectTypeRefs(ta.type, refs);
+      }
+      refs.delete(name);
+      return [...refs].filter((r) => allSchemas.has(r));
+    };
+
+    // DFS topo sort; schemas discovered as cycle edges go into `lazyRefs`
+    const visited = new Set<string>();
+    const inProgress = new Set<string>();
+    const lazyRefs = new Set<string>(); // these schema names need z.lazy() at their call sites
+    const ordered: string[] = [];
+
+    const visit = (name: string): void => {
+      if (visited.has(name)) return;
+      if (inProgress.has(name)) {
+        lazyRefs.add(name); // forward ref — wrap usages in z.lazy()
+        return;
+      }
+      inProgress.add(name);
+      for (const dep of schemaDeps(name)) visit(dep);
+      inProgress.delete(name);
+      visited.add(name);
+      ordered.push(name);
+    };
+    for (const name of allSchemas.keys()) visit(name);
+
+    // Detect self-referential schemas (their property types reference the schema itself)
+    // These need an explicit `: z.ZodType<unknown>` annotation to break TS inference cycles.
+    const selfReferential = new Set<string>();
+    for (const [name, kind] of allSchemas) {
+      if (kind === 'enum') continue;
+      const refs = new Set<string>();
+      if (kind === 'struct') {
+        for (const p of this.collectAllProperties(name)) this.collectTypeRefs(p.type, refs);
+      } else {
+        const ta = typeAliases.find((a) => a.name === name)!;
+        this.collectTypeRefs(ta.type, refs);
+      }
+      if (refs.has(name)) selfReferential.add(name);
+    }
+
+    // Schemas needing explicit type annotation to break TS inference cycles
+    const needsTypeAnnotation = new Set<string>([...selfReferential, ...lazyRefs]);
+
+    // ── Emit ──────────────────────────────────────────────────────────────
+    const lines: string[] = [];
+
+    lines.push('/**');
+    lines.push(' * Zod schemas for LSP protocol types');
+    lines.push(' * Runtime validators derived from the official LSP metaModel.json');
+    lines.push(' *');
+    lines.push(' * Auto-generated from metaModel.json — DO NOT EDIT MANUALLY');
+    lines.push(' */');
+    lines.push('');
+    lines.push("import { z } from 'zod';");
+    lines.push('');
+
+    for (const name of ordered) {
+      const kind = allSchemas.get(name)!;
+
+      if (kind === 'enum') {
+        const en = enumerations.find((e) => e.name === name)!;
+        const literals = en.values.map((v) =>
+          build.literal(v.value as string | number | boolean | null).text()
+        );
+        // Open enums (supportsCustomValues) widen with the enum's base type so
+        // numeric enums (e.g. ErrorCodes, WatchKind) accept numbers, not strings.
+        if (en.supportsCustomValues) {
+          literals.push(en.type.name === 'string' ? build.string().text() : build.number().text());
+        }
+        const schema =
+          literals.length === 1
+            ? literals[0]
+            : build.union(literals.map((l) => build.raw(l))).text();
+        lines.push(`export const ${name}Schema = ${schema};`);
+        continue;
+      }
+
+      if (kind === 'alias') {
+        const ta = typeAliases.find((a) => a.name === name)!;
+        const ann = needsTypeAnnotation.has(name) ? ': z.ZodType<unknown>' : '';
+        const schema = this.typeToBuilder(ta.type, name, lazyRefs).text();
+        lines.push(`export const ${name}Schema${ann} = ${schema};`);
+        continue;
+      }
+
+      // kind === 'struct'
+      const props = this.collectAllProperties(name);
+      const ann = needsTypeAnnotation.has(name) ? ': z.ZodObject<z.ZodRawShape>' : '';
+      if (props.length === 0) {
+        lines.push(`export const ${name}Schema${ann} = z.object({});`);
+        continue;
+      }
+      const propEntries = props.map((p) => {
+        let builder = this.typeToBuilder(p.type, name, lazyRefs);
+        if (p.optional) builder = builder.optional();
+        return `  ${p.name}: ${builder.text()}`;
+      });
+      lines.push(`export const ${name}Schema${ann} = z.object({`);
+      lines.push(propEntries.join(',\n'));
+      lines.push(`});`);
+    }
+    lines.push('');
+
+    // LSPSchemas registry — maps method strings to their params schema
+    lines.push('/**');
+    lines.push(' * Schema registry for method-based lookup');
+    lines.push(' */');
+    lines.push('export const LSPSchemas = {');
+    for (const req of [...requests, ...notifications].sort((a, b) =>
+      a.method.localeCompare(b.method)
+    )) {
+      if (!req.params || req.params.kind !== 'reference') continue;
+      const paramsName = (req.params as ReferenceType).name;
+      lines.push(`  ${JSON.stringify(req.method)}: ${paramsName}Schema,`);
+    }
+    lines.push('} as const;');
+    lines.push('');
+
+    // getSchemaForMethod helper
+    lines.push('/**');
+    lines.push(' * Looks up the Zod validation schema for a given LSP method.');
+    lines.push(' */');
+    lines.push(
+      'export function getSchemaForMethod(method: string): z.ZodType<unknown> | undefined {'
+    );
+    lines.push('  return LSPSchemas[method as keyof typeof LSPSchemas];');
+    lines.push('}');
+
+    fs.writeFileSync(this.schemasOutputPath, lines.join('\n') + '\n', 'utf8');
+    console.log(`   ✅ Generated ${this.schemasOutputPath}`);
+    console.log(
+      `   ✅ Generated ${structures.length} structures, ${enumerations.length} enums, ${typeAliases.length} type aliases\n`
+    );
   }
 
   private async generateEnumsFile() {

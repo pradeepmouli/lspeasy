@@ -156,15 +156,42 @@ export {
   PositionSchema,
   RangeSchema,
   TextDocumentIdentifierSchema,
+  VersionedTextDocumentIdentifierSchema,
+  TextDocumentPositionParamsSchema,
+  LocationSchema,
+  TextEditSchema,
+  WorkspaceEditSchema,
+  DiagnosticSeveritySchema,
+  DiagnosticSchema,
   HoverParamsSchema,
+  MarkupContentSchema,
   HoverSchema,
   CompletionParamsSchema,
+  CompletionItemKindSchema,
   CompletionItemSchema,
   CompletionListSchema,
   DefinitionParamsSchema,
   ReferenceParamsSchema,
+  RenameParamsSchema,
   DocumentSymbolParamsSchema,
   DocumentSymbolSchema,
+  CodeActionContextSchema,
+  CodeActionParamsSchema,
+  CodeActionSchema,
+  FormattingOptionsSchema,
+  DocumentFormattingParamsSchema,
+  DocumentRangeFormattingParamsSchema,
+  WorkspaceSymbolParamsSchema,
+  FoldingRangeParamsSchema,
+  InlayHintParamsSchema,
+  CodeLensParamsSchema,
+  SignatureHelpParamsSchema,
+  TypeDefinitionParamsSchema,
+  ImplementationParamsSchema,
+  DeclarationParamsSchema,
+  DocumentHighlightParamsSchema,
+  SymbolKindSchema,
+  TextDocumentContentChangeEventSchema,
   InitializeParamsSchema,
   DidOpenTextDocumentParamsSchema,
   DidChangeTextDocumentParamsSchema,
@@ -268,3 +295,17 @@ export {
   checkMethod
 } from './utils/capability-guard.js';
 export type { CheckMethodOptions } from './utils/capability-guard.js';
+
+// Discovery — lsp.json config reader (shared with proxy)
+export type { LspServerEntry, LspJson, ResolvedServer } from './discover.js';
+export {
+  selectServer,
+  selectServerByLanguageId,
+  selectExtensionMap,
+  discoverServer,
+  discoverServerByLanguageId,
+  discoverExtensionMap
+} from './discover.js';
+
+// Command tokenizer
+export { tokenizeCommand } from './utils/tokenize-command.js';

@@ -1,13 +1,7 @@
-/**
- * Tests for `buildFlags` — the flag validation/precedence layer. Covers the
- * two silent footguns the CLI previously shipped: `--apply` + `--dry-run`
- * together (one silently winning) and an unvalidated `--wait` (NaN → 0ms).
- */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { buildFlags } from './cli.js';
 
-/** Run a body with process.exit + stderr stubbed; `fail()` throws 'exit'. */
 function withFailStubbed(body: () => void): string[] {
   const errs: string[] = [];
   vi.spyOn(process, 'exit').mockImplementation(((): never => {
@@ -32,7 +26,7 @@ describe('buildFlags', () => {
     expect(flags.dryRun).toBe(false);
     expect(flags.overwrite).toBe(false);
     expect(flags.allowOutsideRoot).toBe(false);
-    expect(flags.server).toBe('typescript-language-server --stdio');
+    expect(flags.server).toBe('');
   });
 
   it('parses a numeric --wait', () => {
@@ -54,22 +48,11 @@ describe('buildFlags', () => {
     expect(errs.join('')).toMatch(/--wait must be a non-negative number/);
   });
 
-  it('errors when --apply and --dry-run are both set', () => {
-    const errs = withFailStubbed(() => {
-      expect(() => buildFlags({ root: '/repo', apply: true, 'dry-run': true })).toThrow('exit');
-    });
-    expect(errs.join('')).toMatch(/--apply and --dry-run are mutually exclusive/);
-  });
-
-  it('accepts --apply alone (dryRun stays false)', () => {
-    expect(buildFlags({ root: '/repo', apply: true }).dryRun).toBe(false);
-  });
-
-  it('accepts --dry-run alone (dryRun true)', () => {
+  it('accepts --dry-run (dryRun true)', () => {
     expect(buildFlags({ root: '/repo', 'dry-run': true }).dryRun).toBe(true);
   });
 
-  it('threads --overwrite onto the flags', () => {
-    expect(buildFlags({ root: '/repo', overwrite: true }).overwrite).toBe(true);
+  it('passes through --server override', () => {
+    expect(buildFlags({ root: '/repo', server: 'rust-analyzer' }).server).toBe('rust-analyzer');
   });
 });
