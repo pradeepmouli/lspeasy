@@ -12,6 +12,9 @@
     },
     {
       "path": "../../packages/client"
+    },
+    {
+      "path": "../proxy"
     }
   ],
   "include": ["src/**/*"],

@@ -83,6 +83,9 @@ importers:
       '@lspeasy/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@lsproxy/proxy':
+        specifier: workspace:*
+        version: link:../proxy
       commander:
         specifier: ^12.1.0
         version: 12.1.0
@@ -114,6 +117,19 @@ importers:
       vue:
         specifier: ^3.5.35
         version: 3.5.35(typescript@6.0.3)
+
+  apps/proxy:
+    dependencies:
+      '@lspeasy/client':
+        specifier: workspace:*
+        version: link:../../packages/client
+      '@lspeasy/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+    devDependencies:
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/client:
     dependencies:
