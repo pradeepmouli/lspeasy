@@ -64,6 +64,10 @@ export class BackendPool {
     return this.extensionMap[ext];
   }
 
+  getBackend(languageId: string): LSPClient | undefined {
+    return this.backends.get(languageId)?.client;
+  }
+
   async ensureBackend(languageId: string): Promise<LSPClient> {
     const existing = this.backends.get(languageId);
     if (existing) {
