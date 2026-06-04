@@ -1,6 +1,7 @@
 // apps/proxy/src/backend-pool.ts
 import { spawn } from 'node:child_process';
 import { resolve, basename } from 'node:path';
+import type { Readable, Writable } from 'node:stream';
 import { pathToFileURL } from 'node:url';
 import { LSPClient } from '@lspeasy/client';
 import {
@@ -78,8 +79,11 @@ export class BackendPool {
     const [cmd, ...args] = tokenizeCommand(discovered.serverCommand);
     if (!cmd) throw new Error('Empty server command');
 
-    const proc = spawn(cmd, args, { cwd: this.root });
-    const transport = new StdioTransport({ input: proc.stdout as any, output: proc.stdin as any });
+    const proc = spawn(cmd, args, { cwd: this.root, stdio: 'pipe' });
+    const transport = new StdioTransport({
+      input: proc.stdout as Readable,
+      output: proc.stdin as Writable
+    });
 
     const rootDir = resolve(this.root);
     const rootUri = pathToFileURL(rootDir).href;
