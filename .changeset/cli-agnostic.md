@@ -1,5 +1,6 @@
 ---
-"@lspeasy/cli": minor
+"@lsproxy/cli": minor
+"@lsproxy/proxy": minor
 "@lspeasy/core": minor
 ---
 
