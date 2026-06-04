@@ -56,6 +56,9 @@ describe('selectServerByLanguageId', () => {
   it('returns null for unknown languageId', () => {
     expect(selectServerByLanguageId(CONFIG, 'python')).toBeNull();
   });
+  it('returns null for empty lspServers', () => {
+    expect(selectServerByLanguageId({ lspServers: {} }, 'typescript')).toBeNull();
+  });
 });
 
 describe('selectExtensionMap', () => {
@@ -64,5 +67,8 @@ describe('selectExtensionMap', () => {
     expect(map['.ts']).toBe('typescript');
     expect(map['.tsx']).toBe('typescriptreact');
     expect(map['.rs']).toBe('rust');
+  });
+  it('returns empty map for empty lspServers', () => {
+    expect(selectExtensionMap({ lspServers: {} })).toEqual({});
   });
 });
