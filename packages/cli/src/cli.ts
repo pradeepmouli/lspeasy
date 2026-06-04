@@ -170,7 +170,7 @@ async function main(): Promise<void> {
 
     if (subArgFile && !values.help) {
       const absPath = resolvePathArg(subArgFile, flags);
-      await session.openAndWait(absPath);
+      await session.open(absPath);
     }
 
     const program = new Command('lspeasy');

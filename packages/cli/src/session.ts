@@ -302,8 +302,8 @@ export class RefactorSession {
     this.log('connected (initialize/initialized handshake complete)');
   }
 
-  /** Open an anchor file and wait for the server to index the project. */
-  async openAndWait(anchorFile: string): Promise<void> {
+  /** Notify the server that an anchor file is open. */
+  async open(anchorFile: string): Promise<void> {
     const client = this.requireClient();
     await client.sendNotification('textDocument/didOpen', {
       textDocument: {
@@ -313,22 +313,31 @@ export class RefactorSession {
         text: readFileSync(anchorFile, 'utf8')
       }
     });
-    this.log(`didOpen ${anchorFile}; waiting ${this.opts.indexWaitMs}ms for indexing…`);
-    await sleep(this.opts.indexWaitMs);
+    this.log(`didOpen ${anchorFile}`);
   }
 
   /**
-   * Run a request that may return `null` while the project is still warming up.
-   * Retries once after another index wait. Returns the (possibly null) result.
+   * Run a request immediately and retry with exponential backoff while the
+   * server returns null (i.e. it is still indexing). Gives up after
+   * `indexWaitMs` total elapsed time and returns null.
+   *
+   * Initial retry delay: 250 ms, doubling each round, capped at 5 s per
+   * attempt. The first attempt is always immediate so fast servers pay no
+   * extra latency at all.
    */
   async requestWithRetry<R>(run: () => Promise<R | null | undefined>): Promise<R | null> {
-    let res = await run();
-    if (res === null || res === undefined) {
-      this.log(`null result — retrying after ${this.opts.indexWaitMs}ms`);
-      await sleep(this.opts.indexWaitMs);
-      res = await run();
+    const deadline = Date.now() + this.opts.indexWaitMs;
+    let delay = 250;
+    while (true) {
+      const res = await run();
+      if (res !== null && res !== undefined) return res as R;
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) return null;
+      const wait = Math.min(delay, remaining);
+      this.log(`null result — retrying in ${wait}ms (${remaining}ms remaining)`);
+      await sleep(wait);
+      delay = Math.min(delay * 2, 5000);
     }
-    return (res ?? null) as R | null;
   }
 
   /**

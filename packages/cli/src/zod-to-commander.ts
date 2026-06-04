@@ -343,9 +343,12 @@ export function zodToCommander(
       }
 
       const params = injectRequiredDefaults(method, rawParams);
-      const result = await (
-        session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>
-      )(method, params);
+      const result = await session.requestWithRetry(() =>
+        (session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>)(
+          method,
+          params
+        )
+      );
 
       // Collect workspace edits from up to four sources:
       // 1. Direct WorkspaceEdit result (e.g. textDocument/rename)
