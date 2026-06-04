@@ -1,5 +1,5 @@
 // apps/proxy/src/proxy-server.ts
-import { createServer, type Server } from 'node:net';
+import { createServer, type Server, type Socket } from 'node:net';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { socketToTransport } from '@lspeasy/core/node';
@@ -24,6 +24,7 @@ export class ProxyServer {
   private readonly docState: DocumentStateManager;
   private server: Server | undefined;
   private readonly sessions = new Map<string, ClientSession>();
+  private readonly activeSockets = new Set<Socket>();
   private idleTimer: ReturnType<typeof setTimeout> | undefined;
   private sessionCounter = 0;
 
@@ -31,7 +32,9 @@ export class ProxyServer {
     this.root = opts.root;
     this.sockPath = opts.socketOverride ?? socketPath(opts.root);
     this.pidFilePath = opts.socketOverride
-      ? opts.socketOverride.replace('.sock', '.pid')
+      ? opts.socketOverride.endsWith('.sock')
+        ? opts.socketOverride.slice(0, -5) + '.pid'
+        : opts.socketOverride + '.pid'
       : pidPath(opts.root);
     this.idleTimeoutMs = opts.idleTimeoutMs ?? 1_800_000;
     this.pool = new BackendPool(opts.root, {
@@ -49,6 +52,8 @@ export class ProxyServer {
     if (existsSync(this.sockPath)) unlinkSync(this.sockPath);
 
     const srv = createServer((socket) => {
+      this.activeSockets.add(socket);
+      socket.on('close', () => this.activeSockets.delete(socket));
       const sessionId = `s${++this.sessionCounter}`;
       const transport = socketToTransport(socket);
       const session = new ClientSession({
@@ -82,8 +87,13 @@ export class ProxyServer {
       this.idleTimer = undefined;
     }
     await this.pool.stopAll();
+    for (const sock of this.activeSockets) sock.destroy();
     await new Promise<void>((resolve) => {
-      this.server?.close(() => resolve());
+      if (!this.server) {
+        resolve();
+        return;
+      }
+      this.server.close(() => resolve());
     });
     if (existsSync(this.sockPath)) unlinkSync(this.sockPath);
     if (existsSync(this.pidFilePath)) unlinkSync(this.pidFilePath);

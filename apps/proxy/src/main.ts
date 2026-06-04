@@ -16,7 +16,11 @@ const { values } = parseArgs({
   strict: true
 });
 
-const root = resolve(values['root'] ?? process.cwd());
+if (!values['root']) {
+  process.stderr.write('[lsproxy] fatal: --root is required\n');
+  process.exit(1);
+}
+const root = resolve(values['root']);
 const server = new ProxyServer({
   root,
   ...(values['socket'] !== undefined && { socketOverride: values['socket'] }),
