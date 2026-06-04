@@ -42,3 +42,17 @@ docs/hierarchy.html
 docs/index.html
 docs/modules.html
 docs/.nojekyll
+
+# BEGIN ai-artifacts
+.claude/
+.codex/
+.agents/
+.specify/
+.cursor/
+.continue/
+.aider/
+.roo/
+.windsurf/
+AGENTS.md
+GEMINI.md
+# END ai-artifacts
