@@ -42,7 +42,7 @@ export class DocumentStateManager {
 
     if (entry.closeTimer !== undefined) {
       clearTimeout(entry.closeTimer);
-      entry.closeTimer = undefined;
+      delete entry.closeTimer;
     }
 
     entry.openSessions.add(sessionId);
