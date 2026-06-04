@@ -1,4 +1,4 @@
-# @lspeasy/cli
+# @lsproxy/cli
 
 LSP-driven CLI that connects to any Language Server Protocol server and exposes
 its capabilities as typed subcommands — hover, rename, format, find-references,
@@ -8,8 +8,8 @@ advertised capabilities, so it works with any LSP server out of the box.
 ## Install
 
 ```bash
-npx @lspeasy/cli textDocument hover src/foo.ts 12:7   # zero-install
-pnpm add -g @lspeasy/cli                               # or install globally
+npx @lsproxy/cli textDocument hover src/foo.ts 12:7   # zero-install
+pnpm add -g @lsproxy/cli                               # or install globally
 ```
 
 ## Usage
@@ -130,16 +130,36 @@ Use `--server <cmd>` to bypass discovery entirely.
 | `--wait <ms>` | `15000` | Index wait before sending requests |
 | `--verbose` | off | Progress logging to stderr |
 | `--allow-outside-root` | off | Allow file-path args that resolve outside `--root` |
+| `--no-proxy` | off | Bypass the proxy daemon and spawn the server directly |
 
 ### Path resolution
 
 Relative paths are resolved against `--root`, not cwd. Any path resolving
 outside `--root` is rejected unless `--allow-outside-root` is set.
 
+## Proxy daemon
+
+By default the CLI connects through `@lsproxy/proxy` — a background daemon that holds
+warm LSP server connections. The daemon is started automatically on first use and exits
+after 30 minutes of idle time.
+
+```bash
+# First invocation — daemon spawns, performs the initialize handshake (~1-3s)
+lspeasy textDocument hover src/foo.ts 1:1
+
+# Subsequent invocations — reconnects via Unix socket (<100ms)
+lspeasy textDocument hover src/foo.ts 2:5
+
+# Bypass the daemon entirely
+lspeasy --no-proxy textDocument hover src/foo.ts 1:1
+```
+
+Socket path: `~/.lsproxy/<hash(root)>.sock`
+
 ## Programmatic use
 
 ```ts
-import { RefactorSession, applyWorkspaceEdit, planWorkspaceEdit } from '@lspeasy/cli';
+import { RefactorSession, applyWorkspaceEdit, planWorkspaceEdit } from '@lsproxy/cli';
 ```
 
 ## License

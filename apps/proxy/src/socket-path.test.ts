@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { socketPath, pidPath } from './socket-path.js';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 
 describe('socketPath + pidPath', () => {
   it('produces a stable path for a given root', () => {
@@ -28,8 +28,7 @@ describe('socketPath + pidPath', () => {
 
   it('hash is 12 characters long', () => {
     const path = socketPath('/project');
-    const filename = path.split('/').pop()!;
-    const hash = filename.replace('.sock', '');
+    const hash = basename(path, '.sock');
     expect(hash).toHaveLength(12);
   });
 });

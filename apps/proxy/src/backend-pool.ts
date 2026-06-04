@@ -49,6 +49,7 @@ interface BackendEntry {
 
 export class BackendPool {
   private readonly backends = new Map<string, BackendEntry>();
+  private readonly starting = new Map<string, Promise<LSPClient>>();
   private readonly extensionMap: Record<string, string>;
   private readonly backendIdleMs: number;
 
@@ -75,6 +76,20 @@ export class BackendPool {
       return existing.client;
     }
 
+    // Deduplicate concurrent startup calls for the same languageId
+    const inflight = this.starting.get(languageId);
+    if (inflight) return inflight;
+
+    const promise = this.startBackend(languageId);
+    this.starting.set(languageId, promise);
+    try {
+      return await promise;
+    } finally {
+      this.starting.delete(languageId);
+    }
+  }
+
+  private async startBackend(languageId: string): Promise<LSPClient> {
     const discovered = discoverServerByLanguageId(this.root, languageId);
     if (!discovered) {
       throw new Error(`No LSP server configured for languageId "${languageId}"`);

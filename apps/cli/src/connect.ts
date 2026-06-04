@@ -7,7 +7,7 @@ import { SocketTransport } from '@lspeasy/core/node';
 import { socketPath } from '@lsproxy/proxy';
 import { RefactorSession, type SessionOptions } from './session.js';
 
-const PROXY_BIN = new URL('../../../proxy/dist/main.js', import.meta.url).pathname;
+const PROXY_BIN = new URL('../../proxy/dist/main.js', import.meta.url).pathname;
 const POLL_INTERVAL_MS = 100;
 const POLL_TIMEOUT_MS = 5000;
 
@@ -60,12 +60,15 @@ export async function connectViaProxy(opts: ConnectOptions): Promise<RefactorSes
 
   if (opts.verbose) process.stderr.write(`[lspeasy] connecting via proxy ${sockPath}\n`);
 
+  const transport = new SocketTransport({ path: sockPath });
+  await transport.waitForConnect();
+
   const sessionOpts: SessionOptions = {
     root: opts.root,
     languageId: opts.languageId,
     indexWaitMs: opts.indexWaitMs,
     verbose: opts.verbose,
-    transport: new SocketTransport({ path: sockPath })
+    transport
   };
 
   const session = new RefactorSession(sessionOpts);

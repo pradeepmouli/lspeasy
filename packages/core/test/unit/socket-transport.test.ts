@@ -151,9 +151,11 @@ describe('SocketTransport (Unix domain socket mode)', () => {
     servers.push(srv);
     await new Promise<void>((r) => srv.listen(sockPath, r));
 
+    // Use a short reconnect delay so the guard window (300ms) actually covers it —
+    // if cancel doesn't work a reconnect fires at ~50ms, which shows up as a second close event.
     const client = new SocketTransport({
       path: sockPath,
-      reconnect: { enabled: true, initialDelayMs: 5000, maxAttempts: 3 }
+      reconnect: { enabled: true, initialDelayMs: 50, maxAttempts: 3 }
     });
     transports.push(client);
 
@@ -166,11 +168,11 @@ describe('SocketTransport (Unix domain socket mode)', () => {
     // Close while reconnect timer is pending — should cancel it and fire close exactly once
     await client.close();
 
-    // Wait longer than the reconnect delay to confirm no reconnect fires
-    await new Promise<void>((r) => setTimeout(r, 200));
+    // Wait past the reconnect delay; a leaked timer would fire a second close event
+    await new Promise<void>((r) => setTimeout(r, 300));
 
     expect(client.isConnected()).toBe(false);
-    // onClose should fire exactly once (from close(), not from the socket close event)
+    // onClose should fire exactly once (from close(), not from the reconnect timer)
     expect(closeFired.mock.calls.length).toBe(1);
 
     // Cleanup server sockets

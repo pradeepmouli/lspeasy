@@ -30,6 +30,9 @@ export class ClientSession {
   private readonly docState: DocumentStateManager;
   private readonly onEnd: (sessionId: string) => void;
   private languageId = 'plaintext';
+  private requestIdCounter = 0;
+  private readonly pendingClientRequests = new Map<string | number, (result: unknown) => void>();
+  private applyEditDisposable: { dispose(): void } | undefined;
 
   constructor(opts: ClientSessionOptions) {
     this.id = opts.sessionId;
@@ -46,6 +49,17 @@ export class ClientSession {
   private async handleMessage(msg: RawMsg): Promise<void> {
     const isRequest = msg.id !== undefined && msg.method !== undefined;
     const isNotification = msg.id === undefined && msg.method !== undefined;
+    // Response to a request we sent (e.g. workspace/applyEdit forwarded to CLI)
+    const isResponse = msg.id !== undefined && msg.method === undefined && msg.result !== undefined;
+
+    if (isResponse) {
+      const resolve = this.pendingClientRequests.get(msg.id as string | number);
+      if (resolve) {
+        this.pendingClientRequests.delete(msg.id as string | number);
+        resolve(msg.result);
+      }
+      return;
+    }
 
     try {
       if (isRequest) {
@@ -69,6 +83,14 @@ export class ClientSession {
     }
   }
 
+  private async forwardToClient(method: string, params: unknown): Promise<unknown> {
+    const id = ++this.requestIdCounter;
+    return new Promise((resolve) => {
+      this.pendingClientRequests.set(id, resolve);
+      void this.transport.send({ jsonrpc: '2.0', id, method, params });
+    });
+  }
+
   private async handleRequest(msg: RawMsg): Promise<unknown> {
     if (msg.method === 'initialize') {
       return this.handleInitialize(msg.params as Record<string, unknown>);
@@ -88,6 +110,15 @@ export class ClientSession {
     const initOpts = params['initializationOptions'] as Record<string, unknown> | undefined;
     this.languageId = (initOpts?.['languageId'] as string | undefined) ?? 'plaintext';
     const backend = await this.pool.ensureBackend(this.languageId);
+
+    // Forward workspace/applyEdit from backend to this CLI session.
+    // The registration overwrites any prior session's handler — acceptable because
+    // applyEdit only fires during executeCommand, which is driven by an active session.
+    this.applyEditDisposable?.dispose();
+    this.applyEditDisposable = (
+      backend.onRequest as (m: string, h: (p: unknown) => Promise<unknown>) => { dispose(): void }
+    )('workspace/applyEdit', (p) => this.forwardToClient('workspace/applyEdit', p));
+
     return { capabilities: backend.getServerCapabilities() ?? {} };
   }
 
@@ -123,7 +154,13 @@ export class ClientSession {
       return;
     }
 
-    if (msg.method === 'textDocument/didClose') return; // handled by DocumentStateManager lazy-close
+    if (msg.method === 'textDocument/didClose') {
+      const p = msg.params as Record<string, unknown>;
+      const td = p['textDocument'] as Record<string, unknown>;
+      const uri = td['uri'] as string;
+      this.docState.onDidClose(this.id, uri);
+      return;
+    }
 
     // Forward all other notifications (didChange, willSave, etc.)
     const backend = this.backendForMsg(msg);
@@ -154,6 +191,8 @@ export class ClientSession {
   }
 
   private handleClose(): void {
+    this.applyEditDisposable?.dispose();
+    this.applyEditDisposable = undefined;
     this.docState.onSessionEnd(this.id);
     this.onEnd(this.id);
   }
