@@ -112,6 +112,16 @@ export interface ClientOptions<
    * Callback for response validation errors
    */
   onValidationError?: (error: ZodError, response: ResponseMessage) => void;
+
+  /**
+   * Arbitrary initialization options passed to the server in the
+   * `initialize` request's `initializationOptions` field.
+   *
+   * @remarks
+   * Used by the proxy path to tell the proxy daemon which backend language
+   * server to activate for this session (e.g. `{ languageId: 'typescript' }`).
+   */
+  initializationOptions?: unknown;
 }
 
 /**

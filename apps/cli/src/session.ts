@@ -21,7 +21,8 @@ import {
   tokenizeCommand,
   type ClientCapabilities,
   type Logger,
-  type ServerCapabilities
+  type ServerCapabilities,
+  type Transport
 } from '@lspeasy/core';
 import { StdioTransport } from '@lspeasy/core/node';
 
@@ -38,6 +39,13 @@ export interface SessionOptions {
   indexWaitMs?: number;
   /** Emit `[lspeasy] …` progress lines to stderr. */
   verbose?: boolean;
+  /**
+   * Pre-built transport to use instead of spawning a server process.
+   *
+   * When supplied, `serverCommand` is ignored and no child process is spawned.
+   * Used by the proxy path to reuse all downstream session logic unchanged.
+   */
+  transport?: Transport;
 }
 
 // Advertise the full set of capabilities the CLI can dispatch so servers do
@@ -175,8 +183,12 @@ class StderrLogger implements Logger {
   }
 }
 
+/** Internal resolved options — all fields have a concrete value except `transport` which may be absent. */
+type ResolvedSessionOptions = Required<Omit<SessionOptions, 'transport'>> &
+  Pick<SessionOptions, 'transport'>;
+
 export class RefactorSession {
-  private readonly opts: Required<SessionOptions>;
+  private readonly opts: ResolvedSessionOptions;
   private proc?: ChildProcessWithoutNullStreams;
   private client?: LSPClient;
   /**
@@ -200,30 +212,38 @@ export class RefactorSession {
     if (this.opts.verbose) process.stderr.write(`[lspeasy] ${msg}\n`);
   }
 
-  /** Spawn the server and complete the LSP handshake. */
+  /** Spawn the server (or reuse a pre-built transport) and complete the LSP handshake. */
   async start(): Promise<void> {
-    const [cmd, ...args] = tokenizeCommand(this.opts.serverCommand);
-    if (!cmd) throw new Error('Empty --server command');
-
-    this.log(`spawning: ${this.opts.serverCommand} (cwd ${this.opts.root})`);
-    const proc = spawn(cmd, args, { cwd: this.opts.root }) as ChildProcessWithoutNullStreams;
-    this.proc = proc;
-    proc.on('error', (e) => {
-      process.stderr.write(`[lspeasy] server spawn error: ${e.message}\n`);
-    });
-
     // Derive the workspace root URI + folders from --root so the server indexes
     // the right project (rootUri:null is fragile for non-tsserver servers).
     const rootDir = resolve(this.opts.root);
     const rootUri = pathToFileURL(rootDir).href;
 
-    const transport = new StdioTransport({ input: proc.stdout, output: proc.stdin });
+    let transport: Transport;
+    if (this.opts.transport) {
+      // Pre-built transport supplied (proxy path) — skip spawning entirely.
+      transport = this.opts.transport;
+      this.log(`using pre-built transport (proxy)`);
+    } else {
+      const [cmd, ...args] = tokenizeCommand(this.opts.serverCommand);
+      if (!cmd) throw new Error('Empty --server command');
+
+      this.log(`spawning: ${this.opts.serverCommand} (cwd ${this.opts.root})`);
+      const proc = spawn(cmd, args, { cwd: this.opts.root }) as ChildProcessWithoutNullStreams;
+      this.proc = proc;
+      proc.on('error', (e) => {
+        process.stderr.write(`[lspeasy] server spawn error: ${e.message}\n`);
+      });
+      transport = new StdioTransport({ input: proc.stdout, output: proc.stdin });
+    }
+
     const client: LSPClient = new LSPClient<ClientCapabilities>({
       name: 'lspeasy-cli',
       version: '0.1.0',
       capabilities: CLIENT_CAPABILITIES as ClientCapabilities,
       rootUri,
       workspaceFolders: [{ uri: rootUri, name: basename(rootDir) }],
+      initializationOptions: { languageId: this.opts.languageId },
       // Keep stdout clean; route the SDK's own logging to stderr (or silence it).
       logger: this.opts.verbose ? new StderrLogger() : new NullLogger()
     });

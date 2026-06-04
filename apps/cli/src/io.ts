@@ -21,6 +21,8 @@ export interface GlobalFlags {
   allowOutsideRoot: boolean;
   /** Permit move-file to replace an existing destination (default: OFF). */
   overwrite: boolean;
+  /** Bypass the proxy daemon and connect directly to the language server. */
+  noProxy: boolean;
 }
 
 /**

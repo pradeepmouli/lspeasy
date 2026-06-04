@@ -18,6 +18,7 @@ import { Command } from 'commander';
 import { fail, resolvePathArg, type GlobalFlags } from './io.js';
 import { discoverServer } from '@lspeasy/core';
 import { RefactorSession } from './session.js';
+import { connectViaProxy } from './connect.js';
 import { buildCommandTree } from './build-commands.js';
 
 const STATIC_HELP = `lspeasy — LSP-driven CLI
@@ -38,6 +39,7 @@ Global flags:
   --wait <ms>           Server index wait in ms (default: 15000)
   --verbose             Progress logging to stderr
   --allow-outside-root  Allow file paths outside --root
+  --no-proxy            Bypass proxy daemon; connect directly to language server
   -h, --help            Show this help
 `;
 
@@ -49,6 +51,7 @@ const GLOBAL_OPTION_CONFIG = {
   wait: { type: 'string' as const, default: '15000' },
   verbose: { type: 'boolean' as const, default: false },
   'allow-outside-root': { type: 'boolean' as const, default: false },
+  'no-proxy': { type: 'boolean' as const, default: false },
   help: { type: 'boolean' as const, short: 'h', default: false }
 };
 
@@ -61,6 +64,7 @@ export type ParsedOptionValues = {
   wait?: string;
   verbose?: boolean;
   'allow-outside-root'?: boolean;
+  'no-proxy'?: boolean;
 };
 
 /**
@@ -84,6 +88,7 @@ export function buildFlags(values: ParsedOptionValues): GlobalFlags {
     verbose: values.verbose === true,
     waitMs,
     allowOutsideRoot: values['allow-outside-root'] === true,
+    noProxy: values['no-proxy'] === true,
     overwrite: false // move-file removed; the flag is kept in GlobalFlags for io.ts compatibility
   };
 }
@@ -157,17 +162,26 @@ async function main(): Promise<void> {
     }
   }
 
-  const session = new RefactorSession({
-    serverCommand,
-    languageId,
-    root: flags.root,
-    indexWaitMs: flags.waitMs,
-    verbose: flags.verbose
-  });
+  let session: RefactorSession;
+  if (flags.noProxy || !serverCommand) {
+    session = new RefactorSession({
+      serverCommand: serverCommand!,
+      languageId,
+      root: flags.root,
+      indexWaitMs: flags.waitMs,
+      verbose: flags.verbose
+    });
+    await session.start();
+  } else {
+    session = await connectViaProxy({
+      root: flags.root,
+      languageId,
+      indexWaitMs: flags.waitMs,
+      verbose: flags.verbose
+    });
+  }
 
   try {
-    await session.start();
-
     if (subArgFile && !values.help) {
       const absPath = resolvePathArg(subArgFile, flags);
       await session.open(absPath);
@@ -183,7 +197,8 @@ async function main(): Promise<void> {
       .option('--json')
       .option('--wait <ms>')
       .option('--verbose')
-      .option('--allow-outside-root');
+      .option('--allow-outside-root')
+      .option('--no-proxy');
 
     buildCommandTree(program, session.capabilities, session, flags);
 
