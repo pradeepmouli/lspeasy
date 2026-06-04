@@ -54,6 +54,9 @@ export class DocumentStateManager {
     return 'change';
   }
 
+  // Returns URIs where this session was the last opener (informational).
+  // The actual backend didClose fires via onClose after lazyCloseMs — do NOT
+  // forward didClose immediately based on this return value.
   onSessionEnd(sessionId: string): string[] {
     const toClose: string[] = [];
     for (const [uri, entry] of this.docs) {

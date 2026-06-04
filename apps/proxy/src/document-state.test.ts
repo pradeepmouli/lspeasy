@@ -52,4 +52,13 @@ describe('DocumentStateManager', () => {
     vi.advanceTimersByTime(600);
     expect(closeCallback).toHaveBeenCalledWith('file:///a.ts');
   });
+
+  it('getContent returns undefined after lazy eviction fires', () => {
+    vi.useFakeTimers();
+    const m = new DocumentStateManager({ lazyCloseMs: 500 });
+    m.onDidOpen('s1', 'file:///a.ts', 'content', 'typescript');
+    m.onSessionEnd('s1');
+    vi.advanceTimersByTime(600);
+    expect(m.getContent('file:///a.ts')).toBeUndefined();
+  });
 });
