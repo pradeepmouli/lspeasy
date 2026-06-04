@@ -43,6 +43,19 @@ function buildServerCommand(entry: LspServerEntry): string {
   return parts.map((t) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(' ');
 }
 
+function loadConfig(root: string): LspJson | null {
+  const lspJsonPath = findLspJsonPath(root);
+  if (!lspJsonPath) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(lspJsonPath, 'utf8'));
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof (parsed as Record<string, unknown>)['lspServers'] !== 'object') return null;
+  return parsed as LspJson;
+}
+
 export function selectServer(config: LspJson, fileExt: string): ResolvedServer | null {
   for (const entry of Object.values(config.lspServers)) {
     if (!fileExt) {
@@ -57,15 +70,45 @@ export function selectServer(config: LspJson, fileExt: string): ResolvedServer |
   return null;
 }
 
-export function discoverServer(root: string, fileExt: string): ResolvedServer | null {
-  const lspJsonPath = findLspJsonPath(root);
-  if (!lspJsonPath) return null;
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(readFileSync(lspJsonPath, 'utf8'));
-  } catch {
-    return null;
+export function selectServerByLanguageId(
+  config: LspJson,
+  languageId: string
+): ResolvedServer | null {
+  for (const entry of Object.values(config.lspServers)) {
+    for (const lid of Object.values(entry.fileExtensions)) {
+      if (lid === languageId) return { serverCommand: buildServerCommand(entry), languageId };
+    }
   }
-  if (!parsed || typeof (parsed as Record<string, unknown>)['lspServers'] !== 'object') return null;
-  return selectServer(parsed as LspJson, fileExt);
+  return null;
+}
+
+export function selectExtensionMap(config: LspJson): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const entry of Object.values(config.lspServers)) {
+    for (const [ext, lid] of Object.entries(entry.fileExtensions)) {
+      map[ext] = lid;
+    }
+  }
+  return map;
+}
+
+export function discoverServer(root: string, fileExt: string): ResolvedServer | null {
+  const config = loadConfig(root);
+  if (!config) return null;
+  return selectServer(config, fileExt);
+}
+
+export function discoverServerByLanguageId(
+  root: string,
+  languageId: string
+): ResolvedServer | null {
+  const config = loadConfig(root);
+  if (!config) return null;
+  return selectServerByLanguageId(config, languageId);
+}
+
+export function discoverExtensionMap(root: string): Record<string, string> {
+  const config = loadConfig(root);
+  if (!config) return {};
+  return selectExtensionMap(config);
 }

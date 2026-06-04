@@ -5,7 +5,8 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { CapturedEdits, tokenizeCommand } from './session.js';
+import { tokenizeCommand } from '@lspeasy/core';
+import { CapturedEdits } from './session.js';
 import type { WorkspaceEdit } from './apply.js';
 
 describe('tokenizeCommand', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { selectServer } from './discover.js';
-import type { LspJson } from './discover.js';
+import { selectServer, selectServerByLanguageId, selectExtensionMap } from '../../src/discover.js';
+import type { LspJson } from '../../src/discover.js';
 
 const CONFIG: LspJson = {
   lspServers: {
@@ -41,5 +41,28 @@ describe('selectServer', () => {
 
   it('returns null for empty lspServers', () => {
     expect(selectServer({ lspServers: {} }, '.ts')).toBeNull();
+  });
+});
+
+describe('selectServerByLanguageId', () => {
+  it('finds server by languageId', () => {
+    expect(selectServerByLanguageId(CONFIG, 'rust')?.serverCommand).toBe('"rust-analyzer"');
+  });
+  it('finds secondary languageId (typescriptreact)', () => {
+    expect(selectServerByLanguageId(CONFIG, 'typescriptreact')?.serverCommand).toContain(
+      'typescript-language-server'
+    );
+  });
+  it('returns null for unknown languageId', () => {
+    expect(selectServerByLanguageId(CONFIG, 'python')).toBeNull();
+  });
+});
+
+describe('selectExtensionMap', () => {
+  it('builds extension → languageId map', () => {
+    const map = selectExtensionMap(CONFIG);
+    expect(map['.ts']).toBe('typescript');
+    expect(map['.tsx']).toBe('typescriptreact');
+    expect(map['.rs']).toBe('rust');
   });
 });

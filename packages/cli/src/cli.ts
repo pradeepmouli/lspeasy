@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 
 import { fail, resolvePathArg, type GlobalFlags } from './io.js';
-import { discoverServer } from './discover.js';
+import { discoverServer } from '@lspeasy/core';
 import { RefactorSession } from './session.js';
 import { buildCommandTree } from './build-commands.js';
 

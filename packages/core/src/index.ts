@@ -295,3 +295,17 @@ export {
   checkMethod
 } from './utils/capability-guard.js';
 export type { CheckMethodOptions } from './utils/capability-guard.js';
+
+// Discovery — lsp.json config reader (shared with proxy)
+export type { LspServerEntry, LspJson, ResolvedServer } from './discover.js';
+export {
+  selectServer,
+  selectServerByLanguageId,
+  selectExtensionMap,
+  discoverServer,
+  discoverServerByLanguageId,
+  discoverExtensionMap
+} from './discover.js';
+
+// Command tokenizer
+export { tokenizeCommand } from './utils/tokenize-command.js';
