@@ -39,25 +39,82 @@ export interface SessionOptions {
   verbose?: boolean;
 }
 
-/** Client capabilities advertised at `initialize`. Generous so the server
- * gates none of the refactor features we rely on. */
+// Advertise the full set of capabilities the CLI can dispatch so servers do
+// not gate their ServerCapabilities on a narrow client declaration. Each entry
+// corresponds to a ClientCapability path used by getCapabilityForRequestMethod;
+// a missing entry silently suppresses the matching command from the command tree.
 const CLIENT_CAPABILITIES = {
   textDocument: {
     synchronization: { dynamicRegistration: false },
+    // Navigation
+    definition: { dynamicRegistration: false },
+    declaration: { dynamicRegistration: false },
+    typeDefinition: { dynamicRegistration: false },
+    implementation: { dynamicRegistration: false },
+    references: { dynamicRegistration: false },
+    documentHighlight: { dynamicRegistration: false },
+    documentSymbol: { dynamicRegistration: false },
+    // Hover / completion / signature
+    hover: { dynamicRegistration: false },
+    completion: { dynamicRegistration: false },
+    signatureHelp: { dynamicRegistration: false },
+    // Refactor / actions / rename
     rename: { dynamicRegistration: false, prepareSupport: true },
     codeAction: {
       dynamicRegistration: false,
-      codeActionLiteralSupport: { codeActionKind: { valueSet: ['', 'refactor', 'refactor.move'] } },
+      codeActionLiteralSupport: {
+        codeActionKind: {
+          valueSet: [
+            '',
+            'quickfix',
+            'refactor',
+            'refactor.extract',
+            'refactor.inline',
+            'refactor.move',
+            'refactor.rewrite',
+            'source',
+            'source.organizeImports',
+            'source.fixAll'
+          ]
+        }
+      },
       resolveSupport: { properties: ['edit'] },
       dataSupport: true
     },
-    definition: { dynamicRegistration: false },
-    references: { dynamicRegistration: false },
-    hover: { dynamicRegistration: false }
+    codeLens: { dynamicRegistration: false },
+    // Formatting
+    formatting: { dynamicRegistration: false },
+    rangeFormatting: { dynamicRegistration: false },
+    onTypeFormatting: { dynamicRegistration: false },
+    // Semantic tokens — needed for servers to advertise semanticTokensProvider
+    semanticTokens: {
+      dynamicRegistration: false,
+      requests: { full: { delta: true }, range: true },
+      tokenTypes: [],
+      tokenModifiers: [],
+      formats: ['relative' as const],
+      overlappingTokenSupport: false,
+      multilineTokenSupport: false
+    },
+    // Hierarchy / navigation
+    callHierarchy: { dynamicRegistration: false },
+    typeHierarchy: { dynamicRegistration: false },
+    selectionRange: { dynamicRegistration: false },
+    foldingRange: { dynamicRegistration: false },
+    linkedEditingRange: { dynamicRegistration: false },
+    // Lenses / hints
+    inlayHint: { dynamicRegistration: false, resolveSupport: { properties: [] } },
+    inlineValue: { dynamicRegistration: false },
+    // Diagnostics / misc
+    diagnostic: { dynamicRegistration: false },
+    colorProvider: { dynamicRegistration: false },
+    documentLink: { dynamicRegistration: false },
+    moniker: { dynamicRegistration: false }
   },
   workspace: {
     applyEdit: true,
     executeCommand: { dynamicRegistration: false },
+    symbol: { dynamicRegistration: false },
     workspaceEdit: {
       documentChanges: true,
       resourceOperations: ['create', 'rename', 'delete'] as Array<'create' | 'rename' | 'delete'>
