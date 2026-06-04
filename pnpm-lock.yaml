@@ -75,6 +75,25 @@ importers:
         specifier: ^0.10.3
         version: 0.10.3
 
+  apps/cli:
+    dependencies:
+      '@lspeasy/client':
+        specifier: workspace:*
+        version: link:../../packages/client
+      '@lspeasy/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      commander:
+        specifier: ^12.1.0
+        version: 12.1.0
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   apps/docs:
     devDependencies:
       typedoc:
@@ -95,25 +114,6 @@ importers:
       vue:
         specifier: ^3.5.35
         version: 3.5.35(typescript@6.0.3)
-
-  packages/cli:
-    dependencies:
-      '@lspeasy/client':
-        specifier: workspace:*
-        version: link:../client
-      '@lspeasy/core':
-        specifier: workspace:*
-        version: link:../core
-      commander:
-        specifier: ^12.1.0
-        version: 12.1.0
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
 
   packages/client:
     dependencies:
