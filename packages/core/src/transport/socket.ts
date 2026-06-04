@@ -81,7 +81,9 @@ export class SocketTransport implements Transport {
         this.scheduleReconnect();
       }
 
-      this.emitClose();
+      if (!this.intentionallyClosed) {
+        this.emitClose();
+      }
     });
 
     socket.on('error', (error) => this.emitError(error));

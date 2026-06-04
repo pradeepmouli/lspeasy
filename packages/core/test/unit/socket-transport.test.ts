@@ -1,4 +1,4 @@
-import { describe, expect, it, afterEach } from 'vitest';
+import { describe, expect, it, afterEach, vi } from 'vitest';
 import { createServer, Socket, type Server } from 'node:net';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -136,6 +136,45 @@ describe('SocketTransport (Unix domain socket mode)', () => {
     await transport.close();
 
     expect(transport.isConnected()).toBe(false);
+  });
+
+  it('cancels reconnect timer when closed during backoff period', async () => {
+    const sockPath = join(tmpdir(), `lspeasy-reconnect-${process.pid}-${Date.now()}.sock`);
+    socketFiles.push(sockPath);
+
+    // Start a server that immediately destroys the accepted socket to force a reconnect cycle
+    const serverSockets: Socket[] = [];
+    const srv = createServer((s) => {
+      serverSockets.push(s);
+      s.destroy();
+    });
+    servers.push(srv);
+    await new Promise<void>((r) => srv.listen(sockPath, r));
+
+    const client = new SocketTransport({
+      path: sockPath,
+      reconnect: { enabled: true, initialDelayMs: 5000, maxAttempts: 3 }
+    });
+    transports.push(client);
+
+    // Wait for the first connect+disconnect cycle so the reconnect timer is armed
+    await waitUntil(() => !client.isConnected(), 3000);
+
+    const closeFired = vi.fn();
+    client.onClose(closeFired);
+
+    // Close while reconnect timer is pending — should cancel it and fire close exactly once
+    await client.close();
+
+    // Wait longer than the reconnect delay to confirm no reconnect fires
+    await new Promise<void>((r) => setTimeout(r, 200));
+
+    expect(client.isConnected()).toBe(false);
+    // onClose should fire exactly once (from close(), not from the socket close event)
+    expect(closeFired.mock.calls.length).toBe(1);
+
+    // Cleanup server sockets
+    for (const s of serverSockets) s.destroy();
   });
 });
 
