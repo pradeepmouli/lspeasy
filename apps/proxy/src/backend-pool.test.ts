@@ -41,7 +41,10 @@ describe('BackendPool', () => {
     });
   });
 
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
 
   it('creates a backend on first ensureBackend call', async () => {
     const pool = new BackendPool('/project');
@@ -71,6 +74,28 @@ describe('BackendPool', () => {
     const pool = new BackendPool('/project');
     const client = (await pool.ensureBackend('typescript')) as any;
     await pool.stopAll();
+    expect(client.disconnect).toHaveBeenCalled();
+  });
+
+  it('fires stopBackend after backendIdleMs', async () => {
+    vi.useFakeTimers();
+    const pool = new BackendPool('/project', { backendIdleMs: 1000 });
+    const client = (await pool.ensureBackend('typescript')) as any;
+    vi.advanceTimersByTime(1000);
+    await vi.runAllTimersAsync();
+    expect(client.disconnect).toHaveBeenCalled();
+  });
+
+  it('resets idle timer on repeated ensureBackend calls', async () => {
+    vi.useFakeTimers();
+    const pool = new BackendPool('/project', { backendIdleMs: 1000 });
+    await pool.ensureBackend('typescript');
+    vi.advanceTimersByTime(500);
+    const client = (await pool.ensureBackend('typescript')) as any;
+    vi.advanceTimersByTime(600); // only 600ms since last call — should not fire yet
+    expect(client.disconnect).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(400); // now 1000ms after last call — fires
+    await vi.runAllTimersAsync();
     expect(client.disconnect).toHaveBeenCalled();
   });
 });
