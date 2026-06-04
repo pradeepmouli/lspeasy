@@ -174,6 +174,28 @@ export class SocketTransport implements Transport {
     return this.connected;
   }
 
+  /** Resolves once the underlying socket fires `connect`, or immediately if already connected. */
+  waitForConnect(): Promise<void> {
+    if (this.connected) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const socket = this.socket;
+      if (!socket) {
+        reject(new Error('SocketTransport: no socket'));
+        return;
+      }
+      const onConnect = () => {
+        socket.off('error', onError);
+        resolve();
+      };
+      const onError = (err: Error) => {
+        socket.off('connect', onConnect);
+        reject(err);
+      };
+      socket.once('connect', onConnect);
+      socket.once('error', onError);
+    });
+  }
+
   private emitError(error: Error): void {
     for (const handler of this.errorHandlers) {
       handler(error);
@@ -228,6 +250,8 @@ export function socketToTransport(socket: Socket): Transport {
   writer.on('error', (error) => emitError(error as Error));
 
   socket.on('close', () => {
+    if (closed) return;
+    closed = true;
     reader.close();
     writer.close();
     emitClose();

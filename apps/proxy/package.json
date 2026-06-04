@@ -2,7 +2,6 @@
   "name": "@lsproxy/proxy",
   "version": "0.1.0",
   "description": "Per-root LSP proxy daemon — holds warm language server connections for @lsproxy/cli",
-  "private": true,
   "type": "module",
   "bin": { "lsproxy": "./dist/main.js" },
   "exports": {
