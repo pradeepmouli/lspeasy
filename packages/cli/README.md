@@ -29,7 +29,7 @@ lspeasy textDocument definition  src/foo.ts 12:7
 lspeasy textDocument formatting  src/foo.ts
 lspeasy textDocument rangeFormatting src/foo.ts 1:1-50:1
 lspeasy textDocument codeAction  src/foo.ts 12:1-12:20
-lspeasy textDocument onTypeFormatting src/foo.ts 12:7 --ch ";" --tab-size 2 --insert-spaces
+lspeasy textDocument onTypeFormatting src/foo.ts 12:7 --ch ";" --on-type-formatting-tab-size 2 --on-type-formatting-insert-spaces true
 lspeasy workspace   symbol       MyClass
 lspeasy call        textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
 ```
