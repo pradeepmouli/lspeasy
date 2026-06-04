@@ -52,7 +52,7 @@ export class ClientSession {
         const result = await this.handleRequest(msg);
         await this.transport.send({
           jsonrpc: '2.0',
-          id: (msg.id ?? 0) as string | number,
+          id: msg.id as string | number,
           result
         });
       } else if (isNotification) {
@@ -62,7 +62,7 @@ export class ClientSession {
       if (isRequest) {
         await this.transport.send({
           jsonrpc: '2.0',
-          id: (msg.id ?? 0) as string | number,
+          id: msg.id as string | number,
           error: { code: -32603, message: String(err) }
         });
       }
@@ -103,7 +103,7 @@ export class ClientSession {
       const langId = td['languageId'] as string;
       const action = this.docState.onDidOpen(this.id, uri, content, langId);
 
-      const backend = await this.pool.ensureBackend(this.languageIdForUri(uri));
+      const backend = await this.pool.ensureBackend(langId || this.languageIdForUri(uri));
 
       if (action === 'open') {
         await (backend.sendNotification as (m: string, p: unknown) => Promise<void>)(
