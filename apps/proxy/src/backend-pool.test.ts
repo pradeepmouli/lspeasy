@@ -1,7 +1,7 @@
 // apps/proxy/src/backend-pool.test.ts
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { BackendPool } from './backend-pool.js';
-import { discoverServerByLanguageId, discoverExtensionMap } from '@lspeasy/core';
+import { discoverServerByLanguageId } from '@lspeasy/core';
 
 vi.mock('@lspeasy/core', async (importActual) => {
   const actual = await importActual<typeof import('@lspeasy/core')>();
