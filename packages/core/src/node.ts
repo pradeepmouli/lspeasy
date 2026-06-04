@@ -22,3 +22,5 @@ export type {
   IpcParentProcessLike,
   IpcChildProcessLike
 } from './transport/ipc.js';
+export { SocketTransport, socketToTransport } from './transport/socket.js';
+export type { SocketTransportOptions } from './transport/socket.js';
