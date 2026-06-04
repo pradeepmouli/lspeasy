@@ -165,7 +165,7 @@ async function main(): Promise<void> {
   let session: RefactorSession;
   if (flags.noProxy || !serverCommand) {
     session = new RefactorSession({
-      serverCommand: serverCommand!,
+      serverCommand,
       languageId,
       root: flags.root,
       indexWaitMs: flags.waitMs,

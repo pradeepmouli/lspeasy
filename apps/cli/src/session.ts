@@ -29,8 +29,8 @@ import { StdioTransport } from '@lspeasy/core/node';
 import type { WorkspaceEdit } from './apply.js';
 
 export interface SessionOptions {
-  /** Server launch command, e.g. `typescript-language-server --stdio`. */
-  serverCommand: string;
+  /** Server launch command, e.g. `typescript-language-server --stdio`. Required unless `transport` is supplied. */
+  serverCommand?: string;
   /** Absolute project root directory. */
   root: string;
   /** languageId for textDocument/didOpen (e.g. 'typescript', 'rust'). */
@@ -183,9 +183,9 @@ class StderrLogger implements Logger {
   }
 }
 
-/** Internal resolved options — all fields have a concrete value except `transport` which may be absent. */
-type ResolvedSessionOptions = Required<Omit<SessionOptions, 'transport'>> &
-  Pick<SessionOptions, 'transport'>;
+/** Internal resolved options — all fields except `serverCommand` and `transport` have defaults. */
+type ResolvedSessionOptions = Required<Omit<SessionOptions, 'transport' | 'serverCommand'>> &
+  Pick<SessionOptions, 'transport' | 'serverCommand'>;
 
 export class RefactorSession {
   private readonly opts: ResolvedSessionOptions;
@@ -221,11 +221,10 @@ export class RefactorSession {
 
     let transport: Transport;
     if (this.opts.transport) {
-      // Pre-built transport supplied (proxy path) — skip spawning entirely.
       transport = this.opts.transport;
       this.log(`using pre-built transport (proxy)`);
     } else {
-      const [cmd, ...args] = tokenizeCommand(this.opts.serverCommand);
+      const [cmd, ...args] = tokenizeCommand(this.opts.serverCommand ?? '');
       if (!cmd) throw new Error('Empty --server command');
 
       this.log(`spawning: ${this.opts.serverCommand} (cwd ${this.opts.root})`);
