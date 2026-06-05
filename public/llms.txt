@@ -115,6 +115,14 @@ document change notification.
 - `buildMethodSets`: Builds the full set of LSP methods and the subset that are always allowed
 (not gated by a capability) for a given capability key.
 - `checkMethod`: Shared validation logic for checking if a method is allowed based on capabilities.
+- `selectServer`
+- `selectServerByLanguageId`
+- `selectExtensionMap`
+- `discoverServer`
+- `discoverServerByLanguageId`
+- `discoverExtensionMap`
+- `tokenizeCommand`: Split a server launch command into argv tokens, honoring single- and
+double-quoted spans so an argument containing spaces survives intact (e.
 - `DedicatedWorkerTransport`: JSON-RPC transport backed by a Dedicated Worker instance.
 - `SharedWorkerTransport`: JSON-RPC transport for Shared Worker environments with per-client envelope routing.
 - `WebSocketTransport`: WebSocket-based transport for LSP communication.
@@ -170,6 +178,7 @@ Uses discriminated union based on presence of 'method' and 'id'
 - `DocumentSymbolSchema`
 - `CodeActionContextSchema`
 - `CodeActionParamsSchema`
+- `CodeActionSchema`
 - `FormattingOptionsSchema`
 - `DocumentFormattingParamsSchema`
 - `DocumentRangeFormattingParamsSchema`
@@ -301,6 +310,9 @@ methods, notification send methods, and server-to-client handler registr...
 - `SharedWorkerLike`: Shared worker wrapper exposing a message port.
 - `WorkerMessageEventLike`: Lightweight event shape shared by worker and message port adapters.
 - `WorkerTransportEnvelope`: Envelope used by shared worker transport to preserve client isolation.
+- `LspServerEntry`
+- `LspJson`
+- `ResolvedServer`
 - `LogLevel`: Numeric severity levels for filtering log output.
 
 ## @lspeasy/server

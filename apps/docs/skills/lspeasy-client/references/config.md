@@ -97,6 +97,16 @@ Callback for response validation errors
 
 **Type:** `(error: ZodError, response: ResponseMessage) => void`
 
+#### initializationOptions
+
+Arbitrary initialization options passed to the server in the
+`initialize` request's `initializationOptions` field.
+
+**Type:** `unknown`
+
+Used by the proxy path to tell the proxy daemon which backend language
+server to activate for this session (e.g. `{ languageId: 'typescript' }`).
+
 ## PartialRequestOptions
 
 Options for `LSPClient.sendRequestWithPartialResults`.
