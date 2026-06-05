@@ -37,7 +37,7 @@ export interface SessionOptions {
   languageId?: string;
   /** Milliseconds to wait for the server to index before the first request. */
   indexWaitMs?: number;
-  /** Emit `[lspeasy] …` progress lines to stderr. */
+  /** Emit `[lsproxy] …` progress lines to stderr. */
   verbose?: boolean;
   /**
    * Pre-built transport to use instead of spawning a server process.
@@ -209,7 +209,7 @@ export class RefactorSession {
   }
 
   private log(msg: string): void {
-    if (this.opts.verbose) process.stderr.write(`[lspeasy] ${msg}\n`);
+    if (this.opts.verbose) process.stderr.write(`[lsproxy] ${msg}\n`);
   }
 
   /** Spawn the server (or reuse a pre-built transport) and complete the LSP handshake. */
@@ -231,13 +231,13 @@ export class RefactorSession {
       const proc = spawn(cmd, args, { cwd: this.opts.root }) as ChildProcessWithoutNullStreams;
       this.proc = proc;
       proc.on('error', (e) => {
-        process.stderr.write(`[lspeasy] server spawn error: ${e.message}\n`);
+        process.stderr.write(`[lsproxy] server spawn error: ${e.message}\n`);
       });
       transport = new StdioTransport({ input: proc.stdout, output: proc.stdin });
     }
 
     const client: LSPClient = new LSPClient<ClientCapabilities>({
-      name: 'lspeasy-cli',
+      name: 'lsproxy-cli',
       version: '0.1.0',
       capabilities: CLIENT_CAPABILITIES as ClientCapabilities,
       rootUri,

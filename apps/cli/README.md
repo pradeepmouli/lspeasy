@@ -15,28 +15,77 @@ pnpm add -g @lsproxy/cli                               # or install globally
 ## Usage
 
 ```
-lspeasy <namespace> <command> [args] [flags]
-lspeasy call <method> --params <json>
+lsproxy <namespace> <command> [args] [flags]
+lsproxy call <method> --params <json>
 ```
 
 Commands are built from the server's capabilities at startup:
 
 ```bash
-lspeasy textDocument hover       src/foo.ts 12:7
-lspeasy textDocument rename      src/foo.ts 12:7 newName
-lspeasy textDocument references  src/foo.ts 12:7
-lspeasy textDocument definition  src/foo.ts 12:7
-lspeasy textDocument formatting  src/foo.ts
-lspeasy textDocument rangeFormatting src/foo.ts 1:1-50:1
-lspeasy textDocument codeAction  src/foo.ts 12:1-12:20
-lspeasy textDocument onTypeFormatting src/foo.ts 12:7 --ch ";" --on-type-formatting-tab-size 2 --on-type-formatting-insert-spaces true
-lspeasy workspace   symbol       MyClass
-lspeasy call        textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
+lsproxy textDocument hover       src/foo.ts 12:7
+lsproxy textDocument rename      src/foo.ts 12:7 newName
+lsproxy textDocument references  src/foo.ts 12:7
+lsproxy textDocument definition  src/foo.ts 12:7
+lsproxy textDocument formatting  src/foo.ts
+lsproxy textDocument rangeFormatting src/foo.ts 1:1-50:1
+lsproxy textDocument onTypeFormatting src/foo.ts 12:7 --ch ";" --on-type-formatting-tab-size 2 --on-type-formatting-insert-spaces true
+lsproxy workspace   symbol       MyClass
+lsproxy call        textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
 ```
 
 Positions are **1-based** (`line:col`, editor-style).  
 Write-side commands (`rename`, `formatting`, code actions that produce edits)
 apply changes to disk automatically. Pass `--dry-run` to preview instead.
+
+### Code actions
+
+`codeAction` returns a JSON array of available fixes and refactors for the given
+range. Actions that include a workspace edit are applied to disk automatically.
+
+```bash
+lsproxy textDocument codeAction src/foo.ts 12:1-12:20
+```
+
+```json
+[
+  { "title": "Add missing import",       "kind": "quickfix" },
+  { "title": "Extract to variable",      "kind": "refactor.extract.variable" },
+  { "title": "Convert to arrow function","kind": "refactor.rewrite",
+    "edit": { "changes": { "file:///src/foo.ts": [ ... ] } } }
+]
+```
+
+Actions with an `edit` field are applied immediately. Use `--dry-run` to print
+the diff instead of writing:
+
+```bash
+lsproxy textDocument codeAction --dry-run src/foo.ts 12:1-12:20
+```
+
+## Help output
+
+```
+lsproxy — LSP-driven CLI
+
+Usage:
+  lsproxy <namespace> <command> [args]
+  lsproxy call <method> --params <json>
+
+Available commands depend on the connected server's advertised capabilities.
+Run with a file argument to see available commands for that language:
+  lsproxy textDocument hover --help src/foo.ts
+
+Global flags:
+  --server <cmd>        LSP server launch command (overrides lsp.json discovery)
+  --root <dir>          Project root (default: cwd)
+  --dry-run             Print changes; do not write
+  --json                Machine-readable JSON on stdout; diagnostics to stderr
+  --wait <ms>           Server index wait in ms (default: 15000)
+  --verbose             Progress logging to stderr
+  --allow-outside-root  Allow file paths outside --root
+  --no-proxy            Bypass proxy daemon; connect directly to language server
+  -h, --help            Show this help
+```
 
 ## Server discovery — `lsp.json`
 
@@ -145,13 +194,13 @@ after 30 minutes of idle time.
 
 ```bash
 # First invocation — daemon spawns, performs the initialize handshake (~1-3s)
-lspeasy textDocument hover src/foo.ts 1:1
+lsproxy textDocument hover src/foo.ts 1:1
 
 # Subsequent invocations — reconnects via Unix socket (<100ms)
-lspeasy textDocument hover src/foo.ts 2:5
+lsproxy textDocument hover src/foo.ts 2:5
 
 # Bypass the daemon entirely
-lspeasy --no-proxy textDocument hover src/foo.ts 1:1
+lsproxy --no-proxy textDocument hover src/foo.ts 1:1
 ```
 
 Socket path: `~/.lsproxy/<hash(root)>.sock`

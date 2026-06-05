@@ -21,15 +21,15 @@ import { RefactorSession } from './session.js';
 import { connectViaProxy } from './connect.js';
 import { buildCommandTree } from './build-commands.js';
 
-const STATIC_HELP = `lspeasy — LSP-driven CLI
+const STATIC_HELP = `lsproxy — LSP-driven CLI
 
 Usage:
-  lspeasy <namespace> <command> [args]
-  lspeasy call <method> --params <json>
+  lsproxy <namespace> <command> [args]
+  lsproxy call <method> --params <json>
 
 Available commands depend on the connected server's advertised capabilities.
 Run with a file argument to see available commands for that language:
-  lspeasy textDocument hover --help src/foo.ts
+  lsproxy textDocument hover --help src/foo.ts
 
 Global flags:
   --server <cmd>        LSP server launch command (overrides lsp.json discovery)
@@ -187,7 +187,7 @@ async function main(): Promise<void> {
       await session.open(absPath);
     }
 
-    const program = new Command('lspeasy');
+    const program = new Command('lsproxy');
 
     // Declare global options so Commander does not reject them in pass 2
     program
@@ -212,7 +212,7 @@ async function main(): Promise<void> {
  * True when this module is the process entry point (vs. imported by a test).
  *
  * Compares resolved real paths of import.meta.url and argv[1]. The bin
- * (lspeasy) is installed as a symlink to dist/cli.js, so argv[1] is the
+ * (lsproxy) is installed as a symlink to dist/cli.js, so argv[1] is the
  * symlink path while import.meta.url is Node's realpath — a plain compare
  * would mismatch and never run main(). realpathSync on both sides makes the
  * symlinked-bin and direct-invocation cases agree.

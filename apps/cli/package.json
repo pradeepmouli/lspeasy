@@ -26,7 +26,7 @@
   },
   "type": "module",
   "bin": {
-    "lspeasy": "./dist/cli.js"
+    "lsproxy": "./dist/cli.js"
   },
   "exports": {
     ".": {
