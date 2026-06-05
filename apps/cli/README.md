@@ -40,7 +40,7 @@ apply changes to disk automatically. Pass `--dry-run` to preview instead.
 ### Code actions
 
 `codeAction` returns a JSON array of available fixes and refactors for the given
-range. Actions that include a workspace edit are applied to disk automatically.
+range.
 
 ```bash
 lsproxy textDocument codeAction src/foo.ts 12:1-12:20
@@ -55,12 +55,16 @@ lsproxy textDocument codeAction src/foo.ts 12:1-12:20
 ]
 ```
 
-Actions with an `edit` field are applied immediately. Use `--dry-run` to print
-the diff instead of writing:
+**When exactly one** action in the result carries an `edit`, it is applied to
+disk automatically. Use `--dry-run` to preview the diff instead:
 
 ```bash
 lsproxy textDocument codeAction --dry-run src/foo.ts 12:1-12:20
 ```
+
+When the server returns zero or multiple edit-bearing actions, the full JSON
+array is printed and no files are changed — pick the one you want and re-run
+with `--params` to apply it directly.
 
 ## Help output
 
