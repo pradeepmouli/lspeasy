@@ -7,18 +7,18 @@ to it instead of spawning a fresh language server on every invocation.
 ## Why
 
 An LSP server's `initialize` handshake and project indexing typically take 1–15
-seconds. Paying that cost on every `lspeasy` call makes scripting impractical.
+seconds. Paying that cost on every `lsproxy` call makes scripting impractical.
 `@lsproxy/proxy` keeps the server alive between calls so subsequent invocations
 attach in under 100ms.
 
 ## How it works
 
 ```
-lspeasy textDocument hover src/foo.ts 12:7
+lsproxy textDocument hover src/foo.ts 12:7
    │
    ├─ checks ~/.lsproxy/<hash(root)>.sock
    │
-   ├─ (first call) spawns lsproxy daemon, awaits socket
+   ├─ (first call) spawns lsps daemon, awaits socket
    │
    └─ connects via SocketTransport ──► ClientSession
                                            │

@@ -1,10 +1,10 @@
 {
   "name": "@lsproxy/proxy",
   "version": "0.2.0",
-  "description": "Per-root LSP proxy daemon — holds warm language server connections for @lsproxy/cli",
+  "description": "Per-root LSP multiplexing daemon — holds warm language server connections for @lsproxy/cli",
   "type": "module",
   "bin": {
-    "lsproxy": "./dist/main.js"
+    "lsps": "./dist/main.js"
   },
   "exports": {
     ".": {
