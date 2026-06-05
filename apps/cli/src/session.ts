@@ -15,6 +15,18 @@ import { readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+const CLI_VERSION: string = (() => {
+  try {
+    return (
+      JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+        version: string;
+      }
+    ).version;
+  } catch {
+    return '0.0.0';
+  }
+})();
+
 import { LSPClient } from '@lspeasy/client';
 import {
   NullLogger,
@@ -238,7 +250,7 @@ export class RefactorSession {
 
     const client: LSPClient = new LSPClient<ClientCapabilities>({
       name: 'lsproxy-cli',
-      version: '0.1.0',
+      version: CLI_VERSION,
       capabilities: CLIENT_CAPABILITIES as ClientCapabilities,
       rootUri,
       workspaceFolders: [{ uri: rootUri, name: basename(rootDir) }],
