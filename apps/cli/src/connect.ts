@@ -53,12 +53,12 @@ export async function connectViaProxy(opts: ConnectOptions): Promise<RefactorSes
   const alreadyUp = existsSync(sockPath) && (await tryConnect(sockPath));
 
   if (!alreadyUp) {
-    if (opts.verbose) process.stderr.write(`[lspeasy] spawning proxy daemon\n`);
+    if (opts.verbose) process.stderr.write(`[lsproxy] spawning proxy daemon\n`);
     spawnDaemon(opts.root, sockPath);
     await pollForSocket(sockPath, POLL_TIMEOUT_MS);
   }
 
-  if (opts.verbose) process.stderr.write(`[lspeasy] connecting via proxy ${sockPath}\n`);
+  if (opts.verbose) process.stderr.write(`[lsproxy] connecting via proxy ${sockPath}\n`);
 
   const transport = new SocketTransport({ path: sockPath });
   await transport.waitForConnect();

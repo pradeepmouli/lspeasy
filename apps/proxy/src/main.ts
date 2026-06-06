@@ -17,7 +17,7 @@ const { values } = parseArgs({
 });
 
 if (!values['root']) {
-  process.stderr.write('[lsproxy] fatal: --root is required\n');
+  process.stderr.write('[lsps] fatal: --root is required\n');
   process.exit(1);
 }
 const root = resolve(values['root']);
@@ -30,6 +30,6 @@ const server = new ProxyServer({
 });
 
 server.start().catch((err: Error) => {
-  process.stderr.write(`[lsproxy] fatal: ${err.message}\n`);
+  process.stderr.write(`[lsps] fatal: ${err.message}\n`);
   process.exit(1);
 });
