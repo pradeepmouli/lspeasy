@@ -520,7 +520,12 @@ export type TextDocumentContent = unknown;`);
           (type as TupleType).items.map((t) => this.typeToBuilder(t, selfName, lazyRefs))
         );
       case 'literal': {
-        const inner = (type as LiteralType).value as { kind: string; value: unknown };
+        const raw = (type as LiteralType).value;
+        // Structure literal (anonymous object like `{}` in LSP spec): {properties: [...]}
+        if (typeof raw === 'object' && raw !== null && 'properties' in raw) {
+          return build.object({});
+        }
+        const inner = raw as { kind: string; value: unknown };
         return build.literal(inner.value as string | number | boolean | null);
       }
       case 'stringLiteral':

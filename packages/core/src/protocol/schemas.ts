@@ -174,6 +174,7 @@ export const CodeActionTagSchema = z.literal(1);
 export const TraceValueSchema = z.union([
   z.literal('off'),
   z.literal('messages'),
+  z.literal('compact'),
   z.literal('verbose')
 ]);
 export const MarkupKindSchema = z.union([z.literal('plaintext'), z.literal('markdown')]);
@@ -556,7 +557,7 @@ export const SemanticTokensRegistrationOptionsSchema = z.object({
   documentSelector: z.union([DocumentSelectorSchema, z.literal(null)]),
   workDoneProgress: z.boolean().optional(),
   legend: SemanticTokensLegendSchema,
-  range: z.union([z.boolean(), z.literal(null)]).optional(),
+  range: z.union([z.boolean(), z.object({})]).optional(),
   full: z.union([z.boolean(), SemanticTokensFullDeltaSchema]).optional(),
   id: z.string().optional()
 });
@@ -1314,7 +1315,7 @@ export const ClientSemanticTokensRequestFullDeltaSchema = z.object({
   delta: z.boolean().optional()
 });
 export const ClientSemanticTokensRequestOptionsSchema = z.object({
-  range: z.union([z.boolean(), z.literal(null)]).optional(),
+  range: z.union([z.boolean(), z.object({})]).optional(),
   full: z.union([z.boolean(), ClientSemanticTokensRequestFullDeltaSchema]).optional()
 });
 export const SemanticTokensClientCapabilitiesSchema = z.object({
@@ -1569,7 +1570,7 @@ export const LinkedEditingRangeOptionsSchema = z.object({
 export const SemanticTokensOptionsSchema = z.object({
   workDoneProgress: z.boolean().optional(),
   legend: SemanticTokensLegendSchema,
-  range: z.union([z.boolean(), z.literal(null)]).optional(),
+  range: z.union([z.boolean(), z.object({})]).optional(),
   full: z.union([z.boolean(), SemanticTokensFullDeltaSchema]).optional()
 });
 export const MonikerOptionsSchema = z.object({

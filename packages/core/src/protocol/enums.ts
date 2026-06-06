@@ -357,6 +357,7 @@ export enum TokenFormat {
 export enum TraceValue {
   Off = 'off',
   Messages = 'messages',
+  Compact = 'compact',
   Verbose = 'verbose'
 }
 
