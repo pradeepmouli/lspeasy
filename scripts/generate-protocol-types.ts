@@ -613,7 +613,13 @@ export type ProgressParams = {
         // Open enums (supportsCustomValues) widen with the enum's base type so
         // numeric enums (e.g. ErrorCodes, WatchKind) accept numbers, not strings.
         if (en.supportsCustomValues) {
-          literals.push(en.type.name === 'string' ? build.string().text() : build.number().text());
+          const fallback =
+            en.type.name === 'string'
+              ? build.string().text()
+              : en.type.name === 'integer'
+                ? build.number().int().text()
+                : build.number().text();
+          literals.push(fallback);
         }
         const schema =
           literals.length === 1

@@ -38,6 +38,11 @@ export interface LspTextEdit {
 // We can't apply snippet edits; filter them out at the boundary.
 type RawEdit = LspTextEdit | { range: LspRange; snippet: unknown };
 
+/** Returns true for plain text edits; false for LSP 3.18 SnippetTextEdits. */
+function isTextEdit(e: RawEdit): e is LspTextEdit {
+  return 'newText' in e;
+}
+
 interface TextDocumentEdit {
   textDocument: { uri: string; version?: number | null };
   edits: RawEdit[];
@@ -192,7 +197,7 @@ export function planWorkspaceEdit(edit: WorkspaceEdit, guard?: BoundaryGuard): A
         changes.push({
           kind: 'edit',
           path: fileURLToPath(dc.textDocument.uri),
-          editCount: dc.edits.length
+          editCount: dc.edits.filter(isTextEdit).length
         });
       }
     }
@@ -375,10 +380,16 @@ export function applyWorkspaceEdit(edit: WorkspaceEdit, guard?: BoundaryGuard): 
               : applyDelete(dc);
         if (change) applied.push(change);
       } else {
+        const snippetCount = dc.edits.filter((e) => !isTextEdit(e)).length;
+        if (snippetCount > 0) {
+          process.stderr.write(
+            `warning: ${snippetCount} snippet edit(s) from server skipped (not supported by this tool)\n`
+          );
+        }
         applied.push(
           applyTextWrite({
             path: fileURLToPath(dc.textDocument.uri),
-            edits: dc.edits.filter((e): e is LspTextEdit => 'newText' in e)
+            edits: dc.edits.filter(isTextEdit)
           })
         );
       }

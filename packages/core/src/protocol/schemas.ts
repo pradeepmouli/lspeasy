@@ -59,14 +59,14 @@ export const ErrorCodesSchema = z.union([
   z.literal(-32603),
   z.literal(-32002),
   z.literal(-32001),
-  z.number()
+  z.number().int()
 ]);
 export const LSPErrorCodesSchema = z.union([
   z.literal(-32803),
   z.literal(-32802),
   z.literal(-32801),
   z.literal(-32800),
-  z.number()
+  z.number().int()
 ]);
 export const FoldingRangeKindSchema = z.union([
   z.literal('comment'),
