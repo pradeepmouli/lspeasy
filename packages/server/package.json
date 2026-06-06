@@ -40,7 +40,7 @@
     "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit"
+    "type-check": "tsgo -p tsconfig.typecheck.json"
   },
   "dependencies": {
     "@lspeasy/core": "workspace:*"
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "typescript": "^6.0.3",
-    "vscode-languageserver-protocol": "^3.17.5"
+    "vscode-languageserver-protocol": "^3.18.0"
   },
   "engines": {
     "node": ">=20.0.0"

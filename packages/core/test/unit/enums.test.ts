@@ -29,12 +29,6 @@ describe('LSP Kind Enums', () => {
       expect(CompletionItemKind.Class).toBe(7);
       expect(CompletionItemKind.Variable).toBe(6);
     });
-
-    it('should support reverse lookup', () => {
-      expect(CompletionItemKind[1]).toBe('Text');
-      expect(CompletionItemKind[2]).toBe('Method');
-      expect(CompletionItemKind[7]).toBe('Class');
-    });
   });
 
   describe('SymbolKind', () => {
@@ -44,11 +38,6 @@ describe('LSP Kind Enums', () => {
       expect(SymbolKind.Method).toBe(6);
       expect(SymbolKind.Function).toBe(12);
       expect(SymbolKind.Variable).toBe(13);
-    });
-
-    it('should support reverse lookup', () => {
-      expect(SymbolKind[5]).toBe('Class');
-      expect(SymbolKind[12]).toBe('Function');
     });
   });
 

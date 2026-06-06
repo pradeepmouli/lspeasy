@@ -59,14 +59,14 @@ export const ErrorCodesSchema = z.union([
   z.literal(-32603),
   z.literal(-32002),
   z.literal(-32001),
-  z.string()
+  z.number().int()
 ]);
 export const LSPErrorCodesSchema = z.union([
   z.literal(-32803),
   z.literal(-32802),
   z.literal(-32801),
   z.literal(-32800),
-  z.string()
+  z.number().int()
 ]);
 export const FoldingRangeKindSchema = z.union([
   z.literal('comment'),
@@ -174,6 +174,7 @@ export const CodeActionTagSchema = z.literal(1);
 export const TraceValueSchema = z.union([
   z.literal('off'),
   z.literal('messages'),
+  z.literal('compact'),
   z.literal('verbose')
 ]);
 export const MarkupKindSchema = z.union([z.literal('plaintext'), z.literal('markdown')]);
@@ -196,7 +197,7 @@ export const LanguageKindSchema = z.union([
   z.literal('erlang'),
   z.literal('fsharp'),
   z.literal('git-commit'),
-  z.literal('rebase'),
+  z.literal('git-rebase'),
   z.literal('go'),
   z.literal('groovy'),
   z.literal('handlebars'),
@@ -218,6 +219,7 @@ export const LanguageKindSchema = z.union([
   z.literal('perl'),
   z.literal('perl6'),
   z.literal('php'),
+  z.literal('plaintext'),
   z.literal('powershell'),
   z.literal('jade'),
   z.literal('python'),
@@ -464,7 +466,11 @@ export const SelectionRangeParamsSchema = z.object({
   textDocument: TextDocumentIdentifierSchema,
   positions: z.array(PositionSchema)
 });
-export const SelectionRangeSchema: z.ZodObject<z.ZodRawShape> = z.object({
+type _SelectionRange = {
+  range: z.infer<typeof RangeSchema>;
+  parent?: _SelectionRange | undefined;
+};
+export const SelectionRangeSchema: z.ZodType<_SelectionRange> = z.object({
   range: RangeSchema,
   parent: z.lazy(() => SelectionRangeSchema).optional()
 });
@@ -555,7 +561,7 @@ export const SemanticTokensRegistrationOptionsSchema = z.object({
   documentSelector: z.union([DocumentSelectorSchema, z.literal(null)]),
   workDoneProgress: z.boolean().optional(),
   legend: SemanticTokensLegendSchema,
-  range: z.union([z.boolean(), z.literal(null)]).optional(),
+  range: z.union([z.boolean(), z.object({})]).optional(),
   full: z.union([z.boolean(), SemanticTokensFullDeltaSchema]).optional(),
   id: z.string().optional()
 });
@@ -824,7 +830,7 @@ export const DiagnosticSchema = z.object({
   code: z.union([z.number().int(), z.string()]).optional(),
   codeDescription: CodeDescriptionSchema.optional(),
   source: z.string().optional(),
-  message: z.string(),
+  message: z.union([z.string(), MarkupContentSchema]),
   tags: z.array(DiagnosticTagSchema).optional(),
   relatedInformation: z.array(DiagnosticRelatedInformationSchema).optional(),
   data: z.lazy(() => LSPAnySchema).optional()
@@ -1313,7 +1319,7 @@ export const ClientSemanticTokensRequestFullDeltaSchema = z.object({
   delta: z.boolean().optional()
 });
 export const ClientSemanticTokensRequestOptionsSchema = z.object({
-  range: z.union([z.boolean(), z.literal(null)]).optional(),
+  range: z.union([z.boolean(), z.object({})]).optional(),
   full: z.union([z.boolean(), ClientSemanticTokensRequestFullDeltaSchema]).optional()
 });
 export const SemanticTokensClientCapabilitiesSchema = z.object({
@@ -1352,7 +1358,8 @@ export const DiagnosticClientCapabilitiesSchema = z.object({
   codeDescriptionSupport: z.boolean().optional(),
   dataSupport: z.boolean().optional(),
   dynamicRegistration: z.boolean().optional(),
-  relatedDocumentSupport: z.boolean().optional()
+  relatedDocumentSupport: z.boolean().optional(),
+  markupMessageSupport: z.boolean().optional()
 });
 export const InlineCompletionClientCapabilitiesSchema = z.object({
   dynamicRegistration: z.boolean().optional()
@@ -1567,7 +1574,7 @@ export const LinkedEditingRangeOptionsSchema = z.object({
 export const SemanticTokensOptionsSchema = z.object({
   workDoneProgress: z.boolean().optional(),
   legend: SemanticTokensLegendSchema,
-  range: z.union([z.boolean(), z.literal(null)]).optional(),
+  range: z.union([z.boolean(), z.object({})]).optional(),
   full: z.union([z.boolean(), SemanticTokensFullDeltaSchema]).optional()
 });
 export const MonikerOptionsSchema = z.object({
@@ -1939,7 +1946,17 @@ export const SymbolInformationSchema = z.object({
   deprecated: z.boolean().optional(),
   location: LocationSchema
 });
-export const DocumentSymbolSchema: z.ZodObject<z.ZodRawShape> = z.object({
+type _DocumentSymbol = {
+  name: string;
+  detail?: string | undefined;
+  kind: z.infer<typeof SymbolKindSchema>;
+  tags?: z.infer<typeof SymbolTagSchema>[] | undefined;
+  deprecated?: boolean | undefined;
+  range: z.infer<typeof RangeSchema>;
+  selectionRange: z.infer<typeof RangeSchema>;
+  children?: _DocumentSymbol[] | undefined;
+};
+export const DocumentSymbolSchema: z.ZodType<_DocumentSymbol> = z.object({
   name: z.string(),
   detail: z.string().optional(),
   kind: SymbolKindSchema,

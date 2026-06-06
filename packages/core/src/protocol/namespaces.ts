@@ -14,6 +14,8 @@ export type LSPRequest = {
       Params: LSP.CallHierarchyIncomingCallsParams;
       Result: LSP.CallHierarchyIncomingCall[] | null;
       PartialResult: LSP.CallHierarchyIncomingCall[];
+      ServerCapability: 'callHierarchyProvider';
+      ClientCapability: 'textDocument.callHierarchy';
       Since: '3.16.0';
       Direction: 'clientToServer';
     };
@@ -22,6 +24,8 @@ export type LSPRequest = {
       Params: LSP.CallHierarchyOutgoingCallsParams;
       Result: LSP.CallHierarchyOutgoingCall[] | null;
       PartialResult: LSP.CallHierarchyOutgoingCall[];
+      ServerCapability: 'callHierarchyProvider';
+      ClientCapability: 'textDocument.callHierarchy';
       Since: '3.16.0';
       Direction: 'clientToServer';
     };
@@ -295,7 +299,6 @@ export type LSPRequest = {
       ServerCapability: 'inlineCompletionProvider';
       ClientCapability: 'textDocument.inlineCompletion';
       Since: '3.18.0';
-      Proposed: true;
       Direction: 'clientToServer';
     };
     WillSaveTextDocumentWaitUntil: {
@@ -431,7 +434,6 @@ export type LSPRequest = {
       ServerCapability: 'documentRangeFormattingProvider.rangesSupport';
       ClientCapability: 'textDocument.rangeFormatting.rangesSupport';
       Since: '3.18.0';
-      Proposed: true;
       Direction: 'clientToServer';
     };
     DocumentOnTypeFormatting: {
@@ -554,7 +556,6 @@ export type LSPRequest = {
       ServerCapability: 'workspace.textDocumentContent';
       ClientCapability: 'workspace.textDocumentContent';
       Since: '3.18.0';
-      Proposed: true;
       Direction: 'clientToServer';
     };
     Symbol: {
@@ -598,7 +599,6 @@ export type LSPRequest = {
       Result: null;
       ClientCapability: 'workspace.foldingRange.refreshSupport';
       Since: '3.18.0';
-      Proposed: true;
       Direction: 'serverToClient';
     };
     SemanticTokensRefresh: {
@@ -638,7 +638,6 @@ export type LSPRequest = {
       Params: LSP.TextDocumentContentRefreshParams;
       Result: null;
       Since: '3.18.0';
-      Proposed: true;
       Direction: 'serverToClient';
     };
     CodeLensRefresh: {
@@ -870,11 +869,15 @@ export const LSPRequest = {
   CallHierarchy: {
     IncomingCalls: {
       Method: 'callHierarchy/incomingCalls',
-      Direction: 'clientToServer'
+      Direction: 'clientToServer',
+      ServerCapability: 'callHierarchyProvider',
+      ClientCapability: 'textDocument.callHierarchy'
     },
     OutgoingCalls: {
       Method: 'callHierarchy/outgoingCalls',
-      Direction: 'clientToServer'
+      Direction: 'clientToServer',
+      ServerCapability: 'callHierarchyProvider',
+      ClientCapability: 'textDocument.callHierarchy'
     }
   },
   Client: {

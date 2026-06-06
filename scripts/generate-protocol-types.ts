@@ -51,6 +51,16 @@ interface CategoryInfo {
   notifications: Notification[];
 }
 
+// Valid TypeScript identifier pattern — names from the network are checked before
+// being interpolated into generated source files to prevent code injection.
+const TS_IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+function assertSafeIdentifier(name: string): string {
+  if (!TS_IDENTIFIER.test(name)) {
+    throw new Error(`Unsafe identifier in metaModel data: ${JSON.stringify(name)}`);
+  }
+  return name;
+}
+
 class ProtocolTypeGenerator {
   private outputProject: Project;
   private metaModel!: MetaModel;
@@ -66,8 +76,8 @@ class ProtocolTypeGenerator {
 
     switch (type.kind) {
       case 'reference':
-        // Prefix with LSP namespace for imported types (unless skipPrefix is true for proposed types)
-        return `LSP.${type.name}`;
+        // Prefix with LSP namespace for imported types (unless skipLSPPrefix is true)
+        return skipLSPPrefix ? type.name : `LSP.${type.name}`;
       case 'base':
         // Base types don't need prefix
         return type.name;
@@ -94,11 +104,80 @@ class ProtocolTypeGenerator {
     }
   }
 
+  // Struct types whose VSCode equivalent exists in vscode-languageserver-protocol.
+  // These drive the generated _type-compat-check.ts bidirectional assertions.
+  private static readonly COMPAT_CHECK_TYPES = [
+    'ServerCapabilities',
+    'ClientCapabilities',
+    'InitializeParams',
+    'CompletionItem',
+    'Diagnostic',
+    'TextEdit',
+    'Location',
+    'Position',
+    'Range',
+    'Hover',
+    'DocumentSymbol',
+    'WorkspaceFolder',
+    'ProgressToken',
+    'WorkDoneProgressBegin',
+    'WorkDoneProgressReport',
+    'WorkDoneProgressEnd',
+    'TextDocumentContentChangeEvent',
+    'VersionedTextDocumentIdentifier',
+    'DidChangeTextDocumentParams',
+    'DidOpenTextDocumentParams',
+    'DidCloseTextDocumentParams',
+    'DidSaveTextDocumentParams'
+  ] as const;
+
+  // Enum types exported as named union type aliases in vscode-languageserver-protocol.
+  // Skipped: SemanticTokenTypes/Modifiers (VSCode uses nominal TS enum),
+  //          WatchKind/ErrorCodes/LSPErrorCodes (VSCode uses uinteger/integer — broader),
+  //          PositionEncodingKind (VSCode: string, ours: specific values — _fromVscode fails).
+  private static readonly COMPAT_CHECK_ENUMS = [
+    'ApplyKind',
+    'CodeActionKind',
+    'CodeActionTag',
+    'CodeActionTriggerKind',
+    'CompletionItemKind',
+    'CompletionItemTag',
+    'CompletionTriggerKind',
+    'DiagnosticSeverity',
+    'DiagnosticTag',
+    'DocumentDiagnosticReportKind',
+    'DocumentHighlightKind',
+    'FailureHandlingKind',
+    'FileChangeType',
+    'FileOperationPatternKind',
+    'FoldingRangeKind',
+    'InlayHintKind',
+    'InlineCompletionTriggerKind',
+    'InsertTextFormat',
+    'InsertTextMode',
+    'LanguageKind',
+    'MarkupKind',
+    'MessageType',
+    'MonikerKind',
+    'NotebookCellKind',
+    'PrepareSupportDefaultBehavior',
+    'ResourceOperationKind',
+    'SignatureHelpTriggerKind',
+    'SymbolKind',
+    'SymbolTag',
+    'TextDocumentSaveReason',
+    'TextDocumentSyncKind',
+    'TokenFormat',
+    'TraceValue',
+    'UniquenessLevel'
+  ] as const;
+
   // Output paths
   private readonly typesOutputPath: string;
   private readonly namespacesOutputPath: string;
   private readonly enumsOutputPath: string;
   private readonly schemasOutputPath: string;
+  private readonly typeCompatCheckOutputPath: string;
 
   constructor() {
     // Initialize ts-morph project for output generation (import management)
@@ -123,6 +202,10 @@ class ProtocolTypeGenerator {
     );
     this.enumsOutputPath = path.join(process.cwd(), 'packages/core/src/protocol/enums.ts');
     this.schemasOutputPath = path.join(process.cwd(), 'packages/core/src/protocol/schemas.ts');
+    this.typeCompatCheckOutputPath = path.join(
+      process.cwd(),
+      'packages/server/test/_type-compat-check.ts'
+    );
   }
 
   async generate() {
@@ -145,6 +228,9 @@ class ProtocolTypeGenerator {
 
     // Step 4: Generate namespaces.ts
     await this.generateNamespacesFile();
+
+    // Step 5: Generate _type-compat-check.ts
+    this.generateTypeCompatCheckFile();
 
     console.log('\n✅ Generation complete!');
     console.log(`   Structures: ${this.parser.getAllStructures().length}`);
@@ -191,41 +277,96 @@ class ProtocolTypeGenerator {
   private async generateTypesFile() {
     console.log('📝 Generating types.ts...');
 
-    // Create source file with ts-morph
-    const sourceFile = this.outputProject.createSourceFile(this.typesOutputPath, '', {
-      overwrite: true
-    });
+    const structures = this.parser.getAllStructures();
+    const typeAliases = this.parser.getAllTypeAliases();
+    const enumerations = this.parser.getAllEnumerations();
+    const enumNames = new Set(enumerations.map((e) => e.name));
 
-    // Add header and re-export using template literal with actual newlines
-    sourceFile.addStatements(`/**
- * LSP Protocol Types
- *
- * Auto-generated from metaModel.json
- * DO NOT EDIT MANUALLY
- */
+    // Detect type aliases involved in mutual cycles (e.g. LSPAny ↔ LSPObject).
+    // A topo-sort DFS marks any alias encountered while still "in progress" as cyclic.
+    // Cyclic aliases are emitted as `unknown` to avoid TS2456.
+    const visited = new Set<string>();
+    const inProgress = new Set<string>();
+    const cyclicAliases = new Set<string>();
 
-export type * from 'vscode-languageserver-protocol';
+    const aliasDepsOf = (name: string): string[] => {
+      const a = typeAliases.find((x) => x.name === name);
+      if (!a || enumNames.has(a.name)) return [];
+      const refs = new Set<string>();
+      this.collectTypeRefs(a.type, refs);
+      refs.delete(name);
+      return [...refs].filter((r) => !enumNames.has(r) && typeAliases.some((x) => x.name === r));
+    };
 
-export type TextDocumentContentParams = unknown;
-export type TextDocumentContent = unknown;
+    const visitAlias = (name: string): void => {
+      if (visited.has(name) || enumNames.has(name)) return;
+      if (inProgress.has(name)) {
+        cyclicAliases.add(name);
+        return;
+      }
+      inProgress.add(name);
+      for (const dep of aliasDepsOf(name)) visitAlias(dep);
+      inProgress.delete(name);
+      visited.add(name);
+    };
+    for (const a of typeAliases) visitAlias(a.name);
 
-export type TextDocumentContentResult = unknown;
+    const lines: string[] = [];
 
-export type TextDocumentContentRegistrationOptions = unknown;
+    lines.push('/**');
+    lines.push(' * LSP Protocol Types');
+    lines.push(' *');
+    lines.push(' * Generated directly from metaModel.json — not inferred from Zod schemas.');
+    lines.push(' * Optional properties use `prop?: T` (no `| undefined`) so these types are');
+    lines.push(' * compatible with packages compiled with exactOptionalPropertyTypes: true.');
+    lines.push(' *');
+    lines.push(' * Auto-generated — DO NOT EDIT MANUALLY');
+    lines.push(' */');
+    lines.push('');
+    lines.push(`export type * from './enums.js';`);
+    lines.push('');
 
-export type TextDocumentContentRefreshParams = unknown;
+    for (const s of structures) {
+      const props = this.collectAllProperties(s.name);
+      if (props.length === 0) {
+        lines.push(`export type ${assertSafeIdentifier(s.name)} = {};`);
+      } else {
+        lines.push(`export type ${assertSafeIdentifier(s.name)} = {`);
+        for (const p of props) {
+          const tsType = this.typeToTsType(p.type);
+          lines.push(
+            p.optional
+              ? `  ${assertSafeIdentifier(p.name)}?: ${tsType};`
+              : `  ${assertSafeIdentifier(p.name)}: ${tsType};`
+          );
+        }
+        lines.push(`};`);
+      }
+      lines.push('');
+    }
 
-export type CancelParams = { id: number | string };
+    for (const a of typeAliases) {
+      if (enumNames.has(a.name)) continue;
+      if (cyclicAliases.has(a.name)) {
+        // Mutual cycles (e.g. LSPAny ↔ LSPObject) cannot be expressed as recursive type
+        // aliases in TypeScript without triggering TS2456. These are all "any JSON value"
+        // types in practice; `unknown` is the safe approximation.
+        lines.push(`export type ${assertSafeIdentifier(a.name)} = unknown;`);
+      } else {
+        lines.push(`export type ${assertSafeIdentifier(a.name)} = ${this.typeToTsType(a.type)};`);
+      }
+    }
 
-export type ProgressParams = {
-  token: string | number;
-};`);
+    lines.push('');
+    lines.push('// TextDocumentContent has no schema in the metamodel yet');
+    lines.push('export type TextDocumentContent = unknown;');
 
-    // Save file (ts-morph will format it)
-    await sourceFile.save();
+    fs.writeFileSync(this.typesOutputPath, lines.join('\n') + '\n', 'utf8');
 
     console.log(`   ✅ Generated ${this.typesOutputPath}`);
-    console.log(`   ✅ Generated protocol type re-exports\n`);
+    console.log(
+      `   ✅ Generated ${structures.length} structure types, ${typeAliases.length} alias types\n`
+    );
   }
 
   private async generateNamespacesFile() {
@@ -509,13 +650,140 @@ export type ProgressParams = {
           (type as TupleType).items.map((t) => this.typeToBuilder(t, selfName, lazyRefs))
         );
       case 'literal': {
-        const inner = (type as LiteralType).value as { kind: string; value: unknown };
+        const raw = (type as LiteralType).value;
+        // Structure literal (anonymous object like `{}` in LSP spec): {properties: [...]}
+        if (typeof raw === 'object' && raw !== null && 'properties' in raw) {
+          return build.object({});
+        }
+        const inner = raw as { kind: string; value: unknown };
         return build.literal(inner.value as string | number | boolean | null);
       }
       case 'stringLiteral':
         return build.literal((type as StringLiteralTypeReference).value);
       default:
         return build.unknown();
+    }
+  }
+
+  /**
+   * Convert a metaModel Type to a TypeScript type string for use in inline declarations
+   * inside schemas.ts (where LSP namespace isn't available, but schema consts are).
+   *
+   * @param selfName – name of the enclosing struct; self-references become `_${selfName}`
+   */
+  private typeToInlineTsType(type: Type, selfName: string): string {
+    switch (type.kind) {
+      case 'base': {
+        const n = (type as BaseTypes).name;
+        if (n === 'string' || n === 'URI' || n === 'DocumentUri' || n === 'RegExp') return 'string';
+        if (n === 'integer' || n === 'uinteger' || n === 'decimal') return 'number';
+        if (n === 'boolean') return 'boolean';
+        if (n === 'null') return 'null';
+        return 'unknown';
+      }
+      case 'reference': {
+        const refName = (type as ReferenceType).name;
+        // Self-reference becomes the private inline type name
+        if (refName === selfName) return `_${selfName}`;
+        // Other references: use z.infer<typeof …Schema> since schemas are in scope
+        return `z.infer<typeof ${refName}Schema>`;
+      }
+      case 'array':
+        return `${this.typeToInlineTsType((type as ArrayType).element, selfName)}[]`;
+      case 'map': {
+        const mt = type as MapType;
+        return `Record<${this.typeToInlineTsType(mt.key, selfName)}, ${this.typeToInlineTsType(mt.value, selfName)}>`;
+      }
+      case 'or':
+        return (type as OrType).items.map((t) => this.typeToInlineTsType(t, selfName)).join(' | ');
+      case 'and':
+        return (type as AndType).items.map((t) => this.typeToInlineTsType(t, selfName)).join(' & ');
+      case 'tuple':
+        return `[${(type as TupleType).items.map((t) => this.typeToInlineTsType(t, selfName)).join(', ')}]`;
+      case 'literal': {
+        const raw = (type as LiteralType).value;
+        if (typeof raw === 'object' && raw !== null && 'properties' in raw) return 'object';
+        const inner = raw as { kind: string; value: unknown };
+        return JSON.stringify(inner.value);
+      }
+      case 'stringLiteral':
+        return JSON.stringify((type as StringLiteralTypeReference).value);
+      default:
+        return 'unknown';
+    }
+  }
+
+  /**
+   * Convert a metaModel Type to a TypeScript type string for use in types.ts.
+   *
+   * Produces EOPT-compatible types: optional properties use `prop?: T` (not `T | undefined`),
+   * matching how vscode-languageserver-protocol is compiled. All references are bare names
+   * since every generated type lives in the same file (or is re-exported from enums.js).
+   */
+  private typeToTsType(type: Type): string {
+    switch (type.kind) {
+      case 'base': {
+        const n = (type as BaseTypes).name;
+        if (n === 'string' || n === 'URI' || n === 'DocumentUri' || n === 'RegExp') return 'string';
+        if (n === 'integer' || n === 'uinteger' || n === 'decimal') return 'number';
+        if (n === 'boolean') return 'boolean';
+        if (n === 'null') return 'null';
+        return 'unknown';
+      }
+      case 'reference': {
+        const refName = (type as ReferenceType).name;
+        // Expand enum references to their literal unions for structural compatibility
+        // with vscode-languageserver-protocol (which uses string/number union type aliases,
+        // not nominal TypeScript enums). This ensures `"markdown"` is assignable to
+        // `MarkupContent.kind` even though `MarkupKind` is a TypeScript enum in enums.ts.
+        const enumDef = this.parser.getAllEnumerations().find((e) => e.name === refName);
+        if (enumDef) {
+          const literals = enumDef.values.map((v) => JSON.stringify(v.value));
+          if (enumDef.supportsCustomValues) {
+            literals.push(enumDef.type.name === 'string' ? 'string' : 'number');
+          }
+          return literals.join(' | ');
+        }
+        return refName;
+      }
+      case 'array': {
+        const elem = this.typeToTsType((type as ArrayType).element);
+        return elem.includes(' | ') || elem.includes(' & ') ? `(${elem})[]` : `${elem}[]`;
+      }
+      case 'map': {
+        const mt = type as MapType;
+        return `Record<${this.typeToTsType(mt.key)}, ${this.typeToTsType(mt.value)}>`;
+      }
+      case 'or':
+        return (type as OrType).items.map((t) => this.typeToTsType(t)).join(' | ');
+      case 'and':
+        return (type as AndType).items.map((t) => this.typeToTsType(t)).join(' & ');
+      case 'tuple':
+        return `[${(type as TupleType).items.map((t) => this.typeToTsType(t)).join(', ')}]`;
+      case 'literal': {
+        const raw = (type as LiteralType).value;
+        if (typeof raw === 'object' && raw !== null && 'properties' in raw) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const litProps = (raw as any).properties as Array<{
+            name: string;
+            type: Type;
+            optional?: boolean;
+          }>;
+          if (litProps.length === 0) return '{}';
+          const fields = litProps.map((p) =>
+            p.optional
+              ? `${p.name}?: ${this.typeToTsType(p.type)}`
+              : `${p.name}: ${this.typeToTsType(p.type)}`
+          );
+          return `{ ${fields.join('; ')} }`;
+        }
+        const inner = raw as { kind: string; value: unknown };
+        return JSON.stringify(inner.value);
+      }
+      case 'stringLiteral':
+        return JSON.stringify((type as StringLiteralTypeReference).value);
+      default:
+        return 'unknown';
     }
   }
 
@@ -613,7 +881,13 @@ export type ProgressParams = {
         // Open enums (supportsCustomValues) widen with the enum's base type so
         // numeric enums (e.g. ErrorCodes, WatchKind) accept numbers, not strings.
         if (en.supportsCustomValues) {
-          literals.push(en.type.name === 'string' ? build.string().text() : build.number().text());
+          const fallback =
+            en.type.name === 'string'
+              ? build.string().text()
+              : en.type.name === 'integer'
+                ? build.number().int().text()
+                : build.number().text();
+          literals.push(fallback);
         }
         const schema =
           literals.length === 1
@@ -633,6 +907,26 @@ export type ProgressParams = {
 
       // kind === 'struct'
       const props = this.collectAllProperties(name);
+      if (selfReferential.has(name)) {
+        // Self-referential struct: declare explicit TS type first so z.ZodType<_Name>
+        // gives z.infer<typeof NameSchema> the correct concrete shape (not Record<string,unknown>).
+        const typePropLines = props.map((p) => {
+          const tsType = this.typeToInlineTsType(p.type, name);
+          return p.optional ? `  ${p.name}?: ${tsType} | undefined;` : `  ${p.name}: ${tsType};`;
+        });
+        lines.push(`type _${name} = {`);
+        lines.push(typePropLines.join('\n'));
+        lines.push(`};`);
+        const propEntries = props.map((p) => {
+          let builder = this.typeToBuilder(p.type, name, lazyRefs);
+          if (p.optional) builder = builder.optional();
+          return `  ${p.name}: ${builder.text()}`;
+        });
+        lines.push(`export const ${name}Schema: z.ZodType<_${name}> = z.object({`);
+        lines.push(propEntries.join(',\n'));
+        lines.push(`});`);
+        continue;
+      }
       const ann = needsTypeAnnotation.has(name) ? ': z.ZodObject<z.ZodRawShape>' : '';
       if (props.length === 0) {
         lines.push(`export const ${name}Schema${ann} = z.object({});`);
@@ -684,40 +978,39 @@ export type ProgressParams = {
   private async generateEnumsFile() {
     console.log('📝 Generating enums.ts...');
 
-    const sourceFile = this.outputProject.createSourceFile(this.enumsOutputPath, '', {
-      overwrite: true
-    });
-
-    sourceFile.addStatements(`/**
- * LSP Protocol Enums
- *
- * Auto-generated from metaModel.json
- * DO NOT EDIT MANUALLY
- */`);
-
     const enums = this.parser
       .getAllEnumerations()
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name));
 
-    for (const enumeration of enums) {
-      const enumDeclaration = sourceFile.addEnum({
-        name: enumeration.name,
-        isExported: true
-      });
+    const lines: string[] = [];
+    lines.push('/**');
+    lines.push(' * LSP Protocol Enums');
+    lines.push(' *');
+    lines.push(' * Emitted as const objects + union type aliases for structural compatibility');
+    lines.push(' * with vscode-languageserver-protocol, which uses the same pattern.');
+    lines.push(' *');
+    lines.push(' * Auto-generated from metaModel.json');
+    lines.push(' * DO NOT EDIT MANUALLY');
+    lines.push(' */');
 
+    for (const enumeration of enums) {
+      lines.push('');
+      lines.push(`export const ${assertSafeIdentifier(enumeration.name)} = {`);
       for (const entry of enumeration.values) {
-        enumDeclaration.addMember({
-          name: entry.name,
-          initializer:
-            typeof entry.value === 'string' ? JSON.stringify(entry.value) : String(entry.value)
-        });
+        lines.push(`  ${assertSafeIdentifier(entry.name)}: ${JSON.stringify(entry.value)},`);
       }
+      lines.push(`} as const;`);
+      lines.push('');
+      const literals = enumeration.values.map((v) => JSON.stringify(v.value));
+      if (enumeration.supportsCustomValues) {
+        literals.push(enumeration.type.name === 'string' ? 'string' : 'number');
+      }
+      lines.push(`export type ${enumeration.name} = ${literals.join(' | ')};`);
     }
 
-    sourceFile.formatText();
-    await sourceFile.save();
-
+    lines.push('');
+    fs.writeFileSync(this.enumsOutputPath, lines.join('\n'), 'utf8');
     console.log(`   ✅ Generated ${this.enumsOutputPath}`);
     console.log(`   ✅ Generated ${enums.length} enums\n`);
   }
@@ -880,6 +1173,115 @@ export type ProgressParams = {
       }
     });
     writer.write(',').newLine();
+  }
+  private generateTypeCompatCheckFile() {
+    console.log('📝 Generating _type-compat-check.ts...');
+
+    const types = ProtocolTypeGenerator.COMPAT_CHECK_TYPES;
+    const enums = ProtocolTypeGenerator.COMPAT_CHECK_ENUMS;
+    const lines: string[] = [];
+
+    lines.push('/**');
+    lines.push(
+      ' * Type-compatibility verification between @lspeasy/core and vscode-languageserver-protocol.'
+    );
+    lines.push(' *');
+    lines.push(' * Every struct in COMPAT_CHECK_TYPES and every enum in COMPAT_CHECK_ENUMS is');
+    lines.push(' * checked bidirectionally against its VSCode counterpart:');
+    lines.push(' *   _fromVscode  — every VSCode value is accepted by our type  (not too narrow)');
+    lines.push(" *   _toVscode    — our value is accepted by VSCode's type       (not too wide)");
+    lines.push(' *');
+    lines.push(' * Our enums are emitted as const objects + union type aliases (matching the');
+    lines.push(
+      ' * vscode-languageserver-protocol pattern), so checks are direct _Extends assertions'
+    );
+    lines.push(' * — no normalization helper needed.');
+    lines.push(' *');
+    lines.push(' * Auto-generated — DO NOT EDIT MANUALLY');
+    lines.push(' */');
+    lines.push('');
+
+    // VSCode imports — structs + enums in one block
+    lines.push(`import type {`);
+    for (const name of types) {
+      lines.push(`  ${name} as Vscode${name},`);
+    }
+    for (const name of enums) {
+      lines.push(`  ${name} as Vscode${name},`);
+    }
+    lines.push(`} from 'vscode-languageserver-protocol';`);
+    lines.push('');
+
+    // Core imports — structs + enums in one block
+    lines.push(`import type {`);
+    for (const name of types) {
+      lines.push(`  ${name},`);
+    }
+    for (const name of enums) {
+      lines.push(`  ${name},`);
+    }
+    lines.push(`} from '@lspeasy/core';`);
+    lines.push('');
+
+    // Structural assertion helper
+    lines.push(`// Structural assertion helper.`);
+    lines.push(`type _Extends<Sub extends Sup, Sup> = void;`);
+    lines.push('');
+
+    // Struct _fromVscode assertions
+    lines.push(`// ── Structs: not-too-narrow ──────────────────────────────────────────────────`);
+    for (const name of types) {
+      lines.push(`type _${name}_fromVscode = _Extends<Vscode${name}, ${name}>;`);
+    }
+    lines.push('');
+
+    // Struct _toVscode assertions
+    lines.push(`// ── Structs: not-too-wide ────────────────────────────────────────────────────`);
+    for (const name of types) {
+      lines.push(`type _${name}_toVscode = _Extends<${name}, Vscode${name}>;`);
+    }
+    lines.push('');
+
+    // Enum _fromVscode assertions
+    lines.push(`// ── Enums: not-too-narrow ────────────────────────────────────────────────────`);
+    for (const name of enums) {
+      lines.push(`type _${name}_fromVscode = _Extends<Vscode${name}, ${name}>;`);
+    }
+    lines.push('');
+
+    // Enum _toVscode assertions
+    lines.push(`// ── Enums: not-too-wide ──────────────────────────────────────────────────────`);
+    for (const name of enums) {
+      lines.push(`type _${name}_toVscode = _Extends<${name}, Vscode${name}>;`);
+    }
+    lines.push('');
+
+    // Export block (forces TypeScript to evaluate all aliases)
+    lines.push(`export type {`);
+    lines.push(`  // Structs — not-too-narrow`);
+    for (const name of types) {
+      lines.push(`  _${name}_fromVscode,`);
+    }
+    lines.push(`  // Structs — not-too-wide`);
+    for (const name of types) {
+      lines.push(`  _${name}_toVscode,`);
+    }
+    lines.push(`  // Enums — not-too-narrow`);
+    for (const name of enums) {
+      lines.push(`  _${name}_fromVscode,`);
+    }
+    lines.push(`  // Enums — not-too-wide`);
+    for (const name of enums) {
+      lines.push(`  _${name}_toVscode,`);
+    }
+    lines.push(`};`);
+    lines.push('');
+
+    fs.writeFileSync(this.typeCompatCheckOutputPath, lines.join('\n'), 'utf8');
+
+    console.log(
+      `   ✅ Generated ${this.typeCompatCheckOutputPath.split('/').pop()} with ${types.length} struct pairs + ${enums.length} enum pairs`
+    );
   }
 }
 

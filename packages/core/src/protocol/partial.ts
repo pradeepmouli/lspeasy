@@ -4,7 +4,7 @@
  * @module protocol/partial
  */
 
-import type { ProgressToken } from 'vscode-languageserver-protocol';
+import type { ProgressToken } from './types.js';
 
 /**
  * A parameter literal used to pass a partial result token.

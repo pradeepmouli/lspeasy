@@ -74,7 +74,7 @@ import {
   getDefinitionForNotification,
   getDefinitionForRequest
 } from '../../src/protocol/infer.js';
-import type { ServerCapabilities } from 'vscode-languageserver-protocol';
+import type { ServerCapabilities } from '../../src/protocol/types.js';
 
 describe('core protocol and utility coverage', () => {
   it('evaluates capability helpers across positive and negative paths', () => {

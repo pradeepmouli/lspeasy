@@ -12,7 +12,7 @@ import type {
   WorkDoneProgressParams,
   WorkDoneProgressOptions,
   WorkDoneProgressCreateParams
-} from 'vscode-languageserver-protocol';
+} from './types.js';
 
 // Re-export progress types
 export type {
