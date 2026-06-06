@@ -64,14 +64,6 @@ type _Extends<Sub extends Sup, Sup> = void;
 // Bidirectionality note:
 // "_fromVscode" checks our type isn't too narrow  (VSCode value must be usable as ours).
 // "_toVscode"   checks our type isn't too wide    (our value must be usable as VSCode's).
-//
-// EOPT limitation: vscode-languageserver-protocol is compiled with exactOptionalPropertyTypes:true,
-// so its optional properties have type `T` (not `T | undefined`) in the value position. Zod's
-// .optional() always produces `T | undefined` regardless of EOPT. For any type with optional
-// properties the _toVscode check produces false positives — those checks are omitted below and
-// only the _fromVscode (not-too-narrow) direction is asserted.
-//
-// Simple types whose properties are all required can be checked in both directions.
 
 // ── Not-too-narrow: every VSCode value must be accepted by our type ────────────────────────────
 type _ServerCaps_fromVscode = _Extends<VscodeServerCapabilities, ServerCapabilities>;
@@ -106,13 +98,27 @@ type _DidOpen_fromVscode = _Extends<VscodeDidOpenTextDocumentParams, DidOpenText
 type _DidClose_fromVscode = _Extends<VscodeDidCloseTextDocumentParams, DidCloseTextDocumentParams>;
 type _DidSave_fromVscode = _Extends<VscodeDidSaveTextDocumentParams, DidSaveTextDocumentParams>;
 
-// ── Not-too-wide: our value must be usable as VSCode's (only for all-required-property types) ──
+// ── Not-too-wide: our value must be usable as VSCode's ────────────────────────────────────────
+//
+// String-enum nominality note:
+// TypeScript string enums are nominal: `"markdown"` is not assignable to `MarkupKind` even when
+// `MarkupKind.Markdown = "markdown"`. Our generated types expand enum references to literal unions
+// (e.g. `"plaintext" | "markdown"`) which is correct for _fromVscode (enum → literal is valid)
+// but blocks _toVscode (literal → enum is not valid). Types whose property chains contain string
+// enum references are omitted from _toVscode checks:
+//   _ServerCaps_toVscode, _ClientCaps_toVscode, _InitParams_toVscode,
+//   _CompletionItem_toVscode, _Hover_toVscode
 type _TextEdit_toVscode = _Extends<TextEdit, VscodeTextEdit>;
 type _Location_toVscode = _Extends<Location, VscodeLocation>;
 type _Position_toVscode = _Extends<Position, VscodePosition>;
 type _Range_toVscode = _Extends<Range, VscodeRange>;
+type _Diagnostic_toVscode = _Extends<Diagnostic, VscodeDiagnostic>;
+type _DocumentSymbol_toVscode = _Extends<DocumentSymbol, VscodeDocumentSymbol>;
 type _WorkspaceFolder_toVscode = _Extends<WorkspaceFolder, VscodeWorkspaceFolder>;
 type _ProgressToken_toVscode = _Extends<ProgressToken, VscodeProgressToken>;
+type _ProgressBegin_toVscode = _Extends<WorkDoneProgressBegin, VscodeWorkDoneProgressBegin>;
+type _ProgressReport_toVscode = _Extends<WorkDoneProgressReport, VscodeWorkDoneProgressReport>;
+type _ProgressEnd_toVscode = _Extends<WorkDoneProgressEnd, VscodeWorkDoneProgressEnd>;
 type _ContentChange_toVscode = _Extends<
   TextDocumentContentChangeEvent,
   VscodeTextDocumentContentChangeEvent
@@ -124,6 +130,7 @@ type _VersionedId_toVscode = _Extends<
 type _DidChange_toVscode = _Extends<DidChangeTextDocumentParams, VscodeDidChangeTextDocumentParams>;
 type _DidOpen_toVscode = _Extends<DidOpenTextDocumentParams, VscodeDidOpenTextDocumentParams>;
 type _DidClose_toVscode = _Extends<DidCloseTextDocumentParams, VscodeDidCloseTextDocumentParams>;
+type _DidSave_toVscode = _Extends<DidSaveTextDocumentParams, VscodeDidSaveTextDocumentParams>;
 
 export type {
   // Not-too-narrow (all types)
@@ -149,16 +156,22 @@ export type {
   _DidOpen_fromVscode,
   _DidClose_fromVscode,
   _DidSave_fromVscode,
-  // Not-too-wide (only all-required-property types — see EOPT note above)
+  // Not-too-wide (omits types with string-enum property chains — see note above)
   _TextEdit_toVscode,
   _Location_toVscode,
   _Position_toVscode,
   _Range_toVscode,
+  _Diagnostic_toVscode,
+  _DocumentSymbol_toVscode,
   _WorkspaceFolder_toVscode,
   _ProgressToken_toVscode,
+  _ProgressBegin_toVscode,
+  _ProgressReport_toVscode,
+  _ProgressEnd_toVscode,
   _ContentChange_toVscode,
   _VersionedId_toVscode,
   _DidChange_toVscode,
   _DidOpen_toVscode,
-  _DidClose_toVscode
+  _DidClose_toVscode,
+  _DidSave_toVscode
 };

@@ -1,709 +1,2689 @@
 /**
- * LSP Protocol Types — inferred from Zod schemas
+ * LSP Protocol Types
  *
- * Auto-generated from metaModel.json
- * DO NOT EDIT MANUALLY
+ * Generated directly from metaModel.json — not inferred from Zod schemas.
+ * Optional properties use `prop?: T` (no `| undefined`) so these types are
+ * compatible with packages compiled with exactOptionalPropertyTypes: true.
+ *
+ * Auto-generated — DO NOT EDIT MANUALLY
  */
 
-import type { z } from 'zod';
-import type * as Schemas from './schemas.js';
-
-// Enum types (TypeScript enum declarations)
 export type * from './enums.js';
 
-// Structure and type-alias types inferred from Zod schemas
-export type ImplementationParams = z.infer<typeof Schemas.ImplementationParamsSchema>;
-export type Location = z.infer<typeof Schemas.LocationSchema>;
-export type ImplementationRegistrationOptions = z.infer<
-  typeof Schemas.ImplementationRegistrationOptionsSchema
->;
-export type TypeDefinitionParams = z.infer<typeof Schemas.TypeDefinitionParamsSchema>;
-export type TypeDefinitionRegistrationOptions = z.infer<
-  typeof Schemas.TypeDefinitionRegistrationOptionsSchema
->;
-export type WorkspaceFolder = z.infer<typeof Schemas.WorkspaceFolderSchema>;
-export type DidChangeWorkspaceFoldersParams = z.infer<
-  typeof Schemas.DidChangeWorkspaceFoldersParamsSchema
->;
-export type ConfigurationParams = z.infer<typeof Schemas.ConfigurationParamsSchema>;
-export type DocumentColorParams = z.infer<typeof Schemas.DocumentColorParamsSchema>;
-export type ColorInformation = z.infer<typeof Schemas.ColorInformationSchema>;
-export type DocumentColorRegistrationOptions = z.infer<
-  typeof Schemas.DocumentColorRegistrationOptionsSchema
->;
-export type ColorPresentationParams = z.infer<typeof Schemas.ColorPresentationParamsSchema>;
-export type ColorPresentation = z.infer<typeof Schemas.ColorPresentationSchema>;
-export type WorkDoneProgressOptions = z.infer<typeof Schemas.WorkDoneProgressOptionsSchema>;
-export type TextDocumentRegistrationOptions = z.infer<
-  typeof Schemas.TextDocumentRegistrationOptionsSchema
->;
-export type FoldingRangeParams = z.infer<typeof Schemas.FoldingRangeParamsSchema>;
-export type FoldingRange = z.infer<typeof Schemas.FoldingRangeSchema>;
-export type FoldingRangeRegistrationOptions = z.infer<
-  typeof Schemas.FoldingRangeRegistrationOptionsSchema
->;
-export type DeclarationParams = z.infer<typeof Schemas.DeclarationParamsSchema>;
-export type DeclarationRegistrationOptions = z.infer<
-  typeof Schemas.DeclarationRegistrationOptionsSchema
->;
-export type SelectionRangeParams = z.infer<typeof Schemas.SelectionRangeParamsSchema>;
-export type SelectionRange = z.infer<typeof Schemas.SelectionRangeSchema>;
-export type SelectionRangeRegistrationOptions = z.infer<
-  typeof Schemas.SelectionRangeRegistrationOptionsSchema
->;
-export type WorkDoneProgressCreateParams = z.infer<
-  typeof Schemas.WorkDoneProgressCreateParamsSchema
->;
-export type WorkDoneProgressCancelParams = z.infer<
-  typeof Schemas.WorkDoneProgressCancelParamsSchema
->;
-export type CallHierarchyPrepareParams = z.infer<typeof Schemas.CallHierarchyPrepareParamsSchema>;
-export type CallHierarchyItem = z.infer<typeof Schemas.CallHierarchyItemSchema>;
-export type CallHierarchyRegistrationOptions = z.infer<
-  typeof Schemas.CallHierarchyRegistrationOptionsSchema
->;
-export type CallHierarchyIncomingCallsParams = z.infer<
-  typeof Schemas.CallHierarchyIncomingCallsParamsSchema
->;
-export type CallHierarchyIncomingCall = z.infer<typeof Schemas.CallHierarchyIncomingCallSchema>;
-export type CallHierarchyOutgoingCallsParams = z.infer<
-  typeof Schemas.CallHierarchyOutgoingCallsParamsSchema
->;
-export type CallHierarchyOutgoingCall = z.infer<typeof Schemas.CallHierarchyOutgoingCallSchema>;
-export type SemanticTokensParams = z.infer<typeof Schemas.SemanticTokensParamsSchema>;
-export type SemanticTokens = z.infer<typeof Schemas.SemanticTokensSchema>;
-export type SemanticTokensPartialResult = z.infer<typeof Schemas.SemanticTokensPartialResultSchema>;
-export type SemanticTokensRegistrationOptions = z.infer<
-  typeof Schemas.SemanticTokensRegistrationOptionsSchema
->;
-export type SemanticTokensDeltaParams = z.infer<typeof Schemas.SemanticTokensDeltaParamsSchema>;
-export type SemanticTokensDelta = z.infer<typeof Schemas.SemanticTokensDeltaSchema>;
-export type SemanticTokensDeltaPartialResult = z.infer<
-  typeof Schemas.SemanticTokensDeltaPartialResultSchema
->;
-export type SemanticTokensRangeParams = z.infer<typeof Schemas.SemanticTokensRangeParamsSchema>;
-export type ShowDocumentParams = z.infer<typeof Schemas.ShowDocumentParamsSchema>;
-export type ShowDocumentResult = z.infer<typeof Schemas.ShowDocumentResultSchema>;
-export type LinkedEditingRangeParams = z.infer<typeof Schemas.LinkedEditingRangeParamsSchema>;
-export type LinkedEditingRanges = z.infer<typeof Schemas.LinkedEditingRangesSchema>;
-export type LinkedEditingRangeRegistrationOptions = z.infer<
-  typeof Schemas.LinkedEditingRangeRegistrationOptionsSchema
->;
-export type CreateFilesParams = z.infer<typeof Schemas.CreateFilesParamsSchema>;
-export type WorkspaceEdit = z.infer<typeof Schemas.WorkspaceEditSchema>;
-export type FileOperationRegistrationOptions = z.infer<
-  typeof Schemas.FileOperationRegistrationOptionsSchema
->;
-export type RenameFilesParams = z.infer<typeof Schemas.RenameFilesParamsSchema>;
-export type DeleteFilesParams = z.infer<typeof Schemas.DeleteFilesParamsSchema>;
-export type MonikerParams = z.infer<typeof Schemas.MonikerParamsSchema>;
-export type Moniker = z.infer<typeof Schemas.MonikerSchema>;
-export type MonikerRegistrationOptions = z.infer<typeof Schemas.MonikerRegistrationOptionsSchema>;
-export type TypeHierarchyPrepareParams = z.infer<typeof Schemas.TypeHierarchyPrepareParamsSchema>;
-export type TypeHierarchyItem = z.infer<typeof Schemas.TypeHierarchyItemSchema>;
-export type TypeHierarchyRegistrationOptions = z.infer<
-  typeof Schemas.TypeHierarchyRegistrationOptionsSchema
->;
-export type TypeHierarchySupertypesParams = z.infer<
-  typeof Schemas.TypeHierarchySupertypesParamsSchema
->;
-export type TypeHierarchySubtypesParams = z.infer<typeof Schemas.TypeHierarchySubtypesParamsSchema>;
-export type InlineValueParams = z.infer<typeof Schemas.InlineValueParamsSchema>;
-export type InlineValueRegistrationOptions = z.infer<
-  typeof Schemas.InlineValueRegistrationOptionsSchema
->;
-export type InlayHintParams = z.infer<typeof Schemas.InlayHintParamsSchema>;
-export type InlayHint = z.infer<typeof Schemas.InlayHintSchema>;
-export type InlayHintRegistrationOptions = z.infer<
-  typeof Schemas.InlayHintRegistrationOptionsSchema
->;
-export type DocumentDiagnosticParams = z.infer<typeof Schemas.DocumentDiagnosticParamsSchema>;
-export type DocumentDiagnosticReportPartialResult = z.infer<
-  typeof Schemas.DocumentDiagnosticReportPartialResultSchema
->;
-export type DiagnosticServerCancellationData = z.infer<
-  typeof Schemas.DiagnosticServerCancellationDataSchema
->;
-export type DiagnosticRegistrationOptions = z.infer<
-  typeof Schemas.DiagnosticRegistrationOptionsSchema
->;
-export type WorkspaceDiagnosticParams = z.infer<typeof Schemas.WorkspaceDiagnosticParamsSchema>;
-export type WorkspaceDiagnosticReport = z.infer<typeof Schemas.WorkspaceDiagnosticReportSchema>;
-export type WorkspaceDiagnosticReportPartialResult = z.infer<
-  typeof Schemas.WorkspaceDiagnosticReportPartialResultSchema
->;
-export type DidOpenNotebookDocumentParams = z.infer<
-  typeof Schemas.DidOpenNotebookDocumentParamsSchema
->;
-export type NotebookDocumentSyncRegistrationOptions = z.infer<
-  typeof Schemas.NotebookDocumentSyncRegistrationOptionsSchema
->;
-export type DidChangeNotebookDocumentParams = z.infer<
-  typeof Schemas.DidChangeNotebookDocumentParamsSchema
->;
-export type DidSaveNotebookDocumentParams = z.infer<
-  typeof Schemas.DidSaveNotebookDocumentParamsSchema
->;
-export type DidCloseNotebookDocumentParams = z.infer<
-  typeof Schemas.DidCloseNotebookDocumentParamsSchema
->;
-export type InlineCompletionParams = z.infer<typeof Schemas.InlineCompletionParamsSchema>;
-export type InlineCompletionList = z.infer<typeof Schemas.InlineCompletionListSchema>;
-export type InlineCompletionItem = z.infer<typeof Schemas.InlineCompletionItemSchema>;
-export type InlineCompletionRegistrationOptions = z.infer<
-  typeof Schemas.InlineCompletionRegistrationOptionsSchema
->;
-export type TextDocumentContentParams = z.infer<typeof Schemas.TextDocumentContentParamsSchema>;
-export type TextDocumentContentResult = z.infer<typeof Schemas.TextDocumentContentResultSchema>;
-export type TextDocumentContentRegistrationOptions = z.infer<
-  typeof Schemas.TextDocumentContentRegistrationOptionsSchema
->;
-export type TextDocumentContentRefreshParams = z.infer<
-  typeof Schemas.TextDocumentContentRefreshParamsSchema
->;
-export type RegistrationParams = z.infer<typeof Schemas.RegistrationParamsSchema>;
-export type UnregistrationParams = z.infer<typeof Schemas.UnregistrationParamsSchema>;
-export type InitializeParams = z.infer<typeof Schemas.InitializeParamsSchema>;
-export type InitializeResult = z.infer<typeof Schemas.InitializeResultSchema>;
-export type InitializeError = z.infer<typeof Schemas.InitializeErrorSchema>;
-export type InitializedParams = z.infer<typeof Schemas.InitializedParamsSchema>;
-export type DidChangeConfigurationParams = z.infer<
-  typeof Schemas.DidChangeConfigurationParamsSchema
->;
-export type DidChangeConfigurationRegistrationOptions = z.infer<
-  typeof Schemas.DidChangeConfigurationRegistrationOptionsSchema
->;
-export type ShowMessageParams = z.infer<typeof Schemas.ShowMessageParamsSchema>;
-export type ShowMessageRequestParams = z.infer<typeof Schemas.ShowMessageRequestParamsSchema>;
-export type MessageActionItem = z.infer<typeof Schemas.MessageActionItemSchema>;
-export type LogMessageParams = z.infer<typeof Schemas.LogMessageParamsSchema>;
-export type DidOpenTextDocumentParams = z.infer<typeof Schemas.DidOpenTextDocumentParamsSchema>;
-export type DidChangeTextDocumentParams = z.infer<typeof Schemas.DidChangeTextDocumentParamsSchema>;
-export type TextDocumentChangeRegistrationOptions = z.infer<
-  typeof Schemas.TextDocumentChangeRegistrationOptionsSchema
->;
-export type DidCloseTextDocumentParams = z.infer<typeof Schemas.DidCloseTextDocumentParamsSchema>;
-export type DidSaveTextDocumentParams = z.infer<typeof Schemas.DidSaveTextDocumentParamsSchema>;
-export type TextDocumentSaveRegistrationOptions = z.infer<
-  typeof Schemas.TextDocumentSaveRegistrationOptionsSchema
->;
-export type WillSaveTextDocumentParams = z.infer<typeof Schemas.WillSaveTextDocumentParamsSchema>;
-export type TextEdit = z.infer<typeof Schemas.TextEditSchema>;
-export type DidChangeWatchedFilesParams = z.infer<typeof Schemas.DidChangeWatchedFilesParamsSchema>;
-export type DidChangeWatchedFilesRegistrationOptions = z.infer<
-  typeof Schemas.DidChangeWatchedFilesRegistrationOptionsSchema
->;
-export type PublishDiagnosticsParams = z.infer<typeof Schemas.PublishDiagnosticsParamsSchema>;
-export type CompletionParams = z.infer<typeof Schemas.CompletionParamsSchema>;
-export type CompletionItem = z.infer<typeof Schemas.CompletionItemSchema>;
-export type CompletionList = z.infer<typeof Schemas.CompletionListSchema>;
-export type CompletionRegistrationOptions = z.infer<
-  typeof Schemas.CompletionRegistrationOptionsSchema
->;
-export type HoverParams = z.infer<typeof Schemas.HoverParamsSchema>;
-export type Hover = z.infer<typeof Schemas.HoverSchema>;
-export type HoverRegistrationOptions = z.infer<typeof Schemas.HoverRegistrationOptionsSchema>;
-export type SignatureHelpParams = z.infer<typeof Schemas.SignatureHelpParamsSchema>;
-export type SignatureHelp = z.infer<typeof Schemas.SignatureHelpSchema>;
-export type SignatureHelpRegistrationOptions = z.infer<
-  typeof Schemas.SignatureHelpRegistrationOptionsSchema
->;
-export type DefinitionParams = z.infer<typeof Schemas.DefinitionParamsSchema>;
-export type DefinitionRegistrationOptions = z.infer<
-  typeof Schemas.DefinitionRegistrationOptionsSchema
->;
-export type ReferenceParams = z.infer<typeof Schemas.ReferenceParamsSchema>;
-export type ReferenceRegistrationOptions = z.infer<
-  typeof Schemas.ReferenceRegistrationOptionsSchema
->;
-export type DocumentHighlightParams = z.infer<typeof Schemas.DocumentHighlightParamsSchema>;
-export type DocumentHighlight = z.infer<typeof Schemas.DocumentHighlightSchema>;
-export type DocumentHighlightRegistrationOptions = z.infer<
-  typeof Schemas.DocumentHighlightRegistrationOptionsSchema
->;
-export type DocumentSymbolParams = z.infer<typeof Schemas.DocumentSymbolParamsSchema>;
-export type SymbolInformation = z.infer<typeof Schemas.SymbolInformationSchema>;
-export type DocumentSymbol = z.infer<typeof Schemas.DocumentSymbolSchema>;
-export type DocumentSymbolRegistrationOptions = z.infer<
-  typeof Schemas.DocumentSymbolRegistrationOptionsSchema
->;
-export type CodeActionParams = z.infer<typeof Schemas.CodeActionParamsSchema>;
-export type Command = z.infer<typeof Schemas.CommandSchema>;
-export type CodeAction = z.infer<typeof Schemas.CodeActionSchema>;
-export type CodeActionRegistrationOptions = z.infer<
-  typeof Schemas.CodeActionRegistrationOptionsSchema
->;
-export type WorkspaceSymbolParams = z.infer<typeof Schemas.WorkspaceSymbolParamsSchema>;
-export type WorkspaceSymbol = z.infer<typeof Schemas.WorkspaceSymbolSchema>;
-export type WorkspaceSymbolRegistrationOptions = z.infer<
-  typeof Schemas.WorkspaceSymbolRegistrationOptionsSchema
->;
-export type CodeLensParams = z.infer<typeof Schemas.CodeLensParamsSchema>;
-export type CodeLens = z.infer<typeof Schemas.CodeLensSchema>;
-export type CodeLensRegistrationOptions = z.infer<typeof Schemas.CodeLensRegistrationOptionsSchema>;
-export type DocumentLinkParams = z.infer<typeof Schemas.DocumentLinkParamsSchema>;
-export type DocumentLink = z.infer<typeof Schemas.DocumentLinkSchema>;
-export type DocumentLinkRegistrationOptions = z.infer<
-  typeof Schemas.DocumentLinkRegistrationOptionsSchema
->;
-export type DocumentFormattingParams = z.infer<typeof Schemas.DocumentFormattingParamsSchema>;
-export type DocumentFormattingRegistrationOptions = z.infer<
-  typeof Schemas.DocumentFormattingRegistrationOptionsSchema
->;
-export type DocumentRangeFormattingParams = z.infer<
-  typeof Schemas.DocumentRangeFormattingParamsSchema
->;
-export type DocumentRangeFormattingRegistrationOptions = z.infer<
-  typeof Schemas.DocumentRangeFormattingRegistrationOptionsSchema
->;
-export type DocumentRangesFormattingParams = z.infer<
-  typeof Schemas.DocumentRangesFormattingParamsSchema
->;
-export type DocumentOnTypeFormattingParams = z.infer<
-  typeof Schemas.DocumentOnTypeFormattingParamsSchema
->;
-export type DocumentOnTypeFormattingRegistrationOptions = z.infer<
-  typeof Schemas.DocumentOnTypeFormattingRegistrationOptionsSchema
->;
-export type RenameParams = z.infer<typeof Schemas.RenameParamsSchema>;
-export type RenameRegistrationOptions = z.infer<typeof Schemas.RenameRegistrationOptionsSchema>;
-export type PrepareRenameParams = z.infer<typeof Schemas.PrepareRenameParamsSchema>;
-export type ExecuteCommandParams = z.infer<typeof Schemas.ExecuteCommandParamsSchema>;
-export type ExecuteCommandRegistrationOptions = z.infer<
-  typeof Schemas.ExecuteCommandRegistrationOptionsSchema
->;
-export type ApplyWorkspaceEditParams = z.infer<typeof Schemas.ApplyWorkspaceEditParamsSchema>;
-export type ApplyWorkspaceEditResult = z.infer<typeof Schemas.ApplyWorkspaceEditResultSchema>;
-export type WorkDoneProgressBegin = z.infer<typeof Schemas.WorkDoneProgressBeginSchema>;
-export type WorkDoneProgressReport = z.infer<typeof Schemas.WorkDoneProgressReportSchema>;
-export type WorkDoneProgressEnd = z.infer<typeof Schemas.WorkDoneProgressEndSchema>;
-export type SetTraceParams = z.infer<typeof Schemas.SetTraceParamsSchema>;
-export type LogTraceParams = z.infer<typeof Schemas.LogTraceParamsSchema>;
-export type CancelParams = z.infer<typeof Schemas.CancelParamsSchema>;
-export type ProgressParams = z.infer<typeof Schemas.ProgressParamsSchema>;
-export type TextDocumentPositionParams = z.infer<typeof Schemas.TextDocumentPositionParamsSchema>;
-export type WorkDoneProgressParams = z.infer<typeof Schemas.WorkDoneProgressParamsSchema>;
-export type PartialResultParams = z.infer<typeof Schemas.PartialResultParamsSchema>;
-export type LocationLink = z.infer<typeof Schemas.LocationLinkSchema>;
-export type Range = z.infer<typeof Schemas.RangeSchema>;
-export type ImplementationOptions = z.infer<typeof Schemas.ImplementationOptionsSchema>;
-export type StaticRegistrationOptions = z.infer<typeof Schemas.StaticRegistrationOptionsSchema>;
-export type TypeDefinitionOptions = z.infer<typeof Schemas.TypeDefinitionOptionsSchema>;
-export type WorkspaceFoldersChangeEvent = z.infer<typeof Schemas.WorkspaceFoldersChangeEventSchema>;
-export type ConfigurationItem = z.infer<typeof Schemas.ConfigurationItemSchema>;
-export type TextDocumentIdentifier = z.infer<typeof Schemas.TextDocumentIdentifierSchema>;
-export type Color = z.infer<typeof Schemas.ColorSchema>;
-export type DocumentColorOptions = z.infer<typeof Schemas.DocumentColorOptionsSchema>;
-export type FoldingRangeOptions = z.infer<typeof Schemas.FoldingRangeOptionsSchema>;
-export type DeclarationOptions = z.infer<typeof Schemas.DeclarationOptionsSchema>;
-export type Position = z.infer<typeof Schemas.PositionSchema>;
-export type SelectionRangeOptions = z.infer<typeof Schemas.SelectionRangeOptionsSchema>;
-export type CallHierarchyOptions = z.infer<typeof Schemas.CallHierarchyOptionsSchema>;
-export type SemanticTokensOptions = z.infer<typeof Schemas.SemanticTokensOptionsSchema>;
-export type SemanticTokensEdit = z.infer<typeof Schemas.SemanticTokensEditSchema>;
-export type LinkedEditingRangeOptions = z.infer<typeof Schemas.LinkedEditingRangeOptionsSchema>;
-export type FileCreate = z.infer<typeof Schemas.FileCreateSchema>;
-export type TextDocumentEdit = z.infer<typeof Schemas.TextDocumentEditSchema>;
-export type CreateFile = z.infer<typeof Schemas.CreateFileSchema>;
-export type RenameFile = z.infer<typeof Schemas.RenameFileSchema>;
-export type DeleteFile = z.infer<typeof Schemas.DeleteFileSchema>;
-export type ChangeAnnotation = z.infer<typeof Schemas.ChangeAnnotationSchema>;
-export type FileOperationFilter = z.infer<typeof Schemas.FileOperationFilterSchema>;
-export type FileRename = z.infer<typeof Schemas.FileRenameSchema>;
-export type FileDelete = z.infer<typeof Schemas.FileDeleteSchema>;
-export type MonikerOptions = z.infer<typeof Schemas.MonikerOptionsSchema>;
-export type TypeHierarchyOptions = z.infer<typeof Schemas.TypeHierarchyOptionsSchema>;
-export type InlineValueContext = z.infer<typeof Schemas.InlineValueContextSchema>;
-export type InlineValueText = z.infer<typeof Schemas.InlineValueTextSchema>;
-export type InlineValueVariableLookup = z.infer<typeof Schemas.InlineValueVariableLookupSchema>;
-export type InlineValueEvaluatableExpression = z.infer<
-  typeof Schemas.InlineValueEvaluatableExpressionSchema
->;
-export type InlineValueOptions = z.infer<typeof Schemas.InlineValueOptionsSchema>;
-export type InlayHintLabelPart = z.infer<typeof Schemas.InlayHintLabelPartSchema>;
-export type MarkupContent = z.infer<typeof Schemas.MarkupContentSchema>;
-export type InlayHintOptions = z.infer<typeof Schemas.InlayHintOptionsSchema>;
-export type RelatedFullDocumentDiagnosticReport = z.infer<
-  typeof Schemas.RelatedFullDocumentDiagnosticReportSchema
->;
-export type RelatedUnchangedDocumentDiagnosticReport = z.infer<
-  typeof Schemas.RelatedUnchangedDocumentDiagnosticReportSchema
->;
-export type FullDocumentDiagnosticReport = z.infer<
-  typeof Schemas.FullDocumentDiagnosticReportSchema
->;
-export type UnchangedDocumentDiagnosticReport = z.infer<
-  typeof Schemas.UnchangedDocumentDiagnosticReportSchema
->;
-export type DiagnosticOptions = z.infer<typeof Schemas.DiagnosticOptionsSchema>;
-export type PreviousResultId = z.infer<typeof Schemas.PreviousResultIdSchema>;
-export type NotebookDocument = z.infer<typeof Schemas.NotebookDocumentSchema>;
-export type TextDocumentItem = z.infer<typeof Schemas.TextDocumentItemSchema>;
-export type NotebookDocumentSyncOptions = z.infer<typeof Schemas.NotebookDocumentSyncOptionsSchema>;
-export type VersionedNotebookDocumentIdentifier = z.infer<
-  typeof Schemas.VersionedNotebookDocumentIdentifierSchema
->;
-export type NotebookDocumentChangeEvent = z.infer<typeof Schemas.NotebookDocumentChangeEventSchema>;
-export type NotebookDocumentIdentifier = z.infer<typeof Schemas.NotebookDocumentIdentifierSchema>;
-export type InlineCompletionContext = z.infer<typeof Schemas.InlineCompletionContextSchema>;
-export type StringValue = z.infer<typeof Schemas.StringValueSchema>;
-export type InlineCompletionOptions = z.infer<typeof Schemas.InlineCompletionOptionsSchema>;
-export type TextDocumentContentOptions = z.infer<typeof Schemas.TextDocumentContentOptionsSchema>;
-export type Registration = z.infer<typeof Schemas.RegistrationSchema>;
-export type Unregistration = z.infer<typeof Schemas.UnregistrationSchema>;
-export type _InitializeParams = z.infer<typeof Schemas._InitializeParamsSchema>;
-export type WorkspaceFoldersInitializeParams = z.infer<
-  typeof Schemas.WorkspaceFoldersInitializeParamsSchema
->;
-export type ServerCapabilities = z.infer<typeof Schemas.ServerCapabilitiesSchema>;
-export type ServerInfo = z.infer<typeof Schemas.ServerInfoSchema>;
-export type VersionedTextDocumentIdentifier = z.infer<
-  typeof Schemas.VersionedTextDocumentIdentifierSchema
->;
-export type SaveOptions = z.infer<typeof Schemas.SaveOptionsSchema>;
-export type FileEvent = z.infer<typeof Schemas.FileEventSchema>;
-export type FileSystemWatcher = z.infer<typeof Schemas.FileSystemWatcherSchema>;
-export type Diagnostic = z.infer<typeof Schemas.DiagnosticSchema>;
-export type CompletionContext = z.infer<typeof Schemas.CompletionContextSchema>;
-export type CompletionItemLabelDetails = z.infer<typeof Schemas.CompletionItemLabelDetailsSchema>;
-export type InsertReplaceEdit = z.infer<typeof Schemas.InsertReplaceEditSchema>;
-export type CompletionItemDefaults = z.infer<typeof Schemas.CompletionItemDefaultsSchema>;
-export type CompletionItemApplyKinds = z.infer<typeof Schemas.CompletionItemApplyKindsSchema>;
-export type CompletionOptions = z.infer<typeof Schemas.CompletionOptionsSchema>;
-export type HoverOptions = z.infer<typeof Schemas.HoverOptionsSchema>;
-export type SignatureHelpContext = z.infer<typeof Schemas.SignatureHelpContextSchema>;
-export type SignatureInformation = z.infer<typeof Schemas.SignatureInformationSchema>;
-export type SignatureHelpOptions = z.infer<typeof Schemas.SignatureHelpOptionsSchema>;
-export type DefinitionOptions = z.infer<typeof Schemas.DefinitionOptionsSchema>;
-export type ReferenceContext = z.infer<typeof Schemas.ReferenceContextSchema>;
-export type ReferenceOptions = z.infer<typeof Schemas.ReferenceOptionsSchema>;
-export type DocumentHighlightOptions = z.infer<typeof Schemas.DocumentHighlightOptionsSchema>;
-export type BaseSymbolInformation = z.infer<typeof Schemas.BaseSymbolInformationSchema>;
-export type DocumentSymbolOptions = z.infer<typeof Schemas.DocumentSymbolOptionsSchema>;
-export type CodeActionContext = z.infer<typeof Schemas.CodeActionContextSchema>;
-export type CodeActionDisabled = z.infer<typeof Schemas.CodeActionDisabledSchema>;
-export type CodeActionOptions = z.infer<typeof Schemas.CodeActionOptionsSchema>;
-export type LocationUriOnly = z.infer<typeof Schemas.LocationUriOnlySchema>;
-export type WorkspaceSymbolOptions = z.infer<typeof Schemas.WorkspaceSymbolOptionsSchema>;
-export type CodeLensOptions = z.infer<typeof Schemas.CodeLensOptionsSchema>;
-export type DocumentLinkOptions = z.infer<typeof Schemas.DocumentLinkOptionsSchema>;
-export type FormattingOptions = z.infer<typeof Schemas.FormattingOptionsSchema>;
-export type DocumentFormattingOptions = z.infer<typeof Schemas.DocumentFormattingOptionsSchema>;
-export type DocumentRangeFormattingOptions = z.infer<
-  typeof Schemas.DocumentRangeFormattingOptionsSchema
->;
-export type DocumentOnTypeFormattingOptions = z.infer<
-  typeof Schemas.DocumentOnTypeFormattingOptionsSchema
->;
-export type RenameOptions = z.infer<typeof Schemas.RenameOptionsSchema>;
-export type PrepareRenamePlaceholder = z.infer<typeof Schemas.PrepareRenamePlaceholderSchema>;
-export type PrepareRenameDefaultBehavior = z.infer<
-  typeof Schemas.PrepareRenameDefaultBehaviorSchema
->;
-export type ExecuteCommandOptions = z.infer<typeof Schemas.ExecuteCommandOptionsSchema>;
-export type WorkspaceEditMetadata = z.infer<typeof Schemas.WorkspaceEditMetadataSchema>;
-export type SemanticTokensLegend = z.infer<typeof Schemas.SemanticTokensLegendSchema>;
-export type SemanticTokensFullDelta = z.infer<typeof Schemas.SemanticTokensFullDeltaSchema>;
-export type OptionalVersionedTextDocumentIdentifier = z.infer<
-  typeof Schemas.OptionalVersionedTextDocumentIdentifierSchema
->;
-export type AnnotatedTextEdit = z.infer<typeof Schemas.AnnotatedTextEditSchema>;
-export type SnippetTextEdit = z.infer<typeof Schemas.SnippetTextEditSchema>;
-export type ResourceOperation = z.infer<typeof Schemas.ResourceOperationSchema>;
-export type CreateFileOptions = z.infer<typeof Schemas.CreateFileOptionsSchema>;
-export type RenameFileOptions = z.infer<typeof Schemas.RenameFileOptionsSchema>;
-export type DeleteFileOptions = z.infer<typeof Schemas.DeleteFileOptionsSchema>;
-export type FileOperationPattern = z.infer<typeof Schemas.FileOperationPatternSchema>;
-export type WorkspaceFullDocumentDiagnosticReport = z.infer<
-  typeof Schemas.WorkspaceFullDocumentDiagnosticReportSchema
->;
-export type WorkspaceUnchangedDocumentDiagnosticReport = z.infer<
-  typeof Schemas.WorkspaceUnchangedDocumentDiagnosticReportSchema
->;
-export type NotebookCell = z.infer<typeof Schemas.NotebookCellSchema>;
-export type NotebookDocumentFilterWithNotebook = z.infer<
-  typeof Schemas.NotebookDocumentFilterWithNotebookSchema
->;
-export type NotebookDocumentFilterWithCells = z.infer<
-  typeof Schemas.NotebookDocumentFilterWithCellsSchema
->;
-export type NotebookDocumentCellChanges = z.infer<typeof Schemas.NotebookDocumentCellChangesSchema>;
-export type SelectedCompletionInfo = z.infer<typeof Schemas.SelectedCompletionInfoSchema>;
-export type ClientInfo = z.infer<typeof Schemas.ClientInfoSchema>;
-export type ClientCapabilities = z.infer<typeof Schemas.ClientCapabilitiesSchema>;
-export type TextDocumentSyncOptions = z.infer<typeof Schemas.TextDocumentSyncOptionsSchema>;
-export type WorkspaceOptions = z.infer<typeof Schemas.WorkspaceOptionsSchema>;
-export type TextDocumentContentChangePartial = z.infer<
-  typeof Schemas.TextDocumentContentChangePartialSchema
->;
-export type TextDocumentContentChangeWholeDocument = z.infer<
-  typeof Schemas.TextDocumentContentChangeWholeDocumentSchema
->;
-export type CodeDescription = z.infer<typeof Schemas.CodeDescriptionSchema>;
-export type DiagnosticRelatedInformation = z.infer<
-  typeof Schemas.DiagnosticRelatedInformationSchema
->;
-export type EditRangeWithInsertReplace = z.infer<typeof Schemas.EditRangeWithInsertReplaceSchema>;
-export type ServerCompletionItemOptions = z.infer<typeof Schemas.ServerCompletionItemOptionsSchema>;
-export type MarkedStringWithLanguage = z.infer<typeof Schemas.MarkedStringWithLanguageSchema>;
-export type ParameterInformation = z.infer<typeof Schemas.ParameterInformationSchema>;
-export type CodeActionKindDocumentation = z.infer<typeof Schemas.CodeActionKindDocumentationSchema>;
-export type NotebookCellTextDocumentFilter = z.infer<
-  typeof Schemas.NotebookCellTextDocumentFilterSchema
->;
-export type FileOperationPatternOptions = z.infer<typeof Schemas.FileOperationPatternOptionsSchema>;
-export type ExecutionSummary = z.infer<typeof Schemas.ExecutionSummarySchema>;
-export type NotebookCellLanguage = z.infer<typeof Schemas.NotebookCellLanguageSchema>;
-export type NotebookDocumentCellChangeStructure = z.infer<
-  typeof Schemas.NotebookDocumentCellChangeStructureSchema
->;
-export type NotebookDocumentCellContentChanges = z.infer<
-  typeof Schemas.NotebookDocumentCellContentChangesSchema
->;
-export type WorkspaceClientCapabilities = z.infer<typeof Schemas.WorkspaceClientCapabilitiesSchema>;
-export type TextDocumentClientCapabilities = z.infer<
-  typeof Schemas.TextDocumentClientCapabilitiesSchema
->;
-export type NotebookDocumentClientCapabilities = z.infer<
-  typeof Schemas.NotebookDocumentClientCapabilitiesSchema
->;
-export type WindowClientCapabilities = z.infer<typeof Schemas.WindowClientCapabilitiesSchema>;
-export type GeneralClientCapabilities = z.infer<typeof Schemas.GeneralClientCapabilitiesSchema>;
-export type WorkspaceFoldersServerCapabilities = z.infer<
-  typeof Schemas.WorkspaceFoldersServerCapabilitiesSchema
->;
-export type FileOperationOptions = z.infer<typeof Schemas.FileOperationOptionsSchema>;
-export type RelativePattern = z.infer<typeof Schemas.RelativePatternSchema>;
-export type TextDocumentFilterLanguage = z.infer<typeof Schemas.TextDocumentFilterLanguageSchema>;
-export type TextDocumentFilterScheme = z.infer<typeof Schemas.TextDocumentFilterSchemeSchema>;
-export type TextDocumentFilterPattern = z.infer<typeof Schemas.TextDocumentFilterPatternSchema>;
-export type NotebookDocumentFilterNotebookType = z.infer<
-  typeof Schemas.NotebookDocumentFilterNotebookTypeSchema
->;
-export type NotebookDocumentFilterScheme = z.infer<
-  typeof Schemas.NotebookDocumentFilterSchemeSchema
->;
-export type NotebookDocumentFilterPattern = z.infer<
-  typeof Schemas.NotebookDocumentFilterPatternSchema
->;
-export type NotebookCellArrayChange = z.infer<typeof Schemas.NotebookCellArrayChangeSchema>;
-export type WorkspaceEditClientCapabilities = z.infer<
-  typeof Schemas.WorkspaceEditClientCapabilitiesSchema
->;
-export type DidChangeConfigurationClientCapabilities = z.infer<
-  typeof Schemas.DidChangeConfigurationClientCapabilitiesSchema
->;
-export type DidChangeWatchedFilesClientCapabilities = z.infer<
-  typeof Schemas.DidChangeWatchedFilesClientCapabilitiesSchema
->;
-export type WorkspaceSymbolClientCapabilities = z.infer<
-  typeof Schemas.WorkspaceSymbolClientCapabilitiesSchema
->;
-export type ExecuteCommandClientCapabilities = z.infer<
-  typeof Schemas.ExecuteCommandClientCapabilitiesSchema
->;
-export type SemanticTokensWorkspaceClientCapabilities = z.infer<
-  typeof Schemas.SemanticTokensWorkspaceClientCapabilitiesSchema
->;
-export type CodeLensWorkspaceClientCapabilities = z.infer<
-  typeof Schemas.CodeLensWorkspaceClientCapabilitiesSchema
->;
-export type FileOperationClientCapabilities = z.infer<
-  typeof Schemas.FileOperationClientCapabilitiesSchema
->;
-export type InlineValueWorkspaceClientCapabilities = z.infer<
-  typeof Schemas.InlineValueWorkspaceClientCapabilitiesSchema
->;
-export type InlayHintWorkspaceClientCapabilities = z.infer<
-  typeof Schemas.InlayHintWorkspaceClientCapabilitiesSchema
->;
-export type DiagnosticWorkspaceClientCapabilities = z.infer<
-  typeof Schemas.DiagnosticWorkspaceClientCapabilitiesSchema
->;
-export type FoldingRangeWorkspaceClientCapabilities = z.infer<
-  typeof Schemas.FoldingRangeWorkspaceClientCapabilitiesSchema
->;
-export type TextDocumentContentClientCapabilities = z.infer<
-  typeof Schemas.TextDocumentContentClientCapabilitiesSchema
->;
-export type TextDocumentSyncClientCapabilities = z.infer<
-  typeof Schemas.TextDocumentSyncClientCapabilitiesSchema
->;
-export type TextDocumentFilterClientCapabilities = z.infer<
-  typeof Schemas.TextDocumentFilterClientCapabilitiesSchema
->;
-export type CompletionClientCapabilities = z.infer<
-  typeof Schemas.CompletionClientCapabilitiesSchema
->;
-export type HoverClientCapabilities = z.infer<typeof Schemas.HoverClientCapabilitiesSchema>;
-export type SignatureHelpClientCapabilities = z.infer<
-  typeof Schemas.SignatureHelpClientCapabilitiesSchema
->;
-export type DeclarationClientCapabilities = z.infer<
-  typeof Schemas.DeclarationClientCapabilitiesSchema
->;
-export type DefinitionClientCapabilities = z.infer<
-  typeof Schemas.DefinitionClientCapabilitiesSchema
->;
-export type TypeDefinitionClientCapabilities = z.infer<
-  typeof Schemas.TypeDefinitionClientCapabilitiesSchema
->;
-export type ImplementationClientCapabilities = z.infer<
-  typeof Schemas.ImplementationClientCapabilitiesSchema
->;
-export type ReferenceClientCapabilities = z.infer<typeof Schemas.ReferenceClientCapabilitiesSchema>;
-export type DocumentHighlightClientCapabilities = z.infer<
-  typeof Schemas.DocumentHighlightClientCapabilitiesSchema
->;
-export type DocumentSymbolClientCapabilities = z.infer<
-  typeof Schemas.DocumentSymbolClientCapabilitiesSchema
->;
-export type CodeActionClientCapabilities = z.infer<
-  typeof Schemas.CodeActionClientCapabilitiesSchema
->;
-export type CodeLensClientCapabilities = z.infer<typeof Schemas.CodeLensClientCapabilitiesSchema>;
-export type DocumentLinkClientCapabilities = z.infer<
-  typeof Schemas.DocumentLinkClientCapabilitiesSchema
->;
-export type DocumentColorClientCapabilities = z.infer<
-  typeof Schemas.DocumentColorClientCapabilitiesSchema
->;
-export type DocumentFormattingClientCapabilities = z.infer<
-  typeof Schemas.DocumentFormattingClientCapabilitiesSchema
->;
-export type DocumentRangeFormattingClientCapabilities = z.infer<
-  typeof Schemas.DocumentRangeFormattingClientCapabilitiesSchema
->;
-export type DocumentOnTypeFormattingClientCapabilities = z.infer<
-  typeof Schemas.DocumentOnTypeFormattingClientCapabilitiesSchema
->;
-export type RenameClientCapabilities = z.infer<typeof Schemas.RenameClientCapabilitiesSchema>;
-export type FoldingRangeClientCapabilities = z.infer<
-  typeof Schemas.FoldingRangeClientCapabilitiesSchema
->;
-export type SelectionRangeClientCapabilities = z.infer<
-  typeof Schemas.SelectionRangeClientCapabilitiesSchema
->;
-export type PublishDiagnosticsClientCapabilities = z.infer<
-  typeof Schemas.PublishDiagnosticsClientCapabilitiesSchema
->;
-export type CallHierarchyClientCapabilities = z.infer<
-  typeof Schemas.CallHierarchyClientCapabilitiesSchema
->;
-export type SemanticTokensClientCapabilities = z.infer<
-  typeof Schemas.SemanticTokensClientCapabilitiesSchema
->;
-export type LinkedEditingRangeClientCapabilities = z.infer<
-  typeof Schemas.LinkedEditingRangeClientCapabilitiesSchema
->;
-export type MonikerClientCapabilities = z.infer<typeof Schemas.MonikerClientCapabilitiesSchema>;
-export type TypeHierarchyClientCapabilities = z.infer<
-  typeof Schemas.TypeHierarchyClientCapabilitiesSchema
->;
-export type InlineValueClientCapabilities = z.infer<
-  typeof Schemas.InlineValueClientCapabilitiesSchema
->;
-export type InlayHintClientCapabilities = z.infer<typeof Schemas.InlayHintClientCapabilitiesSchema>;
-export type DiagnosticClientCapabilities = z.infer<
-  typeof Schemas.DiagnosticClientCapabilitiesSchema
->;
-export type InlineCompletionClientCapabilities = z.infer<
-  typeof Schemas.InlineCompletionClientCapabilitiesSchema
->;
-export type NotebookDocumentSyncClientCapabilities = z.infer<
-  typeof Schemas.NotebookDocumentSyncClientCapabilitiesSchema
->;
-export type ShowMessageRequestClientCapabilities = z.infer<
-  typeof Schemas.ShowMessageRequestClientCapabilitiesSchema
->;
-export type ShowDocumentClientCapabilities = z.infer<
-  typeof Schemas.ShowDocumentClientCapabilitiesSchema
->;
-export type StaleRequestSupportOptions = z.infer<typeof Schemas.StaleRequestSupportOptionsSchema>;
-export type RegularExpressionsClientCapabilities = z.infer<
-  typeof Schemas.RegularExpressionsClientCapabilitiesSchema
->;
-export type MarkdownClientCapabilities = z.infer<typeof Schemas.MarkdownClientCapabilitiesSchema>;
-export type ChangeAnnotationsSupportOptions = z.infer<
-  typeof Schemas.ChangeAnnotationsSupportOptionsSchema
->;
-export type ClientSymbolKindOptions = z.infer<typeof Schemas.ClientSymbolKindOptionsSchema>;
-export type ClientSymbolTagOptions = z.infer<typeof Schemas.ClientSymbolTagOptionsSchema>;
-export type ClientSymbolResolveOptions = z.infer<typeof Schemas.ClientSymbolResolveOptionsSchema>;
-export type ClientCompletionItemOptions = z.infer<typeof Schemas.ClientCompletionItemOptionsSchema>;
-export type ClientCompletionItemOptionsKind = z.infer<
-  typeof Schemas.ClientCompletionItemOptionsKindSchema
->;
-export type CompletionListCapabilities = z.infer<typeof Schemas.CompletionListCapabilitiesSchema>;
-export type ClientSignatureInformationOptions = z.infer<
-  typeof Schemas.ClientSignatureInformationOptionsSchema
->;
-export type ClientCodeActionLiteralOptions = z.infer<
-  typeof Schemas.ClientCodeActionLiteralOptionsSchema
->;
-export type ClientCodeActionResolveOptions = z.infer<
-  typeof Schemas.ClientCodeActionResolveOptionsSchema
->;
-export type CodeActionTagOptions = z.infer<typeof Schemas.CodeActionTagOptionsSchema>;
-export type ClientCodeLensResolveOptions = z.infer<
-  typeof Schemas.ClientCodeLensResolveOptionsSchema
->;
-export type ClientFoldingRangeKindOptions = z.infer<
-  typeof Schemas.ClientFoldingRangeKindOptionsSchema
->;
-export type ClientFoldingRangeOptions = z.infer<typeof Schemas.ClientFoldingRangeOptionsSchema>;
-export type DiagnosticsCapabilities = z.infer<typeof Schemas.DiagnosticsCapabilitiesSchema>;
-export type ClientSemanticTokensRequestOptions = z.infer<
-  typeof Schemas.ClientSemanticTokensRequestOptionsSchema
->;
-export type ClientInlayHintResolveOptions = z.infer<
-  typeof Schemas.ClientInlayHintResolveOptionsSchema
->;
-export type ClientShowMessageActionItemOptions = z.infer<
-  typeof Schemas.ClientShowMessageActionItemOptionsSchema
->;
-export type CompletionItemTagOptions = z.infer<typeof Schemas.CompletionItemTagOptionsSchema>;
-export type ClientCompletionItemResolveOptions = z.infer<
-  typeof Schemas.ClientCompletionItemResolveOptionsSchema
->;
-export type ClientCompletionItemInsertTextModeOptions = z.infer<
-  typeof Schemas.ClientCompletionItemInsertTextModeOptionsSchema
->;
-export type ClientSignatureParameterInformationOptions = z.infer<
-  typeof Schemas.ClientSignatureParameterInformationOptionsSchema
->;
-export type ClientCodeActionKindOptions = z.infer<typeof Schemas.ClientCodeActionKindOptionsSchema>;
-export type ClientDiagnosticsTagOptions = z.infer<typeof Schemas.ClientDiagnosticsTagOptionsSchema>;
-export type ClientSemanticTokensRequestFullDelta = z.infer<
-  typeof Schemas.ClientSemanticTokensRequestFullDeltaSchema
->;
+export type ImplementationParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+};
 
-export type Definition = z.infer<typeof Schemas.DefinitionSchema>;
-export type DefinitionLink = z.infer<typeof Schemas.DefinitionLinkSchema>;
-export type LSPArray = z.infer<typeof Schemas.LSPArraySchema>;
-export type LSPAny = z.infer<typeof Schemas.LSPAnySchema>;
-export type Declaration = z.infer<typeof Schemas.DeclarationSchema>;
-export type DeclarationLink = z.infer<typeof Schemas.DeclarationLinkSchema>;
-export type InlineValue = z.infer<typeof Schemas.InlineValueSchema>;
-export type DocumentDiagnosticReport = z.infer<typeof Schemas.DocumentDiagnosticReportSchema>;
-export type PrepareRenameResult = z.infer<typeof Schemas.PrepareRenameResultSchema>;
-export type DocumentSelector = z.infer<typeof Schemas.DocumentSelectorSchema>;
-export type ProgressToken = z.infer<typeof Schemas.ProgressTokenSchema>;
-export type ChangeAnnotationIdentifier = z.infer<typeof Schemas.ChangeAnnotationIdentifierSchema>;
-export type WorkspaceDocumentDiagnosticReport = z.infer<
-  typeof Schemas.WorkspaceDocumentDiagnosticReportSchema
->;
-export type TextDocumentContentChangeEvent = z.infer<
-  typeof Schemas.TextDocumentContentChangeEventSchema
->;
-export type MarkedString = z.infer<typeof Schemas.MarkedStringSchema>;
-export type DocumentFilter = z.infer<typeof Schemas.DocumentFilterSchema>;
-export type LSPObject = z.infer<typeof Schemas.LSPObjectSchema>;
-export type GlobPattern = z.infer<typeof Schemas.GlobPatternSchema>;
-export type TextDocumentFilter = z.infer<typeof Schemas.TextDocumentFilterSchema>;
-export type NotebookDocumentFilter = z.infer<typeof Schemas.NotebookDocumentFilterSchema>;
-export type Pattern = z.infer<typeof Schemas.PatternSchema>;
-export type RegularExpressionEngineKind = z.infer<typeof Schemas.RegularExpressionEngineKindSchema>;
+export type Location = {
+  uri: string;
+  range: Range;
+};
+
+export type ImplementationRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  id?: string;
+};
+
+export type TypeDefinitionParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+};
+
+export type TypeDefinitionRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  id?: string;
+};
+
+export type WorkspaceFolder = {
+  uri: string;
+  name: string;
+};
+
+export type DidChangeWorkspaceFoldersParams = {
+  event: WorkspaceFoldersChangeEvent;
+};
+
+export type ConfigurationParams = {
+  items: ConfigurationItem[];
+};
+
+export type DocumentColorParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+};
+
+export type ColorInformation = {
+  range: Range;
+  color: Color;
+};
+
+export type DocumentColorRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  id?: string;
+};
+
+export type ColorPresentationParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  color: Color;
+  range: Range;
+};
+
+export type ColorPresentation = {
+  label: string;
+  textEdit?: TextEdit;
+  additionalTextEdits?: TextEdit[];
+};
+
+export type WorkDoneProgressOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type TextDocumentRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+};
+
+export type FoldingRangeParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+};
+
+export type FoldingRange = {
+  startLine: number;
+  startCharacter?: number;
+  endLine: number;
+  endCharacter?: number;
+  kind?: 'comment' | 'imports' | 'region' | string;
+  collapsedText?: string;
+};
+
+export type FoldingRangeRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  id?: string;
+};
+
+export type DeclarationParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+};
+
+export type DeclarationRegistrationOptions = {
+  workDoneProgress?: boolean;
+  documentSelector: DocumentSelector | null;
+  id?: string;
+};
+
+export type SelectionRangeParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  positions: Position[];
+};
+
+export type SelectionRange = {
+  range: Range;
+  parent?: SelectionRange;
+};
+
+export type SelectionRangeRegistrationOptions = {
+  workDoneProgress?: boolean;
+  documentSelector: DocumentSelector | null;
+  id?: string;
+};
+
+export type WorkDoneProgressCreateParams = {
+  token: ProgressToken;
+};
+
+export type WorkDoneProgressCancelParams = {
+  token: ProgressToken;
+};
+
+export type CallHierarchyPrepareParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+};
+
+export type CallHierarchyItem = {
+  name: string;
+  kind:
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+    | 26;
+  tags?: 1[];
+  detail?: string;
+  uri: string;
+  range: Range;
+  selectionRange: Range;
+  data?: LSPAny;
+};
+
+export type CallHierarchyRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  id?: string;
+};
+
+export type CallHierarchyIncomingCallsParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  item: CallHierarchyItem;
+};
+
+export type CallHierarchyIncomingCall = {
+  from: CallHierarchyItem;
+  fromRanges: Range[];
+};
+
+export type CallHierarchyOutgoingCallsParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  item: CallHierarchyItem;
+};
+
+export type CallHierarchyOutgoingCall = {
+  to: CallHierarchyItem;
+  fromRanges: Range[];
+};
+
+export type SemanticTokensParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+};
+
+export type SemanticTokens = {
+  resultId?: string;
+  data: number[];
+};
+
+export type SemanticTokensPartialResult = {
+  data: number[];
+};
+
+export type SemanticTokensRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  legend: SemanticTokensLegend;
+  range?: boolean | {};
+  full?: boolean | SemanticTokensFullDelta;
+  id?: string;
+};
+
+export type SemanticTokensDeltaParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  previousResultId: string;
+};
+
+export type SemanticTokensDelta = {
+  resultId?: string;
+  edits: SemanticTokensEdit[];
+};
+
+export type SemanticTokensDeltaPartialResult = {
+  edits: SemanticTokensEdit[];
+};
+
+export type SemanticTokensRangeParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  range: Range;
+};
+
+export type ShowDocumentParams = {
+  uri: string;
+  external?: boolean;
+  takeFocus?: boolean;
+  selection?: Range;
+};
+
+export type ShowDocumentResult = {
+  success: boolean;
+};
+
+export type LinkedEditingRangeParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+};
+
+export type LinkedEditingRanges = {
+  ranges: Range[];
+  wordPattern?: string;
+};
+
+export type LinkedEditingRangeRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  id?: string;
+};
+
+export type CreateFilesParams = {
+  files: FileCreate[];
+};
+
+export type WorkspaceEdit = {
+  changes?: Record<string, TextEdit[]>;
+  documentChanges?: (TextDocumentEdit | CreateFile | RenameFile | DeleteFile)[];
+  changeAnnotations?: Record<ChangeAnnotationIdentifier, ChangeAnnotation>;
+};
+
+export type FileOperationRegistrationOptions = {
+  filters: FileOperationFilter[];
+};
+
+export type RenameFilesParams = {
+  files: FileRename[];
+};
+
+export type DeleteFilesParams = {
+  files: FileDelete[];
+};
+
+export type MonikerParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+};
+
+export type Moniker = {
+  scheme: string;
+  identifier: string;
+  unique: 'document' | 'project' | 'group' | 'scheme' | 'global';
+  kind?: 'import' | 'export' | 'local';
+};
+
+export type MonikerRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+};
+
+export type TypeHierarchyPrepareParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+};
+
+export type TypeHierarchyItem = {
+  name: string;
+  kind:
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+    | 26;
+  tags?: 1[];
+  detail?: string;
+  uri: string;
+  range: Range;
+  selectionRange: Range;
+  data?: LSPAny;
+};
+
+export type TypeHierarchyRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  id?: string;
+};
+
+export type TypeHierarchySupertypesParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  item: TypeHierarchyItem;
+};
+
+export type TypeHierarchySubtypesParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  item: TypeHierarchyItem;
+};
+
+export type InlineValueParams = {
+  workDoneToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  range: Range;
+  context: InlineValueContext;
+};
+
+export type InlineValueRegistrationOptions = {
+  workDoneProgress?: boolean;
+  documentSelector: DocumentSelector | null;
+  id?: string;
+};
+
+export type InlayHintParams = {
+  workDoneToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  range: Range;
+};
+
+export type InlayHint = {
+  position: Position;
+  label: string | InlayHintLabelPart[];
+  kind?: 1 | 2;
+  textEdits?: TextEdit[];
+  tooltip?: string | MarkupContent;
+  paddingLeft?: boolean;
+  paddingRight?: boolean;
+  data?: LSPAny;
+};
+
+export type InlayHintRegistrationOptions = {
+  workDoneProgress?: boolean;
+  resolveProvider?: boolean;
+  documentSelector: DocumentSelector | null;
+  id?: string;
+};
+
+export type DocumentDiagnosticParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  identifier?: string;
+  previousResultId?: string;
+};
+
+export type DocumentDiagnosticReportPartialResult = {
+  relatedDocuments: Record<
+    string,
+    FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport
+  >;
+};
+
+export type DiagnosticServerCancellationData = {
+  retriggerRequest: boolean;
+};
+
+export type DiagnosticRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  identifier?: string;
+  interFileDependencies: boolean;
+  workspaceDiagnostics: boolean;
+  id?: string;
+};
+
+export type WorkspaceDiagnosticParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  identifier?: string;
+  previousResultIds: PreviousResultId[];
+};
+
+export type WorkspaceDiagnosticReport = {
+  items: WorkspaceDocumentDiagnosticReport[];
+};
+
+export type WorkspaceDiagnosticReportPartialResult = {
+  items: WorkspaceDocumentDiagnosticReport[];
+};
+
+export type DidOpenNotebookDocumentParams = {
+  notebookDocument: NotebookDocument;
+  cellTextDocuments: TextDocumentItem[];
+};
+
+export type NotebookDocumentSyncRegistrationOptions = {
+  notebookSelector: (NotebookDocumentFilterWithNotebook | NotebookDocumentFilterWithCells)[];
+  save?: boolean;
+  id?: string;
+};
+
+export type DidChangeNotebookDocumentParams = {
+  notebookDocument: VersionedNotebookDocumentIdentifier;
+  change: NotebookDocumentChangeEvent;
+};
+
+export type DidSaveNotebookDocumentParams = {
+  notebookDocument: NotebookDocumentIdentifier;
+};
+
+export type DidCloseNotebookDocumentParams = {
+  notebookDocument: NotebookDocumentIdentifier;
+  cellTextDocuments: TextDocumentIdentifier[];
+};
+
+export type InlineCompletionParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  context: InlineCompletionContext;
+};
+
+export type InlineCompletionList = {
+  items: InlineCompletionItem[];
+};
+
+export type InlineCompletionItem = {
+  insertText: string | StringValue;
+  filterText?: string;
+  range?: Range;
+  command?: Command;
+};
+
+export type InlineCompletionRegistrationOptions = {
+  workDoneProgress?: boolean;
+  documentSelector: DocumentSelector | null;
+  id?: string;
+};
+
+export type TextDocumentContentParams = {
+  uri: string;
+};
+
+export type TextDocumentContentResult = {
+  text: string;
+};
+
+export type TextDocumentContentRegistrationOptions = {
+  schemes: string[];
+  id?: string;
+};
+
+export type TextDocumentContentRefreshParams = {
+  uri: string;
+};
+
+export type RegistrationParams = {
+  registrations: Registration[];
+};
+
+export type UnregistrationParams = {
+  unregisterations: Unregistration[];
+};
+
+export type InitializeParams = {
+  workDoneToken?: ProgressToken;
+  processId: number | null;
+  clientInfo?: ClientInfo;
+  locale?: string;
+  rootPath?: string | null;
+  rootUri: string | null;
+  capabilities: ClientCapabilities;
+  initializationOptions?: LSPAny;
+  trace?: 'off' | 'messages' | 'compact' | 'verbose';
+  workspaceFolders?: WorkspaceFolder[] | null;
+};
+
+export type InitializeResult = {
+  capabilities: ServerCapabilities;
+  serverInfo?: ServerInfo;
+};
+
+export type InitializeError = {
+  retry: boolean;
+};
+
+export type InitializedParams = {};
+
+export type DidChangeConfigurationParams = {
+  settings: LSPAny;
+};
+
+export type DidChangeConfigurationRegistrationOptions = {
+  section?: string | string[];
+};
+
+export type ShowMessageParams = {
+  type: 1 | 2 | 3 | 4 | 5;
+  message: string;
+};
+
+export type ShowMessageRequestParams = {
+  type: 1 | 2 | 3 | 4 | 5;
+  message: string;
+  actions?: MessageActionItem[];
+};
+
+export type MessageActionItem = {
+  title: string;
+};
+
+export type LogMessageParams = {
+  type: 1 | 2 | 3 | 4 | 5;
+  message: string;
+};
+
+export type DidOpenTextDocumentParams = {
+  textDocument: TextDocumentItem;
+};
+
+export type DidChangeTextDocumentParams = {
+  textDocument: VersionedTextDocumentIdentifier;
+  contentChanges: TextDocumentContentChangeEvent[];
+};
+
+export type TextDocumentChangeRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  syncKind: 0 | 1 | 2;
+};
+
+export type DidCloseTextDocumentParams = {
+  textDocument: TextDocumentIdentifier;
+};
+
+export type DidSaveTextDocumentParams = {
+  textDocument: TextDocumentIdentifier;
+  text?: string;
+};
+
+export type TextDocumentSaveRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  includeText?: boolean;
+};
+
+export type WillSaveTextDocumentParams = {
+  textDocument: TextDocumentIdentifier;
+  reason: 1 | 2 | 3;
+};
+
+export type TextEdit = {
+  range: Range;
+  newText: string;
+};
+
+export type DidChangeWatchedFilesParams = {
+  changes: FileEvent[];
+};
+
+export type DidChangeWatchedFilesRegistrationOptions = {
+  watchers: FileSystemWatcher[];
+};
+
+export type PublishDiagnosticsParams = {
+  uri: string;
+  version?: number;
+  diagnostics: Diagnostic[];
+};
+
+export type CompletionParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  context?: CompletionContext;
+};
+
+export type CompletionItem = {
+  label: string;
+  labelDetails?: CompletionItemLabelDetails;
+  kind?:
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25;
+  tags?: 1[];
+  detail?: string;
+  documentation?: string | MarkupContent;
+  deprecated?: boolean;
+  preselect?: boolean;
+  sortText?: string;
+  filterText?: string;
+  insertText?: string;
+  insertTextFormat?: 1 | 2;
+  insertTextMode?: 1 | 2;
+  textEdit?: TextEdit | InsertReplaceEdit;
+  textEditText?: string;
+  additionalTextEdits?: TextEdit[];
+  commitCharacters?: string[];
+  command?: Command;
+  data?: LSPAny;
+};
+
+export type CompletionList = {
+  isIncomplete: boolean;
+  itemDefaults?: CompletionItemDefaults;
+  applyKind?: CompletionItemApplyKinds;
+  items: CompletionItem[];
+};
+
+export type CompletionRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  triggerCharacters?: string[];
+  allCommitCharacters?: string[];
+  resolveProvider?: boolean;
+  completionItem?: ServerCompletionItemOptions;
+};
+
+export type HoverParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+};
+
+export type Hover = {
+  contents: MarkupContent | MarkedString | MarkedString[];
+  range?: Range;
+};
+
+export type HoverRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+};
+
+export type SignatureHelpParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  context?: SignatureHelpContext;
+};
+
+export type SignatureHelp = {
+  signatures: SignatureInformation[];
+  activeSignature?: number;
+  activeParameter?: number | null;
+};
+
+export type SignatureHelpRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  triggerCharacters?: string[];
+  retriggerCharacters?: string[];
+};
+
+export type DefinitionParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+};
+
+export type DefinitionRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+};
+
+export type ReferenceParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  context: ReferenceContext;
+};
+
+export type ReferenceRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+};
+
+export type DocumentHighlightParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+};
+
+export type DocumentHighlight = {
+  range: Range;
+  kind?: 1 | 2 | 3;
+};
+
+export type DocumentHighlightRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+};
+
+export type DocumentSymbolParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+};
+
+export type SymbolInformation = {
+  name: string;
+  kind:
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+    | 26;
+  tags?: 1[];
+  containerName?: string;
+  deprecated?: boolean;
+  location: Location;
+};
+
+export type DocumentSymbol = {
+  name: string;
+  detail?: string;
+  kind:
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+    | 26;
+  tags?: 1[];
+  deprecated?: boolean;
+  range: Range;
+  selectionRange: Range;
+  children?: DocumentSymbol[];
+};
+
+export type DocumentSymbolRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  label?: string;
+};
+
+export type CodeActionParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  range: Range;
+  context: CodeActionContext;
+};
+
+export type Command = {
+  title: string;
+  tooltip?: string;
+  command: string;
+  arguments?: LSPAny[];
+};
+
+export type CodeAction = {
+  title: string;
+  kind?:
+    | ''
+    | 'quickfix'
+    | 'refactor'
+    | 'refactor.extract'
+    | 'refactor.inline'
+    | 'refactor.move'
+    | 'refactor.rewrite'
+    | 'source'
+    | 'source.organizeImports'
+    | 'source.fixAll'
+    | 'notebook'
+    | string;
+  diagnostics?: Diagnostic[];
+  isPreferred?: boolean;
+  disabled?: CodeActionDisabled;
+  edit?: WorkspaceEdit;
+  command?: Command;
+  data?: LSPAny;
+  tags?: 1[];
+};
+
+export type CodeActionRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  codeActionKinds?: (
+    | ''
+    | 'quickfix'
+    | 'refactor'
+    | 'refactor.extract'
+    | 'refactor.inline'
+    | 'refactor.move'
+    | 'refactor.rewrite'
+    | 'source'
+    | 'source.organizeImports'
+    | 'source.fixAll'
+    | 'notebook'
+    | string
+  )[];
+  documentation?: CodeActionKindDocumentation[];
+  resolveProvider?: boolean;
+};
+
+export type WorkspaceSymbolParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  query: string;
+};
+
+export type WorkspaceSymbol = {
+  name: string;
+  kind:
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+    | 26;
+  tags?: 1[];
+  containerName?: string;
+  location: Location | LocationUriOnly;
+  data?: LSPAny;
+};
+
+export type WorkspaceSymbolRegistrationOptions = {
+  workDoneProgress?: boolean;
+  resolveProvider?: boolean;
+};
+
+export type CodeLensParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+};
+
+export type CodeLens = {
+  range: Range;
+  command?: Command;
+  data?: LSPAny;
+};
+
+export type CodeLensRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  resolveProvider?: boolean;
+};
+
+export type DocumentLinkParams = {
+  workDoneToken?: ProgressToken;
+  partialResultToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+};
+
+export type DocumentLink = {
+  range: Range;
+  target?: string;
+  tooltip?: string;
+  data?: LSPAny;
+};
+
+export type DocumentLinkRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  resolveProvider?: boolean;
+};
+
+export type DocumentFormattingParams = {
+  workDoneToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  options: FormattingOptions;
+};
+
+export type DocumentFormattingRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+};
+
+export type DocumentRangeFormattingParams = {
+  workDoneToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  range: Range;
+  options: FormattingOptions;
+};
+
+export type DocumentRangeFormattingRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  rangesSupport?: boolean;
+};
+
+export type DocumentRangesFormattingParams = {
+  workDoneToken?: ProgressToken;
+  textDocument: TextDocumentIdentifier;
+  ranges: Range[];
+  options: FormattingOptions;
+};
+
+export type DocumentOnTypeFormattingParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  ch: string;
+  options: FormattingOptions;
+};
+
+export type DocumentOnTypeFormattingRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  firstTriggerCharacter: string;
+  moreTriggerCharacter?: string[];
+};
+
+export type RenameParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+  newName: string;
+};
+
+export type RenameRegistrationOptions = {
+  documentSelector: DocumentSelector | null;
+  workDoneProgress?: boolean;
+  prepareProvider?: boolean;
+};
+
+export type PrepareRenameParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+  workDoneToken?: ProgressToken;
+};
+
+export type ExecuteCommandParams = {
+  workDoneToken?: ProgressToken;
+  command: string;
+  arguments?: LSPAny[];
+};
+
+export type ExecuteCommandRegistrationOptions = {
+  workDoneProgress?: boolean;
+  commands: string[];
+};
+
+export type ApplyWorkspaceEditParams = {
+  label?: string;
+  edit: WorkspaceEdit;
+  metadata?: WorkspaceEditMetadata;
+};
+
+export type ApplyWorkspaceEditResult = {
+  applied: boolean;
+  failureReason?: string;
+  failedChange?: number;
+};
+
+export type WorkDoneProgressBegin = {
+  kind: 'begin';
+  title: string;
+  cancellable?: boolean;
+  message?: string;
+  percentage?: number;
+};
+
+export type WorkDoneProgressReport = {
+  kind: 'report';
+  cancellable?: boolean;
+  message?: string;
+  percentage?: number;
+};
+
+export type WorkDoneProgressEnd = {
+  kind: 'end';
+  message?: string;
+};
+
+export type SetTraceParams = {
+  value: 'off' | 'messages' | 'compact' | 'verbose';
+};
+
+export type LogTraceParams = {
+  message: string;
+  verbose?: string;
+};
+
+export type CancelParams = {
+  id: number | string;
+};
+
+export type ProgressParams = {
+  token: ProgressToken;
+  value: LSPAny;
+};
+
+export type TextDocumentPositionParams = {
+  textDocument: TextDocumentIdentifier;
+  position: Position;
+};
+
+export type WorkDoneProgressParams = {
+  workDoneToken?: ProgressToken;
+};
+
+export type PartialResultParams = {
+  partialResultToken?: ProgressToken;
+};
+
+export type LocationLink = {
+  originSelectionRange?: Range;
+  targetUri: string;
+  targetRange: Range;
+  targetSelectionRange: Range;
+};
+
+export type Range = {
+  start: Position;
+  end: Position;
+};
+
+export type ImplementationOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type StaticRegistrationOptions = {
+  id?: string;
+};
+
+export type TypeDefinitionOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type WorkspaceFoldersChangeEvent = {
+  added: WorkspaceFolder[];
+  removed: WorkspaceFolder[];
+};
+
+export type ConfigurationItem = {
+  scopeUri?: string;
+  section?: string;
+};
+
+export type TextDocumentIdentifier = {
+  uri: string;
+};
+
+export type Color = {
+  red: number;
+  green: number;
+  blue: number;
+  alpha: number;
+};
+
+export type DocumentColorOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type FoldingRangeOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type DeclarationOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type Position = {
+  line: number;
+  character: number;
+};
+
+export type SelectionRangeOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type CallHierarchyOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type SemanticTokensOptions = {
+  workDoneProgress?: boolean;
+  legend: SemanticTokensLegend;
+  range?: boolean | {};
+  full?: boolean | SemanticTokensFullDelta;
+};
+
+export type SemanticTokensEdit = {
+  start: number;
+  deleteCount: number;
+  data?: number[];
+};
+
+export type LinkedEditingRangeOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type FileCreate = {
+  uri: string;
+};
+
+export type TextDocumentEdit = {
+  textDocument: OptionalVersionedTextDocumentIdentifier;
+  edits: (TextEdit | AnnotatedTextEdit | SnippetTextEdit)[];
+};
+
+export type CreateFile = {
+  kind: 'create';
+  annotationId?: ChangeAnnotationIdentifier;
+  uri: string;
+  options?: CreateFileOptions;
+};
+
+export type RenameFile = {
+  kind: 'rename';
+  annotationId?: ChangeAnnotationIdentifier;
+  oldUri: string;
+  newUri: string;
+  options?: RenameFileOptions;
+};
+
+export type DeleteFile = {
+  kind: 'delete';
+  annotationId?: ChangeAnnotationIdentifier;
+  uri: string;
+  options?: DeleteFileOptions;
+};
+
+export type ChangeAnnotation = {
+  label: string;
+  needsConfirmation?: boolean;
+  description?: string;
+};
+
+export type FileOperationFilter = {
+  scheme?: string;
+  pattern: FileOperationPattern;
+};
+
+export type FileRename = {
+  oldUri: string;
+  newUri: string;
+};
+
+export type FileDelete = {
+  uri: string;
+};
+
+export type MonikerOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type TypeHierarchyOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type InlineValueContext = {
+  frameId: number;
+  stoppedLocation: Range;
+};
+
+export type InlineValueText = {
+  range: Range;
+  text: string;
+};
+
+export type InlineValueVariableLookup = {
+  range: Range;
+  variableName?: string;
+  caseSensitiveLookup: boolean;
+};
+
+export type InlineValueEvaluatableExpression = {
+  range: Range;
+  expression?: string;
+};
+
+export type InlineValueOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type InlayHintLabelPart = {
+  value: string;
+  tooltip?: string | MarkupContent;
+  location?: Location;
+  command?: Command;
+};
+
+export type MarkupContent = {
+  kind: 'plaintext' | 'markdown';
+  value: string;
+};
+
+export type InlayHintOptions = {
+  workDoneProgress?: boolean;
+  resolveProvider?: boolean;
+};
+
+export type RelatedFullDocumentDiagnosticReport = {
+  kind: 'full';
+  resultId?: string;
+  items: Diagnostic[];
+  relatedDocuments?: Record<
+    string,
+    FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport
+  >;
+};
+
+export type RelatedUnchangedDocumentDiagnosticReport = {
+  kind: 'unchanged';
+  resultId: string;
+  relatedDocuments?: Record<
+    string,
+    FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport
+  >;
+};
+
+export type FullDocumentDiagnosticReport = {
+  kind: 'full';
+  resultId?: string;
+  items: Diagnostic[];
+};
+
+export type UnchangedDocumentDiagnosticReport = {
+  kind: 'unchanged';
+  resultId: string;
+};
+
+export type DiagnosticOptions = {
+  workDoneProgress?: boolean;
+  identifier?: string;
+  interFileDependencies: boolean;
+  workspaceDiagnostics: boolean;
+};
+
+export type PreviousResultId = {
+  uri: string;
+  value: string;
+};
+
+export type NotebookDocument = {
+  uri: string;
+  notebookType: string;
+  version: number;
+  metadata?: LSPObject;
+  cells: NotebookCell[];
+};
+
+export type TextDocumentItem = {
+  uri: string;
+  languageId:
+    | 'abap'
+    | 'bat'
+    | 'bibtex'
+    | 'clojure'
+    | 'coffeescript'
+    | 'c'
+    | 'cpp'
+    | 'csharp'
+    | 'css'
+    | 'd'
+    | 'pascal'
+    | 'diff'
+    | 'dart'
+    | 'dockerfile'
+    | 'elixir'
+    | 'erlang'
+    | 'fsharp'
+    | 'git-commit'
+    | 'git-rebase'
+    | 'go'
+    | 'groovy'
+    | 'handlebars'
+    | 'haskell'
+    | 'html'
+    | 'ini'
+    | 'java'
+    | 'javascript'
+    | 'javascriptreact'
+    | 'json'
+    | 'latex'
+    | 'less'
+    | 'lua'
+    | 'makefile'
+    | 'markdown'
+    | 'objective-c'
+    | 'objective-cpp'
+    | 'pascal'
+    | 'perl'
+    | 'perl6'
+    | 'php'
+    | 'plaintext'
+    | 'powershell'
+    | 'jade'
+    | 'python'
+    | 'r'
+    | 'razor'
+    | 'ruby'
+    | 'rust'
+    | 'scss'
+    | 'sass'
+    | 'scala'
+    | 'shaderlab'
+    | 'shellscript'
+    | 'sql'
+    | 'swift'
+    | 'typescript'
+    | 'typescriptreact'
+    | 'tex'
+    | 'vb'
+    | 'xml'
+    | 'xsl'
+    | 'yaml'
+    | string;
+  version: number;
+  text: string;
+};
+
+export type NotebookDocumentSyncOptions = {
+  notebookSelector: (NotebookDocumentFilterWithNotebook | NotebookDocumentFilterWithCells)[];
+  save?: boolean;
+};
+
+export type VersionedNotebookDocumentIdentifier = {
+  version: number;
+  uri: string;
+};
+
+export type NotebookDocumentChangeEvent = {
+  metadata?: LSPObject;
+  cells?: NotebookDocumentCellChanges;
+};
+
+export type NotebookDocumentIdentifier = {
+  uri: string;
+};
+
+export type InlineCompletionContext = {
+  triggerKind: 1 | 2;
+  selectedCompletionInfo?: SelectedCompletionInfo;
+};
+
+export type StringValue = {
+  kind: 'snippet';
+  value: string;
+};
+
+export type InlineCompletionOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type TextDocumentContentOptions = {
+  schemes: string[];
+};
+
+export type Registration = {
+  id: string;
+  method: string;
+  registerOptions?: LSPAny;
+};
+
+export type Unregistration = {
+  id: string;
+  method: string;
+};
+
+export type _InitializeParams = {
+  workDoneToken?: ProgressToken;
+  processId: number | null;
+  clientInfo?: ClientInfo;
+  locale?: string;
+  rootPath?: string | null;
+  rootUri: string | null;
+  capabilities: ClientCapabilities;
+  initializationOptions?: LSPAny;
+  trace?: 'off' | 'messages' | 'compact' | 'verbose';
+};
+
+export type WorkspaceFoldersInitializeParams = {
+  workspaceFolders?: WorkspaceFolder[] | null;
+};
+
+export type ServerCapabilities = {
+  positionEncoding?: 'utf-8' | 'utf-16' | 'utf-32' | string;
+  textDocumentSync?: TextDocumentSyncOptions | 0 | 1 | 2;
+  notebookDocumentSync?: NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions;
+  completionProvider?: CompletionOptions;
+  hoverProvider?: boolean | HoverOptions;
+  signatureHelpProvider?: SignatureHelpOptions;
+  declarationProvider?: boolean | DeclarationOptions | DeclarationRegistrationOptions;
+  definitionProvider?: boolean | DefinitionOptions;
+  typeDefinitionProvider?: boolean | TypeDefinitionOptions | TypeDefinitionRegistrationOptions;
+  implementationProvider?: boolean | ImplementationOptions | ImplementationRegistrationOptions;
+  referencesProvider?: boolean | ReferenceOptions;
+  documentHighlightProvider?: boolean | DocumentHighlightOptions;
+  documentSymbolProvider?: boolean | DocumentSymbolOptions;
+  codeActionProvider?: boolean | CodeActionOptions;
+  codeLensProvider?: CodeLensOptions;
+  documentLinkProvider?: DocumentLinkOptions;
+  colorProvider?: boolean | DocumentColorOptions | DocumentColorRegistrationOptions;
+  workspaceSymbolProvider?: boolean | WorkspaceSymbolOptions;
+  documentFormattingProvider?: boolean | DocumentFormattingOptions;
+  documentRangeFormattingProvider?: boolean | DocumentRangeFormattingOptions;
+  documentOnTypeFormattingProvider?: DocumentOnTypeFormattingOptions;
+  renameProvider?: boolean | RenameOptions;
+  foldingRangeProvider?: boolean | FoldingRangeOptions | FoldingRangeRegistrationOptions;
+  selectionRangeProvider?: boolean | SelectionRangeOptions | SelectionRangeRegistrationOptions;
+  executeCommandProvider?: ExecuteCommandOptions;
+  callHierarchyProvider?: boolean | CallHierarchyOptions | CallHierarchyRegistrationOptions;
+  linkedEditingRangeProvider?:
+    | boolean
+    | LinkedEditingRangeOptions
+    | LinkedEditingRangeRegistrationOptions;
+  semanticTokensProvider?: SemanticTokensOptions | SemanticTokensRegistrationOptions;
+  monikerProvider?: boolean | MonikerOptions | MonikerRegistrationOptions;
+  typeHierarchyProvider?: boolean | TypeHierarchyOptions | TypeHierarchyRegistrationOptions;
+  inlineValueProvider?: boolean | InlineValueOptions | InlineValueRegistrationOptions;
+  inlayHintProvider?: boolean | InlayHintOptions | InlayHintRegistrationOptions;
+  diagnosticProvider?: DiagnosticOptions | DiagnosticRegistrationOptions;
+  inlineCompletionProvider?: boolean | InlineCompletionOptions;
+  workspace?: WorkspaceOptions;
+  experimental?: LSPAny;
+};
+
+export type ServerInfo = {
+  name: string;
+  version?: string;
+};
+
+export type VersionedTextDocumentIdentifier = {
+  uri: string;
+  version: number;
+};
+
+export type SaveOptions = {
+  includeText?: boolean;
+};
+
+export type FileEvent = {
+  uri: string;
+  type: 1 | 2 | 3;
+};
+
+export type FileSystemWatcher = {
+  globPattern: GlobPattern;
+  kind?: 1 | 2 | 4 | number;
+};
+
+export type Diagnostic = {
+  range: Range;
+  severity?: 1 | 2 | 3 | 4;
+  code?: number | string;
+  codeDescription?: CodeDescription;
+  source?: string;
+  message: string | MarkupContent;
+  tags?: (1 | 2)[];
+  relatedInformation?: DiagnosticRelatedInformation[];
+  data?: LSPAny;
+};
+
+export type CompletionContext = {
+  triggerKind: 1 | 2 | 3;
+  triggerCharacter?: string;
+};
+
+export type CompletionItemLabelDetails = {
+  detail?: string;
+  description?: string;
+};
+
+export type InsertReplaceEdit = {
+  newText: string;
+  insert: Range;
+  replace: Range;
+};
+
+export type CompletionItemDefaults = {
+  commitCharacters?: string[];
+  editRange?: Range | EditRangeWithInsertReplace;
+  insertTextFormat?: 1 | 2;
+  insertTextMode?: 1 | 2;
+  data?: LSPAny;
+};
+
+export type CompletionItemApplyKinds = {
+  commitCharacters?: 1 | 2;
+  data?: 1 | 2;
+};
+
+export type CompletionOptions = {
+  workDoneProgress?: boolean;
+  triggerCharacters?: string[];
+  allCommitCharacters?: string[];
+  resolveProvider?: boolean;
+  completionItem?: ServerCompletionItemOptions;
+};
+
+export type HoverOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type SignatureHelpContext = {
+  triggerKind: 1 | 2 | 3;
+  triggerCharacter?: string;
+  isRetrigger: boolean;
+  activeSignatureHelp?: SignatureHelp;
+};
+
+export type SignatureInformation = {
+  label: string;
+  documentation?: string | MarkupContent;
+  parameters?: ParameterInformation[];
+  activeParameter?: number | null;
+};
+
+export type SignatureHelpOptions = {
+  workDoneProgress?: boolean;
+  triggerCharacters?: string[];
+  retriggerCharacters?: string[];
+};
+
+export type DefinitionOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type ReferenceContext = {
+  includeDeclaration: boolean;
+};
+
+export type ReferenceOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type DocumentHighlightOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type BaseSymbolInformation = {
+  name: string;
+  kind:
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+    | 26;
+  tags?: 1[];
+  containerName?: string;
+};
+
+export type DocumentSymbolOptions = {
+  workDoneProgress?: boolean;
+  label?: string;
+};
+
+export type CodeActionContext = {
+  diagnostics: Diagnostic[];
+  only?: (
+    | ''
+    | 'quickfix'
+    | 'refactor'
+    | 'refactor.extract'
+    | 'refactor.inline'
+    | 'refactor.move'
+    | 'refactor.rewrite'
+    | 'source'
+    | 'source.organizeImports'
+    | 'source.fixAll'
+    | 'notebook'
+    | string
+  )[];
+  triggerKind?: 1 | 2;
+};
+
+export type CodeActionDisabled = {
+  reason: string;
+};
+
+export type CodeActionOptions = {
+  workDoneProgress?: boolean;
+  codeActionKinds?: (
+    | ''
+    | 'quickfix'
+    | 'refactor'
+    | 'refactor.extract'
+    | 'refactor.inline'
+    | 'refactor.move'
+    | 'refactor.rewrite'
+    | 'source'
+    | 'source.organizeImports'
+    | 'source.fixAll'
+    | 'notebook'
+    | string
+  )[];
+  documentation?: CodeActionKindDocumentation[];
+  resolveProvider?: boolean;
+};
+
+export type LocationUriOnly = {
+  uri: string;
+};
+
+export type WorkspaceSymbolOptions = {
+  workDoneProgress?: boolean;
+  resolveProvider?: boolean;
+};
+
+export type CodeLensOptions = {
+  workDoneProgress?: boolean;
+  resolveProvider?: boolean;
+};
+
+export type DocumentLinkOptions = {
+  workDoneProgress?: boolean;
+  resolveProvider?: boolean;
+};
+
+export type FormattingOptions = {
+  tabSize: number;
+  insertSpaces: boolean;
+  trimTrailingWhitespace?: boolean;
+  insertFinalNewline?: boolean;
+  trimFinalNewlines?: boolean;
+};
+
+export type DocumentFormattingOptions = {
+  workDoneProgress?: boolean;
+};
+
+export type DocumentRangeFormattingOptions = {
+  workDoneProgress?: boolean;
+  rangesSupport?: boolean;
+};
+
+export type DocumentOnTypeFormattingOptions = {
+  firstTriggerCharacter: string;
+  moreTriggerCharacter?: string[];
+};
+
+export type RenameOptions = {
+  workDoneProgress?: boolean;
+  prepareProvider?: boolean;
+};
+
+export type PrepareRenamePlaceholder = {
+  range: Range;
+  placeholder: string;
+};
+
+export type PrepareRenameDefaultBehavior = {
+  defaultBehavior: boolean;
+};
+
+export type ExecuteCommandOptions = {
+  workDoneProgress?: boolean;
+  commands: string[];
+};
+
+export type WorkspaceEditMetadata = {
+  isRefactoring?: boolean;
+};
+
+export type SemanticTokensLegend = {
+  tokenTypes: string[];
+  tokenModifiers: string[];
+};
+
+export type SemanticTokensFullDelta = {
+  delta?: boolean;
+};
+
+export type OptionalVersionedTextDocumentIdentifier = {
+  uri: string;
+  version: number | null;
+};
+
+export type AnnotatedTextEdit = {
+  range: Range;
+  newText: string;
+  annotationId: ChangeAnnotationIdentifier;
+};
+
+export type SnippetTextEdit = {
+  range: Range;
+  snippet: StringValue;
+  annotationId?: ChangeAnnotationIdentifier;
+};
+
+export type ResourceOperation = {
+  kind: string;
+  annotationId?: ChangeAnnotationIdentifier;
+};
+
+export type CreateFileOptions = {
+  overwrite?: boolean;
+  ignoreIfExists?: boolean;
+};
+
+export type RenameFileOptions = {
+  overwrite?: boolean;
+  ignoreIfExists?: boolean;
+};
+
+export type DeleteFileOptions = {
+  recursive?: boolean;
+  ignoreIfNotExists?: boolean;
+};
+
+export type FileOperationPattern = {
+  glob: string;
+  matches?: 'file' | 'folder';
+  options?: FileOperationPatternOptions;
+};
+
+export type WorkspaceFullDocumentDiagnosticReport = {
+  kind: 'full';
+  resultId?: string;
+  items: Diagnostic[];
+  uri: string;
+  version: number | null;
+};
+
+export type WorkspaceUnchangedDocumentDiagnosticReport = {
+  kind: 'unchanged';
+  resultId: string;
+  uri: string;
+  version: number | null;
+};
+
+export type NotebookCell = {
+  kind: 1 | 2;
+  document: string;
+  metadata?: LSPObject;
+  executionSummary?: ExecutionSummary;
+};
+
+export type NotebookDocumentFilterWithNotebook = {
+  notebook: string | NotebookDocumentFilter;
+  cells?: NotebookCellLanguage[];
+};
+
+export type NotebookDocumentFilterWithCells = {
+  notebook?: string | NotebookDocumentFilter;
+  cells: NotebookCellLanguage[];
+};
+
+export type NotebookDocumentCellChanges = {
+  structure?: NotebookDocumentCellChangeStructure;
+  data?: NotebookCell[];
+  textContent?: NotebookDocumentCellContentChanges[];
+};
+
+export type SelectedCompletionInfo = {
+  range: Range;
+  text: string;
+};
+
+export type ClientInfo = {
+  name: string;
+  version?: string;
+};
+
+export type ClientCapabilities = {
+  workspace?: WorkspaceClientCapabilities;
+  textDocument?: TextDocumentClientCapabilities;
+  notebookDocument?: NotebookDocumentClientCapabilities;
+  window?: WindowClientCapabilities;
+  general?: GeneralClientCapabilities;
+  experimental?: LSPAny;
+};
+
+export type TextDocumentSyncOptions = {
+  openClose?: boolean;
+  change?: 0 | 1 | 2;
+  willSave?: boolean;
+  willSaveWaitUntil?: boolean;
+  save?: boolean | SaveOptions;
+};
+
+export type WorkspaceOptions = {
+  workspaceFolders?: WorkspaceFoldersServerCapabilities;
+  fileOperations?: FileOperationOptions;
+  textDocumentContent?: TextDocumentContentOptions | TextDocumentContentRegistrationOptions;
+};
+
+export type TextDocumentContentChangePartial = {
+  range: Range;
+  rangeLength?: number;
+  text: string;
+};
+
+export type TextDocumentContentChangeWholeDocument = {
+  text: string;
+};
+
+export type CodeDescription = {
+  href: string;
+};
+
+export type DiagnosticRelatedInformation = {
+  location: Location;
+  message: string;
+};
+
+export type EditRangeWithInsertReplace = {
+  insert: Range;
+  replace: Range;
+};
+
+export type ServerCompletionItemOptions = {
+  labelDetailsSupport?: boolean;
+};
+
+export type MarkedStringWithLanguage = {
+  language: string;
+  value: string;
+};
+
+export type ParameterInformation = {
+  label: string | [number, number];
+  documentation?: string | MarkupContent;
+};
+
+export type CodeActionKindDocumentation = {
+  kind:
+    | ''
+    | 'quickfix'
+    | 'refactor'
+    | 'refactor.extract'
+    | 'refactor.inline'
+    | 'refactor.move'
+    | 'refactor.rewrite'
+    | 'source'
+    | 'source.organizeImports'
+    | 'source.fixAll'
+    | 'notebook'
+    | string;
+  command: Command;
+};
+
+export type NotebookCellTextDocumentFilter = {
+  notebook: string | NotebookDocumentFilter;
+  language?: string;
+};
+
+export type FileOperationPatternOptions = {
+  ignoreCase?: boolean;
+};
+
+export type ExecutionSummary = {
+  executionOrder: number;
+  success?: boolean;
+};
+
+export type NotebookCellLanguage = {
+  language: string;
+};
+
+export type NotebookDocumentCellChangeStructure = {
+  array: NotebookCellArrayChange;
+  didOpen?: TextDocumentItem[];
+  didClose?: TextDocumentIdentifier[];
+};
+
+export type NotebookDocumentCellContentChanges = {
+  document: VersionedTextDocumentIdentifier;
+  changes: TextDocumentContentChangeEvent[];
+};
+
+export type WorkspaceClientCapabilities = {
+  applyEdit?: boolean;
+  workspaceEdit?: WorkspaceEditClientCapabilities;
+  didChangeConfiguration?: DidChangeConfigurationClientCapabilities;
+  didChangeWatchedFiles?: DidChangeWatchedFilesClientCapabilities;
+  symbol?: WorkspaceSymbolClientCapabilities;
+  executeCommand?: ExecuteCommandClientCapabilities;
+  workspaceFolders?: boolean;
+  configuration?: boolean;
+  semanticTokens?: SemanticTokensWorkspaceClientCapabilities;
+  codeLens?: CodeLensWorkspaceClientCapabilities;
+  fileOperations?: FileOperationClientCapabilities;
+  inlineValue?: InlineValueWorkspaceClientCapabilities;
+  inlayHint?: InlayHintWorkspaceClientCapabilities;
+  diagnostics?: DiagnosticWorkspaceClientCapabilities;
+  foldingRange?: FoldingRangeWorkspaceClientCapabilities;
+  textDocumentContent?: TextDocumentContentClientCapabilities;
+};
+
+export type TextDocumentClientCapabilities = {
+  synchronization?: TextDocumentSyncClientCapabilities;
+  filters?: TextDocumentFilterClientCapabilities;
+  completion?: CompletionClientCapabilities;
+  hover?: HoverClientCapabilities;
+  signatureHelp?: SignatureHelpClientCapabilities;
+  declaration?: DeclarationClientCapabilities;
+  definition?: DefinitionClientCapabilities;
+  typeDefinition?: TypeDefinitionClientCapabilities;
+  implementation?: ImplementationClientCapabilities;
+  references?: ReferenceClientCapabilities;
+  documentHighlight?: DocumentHighlightClientCapabilities;
+  documentSymbol?: DocumentSymbolClientCapabilities;
+  codeAction?: CodeActionClientCapabilities;
+  codeLens?: CodeLensClientCapabilities;
+  documentLink?: DocumentLinkClientCapabilities;
+  colorProvider?: DocumentColorClientCapabilities;
+  formatting?: DocumentFormattingClientCapabilities;
+  rangeFormatting?: DocumentRangeFormattingClientCapabilities;
+  onTypeFormatting?: DocumentOnTypeFormattingClientCapabilities;
+  rename?: RenameClientCapabilities;
+  foldingRange?: FoldingRangeClientCapabilities;
+  selectionRange?: SelectionRangeClientCapabilities;
+  publishDiagnostics?: PublishDiagnosticsClientCapabilities;
+  callHierarchy?: CallHierarchyClientCapabilities;
+  semanticTokens?: SemanticTokensClientCapabilities;
+  linkedEditingRange?: LinkedEditingRangeClientCapabilities;
+  moniker?: MonikerClientCapabilities;
+  typeHierarchy?: TypeHierarchyClientCapabilities;
+  inlineValue?: InlineValueClientCapabilities;
+  inlayHint?: InlayHintClientCapabilities;
+  diagnostic?: DiagnosticClientCapabilities;
+  inlineCompletion?: InlineCompletionClientCapabilities;
+};
+
+export type NotebookDocumentClientCapabilities = {
+  synchronization: NotebookDocumentSyncClientCapabilities;
+};
+
+export type WindowClientCapabilities = {
+  workDoneProgress?: boolean;
+  showMessage?: ShowMessageRequestClientCapabilities;
+  showDocument?: ShowDocumentClientCapabilities;
+};
+
+export type GeneralClientCapabilities = {
+  staleRequestSupport?: StaleRequestSupportOptions;
+  regularExpressions?: RegularExpressionsClientCapabilities;
+  markdown?: MarkdownClientCapabilities;
+  positionEncodings?: ('utf-8' | 'utf-16' | 'utf-32' | string)[];
+};
+
+export type WorkspaceFoldersServerCapabilities = {
+  supported?: boolean;
+  changeNotifications?: string | boolean;
+};
+
+export type FileOperationOptions = {
+  didCreate?: FileOperationRegistrationOptions;
+  willCreate?: FileOperationRegistrationOptions;
+  didRename?: FileOperationRegistrationOptions;
+  willRename?: FileOperationRegistrationOptions;
+  didDelete?: FileOperationRegistrationOptions;
+  willDelete?: FileOperationRegistrationOptions;
+};
+
+export type RelativePattern = {
+  baseUri: WorkspaceFolder | string;
+  pattern: Pattern;
+};
+
+export type TextDocumentFilterLanguage = {
+  language: string;
+  scheme?: string;
+  pattern?: GlobPattern;
+};
+
+export type TextDocumentFilterScheme = {
+  language?: string;
+  scheme: string;
+  pattern?: GlobPattern;
+};
+
+export type TextDocumentFilterPattern = {
+  language?: string;
+  scheme?: string;
+  pattern: GlobPattern;
+};
+
+export type NotebookDocumentFilterNotebookType = {
+  notebookType: string;
+  scheme?: string;
+  pattern?: GlobPattern;
+};
+
+export type NotebookDocumentFilterScheme = {
+  notebookType?: string;
+  scheme: string;
+  pattern?: GlobPattern;
+};
+
+export type NotebookDocumentFilterPattern = {
+  notebookType?: string;
+  scheme?: string;
+  pattern: GlobPattern;
+};
+
+export type NotebookCellArrayChange = {
+  start: number;
+  deleteCount: number;
+  cells?: NotebookCell[];
+};
+
+export type WorkspaceEditClientCapabilities = {
+  documentChanges?: boolean;
+  resourceOperations?: ('create' | 'rename' | 'delete')[];
+  failureHandling?: 'abort' | 'transactional' | 'textOnlyTransactional' | 'undo';
+  normalizesLineEndings?: boolean;
+  changeAnnotationSupport?: ChangeAnnotationsSupportOptions;
+  metadataSupport?: boolean;
+  snippetEditSupport?: boolean;
+};
+
+export type DidChangeConfigurationClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type DidChangeWatchedFilesClientCapabilities = {
+  dynamicRegistration?: boolean;
+  relativePatternSupport?: boolean;
+};
+
+export type WorkspaceSymbolClientCapabilities = {
+  dynamicRegistration?: boolean;
+  symbolKind?: ClientSymbolKindOptions;
+  tagSupport?: ClientSymbolTagOptions;
+  resolveSupport?: ClientSymbolResolveOptions;
+};
+
+export type ExecuteCommandClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type SemanticTokensWorkspaceClientCapabilities = {
+  refreshSupport?: boolean;
+};
+
+export type CodeLensWorkspaceClientCapabilities = {
+  refreshSupport?: boolean;
+};
+
+export type FileOperationClientCapabilities = {
+  dynamicRegistration?: boolean;
+  didCreate?: boolean;
+  willCreate?: boolean;
+  didRename?: boolean;
+  willRename?: boolean;
+  didDelete?: boolean;
+  willDelete?: boolean;
+};
+
+export type InlineValueWorkspaceClientCapabilities = {
+  refreshSupport?: boolean;
+};
+
+export type InlayHintWorkspaceClientCapabilities = {
+  refreshSupport?: boolean;
+};
+
+export type DiagnosticWorkspaceClientCapabilities = {
+  refreshSupport?: boolean;
+};
+
+export type FoldingRangeWorkspaceClientCapabilities = {
+  refreshSupport?: boolean;
+};
+
+export type TextDocumentContentClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type TextDocumentSyncClientCapabilities = {
+  dynamicRegistration?: boolean;
+  willSave?: boolean;
+  willSaveWaitUntil?: boolean;
+  didSave?: boolean;
+};
+
+export type TextDocumentFilterClientCapabilities = {
+  relativePatternSupport?: boolean;
+};
+
+export type CompletionClientCapabilities = {
+  dynamicRegistration?: boolean;
+  completionItem?: ClientCompletionItemOptions;
+  completionItemKind?: ClientCompletionItemOptionsKind;
+  insertTextMode?: 1 | 2;
+  contextSupport?: boolean;
+  completionList?: CompletionListCapabilities;
+};
+
+export type HoverClientCapabilities = {
+  dynamicRegistration?: boolean;
+  contentFormat?: ('plaintext' | 'markdown')[];
+};
+
+export type SignatureHelpClientCapabilities = {
+  dynamicRegistration?: boolean;
+  signatureInformation?: ClientSignatureInformationOptions;
+  contextSupport?: boolean;
+};
+
+export type DeclarationClientCapabilities = {
+  dynamicRegistration?: boolean;
+  linkSupport?: boolean;
+};
+
+export type DefinitionClientCapabilities = {
+  dynamicRegistration?: boolean;
+  linkSupport?: boolean;
+};
+
+export type TypeDefinitionClientCapabilities = {
+  dynamicRegistration?: boolean;
+  linkSupport?: boolean;
+};
+
+export type ImplementationClientCapabilities = {
+  dynamicRegistration?: boolean;
+  linkSupport?: boolean;
+};
+
+export type ReferenceClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type DocumentHighlightClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type DocumentSymbolClientCapabilities = {
+  dynamicRegistration?: boolean;
+  symbolKind?: ClientSymbolKindOptions;
+  hierarchicalDocumentSymbolSupport?: boolean;
+  tagSupport?: ClientSymbolTagOptions;
+  labelSupport?: boolean;
+};
+
+export type CodeActionClientCapabilities = {
+  dynamicRegistration?: boolean;
+  codeActionLiteralSupport?: ClientCodeActionLiteralOptions;
+  isPreferredSupport?: boolean;
+  disabledSupport?: boolean;
+  dataSupport?: boolean;
+  resolveSupport?: ClientCodeActionResolveOptions;
+  honorsChangeAnnotations?: boolean;
+  documentationSupport?: boolean;
+  tagSupport?: CodeActionTagOptions;
+};
+
+export type CodeLensClientCapabilities = {
+  dynamicRegistration?: boolean;
+  resolveSupport?: ClientCodeLensResolveOptions;
+};
+
+export type DocumentLinkClientCapabilities = {
+  dynamicRegistration?: boolean;
+  tooltipSupport?: boolean;
+};
+
+export type DocumentColorClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type DocumentFormattingClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type DocumentRangeFormattingClientCapabilities = {
+  dynamicRegistration?: boolean;
+  rangesSupport?: boolean;
+};
+
+export type DocumentOnTypeFormattingClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type RenameClientCapabilities = {
+  dynamicRegistration?: boolean;
+  prepareSupport?: boolean;
+  prepareSupportDefaultBehavior?: 1;
+  honorsChangeAnnotations?: boolean;
+};
+
+export type FoldingRangeClientCapabilities = {
+  dynamicRegistration?: boolean;
+  rangeLimit?: number;
+  lineFoldingOnly?: boolean;
+  foldingRangeKind?: ClientFoldingRangeKindOptions;
+  foldingRange?: ClientFoldingRangeOptions;
+};
+
+export type SelectionRangeClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type PublishDiagnosticsClientCapabilities = {
+  relatedInformation?: boolean;
+  tagSupport?: ClientDiagnosticsTagOptions;
+  codeDescriptionSupport?: boolean;
+  dataSupport?: boolean;
+  versionSupport?: boolean;
+};
+
+export type CallHierarchyClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type SemanticTokensClientCapabilities = {
+  dynamicRegistration?: boolean;
+  requests: ClientSemanticTokensRequestOptions;
+  tokenTypes: string[];
+  tokenModifiers: string[];
+  formats: 'relative'[];
+  overlappingTokenSupport?: boolean;
+  multilineTokenSupport?: boolean;
+  serverCancelSupport?: boolean;
+  augmentsSyntaxTokens?: boolean;
+};
+
+export type LinkedEditingRangeClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type MonikerClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type TypeHierarchyClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type InlineValueClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type InlayHintClientCapabilities = {
+  dynamicRegistration?: boolean;
+  resolveSupport?: ClientInlayHintResolveOptions;
+};
+
+export type DiagnosticClientCapabilities = {
+  relatedInformation?: boolean;
+  tagSupport?: ClientDiagnosticsTagOptions;
+  codeDescriptionSupport?: boolean;
+  dataSupport?: boolean;
+  dynamicRegistration?: boolean;
+  relatedDocumentSupport?: boolean;
+  markupMessageSupport?: boolean;
+};
+
+export type InlineCompletionClientCapabilities = {
+  dynamicRegistration?: boolean;
+};
+
+export type NotebookDocumentSyncClientCapabilities = {
+  dynamicRegistration?: boolean;
+  executionSummarySupport?: boolean;
+};
+
+export type ShowMessageRequestClientCapabilities = {
+  messageActionItem?: ClientShowMessageActionItemOptions;
+};
+
+export type ShowDocumentClientCapabilities = {
+  support: boolean;
+};
+
+export type StaleRequestSupportOptions = {
+  cancel: boolean;
+  retryOnContentModified: string[];
+};
+
+export type RegularExpressionsClientCapabilities = {
+  engine: RegularExpressionEngineKind;
+  version?: string;
+};
+
+export type MarkdownClientCapabilities = {
+  parser: string;
+  version?: string;
+  allowedTags?: string[];
+};
+
+export type ChangeAnnotationsSupportOptions = {
+  groupsOnLabel?: boolean;
+};
+
+export type ClientSymbolKindOptions = {
+  valueSet?: (
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+    | 26
+  )[];
+};
+
+export type ClientSymbolTagOptions = {
+  valueSet: 1[];
+};
+
+export type ClientSymbolResolveOptions = {
+  properties: string[];
+};
+
+export type ClientCompletionItemOptions = {
+  snippetSupport?: boolean;
+  commitCharactersSupport?: boolean;
+  documentationFormat?: ('plaintext' | 'markdown')[];
+  deprecatedSupport?: boolean;
+  preselectSupport?: boolean;
+  tagSupport?: CompletionItemTagOptions;
+  insertReplaceSupport?: boolean;
+  resolveSupport?: ClientCompletionItemResolveOptions;
+  insertTextModeSupport?: ClientCompletionItemInsertTextModeOptions;
+  labelDetailsSupport?: boolean;
+};
+
+export type ClientCompletionItemOptionsKind = {
+  valueSet?: (
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+  )[];
+};
+
+export type CompletionListCapabilities = {
+  itemDefaults?: string[];
+  applyKindSupport?: boolean;
+};
+
+export type ClientSignatureInformationOptions = {
+  documentationFormat?: ('plaintext' | 'markdown')[];
+  parameterInformation?: ClientSignatureParameterInformationOptions;
+  activeParameterSupport?: boolean;
+  noActiveParameterSupport?: boolean;
+};
+
+export type ClientCodeActionLiteralOptions = {
+  codeActionKind: ClientCodeActionKindOptions;
+};
+
+export type ClientCodeActionResolveOptions = {
+  properties: string[];
+};
+
+export type CodeActionTagOptions = {
+  valueSet: 1[];
+};
+
+export type ClientCodeLensResolveOptions = {
+  properties: string[];
+};
+
+export type ClientFoldingRangeKindOptions = {
+  valueSet?: ('comment' | 'imports' | 'region' | string)[];
+};
+
+export type ClientFoldingRangeOptions = {
+  collapsedText?: boolean;
+};
+
+export type DiagnosticsCapabilities = {
+  relatedInformation?: boolean;
+  tagSupport?: ClientDiagnosticsTagOptions;
+  codeDescriptionSupport?: boolean;
+  dataSupport?: boolean;
+};
+
+export type ClientSemanticTokensRequestOptions = {
+  range?: boolean | {};
+  full?: boolean | ClientSemanticTokensRequestFullDelta;
+};
+
+export type ClientInlayHintResolveOptions = {
+  properties: string[];
+};
+
+export type ClientShowMessageActionItemOptions = {
+  additionalPropertiesSupport?: boolean;
+};
+
+export type CompletionItemTagOptions = {
+  valueSet: 1[];
+};
+
+export type ClientCompletionItemResolveOptions = {
+  properties: string[];
+};
+
+export type ClientCompletionItemInsertTextModeOptions = {
+  valueSet: (1 | 2)[];
+};
+
+export type ClientSignatureParameterInformationOptions = {
+  labelOffsetSupport?: boolean;
+};
+
+export type ClientCodeActionKindOptions = {
+  valueSet: (
+    | ''
+    | 'quickfix'
+    | 'refactor'
+    | 'refactor.extract'
+    | 'refactor.inline'
+    | 'refactor.move'
+    | 'refactor.rewrite'
+    | 'source'
+    | 'source.organizeImports'
+    | 'source.fixAll'
+    | 'notebook'
+    | string
+  )[];
+};
+
+export type ClientDiagnosticsTagOptions = {
+  valueSet: (1 | 2)[];
+};
+
+export type ClientSemanticTokensRequestFullDelta = {
+  delta?: boolean;
+};
+
+export type Definition = Location | Location[];
+export type DefinitionLink = LocationLink;
+export type LSPArray = unknown;
+export type LSPAny = unknown;
+export type Declaration = Location | Location[];
+export type DeclarationLink = LocationLink;
+export type InlineValue =
+  | InlineValueText
+  | InlineValueVariableLookup
+  | InlineValueEvaluatableExpression;
+export type DocumentDiagnosticReport =
+  | RelatedFullDocumentDiagnosticReport
+  | RelatedUnchangedDocumentDiagnosticReport;
+export type PrepareRenameResult = Range | PrepareRenamePlaceholder | PrepareRenameDefaultBehavior;
+export type DocumentSelector = DocumentFilter[];
+export type ProgressToken = number | string;
+export type ChangeAnnotationIdentifier = string;
+export type WorkspaceDocumentDiagnosticReport =
+  | WorkspaceFullDocumentDiagnosticReport
+  | WorkspaceUnchangedDocumentDiagnosticReport;
+export type TextDocumentContentChangeEvent =
+  | TextDocumentContentChangePartial
+  | TextDocumentContentChangeWholeDocument;
+export type MarkedString = string | MarkedStringWithLanguage;
+export type DocumentFilter = TextDocumentFilter | NotebookCellTextDocumentFilter;
+export type LSPObject = Record<string, LSPAny>;
+export type GlobPattern = Pattern | RelativePattern;
+export type TextDocumentFilter =
+  | TextDocumentFilterLanguage
+  | TextDocumentFilterScheme
+  | TextDocumentFilterPattern;
+export type NotebookDocumentFilter =
+  | NotebookDocumentFilterNotebookType
+  | NotebookDocumentFilterScheme
+  | NotebookDocumentFilterPattern;
+export type Pattern = string;
+export type RegularExpressionEngineKind = string;
 
 // TextDocumentContent has no schema in the metamodel yet
 export type TextDocumentContent = unknown;

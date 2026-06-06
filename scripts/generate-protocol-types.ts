@@ -66,8 +66,8 @@ class ProtocolTypeGenerator {
 
     switch (type.kind) {
       case 'reference':
-        // Prefix with LSP namespace for imported types (unless skipPrefix is true for proposed types)
-        return `LSP.${type.name}`;
+        // Prefix with LSP namespace for imported types (unless skipLSPPrefix is true)
+        return skipLSPPrefix ? type.name : `LSP.${type.name}`;
       case 'base':
         // Base types don't need prefix
         return type.name;
@@ -196,42 +196,82 @@ class ProtocolTypeGenerator {
     const enumerations = this.parser.getAllEnumerations();
     const enumNames = new Set(enumerations.map((e) => e.name));
 
-    // Emit z.infer aliases for every structure and type alias that has a schema.
-    // Enums are TypeScript enum declarations in enums.ts — re-export them directly
-    // rather than inferring from their Zod schemas.
-    const structureLines = structures.map(
-      (s) => `export type ${s.name} = z.infer<typeof Schemas.${s.name}Schema>;`
-    );
-    const aliasLines = typeAliases
-      .filter((a) => !enumNames.has(a.name))
-      .map((a) => `export type ${a.name} = z.infer<typeof Schemas.${a.name}Schema>;`);
+    // Detect type aliases involved in mutual cycles (e.g. LSPAny ↔ LSPObject).
+    // A topo-sort DFS marks any alias encountered while still "in progress" as cyclic.
+    // Cyclic aliases are emitted as `unknown` to avoid TS2456.
+    const visited = new Set<string>();
+    const inProgress = new Set<string>();
+    const cyclicAliases = new Set<string>();
 
-    const sourceFile = this.outputProject.createSourceFile(this.typesOutputPath, '', {
-      overwrite: true
-    });
+    const aliasDepsOf = (name: string): string[] => {
+      const a = typeAliases.find((x) => x.name === name);
+      if (!a || enumNames.has(a.name)) return [];
+      const refs = new Set<string>();
+      this.collectTypeRefs(a.type, refs);
+      refs.delete(name);
+      return [...refs].filter((r) => !enumNames.has(r) && typeAliases.some((x) => x.name === r));
+    };
 
-    sourceFile.addStatements(`/**
- * LSP Protocol Types — inferred from Zod schemas
- *
- * Auto-generated from metaModel.json
- * DO NOT EDIT MANUALLY
- */
+    const visitAlias = (name: string): void => {
+      if (visited.has(name) || enumNames.has(name)) return;
+      if (inProgress.has(name)) {
+        cyclicAliases.add(name);
+        return;
+      }
+      inProgress.add(name);
+      for (const dep of aliasDepsOf(name)) visitAlias(dep);
+      inProgress.delete(name);
+      visited.add(name);
+    };
+    for (const a of typeAliases) visitAlias(a.name);
 
-import type { z } from 'zod';
-import type * as Schemas from './schemas.js';
+    const lines: string[] = [];
 
-// Enum types (TypeScript enum declarations)
-export type * from './enums.js';
+    lines.push('/**');
+    lines.push(' * LSP Protocol Types');
+    lines.push(' *');
+    lines.push(' * Generated directly from metaModel.json — not inferred from Zod schemas.');
+    lines.push(' * Optional properties use `prop?: T` (no `| undefined`) so these types are');
+    lines.push(' * compatible with packages compiled with exactOptionalPropertyTypes: true.');
+    lines.push(' *');
+    lines.push(' * Auto-generated — DO NOT EDIT MANUALLY');
+    lines.push(' */');
+    lines.push('');
+    lines.push(`export type * from './enums.js';`);
+    lines.push('');
 
-// Structure and type-alias types inferred from Zod schemas
-${structureLines.join('\n')}
+    for (const s of structures) {
+      const props = this.collectAllProperties(s.name);
+      if (props.length === 0) {
+        lines.push(`export type ${s.name} = {};`);
+      } else {
+        lines.push(`export type ${s.name} = {`);
+        for (const p of props) {
+          const tsType = this.typeToTsType(p.type);
+          lines.push(p.optional ? `  ${p.name}?: ${tsType};` : `  ${p.name}: ${tsType};`);
+        }
+        lines.push(`};`);
+      }
+      lines.push('');
+    }
 
-${aliasLines.join('\n')}
+    for (const a of typeAliases) {
+      if (enumNames.has(a.name)) continue;
+      if (cyclicAliases.has(a.name)) {
+        // Mutual cycles (e.g. LSPAny ↔ LSPObject) cannot be expressed as recursive type
+        // aliases in TypeScript without triggering TS2456. These are all "any JSON value"
+        // types in practice; `unknown` is the safe approximation.
+        lines.push(`export type ${a.name} = unknown;`);
+      } else {
+        lines.push(`export type ${a.name} = ${this.typeToTsType(a.type)};`);
+      }
+    }
 
-// TextDocumentContent has no schema in the metamodel yet
-export type TextDocumentContent = unknown;`);
+    lines.push('');
+    lines.push('// TextDocumentContent has no schema in the metamodel yet');
+    lines.push('export type TextDocumentContent = unknown;');
 
-    await sourceFile.save();
+    fs.writeFileSync(this.typesOutputPath, lines.join('\n') + '\n', 'utf8');
 
     console.log(`   ✅ Generated ${this.typesOutputPath}`);
     console.log(
@@ -573,6 +613,80 @@ export type TextDocumentContent = unknown;`);
       case 'literal': {
         const raw = (type as LiteralType).value;
         if (typeof raw === 'object' && raw !== null && 'properties' in raw) return 'object';
+        const inner = raw as { kind: string; value: unknown };
+        return JSON.stringify(inner.value);
+      }
+      case 'stringLiteral':
+        return JSON.stringify((type as StringLiteralTypeReference).value);
+      default:
+        return 'unknown';
+    }
+  }
+
+  /**
+   * Convert a metaModel Type to a TypeScript type string for use in types.ts.
+   *
+   * Produces EOPT-compatible types: optional properties use `prop?: T` (not `T | undefined`),
+   * matching how vscode-languageserver-protocol is compiled. All references are bare names
+   * since every generated type lives in the same file (or is re-exported from enums.js).
+   */
+  private typeToTsType(type: Type): string {
+    switch (type.kind) {
+      case 'base': {
+        const n = (type as BaseTypes).name;
+        if (n === 'string' || n === 'URI' || n === 'DocumentUri' || n === 'RegExp') return 'string';
+        if (n === 'integer' || n === 'uinteger' || n === 'decimal') return 'number';
+        if (n === 'boolean') return 'boolean';
+        if (n === 'null') return 'null';
+        return 'unknown';
+      }
+      case 'reference': {
+        const refName = (type as ReferenceType).name;
+        // Expand enum references to their literal unions for structural compatibility
+        // with vscode-languageserver-protocol (which uses string/number union type aliases,
+        // not nominal TypeScript enums). This ensures `"markdown"` is assignable to
+        // `MarkupContent.kind` even though `MarkupKind` is a TypeScript enum in enums.ts.
+        const enumDef = this.parser.getAllEnumerations().find((e) => e.name === refName);
+        if (enumDef) {
+          const literals = enumDef.values.map((v) => JSON.stringify(v.value));
+          if (enumDef.supportsCustomValues) {
+            literals.push(enumDef.type.name === 'string' ? 'string' : 'number');
+          }
+          return literals.join(' | ');
+        }
+        return refName;
+      }
+      case 'array': {
+        const elem = this.typeToTsType((type as ArrayType).element);
+        return elem.includes(' | ') || elem.includes(' & ') ? `(${elem})[]` : `${elem}[]`;
+      }
+      case 'map': {
+        const mt = type as MapType;
+        return `Record<${this.typeToTsType(mt.key)}, ${this.typeToTsType(mt.value)}>`;
+      }
+      case 'or':
+        return (type as OrType).items.map((t) => this.typeToTsType(t)).join(' | ');
+      case 'and':
+        return (type as AndType).items.map((t) => this.typeToTsType(t)).join(' & ');
+      case 'tuple':
+        return `[${(type as TupleType).items.map((t) => this.typeToTsType(t)).join(', ')}]`;
+      case 'literal': {
+        const raw = (type as LiteralType).value;
+        if (typeof raw === 'object' && raw !== null && 'properties' in raw) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const litProps = (raw as any).properties as Array<{
+            name: string;
+            type: Type;
+            optional?: boolean;
+          }>;
+          if (litProps.length === 0) return '{}';
+          const fields = litProps.map((p) =>
+            p.optional
+              ? `${p.name}?: ${this.typeToTsType(p.type)}`
+              : `${p.name}: ${this.typeToTsType(p.type)}`
+          );
+          return `{ ${fields.join('; ')} }`;
+        }
         const inner = raw as { kind: string; value: unknown };
         return JSON.stringify(inner.value);
       }
