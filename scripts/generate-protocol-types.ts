@@ -51,6 +51,16 @@ interface CategoryInfo {
   notifications: Notification[];
 }
 
+// Valid TypeScript identifier pattern — names from the network are checked before
+// being interpolated into generated source files to prevent code injection.
+const TS_IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+function assertSafeIdentifier(name: string): string {
+  if (!TS_IDENTIFIER.test(name)) {
+    throw new Error(`Unsafe identifier in metaModel data: ${JSON.stringify(name)}`);
+  }
+  return name;
+}
+
 class ProtocolTypeGenerator {
   private outputProject: Project;
   private metaModel!: MetaModel;
@@ -319,12 +329,16 @@ class ProtocolTypeGenerator {
     for (const s of structures) {
       const props = this.collectAllProperties(s.name);
       if (props.length === 0) {
-        lines.push(`export type ${s.name} = {};`);
+        lines.push(`export type ${assertSafeIdentifier(s.name)} = {};`);
       } else {
-        lines.push(`export type ${s.name} = {`);
+        lines.push(`export type ${assertSafeIdentifier(s.name)} = {`);
         for (const p of props) {
           const tsType = this.typeToTsType(p.type);
-          lines.push(p.optional ? `  ${p.name}?: ${tsType};` : `  ${p.name}: ${tsType};`);
+          lines.push(
+            p.optional
+              ? `  ${assertSafeIdentifier(p.name)}?: ${tsType};`
+              : `  ${assertSafeIdentifier(p.name)}: ${tsType};`
+          );
         }
         lines.push(`};`);
       }
@@ -337,9 +351,9 @@ class ProtocolTypeGenerator {
         // Mutual cycles (e.g. LSPAny ↔ LSPObject) cannot be expressed as recursive type
         // aliases in TypeScript without triggering TS2456. These are all "any JSON value"
         // types in practice; `unknown` is the safe approximation.
-        lines.push(`export type ${a.name} = unknown;`);
+        lines.push(`export type ${assertSafeIdentifier(a.name)} = unknown;`);
       } else {
-        lines.push(`export type ${a.name} = ${this.typeToTsType(a.type)};`);
+        lines.push(`export type ${assertSafeIdentifier(a.name)} = ${this.typeToTsType(a.type)};`);
       }
     }
 
@@ -982,9 +996,9 @@ class ProtocolTypeGenerator {
 
     for (const enumeration of enums) {
       lines.push('');
-      lines.push(`export const ${enumeration.name} = {`);
+      lines.push(`export const ${assertSafeIdentifier(enumeration.name)} = {`);
       for (const entry of enumeration.values) {
-        lines.push(`  ${entry.name}: ${JSON.stringify(entry.value)},`);
+        lines.push(`  ${assertSafeIdentifier(entry.name)}: ${JSON.stringify(entry.value)},`);
       }
       lines.push(`} as const;`);
       lines.push('');
