@@ -4,7 +4,7 @@
  * @module server/progress
  */
 
-import type { ProgressToken } from 'vscode-languageserver-protocol';
+import type { ProgressToken } from '@lspeasy/core';
 import {
   createProgressBegin,
   createProgressReport,

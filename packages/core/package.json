@@ -71,13 +71,9 @@
     "type-check": "tsgo --noEmit"
   },
   "peerDependencies": {
-    "vscode-languageserver-protocol": "^3.18.0",
     "ws": "^8.20.1"
   },
   "peerDependenciesMeta": {
-    "vscode-languageserver-protocol": {
-      "optional": false
-    },
     "ws": {
       "optional": true
     }
@@ -87,8 +83,7 @@
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "typescript": "^6.0.3",
-    "vscode-languageserver-protocol": "^3.18.0"
+    "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -180,7 +180,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   };
   private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
-  private serverInfo?: { name: string; version?: string };
+  private serverInfo?: { name: string; version?: string | undefined };
   private readonly onValidationError?: ClientOptions<ClientCaps>['onValidationError'];
   private capabilityGuard?: CapabilityGuard;
   private clientCapabilityGuard?: ClientCapabilityGuard;
@@ -793,7 +793,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   /**
    * Get server info
    */
-  getServerInfo(): { name: string; version?: string } | undefined {
+  getServerInfo(): { name: string; version?: string | undefined } | undefined {
     return this.serverInfo;
   }
 

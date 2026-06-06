@@ -139,7 +139,7 @@ export {
 } from './utils/document.js';
 export type { IncrementalChange, VersionSource } from './utils/document.js';
 
-// Protocol types (re-exported from vscode-languageserver-protocol)
+// Protocol types (z.infer aliases derived from the generated Zod schemas)
 export type * from './protocol/types.js';
 
 // LSP protocol types and constants (overloaded with same name - type and const)

@@ -5,6 +5,7 @@
 import type {
   Client,
   ClientCapabilities,
+  ServerCapabilities,
   DynamicRegistrationBehavior,
   DidOpenNotebookDocumentParams,
   DidChangeNotebookDocumentParams,
@@ -131,14 +132,16 @@ export interface ClientOptions<
  */
 export interface InitializeResult {
   /** Server capabilities advertised in the `initialize` response. */
-  capabilities: import('vscode-languageserver-protocol').ServerCapabilities;
+  capabilities: ServerCapabilities;
   /** Optional server identification returned by the language server. */
-  serverInfo?: {
-    /** Human-readable name of the language server. */
-    name: string;
-    /** Optional version string of the language server. */
-    version?: string;
-  };
+  serverInfo?:
+    | {
+        /** Human-readable name of the language server. */
+        name: string;
+        /** Optional version string of the language server. */
+        version?: string | undefined;
+      }
+    | undefined;
 }
 
 /**

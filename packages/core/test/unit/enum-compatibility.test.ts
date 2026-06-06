@@ -8,7 +8,7 @@ import type {
   Diagnostic,
   SymbolInformation,
   DocumentHighlight
-} from 'vscode-languageserver-protocol';
+} from '../../src/protocol/types.js';
 import type {
   CodeActionClientCapabilities,
   CodeActionOptions,

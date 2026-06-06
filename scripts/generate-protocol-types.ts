@@ -191,41 +191,52 @@ class ProtocolTypeGenerator {
   private async generateTypesFile() {
     console.log('📝 Generating types.ts...');
 
-    // Create source file with ts-morph
+    const structures = this.parser.getAllStructures();
+    const typeAliases = this.parser.getAllTypeAliases();
+    const enumerations = this.parser.getAllEnumerations();
+    const enumNames = new Set(enumerations.map((e) => e.name));
+
+    // Emit z.infer aliases for every structure and type alias that has a schema.
+    // Enums are TypeScript enum declarations in enums.ts — re-export them directly
+    // rather than inferring from their Zod schemas.
+    const structureLines = structures.map(
+      (s) => `export type ${s.name} = z.infer<typeof Schemas.${s.name}Schema>;`
+    );
+    const aliasLines = typeAliases
+      .filter((a) => !enumNames.has(a.name))
+      .map((a) => `export type ${a.name} = z.infer<typeof Schemas.${a.name}Schema>;`);
+
     const sourceFile = this.outputProject.createSourceFile(this.typesOutputPath, '', {
       overwrite: true
     });
 
-    // Add header and re-export using template literal with actual newlines
     sourceFile.addStatements(`/**
- * LSP Protocol Types
+ * LSP Protocol Types — inferred from Zod schemas
  *
  * Auto-generated from metaModel.json
  * DO NOT EDIT MANUALLY
  */
 
-export type * from 'vscode-languageserver-protocol';
+import type { z } from 'zod';
+import type * as Schemas from './schemas.js';
 
-export type TextDocumentContentParams = unknown;
-export type TextDocumentContent = unknown;
+// Enum types (TypeScript enum declarations)
+export type * from './enums.js';
 
-export type TextDocumentContentResult = unknown;
+// Structure and type-alias types inferred from Zod schemas
+${structureLines.join('\n')}
 
-export type TextDocumentContentRegistrationOptions = unknown;
+${aliasLines.join('\n')}
 
-export type TextDocumentContentRefreshParams = unknown;
+// TextDocumentContent has no schema in the metamodel yet
+export type TextDocumentContent = unknown;`);
 
-export type CancelParams = { id: number | string };
-
-export type ProgressParams = {
-  token: string | number;
-};`);
-
-    // Save file (ts-morph will format it)
     await sourceFile.save();
 
     console.log(`   ✅ Generated ${this.typesOutputPath}`);
-    console.log(`   ✅ Generated protocol type re-exports\n`);
+    console.log(
+      `   ✅ Generated ${structures.length} structure types, ${typeAliases.length} alias types\n`
+    );
   }
 
   private async generateNamespacesFile() {

@@ -4,7 +4,7 @@
  * Uses mapped types and lookups instead of nested conditionals
  */
 
-import type { ClientCapabilities, ServerCapabilities } from 'vscode-languageserver-protocol';
+import type { ClientCapabilities, ServerCapabilities } from './types.js';
 import { LSPRequest, LSPNotification } from './namespaces.js';
 import type { Paths, UnionToIntersection, ConditionalKeys, KeyAsString } from 'type-fest';
 
