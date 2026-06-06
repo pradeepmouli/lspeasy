@@ -94,7 +94,7 @@ class ProtocolTypeGenerator {
     }
   }
 
-  // Types whose VSCode equivalent exists in vscode-languageserver-protocol/types.
+  // Struct types whose VSCode equivalent exists in vscode-languageserver-protocol.
   // These drive the generated _type-compat-check.ts bidirectional assertions.
   private static readonly COMPAT_CHECK_TYPES = [
     'ServerCapabilities',
@@ -119,6 +119,47 @@ class ProtocolTypeGenerator {
     'DidOpenTextDocumentParams',
     'DidCloseTextDocumentParams',
     'DidSaveTextDocumentParams'
+  ] as const;
+
+  // Enum types exported as named union type aliases in vscode-languageserver-protocol.
+  // Skipped: SemanticTokenTypes/Modifiers (VSCode uses nominal TS enum),
+  //          WatchKind/ErrorCodes/LSPErrorCodes (VSCode uses uinteger/integer — broader),
+  //          PositionEncodingKind (VSCode: string, ours: specific values — _fromVscode fails).
+  private static readonly COMPAT_CHECK_ENUMS = [
+    'ApplyKind',
+    'CodeActionKind',
+    'CodeActionTag',
+    'CodeActionTriggerKind',
+    'CompletionItemKind',
+    'CompletionItemTag',
+    'CompletionTriggerKind',
+    'DiagnosticSeverity',
+    'DiagnosticTag',
+    'DocumentDiagnosticReportKind',
+    'DocumentHighlightKind',
+    'FailureHandlingKind',
+    'FileChangeType',
+    'FileOperationPatternKind',
+    'FoldingRangeKind',
+    'InlayHintKind',
+    'InlineCompletionTriggerKind',
+    'InsertTextFormat',
+    'InsertTextMode',
+    'LanguageKind',
+    'MarkupKind',
+    'MessageType',
+    'MonikerKind',
+    'NotebookCellKind',
+    'PrepareSupportDefaultBehavior',
+    'ResourceOperationKind',
+    'SignatureHelpTriggerKind',
+    'SymbolKind',
+    'SymbolTag',
+    'TextDocumentSaveReason',
+    'TextDocumentSyncKind',
+    'TokenFormat',
+    'TraceValue',
+    'UniquenessLevel'
   ] as const;
 
   // Output paths
@@ -153,7 +194,7 @@ class ProtocolTypeGenerator {
     this.schemasOutputPath = path.join(process.cwd(), 'packages/core/src/protocol/schemas.ts');
     this.typeCompatCheckOutputPath = path.join(
       process.cwd(),
-      'packages/server/src/_type-compat-check.ts'
+      'packages/server/test/_type-compat-check.ts'
     );
   }
 
@@ -923,40 +964,39 @@ class ProtocolTypeGenerator {
   private async generateEnumsFile() {
     console.log('📝 Generating enums.ts...');
 
-    const sourceFile = this.outputProject.createSourceFile(this.enumsOutputPath, '', {
-      overwrite: true
-    });
-
-    sourceFile.addStatements(`/**
- * LSP Protocol Enums
- *
- * Auto-generated from metaModel.json
- * DO NOT EDIT MANUALLY
- */`);
-
     const enums = this.parser
       .getAllEnumerations()
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name));
 
-    for (const enumeration of enums) {
-      const enumDeclaration = sourceFile.addEnum({
-        name: enumeration.name,
-        isExported: true
-      });
+    const lines: string[] = [];
+    lines.push('/**');
+    lines.push(' * LSP Protocol Enums');
+    lines.push(' *');
+    lines.push(' * Emitted as const objects + union type aliases for structural compatibility');
+    lines.push(' * with vscode-languageserver-protocol, which uses the same pattern.');
+    lines.push(' *');
+    lines.push(' * Auto-generated from metaModel.json');
+    lines.push(' * DO NOT EDIT MANUALLY');
+    lines.push(' */');
 
+    for (const enumeration of enums) {
+      lines.push('');
+      lines.push(`export const ${enumeration.name} = {`);
       for (const entry of enumeration.values) {
-        enumDeclaration.addMember({
-          name: entry.name,
-          initializer:
-            typeof entry.value === 'string' ? JSON.stringify(entry.value) : String(entry.value)
-        });
+        lines.push(`  ${entry.name}: ${JSON.stringify(entry.value)},`);
       }
+      lines.push(`} as const;`);
+      lines.push('');
+      const literals = enumeration.values.map((v) => JSON.stringify(v.value));
+      if (enumeration.supportsCustomValues) {
+        literals.push(enumeration.type.name === 'string' ? 'string' : 'number');
+      }
+      lines.push(`export type ${enumeration.name} = ${literals.join(' | ')};`);
     }
 
-    sourceFile.formatText();
-    await sourceFile.save();
-
+    lines.push('');
+    fs.writeFileSync(this.enumsOutputPath, lines.join('\n'), 'utf8');
     console.log(`   ✅ Generated ${this.enumsOutputPath}`);
     console.log(`   ✅ Generated ${enums.length} enums\n`);
   }
@@ -1124,6 +1164,7 @@ class ProtocolTypeGenerator {
     console.log('📝 Generating _type-compat-check.ts...');
 
     const types = ProtocolTypeGenerator.COMPAT_CHECK_TYPES;
+    const enums = ProtocolTypeGenerator.COMPAT_CHECK_ENUMS;
     const lines: string[] = [];
 
     lines.push('/**');
@@ -1131,93 +1172,92 @@ class ProtocolTypeGenerator {
       ' * Type-compatibility verification between @lspeasy/core and vscode-languageserver-protocol.'
     );
     lines.push(' *');
-    lines.push(
-      ' * Every type in COMPAT_CHECK_TYPES is checked bidirectionally against its VSCode counterpart:'
-    );
+    lines.push(' * Every struct in COMPAT_CHECK_TYPES and every enum in COMPAT_CHECK_ENUMS is');
+    lines.push(' * checked bidirectionally against its VSCode counterpart:');
     lines.push(' *   _fromVscode  — every VSCode value is accepted by our type  (not too narrow)');
     lines.push(" *   _toVscode    — our value is accepted by VSCode's type       (not too wide)");
     lines.push(' *');
+    lines.push(' * Our enums are emitted as const objects + union type aliases (matching the');
     lines.push(
-      ' * _toVscode uses Flexible<VscodeType> to relax string/number enum types to their backing'
+      ' * vscode-languageserver-protocol pattern), so checks are direct _Extends assertions'
     );
-    lines.push(
-      ' * primitive. TypeScript string enums are nominal, so our generated literal unions'
-    );
-    lines.push(
-      ' * (e.g. "plaintext" | "markdown") are not directly assignable to `MarkupKind`. Flexible<>'
-    );
-    lines.push(
-      ' * widens those to `string`, which our unions satisfy. _fromVscode still verifies the values'
-    );
-    lines.push(
-      ' * are exactly right in the inbound direction, so bidirectional coverage is intact.'
-    );
+    lines.push(' * — no normalization helper needed.');
     lines.push(' *');
     lines.push(' * Auto-generated — DO NOT EDIT MANUALLY');
     lines.push(' */');
     lines.push('');
 
-    // VSCode imports
+    // VSCode imports — structs + enums in one block
     lines.push(`import type {`);
     for (const name of types) {
+      lines.push(`  ${name} as Vscode${name},`);
+    }
+    for (const name of enums) {
       lines.push(`  ${name} as Vscode${name},`);
     }
     lines.push(`} from 'vscode-languageserver-protocol';`);
     lines.push('');
 
-    // Core imports
+    // Core imports — structs + enums in one block
     lines.push(`import type {`);
     for (const name of types) {
+      lines.push(`  ${name},`);
+    }
+    for (const name of enums) {
       lines.push(`  ${name},`);
     }
     lines.push(`} from '@lspeasy/core';`);
     lines.push('');
 
-    // Utilities
+    // Structural assertion helper
     lines.push(`// Structural assertion helper.`);
     lines.push(`type _Extends<Sub extends Sup, Sup> = void;`);
     lines.push('');
-    lines.push(
-      `// Recursively replace string/number-backed types (including enums) with their primitive.`
-    );
-    lines.push(`// This allows nominal TypeScript enum types on the VSCode side to be satisfied`);
-    lines.push(`// by our generated literal unions in the _toVscode direction.`);
-    lines.push(`type Flexible<T> =`);
-    lines.push(`  T extends string ? string`);
-    lines.push(`  : T extends number ? number`);
-    lines.push(`  : T extends boolean ? boolean`);
-    lines.push(`  : T extends null ? null`);
-    lines.push(`  : T extends undefined ? undefined`);
-    lines.push(`  : T extends readonly (infer U)[] ? Flexible<U>[]`);
-    lines.push(`  : T extends object ? { [K in keyof T]: Flexible<T[K]> }`);
-    lines.push(`  : T;`);
-    lines.push('');
 
-    // _fromVscode assertions
-    lines.push(`// ── Not-too-narrow: every VSCode value must be accepted by our type ──────────`);
+    // Struct _fromVscode assertions
+    lines.push(`// ── Structs: not-too-narrow ──────────────────────────────────────────────────`);
     for (const name of types) {
-      const alias = `_${name}_fromVscode`;
-      lines.push(`type ${alias} = _Extends<Vscode${name}, ${name}>;`);
+      lines.push(`type _${name}_fromVscode = _Extends<Vscode${name}, ${name}>;`);
     }
     lines.push('');
 
-    // _toVscode assertions
-    lines.push(`// ── Not-too-wide: our value must be accepted by VSCode's type ────────────────`);
-    lines.push(`// (Flexible<> relaxes nominal enum types — see header comment)`);
+    // Struct _toVscode assertions
+    lines.push(`// ── Structs: not-too-wide ────────────────────────────────────────────────────`);
     for (const name of types) {
-      const alias = `_${name}_toVscode`;
-      lines.push(`type ${alias} = _Extends<${name}, Flexible<Vscode${name}>>;`);
+      lines.push(`type _${name}_toVscode = _Extends<${name}, Vscode${name}>;`);
+    }
+    lines.push('');
+
+    // Enum _fromVscode assertions
+    lines.push(`// ── Enums: not-too-narrow ────────────────────────────────────────────────────`);
+    for (const name of enums) {
+      lines.push(`type _${name}_fromVscode = _Extends<Vscode${name}, ${name}>;`);
+    }
+    lines.push('');
+
+    // Enum _toVscode assertions
+    lines.push(`// ── Enums: not-too-wide ──────────────────────────────────────────────────────`);
+    for (const name of enums) {
+      lines.push(`type _${name}_toVscode = _Extends<${name}, Vscode${name}>;`);
     }
     lines.push('');
 
     // Export block (forces TypeScript to evaluate all aliases)
     lines.push(`export type {`);
-    lines.push(`  // Not-too-narrow`);
+    lines.push(`  // Structs — not-too-narrow`);
     for (const name of types) {
       lines.push(`  _${name}_fromVscode,`);
     }
-    lines.push(`  // Not-too-wide`);
+    lines.push(`  // Structs — not-too-wide`);
     for (const name of types) {
+      lines.push(`  _${name}_toVscode,`);
+    }
+    lines.push(`  // Enums — not-too-narrow`);
+    for (const name of enums) {
+      lines.push(`  _${name}_fromVscode,`);
+    }
+    lines.push(`  // Enums — not-too-wide`);
+    for (const name of enums) {
       lines.push(`  _${name}_toVscode,`);
     }
     lines.push(`};`);
@@ -1226,7 +1266,7 @@ class ProtocolTypeGenerator {
     fs.writeFileSync(this.typeCompatCheckOutputPath, lines.join('\n'), 'utf8');
 
     console.log(
-      `   ✅ Generated ${this.typeCompatCheckOutputPath.split('/').pop()} with ${types.length} type pairs`
+      `   ✅ Generated ${this.typeCompatCheckOutputPath.split('/').pop()} with ${types.length} struct pairs + ${enums.length} enum pairs`
     );
   }
 }
