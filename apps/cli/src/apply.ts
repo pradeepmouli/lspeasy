@@ -34,9 +34,13 @@ export interface LspTextEdit {
   newText: string;
 }
 
+// LSP 3.18 added SnippetTextEdit (range + snippet instead of newText).
+// We can't apply snippet edits; filter them out at the boundary.
+type RawEdit = LspTextEdit | { range: LspRange; snippet: unknown };
+
 interface TextDocumentEdit {
   textDocument: { uri: string; version?: number | null };
-  edits: LspTextEdit[];
+  edits: RawEdit[];
 }
 
 interface CreateFileOp {
@@ -371,7 +375,12 @@ export function applyWorkspaceEdit(edit: WorkspaceEdit, guard?: BoundaryGuard): 
               : applyDelete(dc);
         if (change) applied.push(change);
       } else {
-        applied.push(applyTextWrite({ path: fileURLToPath(dc.textDocument.uri), edits: dc.edits }));
+        applied.push(
+          applyTextWrite({
+            path: fileURLToPath(dc.textDocument.uri),
+            edits: dc.edits.filter((e): e is LspTextEdit => 'newText' in e)
+          })
+        );
       }
     }
     return applied;

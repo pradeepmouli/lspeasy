@@ -59,14 +59,14 @@ export const ErrorCodesSchema = z.union([
   z.literal(-32603),
   z.literal(-32002),
   z.literal(-32001),
-  z.string()
+  z.number()
 ]);
 export const LSPErrorCodesSchema = z.union([
   z.literal(-32803),
   z.literal(-32802),
   z.literal(-32801),
   z.literal(-32800),
-  z.string()
+  z.number()
 ]);
 export const FoldingRangeKindSchema = z.union([
   z.literal('comment'),
@@ -196,7 +196,7 @@ export const LanguageKindSchema = z.union([
   z.literal('erlang'),
   z.literal('fsharp'),
   z.literal('git-commit'),
-  z.literal('rebase'),
+  z.literal('git-rebase'),
   z.literal('go'),
   z.literal('groovy'),
   z.literal('handlebars'),
@@ -218,6 +218,7 @@ export const LanguageKindSchema = z.union([
   z.literal('perl'),
   z.literal('perl6'),
   z.literal('php'),
+  z.literal('plaintext'),
   z.literal('powershell'),
   z.literal('jade'),
   z.literal('python'),
@@ -824,7 +825,7 @@ export const DiagnosticSchema = z.object({
   code: z.union([z.number().int(), z.string()]).optional(),
   codeDescription: CodeDescriptionSchema.optional(),
   source: z.string().optional(),
-  message: z.string(),
+  message: z.union([z.string(), MarkupContentSchema]),
   tags: z.array(DiagnosticTagSchema).optional(),
   relatedInformation: z.array(DiagnosticRelatedInformationSchema).optional(),
   data: z.lazy(() => LSPAnySchema).optional()
@@ -1352,7 +1353,8 @@ export const DiagnosticClientCapabilitiesSchema = z.object({
   codeDescriptionSupport: z.boolean().optional(),
   dataSupport: z.boolean().optional(),
   dynamicRegistration: z.boolean().optional(),
-  relatedDocumentSupport: z.boolean().optional()
+  relatedDocumentSupport: z.boolean().optional(),
+  markupMessageSupport: z.boolean().optional()
 });
 export const InlineCompletionClientCapabilitiesSchema = z.object({
   dynamicRegistration: z.boolean().optional()
