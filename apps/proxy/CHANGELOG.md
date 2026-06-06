@@ -1,5 +1,11 @@
 # @lsproxy/proxy
 
+## 1.0.0
+
+### Major Changes
+
+- 5243294: - Rename daemon binary from `lsproxy` to `lsps` to reflect that it multiplexes multiple LSP servers
+
 ## 0.2.0
 
 ### Minor Changes

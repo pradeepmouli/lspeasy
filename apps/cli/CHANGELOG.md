@@ -1,5 +1,16 @@
 # @lspeasy/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- 5243294: - Rename CLI binary from `lspeasy` to `lsproxy` to align with the `@lsproxy/*` package scope
+
+### Patch Changes
+
+- Updated dependencies [5243294]
+  - @lsproxy/proxy@1.0.0
+
 ## 0.3.0
 
 ### Minor Changes
