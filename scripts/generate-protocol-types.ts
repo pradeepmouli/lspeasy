@@ -535,6 +535,54 @@ export type TextDocumentContent = unknown;`);
     }
   }
 
+  /**
+   * Convert a metaModel Type to a TypeScript type string for use in inline declarations
+   * inside schemas.ts (where LSP namespace isn't available, but schema consts are).
+   *
+   * @param selfName – name of the enclosing struct; self-references become `_${selfName}`
+   */
+  private typeToInlineTsType(type: Type, selfName: string): string {
+    switch (type.kind) {
+      case 'base': {
+        const n = (type as BaseTypes).name;
+        if (n === 'string' || n === 'URI' || n === 'DocumentUri' || n === 'RegExp') return 'string';
+        if (n === 'integer' || n === 'uinteger' || n === 'decimal') return 'number';
+        if (n === 'boolean') return 'boolean';
+        if (n === 'null') return 'null';
+        return 'unknown';
+      }
+      case 'reference': {
+        const refName = (type as ReferenceType).name;
+        // Self-reference becomes the private inline type name
+        if (refName === selfName) return `_${selfName}`;
+        // Other references: use z.infer<typeof …Schema> since schemas are in scope
+        return `z.infer<typeof ${refName}Schema>`;
+      }
+      case 'array':
+        return `${this.typeToInlineTsType((type as ArrayType).element, selfName)}[]`;
+      case 'map': {
+        const mt = type as MapType;
+        return `Record<${this.typeToInlineTsType(mt.key, selfName)}, ${this.typeToInlineTsType(mt.value, selfName)}>`;
+      }
+      case 'or':
+        return (type as OrType).items.map((t) => this.typeToInlineTsType(t, selfName)).join(' | ');
+      case 'and':
+        return (type as AndType).items.map((t) => this.typeToInlineTsType(t, selfName)).join(' & ');
+      case 'tuple':
+        return `[${(type as TupleType).items.map((t) => this.typeToInlineTsType(t, selfName)).join(', ')}]`;
+      case 'literal': {
+        const raw = (type as LiteralType).value;
+        if (typeof raw === 'object' && raw !== null && 'properties' in raw) return 'object';
+        const inner = raw as { kind: string; value: unknown };
+        return JSON.stringify(inner.value);
+      }
+      case 'stringLiteral':
+        return JSON.stringify((type as StringLiteralTypeReference).value);
+      default:
+        return 'unknown';
+    }
+  }
+
   /** Generate `schemas.ts` — Zod schemas for all LSP structures, enumerations, and type aliases. */
   private generateSchemasFile(): void {
     console.log('📝 Generating schemas.ts...');
@@ -655,6 +703,26 @@ export type TextDocumentContent = unknown;`);
 
       // kind === 'struct'
       const props = this.collectAllProperties(name);
+      if (selfReferential.has(name)) {
+        // Self-referential struct: declare explicit TS type first so z.ZodType<_Name>
+        // gives z.infer<typeof NameSchema> the correct concrete shape (not Record<string,unknown>).
+        const typePropLines = props.map((p) => {
+          const tsType = this.typeToInlineTsType(p.type, name);
+          return p.optional ? `  ${p.name}?: ${tsType} | undefined;` : `  ${p.name}: ${tsType};`;
+        });
+        lines.push(`type _${name} = {`);
+        lines.push(typePropLines.join('\n'));
+        lines.push(`};`);
+        const propEntries = props.map((p) => {
+          let builder = this.typeToBuilder(p.type, name, lazyRefs);
+          if (p.optional) builder = builder.optional();
+          return `  ${p.name}: ${builder.text()}`;
+        });
+        lines.push(`export const ${name}Schema: z.ZodType<_${name}> = z.object({`);
+        lines.push(propEntries.join(',\n'));
+        lines.push(`});`);
+        continue;
+      }
       const ann = needsTypeAnnotation.has(name) ? ': z.ZodObject<z.ZodRawShape>' : '';
       if (props.length === 0) {
         lines.push(`export const ${name}Schema${ann} = z.object({});`);

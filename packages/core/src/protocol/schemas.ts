@@ -466,7 +466,11 @@ export const SelectionRangeParamsSchema = z.object({
   textDocument: TextDocumentIdentifierSchema,
   positions: z.array(PositionSchema)
 });
-export const SelectionRangeSchema: z.ZodObject<z.ZodRawShape> = z.object({
+type _SelectionRange = {
+  range: z.infer<typeof RangeSchema>;
+  parent?: _SelectionRange | undefined;
+};
+export const SelectionRangeSchema: z.ZodType<_SelectionRange> = z.object({
   range: RangeSchema,
   parent: z.lazy(() => SelectionRangeSchema).optional()
 });
@@ -1942,7 +1946,17 @@ export const SymbolInformationSchema = z.object({
   deprecated: z.boolean().optional(),
   location: LocationSchema
 });
-export const DocumentSymbolSchema: z.ZodObject<z.ZodRawShape> = z.object({
+type _DocumentSymbol = {
+  name: string;
+  detail?: string | undefined;
+  kind: z.infer<typeof SymbolKindSchema>;
+  tags?: z.infer<typeof SymbolTagSchema>[] | undefined;
+  deprecated?: boolean | undefined;
+  range: z.infer<typeof RangeSchema>;
+  selectionRange: z.infer<typeof RangeSchema>;
+  children?: _DocumentSymbol[] | undefined;
+};
+export const DocumentSymbolSchema: z.ZodType<_DocumentSymbol> = z.object({
   name: z.string(),
   detail: z.string().optional(),
   kind: SymbolKindSchema,
