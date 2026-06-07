@@ -2,6 +2,25 @@
   "name": "@lsproxy/proxy",
   "version": "1.0.0",
   "description": "Per-root LSP multiplexing daemon — holds warm language server connections for @lsproxy/cli",
+  "private": false,
+  "keywords": [
+    "lsp",
+    "language-server-protocol",
+    "lsp-proxy",
+    "language-server",
+    "cli"
+  ],
+  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
+  "bugs": {
+    "url": "https://github.com/pradeepmouli/lspeasy/issues"
+  },
+  "license": "MIT",
+  "author": "Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeepmouli/lspeasy.git",
+    "directory": "apps/proxy"
+  },
   "type": "module",
   "bin": {
     "lsps": "./dist/main.js"
@@ -14,6 +33,13 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
