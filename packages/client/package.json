@@ -43,7 +43,8 @@
     "type-check": "tsgo --noEmit"
   },
   "dependencies": {
-    "@lspeasy/core": "workspace:*"
+    "@lspeasy/core": "workspace:*",
+    "camelcase": "^9.0.0"
   },
   "optionalDependencies": {
     "zod": "^4.4.3"
