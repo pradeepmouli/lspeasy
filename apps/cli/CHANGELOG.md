@@ -1,5 +1,13 @@
 # @lspeasy/cli
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [0d93464]
+  - @lspeasy/client@3.1.2
+  - @lsproxy/proxy@1.0.1
+
 ## 0.4.0
 
 ### Minor Changes

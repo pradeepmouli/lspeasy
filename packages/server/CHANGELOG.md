@@ -1,5 +1,11 @@
 # @lspeasy/server
 
+## 4.1.2
+
+### Patch Changes
+
+- 0d93464: Move `camelcase` from root devDependencies to package dependencies — it is imported at runtime by capability-proxy and was missing from installed packages
+
 ## 4.1.1
 
 ### Patch Changes
