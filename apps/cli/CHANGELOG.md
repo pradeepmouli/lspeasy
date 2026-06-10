@@ -1,5 +1,11 @@
 # @lspeasy/cli
 
+## 0.4.3
+
+### Patch Changes
+
+- Postinstall script now copies skills to `~/.claude/skills/` after rewriting invocations. Global installs will have skills available to Claude Code immediately after install.
+
 ## 0.4.2
 
 ### Patch Changes
