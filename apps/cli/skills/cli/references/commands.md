@@ -5,7 +5,7 @@
 callHierarchy operations
 
 ```
-[options] [command]
+npx @lsproxy/cli callHierarchy [options] [command]
 ```
 
 ## codeAction
@@ -13,7 +13,7 @@ callHierarchy operations
 codeAction operations
 
 ```
-[options] [command]
+npx @lsproxy/cli codeAction [options] [command]
 ```
 
 ## codeLens
@@ -21,7 +21,7 @@ codeAction operations
 codeLens operations
 
 ```
-[options] [command]
+npx @lsproxy/cli codeLens [options] [command]
 ```
 
 ## completionItem
@@ -29,7 +29,7 @@ codeLens operations
 completionItem operations
 
 ```
-[options] [command]
+npx @lsproxy/cli completionItem [options] [command]
 ```
 
 ## documentLink
@@ -37,7 +37,7 @@ completionItem operations
 documentLink operations
 
 ```
-[options] [command]
+npx @lsproxy/cli documentLink [options] [command]
 ```
 
 ## inlayHint
@@ -45,7 +45,7 @@ documentLink operations
 inlayHint operations
 
 ```
-[options] [command]
+npx @lsproxy/cli inlayHint [options] [command]
 ```
 
 ## textDocument
@@ -53,7 +53,7 @@ inlayHint operations
 textDocument operations
 
 ```
-[options] [command]
+npx @lsproxy/cli textDocument [options] [command]
 ```
 
 ## workspace
@@ -61,7 +61,7 @@ textDocument operations
 workspace operations
 
 ```
-[options] [command]
+npx @lsproxy/cli workspace [options] [command]
 ```
 
 ## workspaceSymbol
@@ -69,7 +69,7 @@ workspace operations
 workspaceSymbol operations
 
 ```
-[options] [command]
+npx @lsproxy/cli workspaceSymbol [options] [command]
 ```
 
 ## call
@@ -77,7 +77,7 @@ workspaceSymbol operations
 Send any LSP request by method name with raw JSON params
 
 ```
-[options] <method>
+npx @lsproxy/cli call [options] <method>
 ```
 
 ### Options
