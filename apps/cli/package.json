@@ -39,7 +39,8 @@
   "files": [
     "dist",
     "README.md",
-    "skills"
+    "skills",
+    "skillit-postinstall.cjs"
   ],
   "publishConfig": {
     "access": "public"
@@ -48,7 +49,8 @@
     "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit"
+    "type-check": "tsgo --noEmit",
+    "postinstall": "node ./skillit-postinstall.cjs"
   },
   "dependencies": {
     "@lspeasy/client": "workspace:*",
