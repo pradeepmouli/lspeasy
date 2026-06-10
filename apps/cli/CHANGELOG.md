@@ -1,5 +1,11 @@
 # @lspeasy/cli
 
+## 0.4.2
+
+### Patch Changes
+
+- 31f31c0: Bundle generated skill files with the package and enrich README with Features, Troubleshooting, and Quick Start sections. Adds `buildProgram()` export as a static introspection surface for tools and shell completion.
+
 ## 0.4.1
 
 ### Patch Changes
