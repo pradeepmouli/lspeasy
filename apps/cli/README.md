@@ -5,12 +5,40 @@ its capabilities as typed subcommands — hover, rename, format, find-references
 code actions, and more. The command surface is built at runtime from the server's
 advertised capabilities, so it works with any LSP server out of the box.
 
+## Features
+
+- **Semantic refactoring** — project-wide rename, move-file with importer updates, extract symbol
+- **Reference tracking** — find all references, call hierarchy, workspace symbol search
+- **Code actions** — list and apply quick-fixes and refactors at any range
+- **Any LSP server** — TypeScript, Rust, Python, Go, or any LSP-compliant server via `lsp.json`
+- **Proxy daemon** — warm server connections for sub-100ms subsequent invocations
+- **Dry-run preview** — `--dry-run` prints diffs without writing; safe to inspect before committing
+
 ## Install
 
 ```bash
 npx @lsproxy/cli textDocument hover src/foo.ts 12:7   # zero-install
 pnpm add -g @lsproxy/cli                               # or install globally
 ```
+
+## Quick Start
+
+```bash
+# Preview a rename before writing (always do this first)
+lsproxy textDocument rename --dry-run src/auth/login.ts 42:15 "signIn"
+
+# Find all references to a symbol
+lsproxy textDocument references src/auth/login.ts 42:15
+
+# List available code actions at a range, then apply the chosen one
+lsproxy textDocument codeAction src/foo.ts 12:1-12:20
+
+# Send any LSP method directly (useful for probing capabilities)
+lsproxy call workspace/executeCommand --params '{"command":"typescript.reloadProjects"}'
+```
+
+Positions are **1-based** (`line:col`, editor-style).
+Write-side commands apply changes to disk automatically — use `--dry-run` to preview first.
 
 ## Usage
 
@@ -19,52 +47,49 @@ lsproxy <namespace> <command> [args] [flags]
 lsproxy call <method> --params <json>
 ```
 
-Commands are built from the server's capabilities at startup:
+Commands are built from the server's capabilities at startup. Available namespaces:
+`callHierarchy`, `codeAction`, `codeLens`, `completionItem`, `documentLink`,
+`inlayHint`, `textDocument`, `workspace`, `workspaceSymbol`.
 
 ```bash
-lsproxy textDocument hover       src/foo.ts 12:7
-lsproxy textDocument rename      src/foo.ts 12:7 newName
-lsproxy textDocument references  src/foo.ts 12:7
-lsproxy textDocument definition  src/foo.ts 12:7
-lsproxy textDocument formatting  src/foo.ts
+lsproxy textDocument hover           src/foo.ts 12:7
+lsproxy textDocument rename          src/foo.ts 12:7 newName
+lsproxy textDocument references      src/foo.ts 12:7
+lsproxy textDocument definition      src/foo.ts 12:7
+lsproxy textDocument formatting      src/foo.ts
 lsproxy textDocument rangeFormatting src/foo.ts 1:1-50:1
-lsproxy textDocument onTypeFormatting src/foo.ts 12:7 --ch ";" --on-type-formatting-tab-size 2 --on-type-formatting-insert-spaces true
-lsproxy workspace   symbol       MyClass
+lsproxy workspace   symbol           MyClass
 lsproxy call        textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
 ```
 
-Positions are **1-based** (`line:col`, editor-style).  
-Write-side commands (`rename`, `formatting`, code actions that produce edits)
-apply changes to disk automatically. Pass `--dry-run` to preview instead.
-
 ### Code actions
 
-`codeAction` returns a JSON array of available fixes and refactors for the given
-range.
-
-```bash
-lsproxy textDocument codeAction src/foo.ts 12:1-12:20
-```
-
-```json
-[
-  { "title": "Add missing import",       "kind": "quickfix" },
-  { "title": "Extract to variable",      "kind": "refactor.extract.variable" },
-  { "title": "Convert to arrow function","kind": "refactor.rewrite",
-    "edit": { "changes": { "file:///src/foo.ts": [ ... ] } } }
-]
-```
-
-**When exactly one** action in the result carries an `edit`, it is applied to
-disk automatically. Use `--dry-run` to preview the diff instead:
+`codeAction` returns a JSON array of available fixes and refactors for a range.
+When exactly one action carries an edit it is applied automatically; when zero or
+multiple carry edits the array is printed and no files are changed.
 
 ```bash
 lsproxy textDocument codeAction --dry-run src/foo.ts 12:1-12:20
 ```
 
-When the server returns zero or multiple edit-bearing actions, the full JSON
-array is printed and no files are changed — pick the one you want and re-run
-with `--params` to apply it directly.
+## Troubleshooting
+
+**Commands missing from `--help`** — lsproxy only registers commands for capabilities the
+server actually advertises. If `textDocument rename` doesn't appear, the server doesn't
+support `renameProvider`. Use `lsproxy call initialize --params '{}'` to inspect the
+server's capability response.
+
+**Wrong positions** — Positions must be 1-based (`line:col`). Most editors display
+1-based positions; LSP protocol is 0-based internally but lsproxy converts for you.
+Passing 0-based values shifts edits by one line/column.
+
+**Server not found** — Without `--server`, lsproxy walks up from `--root` looking for
+`lsp.json`. If it can't find one it will time out. Either add `lsp.json` to the project
+root or pass `--server <cmd>` explicitly.
+
+**Write commands applied unexpectedly** — `rename`, `formatting`, and code actions that
+produce edits write to disk immediately. Always run with `--dry-run` first on an
+unfamiliar codebase.
 
 ## Help output
 

@@ -13,3 +13,4 @@ export type { SessionOptions } from './session.js';
 export { applyWorkspaceEdit, applyTextEdits, planWorkspaceEdit } from './apply.js';
 export type { WorkspaceEdit, LspTextEdit, LspRange, LspPosition, AppliedChange } from './apply.js';
 export type { GlobalFlags } from './io.js';
+export { buildProgram } from './program.js';

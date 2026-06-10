@@ -57,6 +57,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "typedoc-plugin-skillit": "^1.4.0",
     "typescript": "^6.0.3"
   },
   "engines": {
