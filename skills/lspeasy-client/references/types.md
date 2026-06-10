@@ -12,7 +12,7 @@ BaseLSPClient<ClientCaps> & Client<ClientCaps, ServerCapabilities>
 ### `InitializeResult`
 Initialize result from server.
 **Properties:**
-- `capabilities: ServerCapabilities<any>` — Server capabilities advertised in the `initialize` response.
+- `capabilities: ServerCapabilities` — Server capabilities advertised in the `initialize` response.
 - `serverInfo: { name: string; version?: string }` (optional) — Optional server identification returned by the language server.
 
 ### `CancellableRequest`

@@ -1,12 +1,11 @@
 ---
+description: "Documentation site for lspeasy Use when: You are building a browser-based LSP client, a WebSocket-backed language...."
 name: lspeasy-core
-description: "Core types, transports, and utilities for LSP SDK Use when: You are building a browser-based LSP client, a WebSocket-backed language.... Also: lsp, language-server-protocol, jsonrpc, transport."
-license: MIT
 ---
 
 # @lspeasy/core
 
-Core types, transports, and utilities for LSP SDK
+Documentation site for lspeasy
 
 `@lspeasy/core` is the shared foundation for the lspeasy SDK. It contains
 everything needed to build custom LSP integrations, and re-exports the
@@ -48,30 +47,6 @@ for string-literal method names.
 DisposableStore for lifecycle management, ResponseError for
 structured JSON-RPC errors, DocumentVersionTracker for document sync.
 
-## Quick Start
-
-```typescript
-import {
-  CompletionItemKind,
-  SymbolKind,
-  DiagnosticSeverity,
-  CodeActionKind,
-  FoldingRangeKind
-} from '@lspeasy/core/protocol/enums';
-
-// Use enums instead of magic numbers
-const completion = {
-  label: 'myFunction',
-  kind: CompletionItemKind.Function // Instead of: kind: 2
-};
-
-// String-based kinds support both enums and custom values
-const codeAction = {
-  title: 'Quick fix',
-  kind: CodeActionKind.QuickFix // Or custom: 'refactor.extract.helper'
-};
-```
-
 ## When to Use
 
 **Use this skill when:**
@@ -84,7 +59,7 @@ const codeAction = {
 - You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. (`WebSocketTransport`)
 - You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. (`ResponseError`)
 
-API surface: 55 functions, 11 classes, 77 types, 1 enums, 41 constants
+API surface: 62 functions, 11 classes, 122 types, 1 enums, 106 constants
 
 ## NEVER
 
@@ -110,20 +85,18 @@ document change notification), `createProgressBegin` (Creates a `WorkDoneProgres
 (not gated by a capability) for a given capability key)
 **Key classes:** `WebSocketTransport` (WebSocket-based transport for LSP communication), `DisposableStore` (Collects multiple `Disposable` instances and releases them together), `CancellationTokenSource` (Controller that creates and manages a `CancellationToken`), `ConsoleLogger` (Logger implementation that writes to the process console with level filtering), `NullLogger` (No-op logger that silently discards all messages), `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `DocumentVersionTracker` (Tracks monotonically increasing version numbers for open text documents)
 
-*185 exports total — see references/ for full API.*
+*302 exports total — see references/ for full API.*
 
 ## References
 
 Load these on demand — do NOT read all at once:
 
-- When calling any function → read `references/functions.md` for full signatures, parameters, and return types
-- When using a class → read `references/classes/` for properties, methods, and inheritance
+- When calling any function → browse `references/functions/` for grouped indexes, full signatures, parameters, and return types
+- When using a class → read `references/classes.md` for properties, methods, and inheritance
 - When defining typed variables or function parameters → read `references/types.md`
-- When using enum values → read `references/enums.md`
 - When using exported constants → read `references/variables.md`
 - When configuring options → read `references/config.md` for all settings and defaults
 
 ## Links
 
-- [Repository](https://github.com/pradeepmouli/lspeasy)
 - Author: Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)

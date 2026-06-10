@@ -2,6 +2,203 @@
 
 ## protocol
 
+### `ApplyKind`
+LSP Protocol Enums
+
+Emitted as const objects + union type aliases for structural compatibility
+with vscode-languageserver-protocol, which uses the same pattern.
+
+Auto-generated from metaModel.json
+DO NOT EDIT MANUALLY
+```ts
+1 | 2
+```
+
+### `CodeActionKind`
+```ts
+"" | "quickfix" | "refactor" | "refactor.extract" | "refactor.inline" | "refactor.move" | "refactor.rewrite" | "source" | "source.organizeImports" | "source.fixAll" | "notebook" | string
+```
+
+### `CodeActionTag`
+```ts
+1
+```
+
+### `CodeActionTriggerKind`
+```ts
+1 | 2
+```
+
+### `CompletionItemKind`
+```ts
+1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
+```
+
+### `CompletionItemTag`
+```ts
+1
+```
+
+### `CompletionTriggerKind`
+```ts
+1 | 2 | 3
+```
+
+### `DiagnosticSeverity`
+```ts
+1 | 2 | 3 | 4
+```
+
+### `DiagnosticTag`
+```ts
+1 | 2
+```
+
+### `DocumentDiagnosticReportKind`
+```ts
+"full" | "unchanged"
+```
+
+### `DocumentHighlightKind`
+```ts
+1 | 2 | 3
+```
+
+### `ErrorCodes`
+```ts
+-32700 | -32600 | -32601 | -32602 | -32603 | -32002 | -32001 | number
+```
+
+### `FailureHandlingKind`
+```ts
+"abort" | "transactional" | "textOnlyTransactional" | "undo"
+```
+
+### `FileOperationPatternKind`
+```ts
+"file" | "folder"
+```
+
+### `FoldingRangeKind`
+```ts
+"comment" | "imports" | "region" | string
+```
+
+### `InlayHintKind`
+```ts
+1 | 2
+```
+
+### `InlineCompletionTriggerKind`
+```ts
+1 | 2
+```
+
+### `InsertTextFormat`
+```ts
+1 | 2
+```
+
+### `InsertTextMode`
+```ts
+1 | 2
+```
+
+### `LanguageKind`
+```ts
+"abap" | "bat" | "bibtex" | "clojure" | "coffeescript" | "c" | "cpp" | "csharp" | "css" | "d" | "pascal" | "diff" | "dart" | "dockerfile" | "elixir" | "erlang" | "fsharp" | "git-commit" | "git-rebase" | "go" | "groovy" | "handlebars" | "haskell" | "html" | "ini" | "java" | "javascript" | "javascriptreact" | "json" | "latex" | "less" | "lua" | "makefile" | "markdown" | "objective-c" | "objective-cpp" | "pascal" | "perl" | "perl6" | "php" | "plaintext" | "powershell" | "jade" | "python" | "r" | "razor" | "ruby" | "rust" | "scss" | "sass" | "scala" | "shaderlab" | "shellscript" | "sql" | "swift" | "typescript" | "typescriptreact" | "tex" | "vb" | "xml" | "xsl" | "yaml" | string
+```
+
+### `LSPErrorCodes`
+```ts
+-32803 | -32802 | -32801 | -32800 | number
+```
+
+### `MarkupKind`
+```ts
+"plaintext" | "markdown"
+```
+
+### `MessageType`
+```ts
+1 | 2 | 3 | 4 | 5
+```
+
+### `MonikerKind`
+```ts
+"import" | "export" | "local"
+```
+
+### `NotebookCellKind`
+```ts
+1 | 2
+```
+
+### `PositionEncodingKind`
+```ts
+"utf-8" | "utf-16" | "utf-32" | string
+```
+
+### `PrepareSupportDefaultBehavior`
+```ts
+1
+```
+
+### `ResourceOperationKind`
+```ts
+"create" | "rename" | "delete"
+```
+
+### `SemanticTokenModifiers`
+```ts
+"declaration" | "definition" | "readonly" | "static" | "deprecated" | "abstract" | "async" | "modification" | "documentation" | "defaultLibrary" | string
+```
+
+### `SemanticTokenTypes`
+```ts
+"namespace" | "type" | "class" | "enum" | "interface" | "struct" | "typeParameter" | "parameter" | "variable" | "property" | "enumMember" | "event" | "function" | "method" | "macro" | "keyword" | "modifier" | "comment" | "string" | "number" | "regexp" | "operator" | "decorator" | "label" | string
+```
+
+### `SignatureHelpTriggerKind`
+```ts
+1 | 2 | 3
+```
+
+### `SymbolKind`
+```ts
+1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26
+```
+
+### `SymbolTag`
+```ts
+1
+```
+
+### `TextDocumentSaveReason`
+```ts
+1 | 2 | 3
+```
+
+### `TextDocumentSyncKind`
+```ts
+0 | 1 | 2
+```
+
+### `TokenFormat`
+```ts
+"relative"
+```
+
+### `TraceValue`
+```ts
+"off" | "messages" | "compact" | "verbose"
+```
+
+### `UniquenessLevel`
+```ts
+"document" | "project" | "group" | "scheme" | "global"
+```
+
 ### `LSPRequestMethod`
 Union type of all valid LSP request method names
 ```ts
@@ -205,6 +402,20 @@ Mapped type of all available LSP notification methods and their handler signatur
 Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof Notifications[Namespace] as CamelCase<StripNamespaceSuffix<Namespace & string, Method & string>>]: IsServerCapabilityEnabled<ServerCaps, Notifications[Namespace][Method]> extends true ? Notifications[Namespace][Method] : never }> }>>
 ```
 
+### `FileChangeType`
+
+### `FileChangeType`
+```ts
+1 | 2 | 3
+```
+
+### `WatchKind`
+
+### `WatchKind`
+```ts
+1 | 2 | 4 | number
+```
+
 ### `WorkDoneProgressValue`
 WorkDoneProgress value types
 ```ts
@@ -220,90 +431,5 @@ A parameter literal used to pass a partial result token.
 ### `DynamicRegistration`
 A single LSP dynamic capability registration entry.
 **Properties:**
-- `id: string` — Unique identifier for this registration, used to unregister it later.
-- `method: string` — The LSP method this registration applies to.
-- `registerOptions: unknown` (optional) — Optional method-specific registration options.
-
-### `DynamicRegistrationBehavior`
-Controls compatibility behavior for dynamic registrations not declared by client capabilities.
-**Properties:**
-- `allowUndeclaredDynamicRegistration: boolean` (optional) — When `true`, the client accepts dynamic registrations for capabilities it did not declare
-in the `initialize` request. Useful for compatibility with servers that over-register.
-
-### `RegisterCapabilityParams`
-Params payload for `client/registerCapability`.
-**Properties:**
-- `registrations: DynamicRegistration[]` — The capability registrations to apply.
-
-### `UnregisterCapability`
-Entry used by `client/unregisterCapability`.
-**Properties:**
-- `id: string` — The registration `id` returned by the original `client/registerCapability` request.
-- `method: string` — The LSP method to unregister.
-
-### `UnregisterCapabilityParams`
-Params payload for `client/unregisterCapability`.
-**Properties:**
-- `unregisterations: UnregisterCapability[]` — The capability unregistration entries to apply.
-
-### `CancelledPartialResult`
-Structured response when a partial-enabled request is cancelled.
-**Properties:**
-- `cancelled: true` — Discriminant — always `true` for cancelled results.
-- `partialResults: TPartial[]` — Partial result batches received before the cancellation occurred.
-- `finalResult: undefined` (optional) — Always `undefined` for cancelled results — no final result was received.
-
-### `CompletedPartialResult`
-Structured response when a partial-enabled request completes successfully.
-**Properties:**
-- `cancelled: false` — Discriminant — always `false` for completed results.
-- `partialResults: TPartial[]` — Partial result batches received during streaming.
-- `finalResult: TResult` — The final result returned when the request completed.
-
-### `PartialRequestOutcome`
-Union return type for partial-enabled client requests.
-```ts
-CancelledPartialResult<TPartial> | CompletedPartialResult<TPartial, TResult>
-```
-
-## JSON-RPC
-
-### `BaseMessage`
-Base JSON-RPC 2.0 message discriminant.
-**Properties:**
-- `jsonrpc: "2.0"` — JSON-RPC protocol version discriminant — always `"2.0"`.
-
-### `RequestMessage`
-JSON-RPC 2.0 Request message — expects a response from the peer.
-**Properties:**
-- `id: string | number` — Unique identifier correlating this request to its eventual response.
-- `method: string` — LSP method string, e.g. `'textDocument/hover'`.
-- `jsonrpc: "2.0"` — JSON-RPC protocol version — always `"2.0"` (inherited).
-- `params: unknown` (optional) — Optional request parameters (method-specific shape).
-
-### `NotificationMessage`
-JSON-RPC 2.0 Notification message — no response is expected or sent.
-**Properties:**
-- `method: string` — LSP method string, e.g. `'textDocument/didOpen'`.
-- `jsonrpc: "2.0"` — JSON-RPC protocol version — always `"2.0"` (inherited).
-- `params: unknown` (optional) — Optional notification parameters (method-specific shape).
-
-### `SuccessResponseMessage`
-JSON-RPC 2.0 success response to a prior request.
-**Properties:**
-- `id: string | number` — Identifier matching the originating request's `id`.
-- `jsonrpc: "2.0"` — JSON-RPC protocol version — always `"2.0"` (inherited).
-- `result: unknown` — The request result payload.
-
-### `ErrorResponseMessage`
-JSON-RPC 2.0 error response to a prior request.
-**Properties:**
-- `id: string | number` — Identifier matching the originating request's `id`.
-- `jsonrpc: "2.0"` — JSON-RPC protocol version — always `"2.0"` (inherited).
-- `error: ResponseErrorInterface` — Structured error payload.
-
-### `ResponseMessage`
-JSON-RPC 2.0 Response message — either a success result or an error.
-```ts
 
 <!-- truncated -->

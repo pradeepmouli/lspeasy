@@ -176,14 +176,14 @@ Core types, transports, and utilities shared by all lspeasy packages.
 Get the server capability key for a given request method at runtime.
 
 ```ts
-getCapabilityForRequestMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
+getCapabilityForRequestMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
 ```
 
 **Parameters:**
 - `method: M` — The LSP request method string to look up.
 - `_direction: D` — Optional direction filter (currently unused).
 
-**Returns:** `InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
+**Returns:** `InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
 
 ### getClientCapabilityForRequestMethod
 
@@ -204,14 +204,14 @@ getClientCapabilityForRequestMethod<M, D>(method: M, _direction: D): "alwaysOn" 
 Get the server capability key for a given notification method at runtime.
 
 ```ts
-getCapabilityForNotificationMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
+getCapabilityForNotificationMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
 ```
 
 **Parameters:**
 - `method: M` — The LSP notification method string to look up.
 - `_direction: D` — Optional direction filter (currently unused).
 
-**Returns:** `InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
+**Returns:** `InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
 
 ### getClientCapabilityForNotificationMethod
 
@@ -263,14 +263,14 @@ Type-guarding predicate that narrows `capabilities` to include the specific
 server capability key required for the given client-to-server request method.
 
 ```ts
-serverSupportsRequest<M>(method: M, capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "callHierarchyProvider" | "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "inlineCompletionProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentRangeFormattingProvider.rangesSupport" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspace.textDocumentContent" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+serverSupportsRequest<M>(method: M, capabilities: ServerCapabilities): capabilities is ServerCapabilities & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "callHierarchyProvider" | "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "inlineCompletionProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentRangeFormattingProvider.rangesSupport" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspace.textDocumentContent" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `method: M` — The LSP request method string (e.g. `'textDocument/hover'`).
 - `capabilities: ServerCapabilities` — The `ServerCapabilities` object to test.
 
-**Returns:** `capabilities is ServerCapabilities<any> & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "callHierarchyProvider" | "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "inlineCompletionProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentRangeFormattingProvider.rangesSupport" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspace.textDocumentContent" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is ServerCapabilities & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "callHierarchyProvider" | "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "inlineCompletionProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentRangeFormattingProvider.rangesSupport" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspace.textDocumentContent" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### serverSupportsNotification
 
@@ -278,14 +278,14 @@ Type-guarding predicate that narrows `capabilities` to include the specific
 server capability key required for the given client-to-server notification method.
 
 ```ts
-serverSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+serverSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `method: M` — The LSP notification method string (e.g. `'textDocument/didOpen'`).
 - `capabilities: T` — The `ServerCapabilities` object to test.
 
-**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### clientSupportsRequest
 
@@ -323,14 +323,14 @@ Type-guarding predicate that narrows `capabilities` to confirm a specific server
 is enabled at a deep dot-notation path.
 
 ```ts
-hasServerCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+hasServerCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `capabilities: T` — The server capabilities to check.
 - `capability: K` — Dot-notation path of the capability (e.g. `'hoverProvider'`).
 
-**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities<any>>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities<any>, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
 
 ### hasClientCapability
 
@@ -352,91 +352,91 @@ hasClientCapability<K, T>(capabilities: T, capability: K): capabilities is T & C
 Returns `true` when `hoverProvider` is declared in the server capabilities.
 
 ```ts
-supportsHover(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }
+supportsHover(capabilities: ServerCapabilities): capabilities is ServerCapabilities & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }
 ```
 
 **Parameters:**
 - `capabilities: ServerCapabilities` — The server capabilities to check.
 
-**Returns:** `capabilities is ServerCapabilities<any> & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }`
+**Returns:** `capabilities is ServerCapabilities & { hoverProvider: NonNullable<boolean | HoverOptions | undefined> }`
 
 ### supportsCompletion
 
 Returns `true` when `completionProvider` is declared in the server capabilities.
 
 ```ts
-supportsCompletion(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }
+supportsCompletion(capabilities: ServerCapabilities): capabilities is ServerCapabilities & { completionProvider: CompletionOptions }
 ```
 
 **Parameters:**
 - `capabilities: ServerCapabilities` — The server capabilities to check.
 
-**Returns:** `capabilities is ServerCapabilities<any> & { completionProvider: CompletionOptions }`
+**Returns:** `capabilities is ServerCapabilities & { completionProvider: CompletionOptions }`
 
 ### supportsDefinition
 
 Returns `true` when `definitionProvider` is declared in the server capabilities.
 
 ```ts
-supportsDefinition(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }
+supportsDefinition(capabilities: ServerCapabilities): capabilities is ServerCapabilities & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }
 ```
 
 **Parameters:**
 - `capabilities: ServerCapabilities` — The server capabilities to check.
 
-**Returns:** `capabilities is ServerCapabilities<any> & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }`
+**Returns:** `capabilities is ServerCapabilities & { definitionProvider: NonNullable<boolean | DefinitionOptions | undefined> }`
 
 ### supportsReferences
 
 Returns `true` when `referencesProvider` is declared in the server capabilities.
 
 ```ts
-supportsReferences(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { referencesProvider: NonNullable<boolean | ReferenceOptions | undefined> }
+supportsReferences(capabilities: ServerCapabilities): capabilities is ServerCapabilities & { referencesProvider: NonNullable<boolean | ReferenceOptions | undefined> }
 ```
 
 **Parameters:**
 - `capabilities: ServerCapabilities` — The server capabilities to check.
 
-**Returns:** `capabilities is ServerCapabilities<any> & { referencesProvider: NonNullable<boolean | ReferenceOptions | undefined> }`
+**Returns:** `capabilities is ServerCapabilities & { referencesProvider: NonNullable<boolean | ReferenceOptions | undefined> }`
 
 ### supportsDocumentSymbol
 
 Returns `true` when `documentSymbolProvider` is declared in the server capabilities.
 
 ```ts
-supportsDocumentSymbol(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { documentSymbolProvider: NonNullable<boolean | DocumentSymbolOptions | undefined> }
+supportsDocumentSymbol(capabilities: ServerCapabilities): capabilities is ServerCapabilities & { documentSymbolProvider: NonNullable<boolean | DocumentSymbolOptions | undefined> }
 ```
 
 **Parameters:**
 - `capabilities: ServerCapabilities` — The server capabilities to check.
 
-**Returns:** `capabilities is ServerCapabilities<any> & { documentSymbolProvider: NonNullable<boolean | DocumentSymbolOptions | undefined> }`
+**Returns:** `capabilities is ServerCapabilities & { documentSymbolProvider: NonNullable<boolean | DocumentSymbolOptions | undefined> }`
 
 ### supportsWorkspaceFolders
 
 Returns `true` when the server supports workspace folders.
 
 ```ts
-supportsWorkspaceFolders(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { workspace: { workspaceFolders: { supported: true } } }
+supportsWorkspaceFolders(capabilities: ServerCapabilities): capabilities is ServerCapabilities & { workspace: { workspaceFolders: { supported: true } } }
 ```
 
 **Parameters:**
 - `capabilities: ServerCapabilities` — The server capabilities to check.
 
-**Returns:** `capabilities is ServerCapabilities<any> & { workspace: { workspaceFolders: { supported: true } } }`
+**Returns:** `capabilities is ServerCapabilities & { workspace: { workspaceFolders: { supported: true } } }`
 
 ### supportsNotebookDocumentSync
 
 Helper to check if notebook document sync is supported by the server.
 
 ```ts
-supportsNotebookDocumentSync(capabilities: ServerCapabilities): capabilities is ServerCapabilities<any> & { notebookDocumentSync: NonNullable<NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | undefined> }
+supportsNotebookDocumentSync(capabilities: ServerCapabilities): capabilities is ServerCapabilities & { notebookDocumentSync: NonNullable<NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | undefined> }
 ```
 
 **Parameters:**
 - `capabilities: ServerCapabilities` — The server capabilities to check.
 
-**Returns:** `capabilities is ServerCapabilities<any> & { notebookDocumentSync: NonNullable<NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | undefined> }`
+**Returns:** `capabilities is ServerCapabilities & { notebookDocumentSync: NonNullable<NotebookDocumentSyncOptions | NotebookDocumentSyncRegistrationOptions | undefined> }`
 
 ### supportsFileWatching
 
@@ -1290,6 +1290,242 @@ constructor(): DocumentVersionTracker
 - `currentVersion(uri: string): number | undefined` — Returns the current tracked version, if any.
 - `close(uri: string): void` — Stops tracking a document URI.
 
+### ApplyKind
+
+LSP Protocol Enums
+
+Emitted as const objects + union type aliases for structural compatibility
+with vscode-languageserver-protocol, which uses the same pattern.
+
+Auto-generated from metaModel.json
+DO NOT EDIT MANUALLY
+
+```ts
+type ApplyKind = 1 | 2
+```
+
+### CodeActionKind
+
+```ts
+type CodeActionKind = "" | "quickfix" | "refactor" | "refactor.extract" | "refactor.inline" | "refactor.move" | "refactor.rewrite" | "source" | "source.organizeImports" | "source.fixAll" | "notebook" | string
+```
+
+### CodeActionTag
+
+```ts
+type CodeActionTag = 1
+```
+
+### CodeActionTriggerKind
+
+```ts
+type CodeActionTriggerKind = 1 | 2
+```
+
+### CompletionItemKind
+
+```ts
+type CompletionItemKind = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25
+```
+
+### CompletionItemTag
+
+```ts
+type CompletionItemTag = 1
+```
+
+### CompletionTriggerKind
+
+```ts
+type CompletionTriggerKind = 1 | 2 | 3
+```
+
+### DiagnosticSeverity
+
+```ts
+type DiagnosticSeverity = 1 | 2 | 3 | 4
+```
+
+### DiagnosticTag
+
+```ts
+type DiagnosticTag = 1 | 2
+```
+
+### DocumentDiagnosticReportKind
+
+```ts
+type DocumentDiagnosticReportKind = "full" | "unchanged"
+```
+
+### DocumentHighlightKind
+
+```ts
+type DocumentHighlightKind = 1 | 2 | 3
+```
+
+### ErrorCodes
+
+```ts
+type ErrorCodes = -32700 | -32600 | -32601 | -32602 | -32603 | -32002 | -32001 | number
+```
+
+### FailureHandlingKind
+
+```ts
+type FailureHandlingKind = "abort" | "transactional" | "textOnlyTransactional" | "undo"
+```
+
+### FileOperationPatternKind
+
+```ts
+type FileOperationPatternKind = "file" | "folder"
+```
+
+### FoldingRangeKind
+
+```ts
+type FoldingRangeKind = "comment" | "imports" | "region" | string
+```
+
+### InlayHintKind
+
+```ts
+type InlayHintKind = 1 | 2
+```
+
+### InlineCompletionTriggerKind
+
+```ts
+type InlineCompletionTriggerKind = 1 | 2
+```
+
+### InsertTextFormat
+
+```ts
+type InsertTextFormat = 1 | 2
+```
+
+### InsertTextMode
+
+```ts
+type InsertTextMode = 1 | 2
+```
+
+### LanguageKind
+
+```ts
+type LanguageKind = "abap" | "bat" | "bibtex" | "clojure" | "coffeescript" | "c" | "cpp" | "csharp" | "css" | "d" | "pascal" | "diff" | "dart" | "dockerfile" | "elixir" | "erlang" | "fsharp" | "git-commit" | "git-rebase" | "go" | "groovy" | "handlebars" | "haskell" | "html" | "ini" | "java" | "javascript" | "javascriptreact" | "json" | "latex" | "less" | "lua" | "makefile" | "markdown" | "objective-c" | "objective-cpp" | "pascal" | "perl" | "perl6" | "php" | "plaintext" | "powershell" | "jade" | "python" | "r" | "razor" | "ruby" | "rust" | "scss" | "sass" | "scala" | "shaderlab" | "shellscript" | "sql" | "swift" | "typescript" | "typescriptreact" | "tex" | "vb" | "xml" | "xsl" | "yaml" | string
+```
+
+### LSPErrorCodes
+
+```ts
+type LSPErrorCodes = -32803 | -32802 | -32801 | -32800 | number
+```
+
+### MarkupKind
+
+```ts
+type MarkupKind = "plaintext" | "markdown"
+```
+
+### MessageType
+
+```ts
+type MessageType = 1 | 2 | 3 | 4 | 5
+```
+
+### MonikerKind
+
+```ts
+type MonikerKind = "import" | "export" | "local"
+```
+
+### NotebookCellKind
+
+```ts
+type NotebookCellKind = 1 | 2
+```
+
+### PositionEncodingKind
+
+```ts
+type PositionEncodingKind = "utf-8" | "utf-16" | "utf-32" | string
+```
+
+### PrepareSupportDefaultBehavior
+
+```ts
+type PrepareSupportDefaultBehavior = 1
+```
+
+### ResourceOperationKind
+
+```ts
+type ResourceOperationKind = "create" | "rename" | "delete"
+```
+
+### SemanticTokenModifiers
+
+```ts
+type SemanticTokenModifiers = "declaration" | "definition" | "readonly" | "static" | "deprecated" | "abstract" | "async" | "modification" | "documentation" | "defaultLibrary" | string
+```
+
+### SemanticTokenTypes
+
+```ts
+type SemanticTokenTypes = "namespace" | "type" | "class" | "enum" | "interface" | "struct" | "typeParameter" | "parameter" | "variable" | "property" | "enumMember" | "event" | "function" | "method" | "macro" | "keyword" | "modifier" | "comment" | "string" | "number" | "regexp" | "operator" | "decorator" | "label" | string
+```
+
+### SignatureHelpTriggerKind
+
+```ts
+type SignatureHelpTriggerKind = 1 | 2 | 3
+```
+
+### SymbolKind
+
+```ts
+type SymbolKind = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26
+```
+
+### SymbolTag
+
+```ts
+type SymbolTag = 1
+```
+
+### TextDocumentSaveReason
+
+```ts
+type TextDocumentSaveReason = 1 | 2 | 3
+```
+
+### TextDocumentSyncKind
+
+```ts
+type TextDocumentSyncKind = 0 | 1 | 2
+```
+
+### TokenFormat
+
+```ts
+type TokenFormat = "relative"
+```
+
+### TraceValue
+
+```ts
+type TraceValue = "off" | "messages" | "compact" | "verbose"
+```
+
+### UniquenessLevel
+
+```ts
+type UniquenessLevel = "document" | "project" | "group" | "scheme" | "global"
+```
+
 ### LSPRequestMethod
 
 Union type of all valid LSP request method names
@@ -1722,6 +1958,22 @@ Mapped type of all available LSP notification methods and their handler signatur
 type AvailableNotifications = Simplify<RemoveNever<{ [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{ [Method in keyof Notifications[Namespace] as CamelCase<StripNamespaceSuffix<Namespace & string, Method & string>>]: IsServerCapabilityEnabled<ServerCaps, Notifications[Namespace][Method]> extends true ? Notifications[Namespace][Method] : never }> }>>
 ```
 
+### FileChangeType
+
+### FileChangeType
+
+```ts
+type FileChangeType = 1 | 2 | 3
+```
+
+### WatchKind
+
+### WatchKind
+
+```ts
+type WatchKind = 1 | 2 | 4 | number
+```
+
 ### WorkDoneProgressValue
 
 WorkDoneProgress value types
@@ -1805,6 +2057,242 @@ Numeric severity levels for filtering log output.
 - `Info` = `2` — 
 - `Debug` = `3` — 
 - `Trace` = `4` — 
+
+### ApplyKind
+
+LSP Protocol Enums
+
+Emitted as const objects + union type aliases for structural compatibility
+with vscode-languageserver-protocol, which uses the same pattern.
+
+Auto-generated from metaModel.json
+DO NOT EDIT MANUALLY
+
+```ts
+const ApplyKind: { Replace: 1; Merge: 2 }
+```
+
+### CodeActionKind
+
+```ts
+const CodeActionKind: { Empty: ""; QuickFix: "quickfix"; Refactor: "refactor"; RefactorExtract: "refactor.extract"; RefactorInline: "refactor.inline"; RefactorMove: "refactor.move"; RefactorRewrite: "refactor.rewrite"; Source: "source"; SourceOrganizeImports: "source.organizeImports"; SourceFixAll: "source.fixAll"; Notebook: "notebook" }
+```
+
+### CodeActionTag
+
+```ts
+const CodeActionTag: { LLMGenerated: 1 }
+```
+
+### CodeActionTriggerKind
+
+```ts
+const CodeActionTriggerKind: { Invoked: 1; Automatic: 2 }
+```
+
+### CompletionItemKind
+
+```ts
+const CompletionItemKind: { Text: 1; Method: 2; Function: 3; Constructor: 4; Field: 5; Variable: 6; Class: 7; Interface: 8; Module: 9; Property: 10; Unit: 11; Value: 12; Enum: 13; Keyword: 14; Snippet: 15; Color: 16; File: 17; Reference: 18; Folder: 19; EnumMember: 20; Constant: 21; Struct: 22; Event: 23; Operator: 24; TypeParameter: 25 }
+```
+
+### CompletionItemTag
+
+```ts
+const CompletionItemTag: { Deprecated: 1 }
+```
+
+### CompletionTriggerKind
+
+```ts
+const CompletionTriggerKind: { Invoked: 1; TriggerCharacter: 2; TriggerForIncompleteCompletions: 3 }
+```
+
+### DiagnosticSeverity
+
+```ts
+const DiagnosticSeverity: { Error: 1; Warning: 2; Information: 3; Hint: 4 }
+```
+
+### DiagnosticTag
+
+```ts
+const DiagnosticTag: { Unnecessary: 1; Deprecated: 2 }
+```
+
+### DocumentDiagnosticReportKind
+
+```ts
+const DocumentDiagnosticReportKind: { Full: "full"; Unchanged: "unchanged" }
+```
+
+### DocumentHighlightKind
+
+```ts
+const DocumentHighlightKind: { Text: 1; Read: 2; Write: 3 }
+```
+
+### ErrorCodes
+
+```ts
+const ErrorCodes: { ParseError: -32700; InvalidRequest: -32600; MethodNotFound: -32601; InvalidParams: -32602; InternalError: -32603; ServerNotInitialized: -32002; UnknownErrorCode: -32001 }
+```
+
+### FailureHandlingKind
+
+```ts
+const FailureHandlingKind: { Abort: "abort"; Transactional: "transactional"; TextOnlyTransactional: "textOnlyTransactional"; Undo: "undo" }
+```
+
+### FileOperationPatternKind
+
+```ts
+const FileOperationPatternKind: { file: "file"; folder: "folder" }
+```
+
+### FoldingRangeKind
+
+```ts
+const FoldingRangeKind: { Comment: "comment"; Imports: "imports"; Region: "region" }
+```
+
+### InlayHintKind
+
+```ts
+const InlayHintKind: { Type: 1; Parameter: 2 }
+```
+
+### InlineCompletionTriggerKind
+
+```ts
+const InlineCompletionTriggerKind: { Invoked: 1; Automatic: 2 }
+```
+
+### InsertTextFormat
+
+```ts
+const InsertTextFormat: { PlainText: 1; Snippet: 2 }
+```
+
+### InsertTextMode
+
+```ts
+const InsertTextMode: { asIs: 1; adjustIndentation: 2 }
+```
+
+### LanguageKind
+
+```ts
+const LanguageKind: { ABAP: "abap"; WindowsBat: "bat"; BibTeX: "bibtex"; Clojure: "clojure"; Coffeescript: "coffeescript"; C: "c"; CPP: "cpp"; CSharp: "csharp"; CSS: "css"; D: "d"; Delphi: "pascal"; Diff: "diff"; Dart: "dart"; Dockerfile: "dockerfile"; Elixir: "elixir"; Erlang: "erlang"; FSharp: "fsharp"; GitCommit: "git-commit"; GitRebase: "git-rebase"; Go: "go"; Groovy: "groovy"; Handlebars: "handlebars"; Haskell: "haskell"; HTML: "html"; Ini: "ini"; Java: "java"; JavaScript: "javascript"; JavaScriptReact: "javascriptreact"; JSON: "json"; LaTeX: "latex"; Less: "less"; Lua: "lua"; Makefile: "makefile"; Markdown: "markdown"; ObjectiveC: "objective-c"; ObjectiveCPP: "objective-cpp"; Pascal: "pascal"; Perl: "perl"; Perl6: "perl6"; PHP: "php"; Plaintext: "plaintext"; Powershell: "powershell"; Pug: "jade"; Python: "python"; R: "r"; Razor: "razor"; Ruby: "ruby"; Rust: "rust"; SCSS: "scss"; SASS: "sass"; Scala: "scala"; ShaderLab: "shaderlab"; ShellScript: "shellscript"; SQL: "sql"; Swift: "swift"; TypeScript: "typescript"; TypeScriptReact: "typescriptreact"; TeX: "tex"; VisualBasic: "vb"; XML: "xml"; XSL: "xsl"; YAML: "yaml" }
+```
+
+### LSPErrorCodes
+
+```ts
+const LSPErrorCodes: { RequestFailed: -32803; ServerCancelled: -32802; ContentModified: -32801; RequestCancelled: -32800 }
+```
+
+### MarkupKind
+
+```ts
+const MarkupKind: { PlainText: "plaintext"; Markdown: "markdown" }
+```
+
+### MessageType
+
+```ts
+const MessageType: { Error: 1; Warning: 2; Info: 3; Log: 4; Debug: 5 }
+```
+
+### MonikerKind
+
+```ts
+const MonikerKind: { import: "import"; export: "export"; local: "local" }
+```
+
+### NotebookCellKind
+
+```ts
+const NotebookCellKind: { Markup: 1; Code: 2 }
+```
+
+### PositionEncodingKind
+
+```ts
+const PositionEncodingKind: { UTF8: "utf-8"; UTF16: "utf-16"; UTF32: "utf-32" }
+```
+
+### PrepareSupportDefaultBehavior
+
+```ts
+const PrepareSupportDefaultBehavior: { Identifier: 1 }
+```
+
+### ResourceOperationKind
+
+```ts
+const ResourceOperationKind: { Create: "create"; Rename: "rename"; Delete: "delete" }
+```
+
+### SemanticTokenModifiers
+
+```ts
+const SemanticTokenModifiers: { declaration: "declaration"; definition: "definition"; readonly: "readonly"; static: "static"; deprecated: "deprecated"; abstract: "abstract"; async: "async"; modification: "modification"; documentation: "documentation"; defaultLibrary: "defaultLibrary" }
+```
+
+### SemanticTokenTypes
+
+```ts
+const SemanticTokenTypes: { namespace: "namespace"; type: "type"; class: "class"; enum: "enum"; interface: "interface"; struct: "struct"; typeParameter: "typeParameter"; parameter: "parameter"; variable: "variable"; property: "property"; enumMember: "enumMember"; event: "event"; function: "function"; method: "method"; macro: "macro"; keyword: "keyword"; modifier: "modifier"; comment: "comment"; string: "string"; number: "number"; regexp: "regexp"; operator: "operator"; decorator: "decorator"; label: "label" }
+```
+
+### SignatureHelpTriggerKind
+
+```ts
+const SignatureHelpTriggerKind: { Invoked: 1; TriggerCharacter: 2; ContentChange: 3 }
+```
+
+### SymbolKind
+
+```ts
+const SymbolKind: { File: 1; Module: 2; Namespace: 3; Package: 4; Class: 5; Method: 6; Property: 7; Field: 8; Constructor: 9; Enum: 10; Interface: 11; Function: 12; Variable: 13; Constant: 14; String: 15; Number: 16; Boolean: 17; Array: 18; Object: 19; Key: 20; Null: 21; EnumMember: 22; Struct: 23; Event: 24; Operator: 25; TypeParameter: 26 }
+```
+
+### SymbolTag
+
+```ts
+const SymbolTag: { Deprecated: 1 }
+```
+
+### TextDocumentSaveReason
+
+```ts
+const TextDocumentSaveReason: { Manual: 1; AfterDelay: 2; FocusOut: 3 }
+```
+
+### TextDocumentSyncKind
+
+```ts
+const TextDocumentSyncKind: { None: 0; Full: 1; Incremental: 2 }
+```
+
+### TokenFormat
+
+```ts
+const TokenFormat: { Relative: "relative" }
+```
+
+### TraceValue
+
+```ts
+const TraceValue: { Off: "off"; Messages: "messages"; Compact: "compact"; Verbose: "verbose" }
+```
+
+### UniquenessLevel
+
+```ts
+const UniquenessLevel: { document: "document"; project: "project"; group: "group"; scheme: "scheme"; global: "global" }
+```
 
 ### RequestMethodMap
 
@@ -2060,7 +2548,7 @@ const DocumentSymbolParamsSchema: ZodObject<{ workDoneToken: ZodOptional<ZodUnio
 ### DocumentSymbolSchema
 
 ```ts
-const DocumentSymbolSchema: z.ZodObject<z.ZodRawShape>
+const DocumentSymbolSchema: z.ZodType<_DocumentSymbol>
 ```
 
 ### CodeActionContextSchema
@@ -2168,7 +2656,7 @@ const TextDocumentContentChangeEventSchema: ZodUnion<readonly [ZodObject<{ range
 ### InitializeParamsSchema
 
 ```ts
-const InitializeParamsSchema: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; processId: ZodUnion<readonly [ZodNumber, ZodLiteral<null>]>; clientInfo: ZodOptional<ZodObject<{ name: ZodString; version: ZodOptional<ZodString> }, $strip>>; locale: ZodOptional<ZodString>; rootPath: ZodOptional<ZodUnion<readonly [ZodString, ZodLiteral<null>]>>; rootUri: ZodUnion<readonly [ZodString, ZodLiteral<null>]>; capabilities: ZodObject<{ workspace: ZodOptional<ZodObject<{ applyEdit: ZodOptional<ZodBoolean>; workspaceEdit: ZodOptional<ZodObject<{ documentChanges: ZodOptional<(...)>; resourceOperations: ZodOptional<(...)>; failureHandling: ZodOptional<(...)>; normalizesLineEndings: ZodOptional<(...)>; changeAnnotationSupport: ZodOptional<(...)>; metadataSupport: ZodOptional<(...)>; snippetEditSupport: ZodOptional<(...)> }, $strip>>; didChangeConfiguration: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; didChangeWatchedFiles: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; relativePatternSupport: ZodOptional<(...)> }, $strip>>; symbol: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; symbolKind: ZodOptional<(...)>; tagSupport: ZodOptional<(...)>; resolveSupport: ZodOptional<(...)> }, $strip>>; executeCommand: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; workspaceFolders: ZodOptional<ZodBoolean>; configuration: ZodOptional<ZodBoolean>; semanticTokens: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; codeLens: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; fileOperations: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; didCreate: ZodOptional<(...)>; willCreate: ZodOptional<(...)>; didRename: ZodOptional<(...)>; willRename: ZodOptional<(...)>; didDelete: ZodOptional<(...)>; willDelete: ZodOptional<(...)> }, $strip>>; inlineValue: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; inlayHint: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; diagnostics: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; foldingRange: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; textDocumentContent: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>> }, $strip>>; textDocument: ZodOptional<ZodObject<{ synchronization: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; willSave: ZodOptional<(...)>; willSaveWaitUntil: ZodOptional<(...)>; didSave: ZodOptional<(...)> }, $strip>>; filters: ZodOptional<ZodObject<{ relativePatternSupport: ZodOptional<(...)> }, $strip>>; completion: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; completionItem: ZodOptional<(...)>; completionItemKind: ZodOptional<(...)>; insertTextMode: ZodOptional<(...)>; contextSupport: ZodOptional<(...)>; completionList: ZodOptional<(...)> }, $strip>>; hover: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; contentFormat: ZodOptional<(...)> }, $strip>>; signatureHelp: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; signatureInformation: ZodOptional<(...)>; contextSupport: ZodOptional<(...)> }, $strip>>; declaration: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; linkSupport: ZodOptional<(...)> }, $strip>>; definition: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; linkSupport: ZodOptional<(...)> }, $strip>>; typeDefinition: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; linkSupport: ZodOptional<(...)> }, $strip>>; implementation: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; linkSupport: ZodOptional<(...)> }, $strip>>; references: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; documentHighlight: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; documentSymbol: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; symbolKind: ZodOptional<(...)>; hierarchicalDocumentSymbolSupport: ZodOptional<(...)>; tagSupport: ZodOptional<(...)>; labelSupport: ZodOptional<(...)> }, $strip>>; codeAction: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; codeActionLiteralSupport: ZodOptional<(...)>; isPreferredSupport: ZodOptional<(...)>; disabledSupport: ZodOptional<(...)>; dataSupport: ZodOptional<(...)>; resolveSupport: ZodOptional<(...)>; honorsChangeAnnotations: ZodOptional<(...)>; documentationSupport: ZodOptional<(...)>; tagSupport: ZodOptional<(...)> }, $strip>>; codeLens: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; resolveSupport: ZodOptional<(...)> }, $strip>>; documentLink: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; tooltipSupport: ZodOptional<(...)> }, $strip>>; colorProvider: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; formatting: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; rangeFormatting: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; rangesSupport: ZodOptional<(...)> }, $strip>>; onTypeFormatting: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; rename: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; prepareSupport: ZodOptional<(...)>; prepareSupportDefaultBehavior: ZodOptional<(...)>; honorsChangeAnnotations: ZodOptional<(...)> }, $strip>>; foldingRange: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; rangeLimit: ZodOptional<(...)>; lineFoldingOnly: ZodOptional<(...)>; foldingRangeKind: ZodOptional<(...)>; foldingRange: ZodOptional<(...)> }, $strip>>; selectionRange: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; publishDiagnostics: ZodOptional<ZodObject<{ relatedInformation: ZodOptional<(...)>; tagSupport: ZodOptional<(...)>; codeDescriptionSupport: ZodOptional<(...)>; dataSupport: ZodOptional<(...)>; versionSupport: ZodOptional<(...)> }, $strip>>; callHierarchy: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; semanticTokens: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; requests: ZodObject<(...), (...)>; tokenTypes: ZodArray<(...)>; tokenModifiers: ZodArray<(...)>; formats: ZodArray<(...)>; overlappingTokenSupport: ZodOptional<(...)>; multilineTokenSupport: ZodOptional<(...)>; serverCancelSupport: ZodOptional<(...)>; augmentsSyntaxTokens: ZodOptional<(...)> }, $strip>>; linkedEditingRange: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; moniker: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; typeHierarchy: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; inlineValue: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; inlayHint: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; resolveSupport: ZodOptional<(...)> }, $strip>>; diagnostic: ZodOptional<ZodObject<{ relatedInformation: ZodOptional<(...)>; tagSupport: ZodOptional<(...)>; codeDescriptionSupport: ZodOptional<(...)>; dataSupport: ZodOptional<(...)>; dynamicRegistration: ZodOptional<(...)>; relatedDocumentSupport: ZodOptional<(...)>; markupMessageSupport: ZodOptional<(...)> }, $strip>>; inlineCompletion: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>> }, $strip>>; notebookDocument: ZodOptional<ZodObject<{ synchronization: ZodObject<{ dynamicRegistration: ZodOptional<ZodBoolean>; executionSummarySupport: ZodOptional<ZodBoolean> }, $strip> }, $strip>>; window: ZodOptional<ZodObject<{ workDoneProgress: ZodOptional<ZodBoolean>; showMessage: ZodOptional<ZodObject<{ messageActionItem: ZodOptional<(...)> }, $strip>>; showDocument: ZodOptional<ZodObject<{ support: ZodBoolean }, $strip>> }, $strip>>; general: ZodOptional<ZodObject<{ staleRequestSupport: ZodOptional<ZodObject<{ cancel: ZodBoolean; retryOnContentModified: ZodArray<(...)> }, $strip>>; regularExpressions: ZodOptional<ZodObject<{ engine: ZodString; version: ZodOptional<(...)> }, $strip>>; markdown: ZodOptional<ZodObject<{ parser: ZodString; version: ZodOptional<(...)>; allowedTags: ZodOptional<(...)> }, $strip>>; positionEncodings: ZodOptional<ZodArray<ZodUnion<readonly [(...), (...), (...), (...)]>>> }, $strip>>; experimental: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; initializationOptions: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>; trace: ZodOptional<ZodUnion<readonly [ZodLiteral<"off">, ZodLiteral<"messages">, ZodLiteral<"verbose">]>>; workspaceFolders: ZodOptional<ZodUnion<readonly [ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>>, ZodLiteral<null>]>> }, $strip>
+const InitializeParamsSchema: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; processId: ZodUnion<readonly [ZodNumber, ZodLiteral<null>]>; clientInfo: ZodOptional<ZodObject<{ name: ZodString; version: ZodOptional<ZodString> }, $strip>>; locale: ZodOptional<ZodString>; rootPath: ZodOptional<ZodUnion<readonly [ZodString, ZodLiteral<null>]>>; rootUri: ZodUnion<readonly [ZodString, ZodLiteral<null>]>; capabilities: ZodObject<{ workspace: ZodOptional<ZodObject<{ applyEdit: ZodOptional<ZodBoolean>; workspaceEdit: ZodOptional<ZodObject<{ documentChanges: ZodOptional<(...)>; resourceOperations: ZodOptional<(...)>; failureHandling: ZodOptional<(...)>; normalizesLineEndings: ZodOptional<(...)>; changeAnnotationSupport: ZodOptional<(...)>; metadataSupport: ZodOptional<(...)>; snippetEditSupport: ZodOptional<(...)> }, $strip>>; didChangeConfiguration: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; didChangeWatchedFiles: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; relativePatternSupport: ZodOptional<(...)> }, $strip>>; symbol: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; symbolKind: ZodOptional<(...)>; tagSupport: ZodOptional<(...)>; resolveSupport: ZodOptional<(...)> }, $strip>>; executeCommand: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; workspaceFolders: ZodOptional<ZodBoolean>; configuration: ZodOptional<ZodBoolean>; semanticTokens: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; codeLens: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; fileOperations: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; didCreate: ZodOptional<(...)>; willCreate: ZodOptional<(...)>; didRename: ZodOptional<(...)>; willRename: ZodOptional<(...)>; didDelete: ZodOptional<(...)>; willDelete: ZodOptional<(...)> }, $strip>>; inlineValue: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; inlayHint: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; diagnostics: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; foldingRange: ZodOptional<ZodObject<{ refreshSupport: ZodOptional<(...)> }, $strip>>; textDocumentContent: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>> }, $strip>>; textDocument: ZodOptional<ZodObject<{ synchronization: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; willSave: ZodOptional<(...)>; willSaveWaitUntil: ZodOptional<(...)>; didSave: ZodOptional<(...)> }, $strip>>; filters: ZodOptional<ZodObject<{ relativePatternSupport: ZodOptional<(...)> }, $strip>>; completion: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; completionItem: ZodOptional<(...)>; completionItemKind: ZodOptional<(...)>; insertTextMode: ZodOptional<(...)>; contextSupport: ZodOptional<(...)>; completionList: ZodOptional<(...)> }, $strip>>; hover: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; contentFormat: ZodOptional<(...)> }, $strip>>; signatureHelp: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; signatureInformation: ZodOptional<(...)>; contextSupport: ZodOptional<(...)> }, $strip>>; declaration: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; linkSupport: ZodOptional<(...)> }, $strip>>; definition: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; linkSupport: ZodOptional<(...)> }, $strip>>; typeDefinition: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; linkSupport: ZodOptional<(...)> }, $strip>>; implementation: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; linkSupport: ZodOptional<(...)> }, $strip>>; references: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; documentHighlight: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; documentSymbol: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; symbolKind: ZodOptional<(...)>; hierarchicalDocumentSymbolSupport: ZodOptional<(...)>; tagSupport: ZodOptional<(...)>; labelSupport: ZodOptional<(...)> }, $strip>>; codeAction: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; codeActionLiteralSupport: ZodOptional<(...)>; isPreferredSupport: ZodOptional<(...)>; disabledSupport: ZodOptional<(...)>; dataSupport: ZodOptional<(...)>; resolveSupport: ZodOptional<(...)>; honorsChangeAnnotations: ZodOptional<(...)>; documentationSupport: ZodOptional<(...)>; tagSupport: ZodOptional<(...)> }, $strip>>; codeLens: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; resolveSupport: ZodOptional<(...)> }, $strip>>; documentLink: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; tooltipSupport: ZodOptional<(...)> }, $strip>>; colorProvider: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; formatting: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; rangeFormatting: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; rangesSupport: ZodOptional<(...)> }, $strip>>; onTypeFormatting: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; rename: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; prepareSupport: ZodOptional<(...)>; prepareSupportDefaultBehavior: ZodOptional<(...)>; honorsChangeAnnotations: ZodOptional<(...)> }, $strip>>; foldingRange: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; rangeLimit: ZodOptional<(...)>; lineFoldingOnly: ZodOptional<(...)>; foldingRangeKind: ZodOptional<(...)>; foldingRange: ZodOptional<(...)> }, $strip>>; selectionRange: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; publishDiagnostics: ZodOptional<ZodObject<{ relatedInformation: ZodOptional<(...)>; tagSupport: ZodOptional<(...)>; codeDescriptionSupport: ZodOptional<(...)>; dataSupport: ZodOptional<(...)>; versionSupport: ZodOptional<(...)> }, $strip>>; callHierarchy: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; semanticTokens: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; requests: ZodObject<(...), (...)>; tokenTypes: ZodArray<(...)>; tokenModifiers: ZodArray<(...)>; formats: ZodArray<(...)>; overlappingTokenSupport: ZodOptional<(...)>; multilineTokenSupport: ZodOptional<(...)>; serverCancelSupport: ZodOptional<(...)>; augmentsSyntaxTokens: ZodOptional<(...)> }, $strip>>; linkedEditingRange: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; moniker: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; typeHierarchy: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; inlineValue: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>>; inlayHint: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)>; resolveSupport: ZodOptional<(...)> }, $strip>>; diagnostic: ZodOptional<ZodObject<{ relatedInformation: ZodOptional<(...)>; tagSupport: ZodOptional<(...)>; codeDescriptionSupport: ZodOptional<(...)>; dataSupport: ZodOptional<(...)>; dynamicRegistration: ZodOptional<(...)>; relatedDocumentSupport: ZodOptional<(...)>; markupMessageSupport: ZodOptional<(...)> }, $strip>>; inlineCompletion: ZodOptional<ZodObject<{ dynamicRegistration: ZodOptional<(...)> }, $strip>> }, $strip>>; notebookDocument: ZodOptional<ZodObject<{ synchronization: ZodObject<{ dynamicRegistration: ZodOptional<ZodBoolean>; executionSummarySupport: ZodOptional<ZodBoolean> }, $strip> }, $strip>>; window: ZodOptional<ZodObject<{ workDoneProgress: ZodOptional<ZodBoolean>; showMessage: ZodOptional<ZodObject<{ messageActionItem: ZodOptional<(...)> }, $strip>>; showDocument: ZodOptional<ZodObject<{ support: ZodBoolean }, $strip>> }, $strip>>; general: ZodOptional<ZodObject<{ staleRequestSupport: ZodOptional<ZodObject<{ cancel: ZodBoolean; retryOnContentModified: ZodArray<(...)> }, $strip>>; regularExpressions: ZodOptional<ZodObject<{ engine: ZodString; version: ZodOptional<(...)> }, $strip>>; markdown: ZodOptional<ZodObject<{ parser: ZodString; version: ZodOptional<(...)>; allowedTags: ZodOptional<(...)> }, $strip>>; positionEncodings: ZodOptional<ZodArray<ZodUnion<readonly [(...), (...), (...), (...)]>>> }, $strip>>; experimental: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; initializationOptions: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>; trace: ZodOptional<ZodUnion<readonly [ZodLiteral<"off">, ZodLiteral<"messages">, ZodLiteral<"compact">, ZodLiteral<"verbose">]>>; workspaceFolders: ZodOptional<ZodUnion<readonly [ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>>, ZodLiteral<null>]>> }, $strip>
 ```
 
 ### DidOpenTextDocumentParamsSchema
@@ -2200,7 +2688,7 @@ const DidSaveTextDocumentParamsSchema: ZodObject<{ textDocument: ZodObject<{ uri
 Schema registry for method-based lookup
 
 ```ts
-const LSPSchemas: { $/cancelRequest: ZodObject<{ id: ZodUnion<readonly [ZodNumber, ZodString]> }, $strip>; $/logTrace: ZodObject<{ message: ZodString; verbose: ZodOptional<ZodString> }, $strip>; $/progress: ZodObject<{ token: ZodUnion<readonly [ZodNumber, ZodString]>; value: ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>> }, $strip>; $/setTrace: ZodObject<{ value: ZodUnion<readonly [ZodLiteral<"off">, ZodLiteral<"messages">, ZodLiteral<"verbose">]> }, $strip>; callHierarchy/incomingCalls: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; item: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; selectionRange: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }, $strip>; callHierarchy/outgoingCalls: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; item: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; selectionRange: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }, $strip>; client/registerCapability: ZodObject<{ registrations: ZodArray<ZodObject<{ id: ZodString; method: ZodString; registerOptions: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>> }, $strip>; client/unregisterCapability: ZodObject<{ unregisterations: ZodArray<ZodObject<{ id: ZodString; method: ZodString }, $strip>> }, $strip>; codeAction/resolve: ZodObject<{ title: ZodString; kind: ZodOptional<ZodUnion<readonly [ZodLiteral<"">, ZodLiteral<"quickfix">, ZodLiteral<"refactor">, ZodLiteral<"refactor.extract">, ZodLiteral<"refactor.inline">, ZodLiteral<"refactor.move">, ZodLiteral<"refactor.rewrite">, ZodLiteral<"source">, ZodLiteral<"source.organizeImports">, ZodLiteral<"source.fixAll">, ZodLiteral<"notebook">, ZodString]>>; diagnostics: ZodOptional<ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip>; severity: ZodOptional<ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>, ZodLiteral<(...)>, ZodLiteral<(...)>]>>; code: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; codeDescription: ZodOptional<ZodObject<{ href: ZodString }, $strip>>; source: ZodOptional<ZodString>; message: ZodUnion<readonly [ZodString, ZodObject<{ kind: ...; value: ... }, $strip>]>; tags: ZodOptional<ZodArray<ZodUnion<readonly [(...), (...)]>>>; relatedInformation: ZodOptional<ZodArray<ZodObject<{ location: ...; message: ... }, $strip>>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<(...), (...)>>>> }, $strip>>>; isPreferred: ZodOptional<ZodBoolean>; disabled: ZodOptional<ZodObject<{ reason: ZodString }, $strip>>; edit: ZodOptional<ZodObject<{ changes: ZodOptional<ZodRecord<ZodString, ZodArray<ZodObject<{ range: ...; newText: ... }, $strip>>>>; documentChanges: ZodOptional<ZodArray<ZodUnion<readonly [ZodObject<(...), (...)>, ZodObject<(...), (...)>, ZodObject<(...), (...)>, ZodObject<(...), (...)>]>>>; changeAnnotations: ZodOptional<ZodRecord<ZodString, ZodObject<{ label: ZodString; needsConfirmation: ZodOptional<(...)>; description: ZodOptional<(...)> }, $strip>>> }, $strip>>; command: ZodOptional<ZodObject<{ title: ZodString; tooltip: ZodOptional<ZodString>; command: ZodString; arguments: ZodOptional<ZodArray<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<(...), (...)>>>>> }, $strip>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>; tags: ZodOptional<ZodArray<ZodLiteral<1>>> }, $strip>; codeLens/resolve: ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; command: ZodOptional<ZodObject<{ title: ZodString; tooltip: ZodOptional<ZodString>; command: ZodString; arguments: ZodOptional<ZodArray<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<(...), (...)>>>>> }, $strip>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; completionItem/resolve: ZodObject<{ label: ZodString; labelDetails: ZodOptional<ZodObject<{ detail: ZodOptional<ZodString>; description: ZodOptional<ZodString> }, $strip>>; kind: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>]>>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; documentation: ZodOptional<ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>]>; value: ZodString }, $strip>]>>; deprecated: ZodOptional<ZodBoolean>; preselect: ZodOptional<ZodBoolean>; sortText: ZodOptional<ZodString>; filterText: ZodOptional<ZodString>; insertText: ZodOptional<ZodString>; insertTextFormat: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>>; insertTextMode: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>>; textEdit: ZodOptional<ZodUnion<readonly [ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; newText: ZodString }, $strip>, ZodObject<{ newText: ZodString; insert: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; replace: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip> }, $strip>]>>; textEditText: ZodOptional<ZodString>; additionalTextEdits: ZodOptional<ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip>; newText: ZodString }, $strip>>>; commitCharacters: ZodOptional<ZodArray<ZodString>>; command: ZodOptional<ZodObject<{ title: ZodString; tooltip: ZodOptional<ZodString>; command: ZodString; arguments: ZodOptional<ZodArray<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<(...), (...)>>>>> }, $strip>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; documentLink/resolve: ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; target: ZodOptional<ZodString>; tooltip: ZodOptional<ZodString>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; initialize: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; processId: ZodUnion<readonly [ZodNumber, ZodLiteral<null>]>; clientInfo: ZodOptional<ZodObject<{ name: ZodString; version: ZodOptional<ZodString> }, $strip>>; locale: ZodOptional<ZodString>; rootPath: ZodOptional<ZodUnion<readonly [ZodString, ZodLiteral<null>]>>; rootUri: ZodUnion<readonly [ZodString, ZodLiteral<null>]>; capabilities: ZodObject<{ workspace: ZodOptional<ZodObject<{ applyEdit: ZodOptional<ZodBoolean>; workspaceEdit: ZodOptional<ZodObject<{ documentChanges: ...; resourceOperations: ...; failureHandling: ...; normalizesLineEndings: ...; changeAnnotationSupport: ...; metadataSupport: ...; snippetEditSupport: ... }, $strip>>; didChangeConfiguration: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; didChangeWatchedFiles: ZodOptional<ZodObject<{ dynamicRegistration: ...; relativePatternSupport: ... }, $strip>>; symbol: ZodOptional<ZodObject<{ dynamicRegistration: ...; symbolKind: ...; tagSupport: ...; resolveSupport: ... }, $strip>>; executeCommand: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; workspaceFolders: ZodOptional<ZodBoolean>; configuration: ZodOptional<ZodBoolean>; semanticTokens: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; codeLens: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; fileOperations: ZodOptional<ZodObject<{ dynamicRegistration: ...; didCreate: ...; willCreate: ...; didRename: ...; willRename: ...; didDelete: ...; willDelete: ... }, $strip>>; inlineValue: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; inlayHint: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; diagnostics: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; foldingRange: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; textDocumentContent: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>> }, $strip>>; textDocument: ZodOptional<ZodObject<{ synchronization: ZodOptional<ZodObject<{ dynamicRegistration: ...; willSave: ...; willSaveWaitUntil: ...; didSave: ... }, $strip>>; filters: ZodOptional<ZodObject<{ relativePatternSupport: ... }, $strip>>; completion: ZodOptional<ZodObject<{ dynamicRegistration: ...; completionItem: ...; completionItemKind: ...; insertTextMode: ...; contextSupport: ...; completionList: ... }, $strip>>; hover: ZodOptional<ZodObject<{ dynamicRegistration: ...; contentFormat: ... }, $strip>>; signatureHelp: ZodOptional<ZodObject<{ dynamicRegistration: ...; signatureInformation: ...; contextSupport: ... }, $strip>>; declaration: ZodOptional<ZodObject<{ dynamicRegistration: ...; linkSupport: ... }, $strip>>; definition: ZodOptional<ZodObject<{ dynamicRegistration: ...; linkSupport: ... }, $strip>>; typeDefinition: ZodOptional<ZodObject<{ dynamicRegistration: ...; linkSupport: ... }, $strip>>; implementation: ZodOptional<ZodObject<{ dynamicRegistration: ...; linkSupport: ... }, $strip>>; references: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; documentHighlight: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; documentSymbol: ZodOptional<ZodObject<{ dynamicRegistration: ...; symbolKind: ...; hierarchicalDocumentSymbolSupport: ...; tagSupport: ...; labelSupport: ... }, $strip>>; codeAction: ZodOptional<ZodObject<{ dynamicRegistration: ...; codeActionLiteralSupport: ...; isPreferredSupport: ...; disabledSupport: ...; dataSupport: ...; resolveSupport: ...; honorsChangeAnnotations: ...; documentationSupport: ...; tagSupport: ... }, $strip>>; codeLens: ZodOptional<ZodObject<{ dynamicRegistration: ...; resolveSupport: ... }, $strip>>; documentLink: ZodOptional<ZodObject<{ dynamicRegistration: ...; tooltipSupport: ... }, $strip>>; colorProvider: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; formatting: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; rangeFormatting: ZodOptional<ZodObject<{ dynamicRegistration: ...; rangesSupport: ... }, $strip>>; onTypeFormatting: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; rename: ZodOptional<ZodObject<{ dynamicRegistration: ...; prepareSupport: ...; prepareSupportDefaultBehavior: ...; honorsChangeAnnotations: ... }, $strip>>; foldingRange: ZodOptional<ZodObject<{ dynamicRegistration: ...; rangeLimit: ...; lineFoldingOnly: ...; foldingRangeKind: ...; foldingRange: ... }, $strip>>; selectionRange: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; publishDiagnostics: ZodOptional<ZodObject<{ relatedInformation: ...; tagSupport: ...; codeDescriptionSupport: ...; dataSupport: ...; versionSupport: ... }, $strip>>; callHierarchy: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; semanticTokens: ZodOptional<ZodObject<{ dynamicRegistration: ...; requests: ...; tokenTypes: ...; tokenModifiers: ...; formats: ...; overlappingTokenSupport: ...; multilineTokenSupport: ...; serverCancelSupport: ...; augmentsSyntaxTokens: ... }, $strip>>; linkedEditingRange: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; moniker: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; typeHierarchy: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; inlineValue: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; inlayHint: ZodOptional<ZodObject<{ dynamicRegistration: ...; resolveSupport: ... }, $strip>>; diagnostic: ZodOptional<ZodObject<{ relatedInformation: ...; tagSupport: ...; codeDescriptionSupport: ...; dataSupport: ...; dynamicRegistration: ...; relatedDocumentSupport: ...; markupMessageSupport: ... }, $strip>>; inlineCompletion: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>> }, $strip>>; notebookDocument: ZodOptional<ZodObject<{ synchronization: ZodObject<{ dynamicRegistration: ZodOptional<(...)>; executionSummarySupport: ZodOptional<(...)> }, $strip> }, $strip>>; window: ZodOptional<ZodObject<{ workDoneProgress: ZodOptional<ZodBoolean>; showMessage: ZodOptional<ZodObject<{ messageActionItem: ... }, $strip>>; showDocument: ZodOptional<ZodObject<{ support: ... }, $strip>> }, $strip>>; general: ZodOptional<ZodObject<{ staleRequestSupport: ZodOptional<ZodObject<{ cancel: ...; retryOnContentModified: ... }, $strip>>; regularExpressions: ZodOptional<ZodObject<{ engine: ...; version: ... }, $strip>>; markdown: ZodOptional<ZodObject<{ parser: ...; version: ...; allowedTags: ... }, $strip>>; positionEncodings: ZodOptional<ZodArray<ZodUnion<(...)>>> }, $strip>>; experimental: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; initializationOptions: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>; trace: ZodOptional<ZodUnion<readonly [ZodLiteral<"off">, ZodLiteral<"messages">, ZodLiteral<"verbose">]>>; workspaceFolders: ZodOptional<ZodUnion<readonly [ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>>, ZodLiteral<null>]>> }, $strip>; initialized: ZodObject<{}, $strip>; inlayHint/resolve: ZodObject<{ position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; label: ZodUnion<readonly [ZodString, ZodArray<ZodObject<{ value: ZodString; tooltip: ZodOptional<ZodUnion<readonly [(...), (...)]>>; location: ZodOptional<ZodObject<{ uri: ...; range: ... }, $strip>>; command: ZodOptional<ZodObject<{ title: ...; tooltip: ...; command: ...; arguments: ... }, $strip>> }, $strip>>]>; kind: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>>; textEdits: ZodOptional<ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip>; newText: ZodString }, $strip>>>; tooltip: ZodOptional<ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>]>; value: ZodString }, $strip>]>>; paddingLeft: ZodOptional<ZodBoolean>; paddingRight: ZodOptional<ZodBoolean>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; notebookDocument/didChange: ZodObject<{ notebookDocument: ZodObject<{ version: ZodNumber; uri: ZodString }, $strip>; change: ZodObject<{ metadata: ZodOptional<ZodRecord<ZodString, ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>>; cells: ZodOptional<ZodObject<{ structure: ZodOptional<ZodObject<{ array: ...; didOpen: ...; didClose: ... }, $strip>>; data: ZodOptional<ZodArray<ZodObject<(...), (...)>>>; textContent: ZodOptional<ZodArray<ZodObject<(...), (...)>>> }, $strip>> }, $strip> }, $strip>; notebookDocument/didClose: ZodObject<{ notebookDocument: ZodObject<{ uri: ZodString }, $strip>; cellTextDocuments: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; notebookDocument/didOpen: ZodObject<{ notebookDocument: ZodObject<{ uri: ZodString; notebookType: ZodString; version: ZodNumber; metadata: ZodOptional<ZodRecord<ZodString, ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>>; cells: ZodArray<ZodObject<{ kind: ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>]>; document: ZodString; metadata: ZodOptional<ZodRecord<ZodString, ZodLazy<(...)>>>; executionSummary: ZodOptional<ZodObject<{ executionOrder: ...; success: ... }, $strip>> }, $strip>> }, $strip>; cellTextDocuments: ZodArray<ZodObject<{ uri: ZodString; languageId: ZodUnion<readonly [ZodLiteral<"abap">, ZodLiteral<"bat">, ZodLiteral<"bibtex">, ZodLiteral<"clojure">, ZodLiteral<"coffeescript">, ZodLiteral<"c">, ZodLiteral<"cpp">, ZodLiteral<"csharp">, ZodLiteral<"css">, ZodLiteral<"d">, ZodLiteral<"pascal">, ZodLiteral<"diff">, ZodLiteral<"dart">, ZodLiteral<"dockerfile">, ZodLiteral<"elixir">, ZodLiteral<"erlang">, ZodLiteral<"fsharp">, ZodLiteral<"git-commit">, ZodLiteral<"git-rebase">, ZodLiteral<"go">, ZodLiteral<"groovy">, ZodLiteral<"handlebars">, ZodLiteral<"haskell">, ZodLiteral<"html">, ZodLiteral<"ini">, ZodLiteral<"java">, ZodLiteral<"javascript">, ZodLiteral<"javascriptreact">, ZodLiteral<"json">, ZodLiteral<"latex">, ZodLiteral<"less">, ZodLiteral<"lua">, ZodLiteral<"makefile">, ZodLiteral<"markdown">, ZodLiteral<"objective-c">, ZodLiteral<"objective-cpp">, ZodLiteral<"pascal">, ZodLiteral<"perl">, ZodLiteral<"perl6">, ZodLiteral<"php">, ZodLiteral<"plaintext">, ZodLiteral<"powershell">, ZodLiteral<"jade">, ZodLiteral<"python">, ZodLiteral<"r">, ZodLiteral<"razor">, ZodLiteral<"ruby">, ZodLiteral<"rust">, ZodLiteral<"scss">, ZodLiteral<"sass">, ZodLiteral<"scala">, ZodLiteral<"shaderlab">, ZodLiteral<"shellscript">, ZodLiteral<"sql">, ZodLiteral<"swift">, ZodLiteral<"typescript">, ZodLiteral<"typescriptreact">, ZodLiteral<"tex">, ZodLiteral<"vb">, ZodLiteral<"xml">, ZodLiteral<"xsl">, ZodLiteral<"yaml">, ZodString]>; version: ZodNumber; text: ZodString }, $strip>> }, $strip>; notebookDocument/didSave: ZodObject<{ notebookDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; telemetry/event: ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>; textDocument/codeAction: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; context: ZodObject<{ diagnostics: ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; severity: ZodOptional<ZodUnion<readonly [(...), (...), (...), (...)]>>; code: ZodOptional<ZodUnion<readonly [(...), (...)]>>; codeDescription: ZodOptional<ZodObject<{ href: ... }, $strip>>; source: ZodOptional<ZodString>; message: ZodUnion<readonly [ZodString, ZodObject<(...), (...)>]>; tags: ZodOptional<ZodArray<ZodUnion<(...)>>>; relatedInformation: ZodOptional<ZodArray<ZodObject<(...), (...)>>>; data: ZodOptional<ZodLazy<ZodType<(...), (...), (...)>>> }, $strip>>; only: ZodOptional<ZodArray<ZodUnion<readonly [ZodLiteral<"">, ZodLiteral<"quickfix">, ZodLiteral<"refactor">, ZodLiteral<"refactor.extract">, ZodLiteral<"refactor.inline">, ZodLiteral<"refactor.move">, ZodLiteral<"refactor.rewrite">, ZodLiteral<"source">, ZodLiteral<"source.organizeImports">, ZodLiteral<"source.fixAll">, ZodLiteral<"notebook">, ZodString]>>>; triggerKind: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>> }, $strip> }, $strip>; textDocument/codeLens: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/colorPresentation: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; color: ZodObject<{ red: ZodNumber; green: ZodNumber; blue: ZodNumber; alpha: ZodNumber }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip> }, $strip>; textDocument/completion: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; context: ZodOptional<ZodObject<{ triggerKind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]>; triggerCharacter: ZodOptional<ZodString> }, $strip>> }, $strip>; textDocument/declaration: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/definition: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/diagnostic: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; identifier: ZodOptional<ZodString>; previousResultId: ZodOptional<ZodString> }, $strip>; textDocument/didChange: ZodObject<{ textDocument: ZodObject<{ uri: ZodString; version: ZodNumber }, $strip>; contentChanges: ZodArray<ZodUnion<readonly [ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; rangeLength: ZodOptional<ZodNumber>; text: ZodString }, $strip>, ZodObject<{ text: ZodString }, $strip>]>> }, $strip>; textDocument/didClose: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/didOpen: ZodObject<{ textDocument: ZodObject<{ uri: ZodString; languageId: ZodUnion<readonly [ZodLiteral<"abap">, ZodLiteral<"bat">, ZodLiteral<"bibtex">, ZodLiteral<"clojure">, ZodLiteral<"coffeescript">, ZodLiteral<"c">, ZodLiteral<"cpp">, ZodLiteral<"csharp">, ZodLiteral<"css">, ZodLiteral<"d">, ZodLiteral<"pascal">, ZodLiteral<"diff">, ZodLiteral<"dart">, ZodLiteral<"dockerfile">, ZodLiteral<"elixir">, ZodLiteral<"erlang">, ZodLiteral<"fsharp">, ZodLiteral<"git-commit">, ZodLiteral<"git-rebase">, ZodLiteral<"go">, ZodLiteral<"groovy">, ZodLiteral<"handlebars">, ZodLiteral<"haskell">, ZodLiteral<"html">, ZodLiteral<"ini">, ZodLiteral<"java">, ZodLiteral<"javascript">, ZodLiteral<"javascriptreact">, ZodLiteral<"json">, ZodLiteral<"latex">, ZodLiteral<"less">, ZodLiteral<"lua">, ZodLiteral<"makefile">, ZodLiteral<"markdown">, ZodLiteral<"objective-c">, ZodLiteral<"objective-cpp">, ZodLiteral<"pascal">, ZodLiteral<"perl">, ZodLiteral<"perl6">, ZodLiteral<"php">, ZodLiteral<"plaintext">, ZodLiteral<"powershell">, ZodLiteral<"jade">, ZodLiteral<"python">, ZodLiteral<"r">, ZodLiteral<"razor">, ZodLiteral<"ruby">, ZodLiteral<"rust">, ZodLiteral<"scss">, ZodLiteral<"sass">, ZodLiteral<"scala">, ZodLiteral<"shaderlab">, ZodLiteral<"shellscript">, ZodLiteral<"sql">, ZodLiteral<"swift">, ZodLiteral<"typescript">, ZodLiteral<"typescriptreact">, ZodLiteral<"tex">, ZodLiteral<"vb">, ZodLiteral<"xml">, ZodLiteral<"xsl">, ZodLiteral<"yaml">, ZodString]>; version: ZodNumber; text: ZodString }, $strip> }, $strip>; textDocument/didSave: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; text: ZodOptional<ZodString> }, $strip>; textDocument/documentColor: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/documentHighlight: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/documentLink: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/documentSymbol: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/foldingRange: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/formatting: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; options: ZodObject<{ tabSize: ZodNumber; insertSpaces: ZodBoolean; trimTrailingWhitespace: ZodOptional<ZodBoolean>; insertFinalNewline: ZodOptional<ZodBoolean>; trimFinalNewlines: ZodOptional<ZodBoolean> }, $strip> }, $strip>; textDocument/hover: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/implementation: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/inlayHint: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip> }, $strip>; textDocument/inlineCompletion: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; context: ZodObject<{ triggerKind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>; selectedCompletionInfo: ZodOptional<ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; text: ZodString }, $strip>> }, $strip> }, $strip>; textDocument/inlineValue: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; context: ZodObject<{ frameId: ZodNumber; stoppedLocation: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip> }, $strip> }, $strip>; textDocument/linkedEditingRange: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/moniker: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/onTypeFormatting: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; ch: ZodString; options: ZodObject<{ tabSize: ZodNumber; insertSpaces: ZodBoolean; trimTrailingWhitespace: ZodOptional<ZodBoolean>; insertFinalNewline: ZodOptional<ZodBoolean>; trimFinalNewlines: ZodOptional<ZodBoolean> }, $strip> }, $strip>; textDocument/prepareCallHierarchy: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/prepareRename: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/prepareTypeHierarchy: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/publishDiagnostics: ZodObject<{ uri: ZodString; version: ZodOptional<ZodNumber>; diagnostics: ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; severity: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>]>>; code: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; codeDescription: ZodOptional<ZodObject<{ href: ZodString }, $strip>>; source: ZodOptional<ZodString>; message: ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<(...)>; value: ZodString }, $strip>]>; tags: ZodOptional<ZodArray<ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>]>>>; relatedInformation: ZodOptional<ZodArray<ZodObject<{ location: ZodObject<(...), (...)>; message: ZodString }, $strip>>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>> }, $strip>; textDocument/rangeFormatting: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; options: ZodObject<{ tabSize: ZodNumber; insertSpaces: ZodBoolean; trimTrailingWhitespace: ZodOptional<ZodBoolean>; insertFinalNewline: ZodOptional<ZodBoolean>; trimFinalNewlines: ZodOptional<ZodBoolean> }, $strip> }, $strip>; textDocument/rangesFormatting: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; ranges: ZodArray<ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>>; options: ZodObject<{ tabSize: ZodNumber; insertSpaces: ZodBoolean; trimTrailingWhitespace: ZodOptional<ZodBoolean>; insertFinalNewline: ZodOptional<ZodBoolean>; trimFinalNewlines: ZodOptional<ZodBoolean> }, $strip> }, $strip>; textDocument/references: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; context: ZodObject<{ includeDeclaration: ZodBoolean }, $strip> }, $strip>; textDocument/rename: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; newName: ZodString }, $strip>; textDocument/selectionRange: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; positions: ZodArray<ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>> }, $strip>; textDocument/semanticTokens/full: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/semanticTokens/full/delta: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; previousResultId: ZodString }, $strip>; textDocument/semanticTokens/range: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip> }, $strip>; textDocument/signatureHelp: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; context: ZodOptional<ZodObject<{ triggerKind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]>; triggerCharacter: ZodOptional<ZodString>; isRetrigger: ZodBoolean; activeSignatureHelp: ZodOptional<ZodObject<{ signatures: ZodArray<ZodObject<(...), (...)>>; activeSignature: ZodOptional<ZodNumber>; activeParameter: ZodOptional<ZodUnion<(...)>> }, $strip>> }, $strip>> }, $strip>; textDocument/typeDefinition: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/willSave: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; reason: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]> }, $strip>; textDocument/willSaveWaitUntil: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; reason: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]> }, $strip>; typeHierarchy/subtypes: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; item: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; selectionRange: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }, $strip>; typeHierarchy/supertypes: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; item: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; selectionRange: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }, $strip>; window/logMessage: ZodObject<{ type: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>]>; message: ZodString }, $strip>; window/showDocument: ZodObject<{ uri: ZodString; external: ZodOptional<ZodBoolean>; takeFocus: ZodOptional<ZodBoolean>; selection: ZodOptional<ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>> }, $strip>; window/showMessage: ZodObject<{ type: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>]>; message: ZodString }, $strip>; window/showMessageRequest: ZodObject<{ type: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>]>; message: ZodString; actions: ZodOptional<ZodArray<ZodObject<{ title: ZodString }, $strip>>> }, $strip>; window/workDoneProgress/cancel: ZodObject<{ token: ZodUnion<readonly [ZodNumber, ZodString]> }, $strip>; window/workDoneProgress/create: ZodObject<{ token: ZodUnion<readonly [ZodNumber, ZodString]> }, $strip>; workspace/applyEdit: ZodObject<{ label: ZodOptional<ZodString>; edit: ZodObject<{ changes: ZodOptional<ZodRecord<ZodString, ZodArray<ZodObject<{ range: ZodObject<(...), (...)>; newText: ZodString }, $strip>>>>; documentChanges: ZodOptional<ZodArray<ZodUnion<readonly [ZodObject<{ textDocument: ...; edits: ... }, $strip>, ZodObject<{ kind: ...; annotationId: ...; uri: ...; options: ... }, $strip>, ZodObject<{ kind: ...; annotationId: ...; oldUri: ...; newUri: ...; options: ... }, $strip>, ZodObject<{ kind: ...; annotationId: ...; uri: ...; options: ... }, $strip>]>>>; changeAnnotations: ZodOptional<ZodRecord<ZodString, ZodObject<{ label: ZodString; needsConfirmation: ZodOptional<ZodBoolean>; description: ZodOptional<ZodString> }, $strip>>> }, $strip>; metadata: ZodOptional<ZodObject<{ isRefactoring: ZodOptional<ZodBoolean> }, $strip>> }, $strip>; workspace/configuration: ZodObject<{ items: ZodArray<ZodObject<{ scopeUri: ZodOptional<ZodString>; section: ZodOptional<ZodString> }, $strip>> }, $strip>; workspace/diagnostic: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; identifier: ZodOptional<ZodString>; previousResultIds: ZodArray<ZodObject<{ uri: ZodString; value: ZodString }, $strip>> }, $strip>; workspace/didChangeConfiguration: ZodObject<{ settings: ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>> }, $strip>; workspace/didChangeWatchedFiles: ZodObject<{ changes: ZodArray<ZodObject<{ uri: ZodString; type: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]> }, $strip>> }, $strip>; workspace/didChangeWorkspaceFolders: ZodObject<{ event: ZodObject<{ added: ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>>; removed: ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>> }, $strip> }, $strip>; workspace/didCreateFiles: ZodObject<{ files: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; workspace/didDeleteFiles: ZodObject<{ files: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; workspace/didRenameFiles: ZodObject<{ files: ZodArray<ZodObject<{ oldUri: ZodString; newUri: ZodString }, $strip>> }, $strip>; workspace/executeCommand: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; command: ZodString; arguments: ZodOptional<ZodArray<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>> }, $strip>; workspace/symbol: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; query: ZodString }, $strip>; workspace/textDocumentContent: ZodObject<{ uri: ZodString }, $strip>; workspace/textDocumentContent/refresh: ZodObject<{ uri: ZodString }, $strip>; workspace/willCreateFiles: ZodObject<{ files: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; workspace/willDeleteFiles: ZodObject<{ files: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; workspace/willRenameFiles: ZodObject<{ files: ZodArray<ZodObject<{ oldUri: ZodString; newUri: ZodString }, $strip>> }, $strip>; workspaceSymbol/resolve: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; containerName: ZodOptional<ZodString>; location: ZodUnion<readonly [ZodObject<{ uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip> }, $strip>, ZodObject<{ uri: ZodString }, $strip>]>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }
+const LSPSchemas: { $/cancelRequest: ZodObject<{ id: ZodUnion<readonly [ZodNumber, ZodString]> }, $strip>; $/logTrace: ZodObject<{ message: ZodString; verbose: ZodOptional<ZodString> }, $strip>; $/progress: ZodObject<{ token: ZodUnion<readonly [ZodNumber, ZodString]>; value: ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>> }, $strip>; $/setTrace: ZodObject<{ value: ZodUnion<readonly [ZodLiteral<"off">, ZodLiteral<"messages">, ZodLiteral<"compact">, ZodLiteral<"verbose">]> }, $strip>; callHierarchy/incomingCalls: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; item: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; selectionRange: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }, $strip>; callHierarchy/outgoingCalls: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; item: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; selectionRange: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }, $strip>; client/registerCapability: ZodObject<{ registrations: ZodArray<ZodObject<{ id: ZodString; method: ZodString; registerOptions: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>> }, $strip>; client/unregisterCapability: ZodObject<{ unregisterations: ZodArray<ZodObject<{ id: ZodString; method: ZodString }, $strip>> }, $strip>; codeAction/resolve: ZodObject<{ title: ZodString; kind: ZodOptional<ZodUnion<readonly [ZodLiteral<"">, ZodLiteral<"quickfix">, ZodLiteral<"refactor">, ZodLiteral<"refactor.extract">, ZodLiteral<"refactor.inline">, ZodLiteral<"refactor.move">, ZodLiteral<"refactor.rewrite">, ZodLiteral<"source">, ZodLiteral<"source.organizeImports">, ZodLiteral<"source.fixAll">, ZodLiteral<"notebook">, ZodString]>>; diagnostics: ZodOptional<ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip>; severity: ZodOptional<ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>, ZodLiteral<(...)>, ZodLiteral<(...)>]>>; code: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; codeDescription: ZodOptional<ZodObject<{ href: ZodString }, $strip>>; source: ZodOptional<ZodString>; message: ZodUnion<readonly [ZodString, ZodObject<{ kind: ...; value: ... }, $strip>]>; tags: ZodOptional<ZodArray<ZodUnion<readonly [(...), (...)]>>>; relatedInformation: ZodOptional<ZodArray<ZodObject<{ location: ...; message: ... }, $strip>>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<(...), (...)>>>> }, $strip>>>; isPreferred: ZodOptional<ZodBoolean>; disabled: ZodOptional<ZodObject<{ reason: ZodString }, $strip>>; edit: ZodOptional<ZodObject<{ changes: ZodOptional<ZodRecord<ZodString, ZodArray<ZodObject<{ range: ...; newText: ... }, $strip>>>>; documentChanges: ZodOptional<ZodArray<ZodUnion<readonly [ZodObject<(...), (...)>, ZodObject<(...), (...)>, ZodObject<(...), (...)>, ZodObject<(...), (...)>]>>>; changeAnnotations: ZodOptional<ZodRecord<ZodString, ZodObject<{ label: ZodString; needsConfirmation: ZodOptional<(...)>; description: ZodOptional<(...)> }, $strip>>> }, $strip>>; command: ZodOptional<ZodObject<{ title: ZodString; tooltip: ZodOptional<ZodString>; command: ZodString; arguments: ZodOptional<ZodArray<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<(...), (...)>>>>> }, $strip>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>; tags: ZodOptional<ZodArray<ZodLiteral<1>>> }, $strip>; codeLens/resolve: ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; command: ZodOptional<ZodObject<{ title: ZodString; tooltip: ZodOptional<ZodString>; command: ZodString; arguments: ZodOptional<ZodArray<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<(...), (...)>>>>> }, $strip>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; completionItem/resolve: ZodObject<{ label: ZodString; labelDetails: ZodOptional<ZodObject<{ detail: ZodOptional<ZodString>; description: ZodOptional<ZodString> }, $strip>>; kind: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>]>>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; documentation: ZodOptional<ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>]>; value: ZodString }, $strip>]>>; deprecated: ZodOptional<ZodBoolean>; preselect: ZodOptional<ZodBoolean>; sortText: ZodOptional<ZodString>; filterText: ZodOptional<ZodString>; insertText: ZodOptional<ZodString>; insertTextFormat: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>>; insertTextMode: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>>; textEdit: ZodOptional<ZodUnion<readonly [ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; newText: ZodString }, $strip>, ZodObject<{ newText: ZodString; insert: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; replace: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip> }, $strip>]>>; textEditText: ZodOptional<ZodString>; additionalTextEdits: ZodOptional<ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip>; newText: ZodString }, $strip>>>; commitCharacters: ZodOptional<ZodArray<ZodString>>; command: ZodOptional<ZodObject<{ title: ZodString; tooltip: ZodOptional<ZodString>; command: ZodString; arguments: ZodOptional<ZodArray<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<(...), (...)>>>>> }, $strip>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; documentLink/resolve: ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; target: ZodOptional<ZodString>; tooltip: ZodOptional<ZodString>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; initialize: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; processId: ZodUnion<readonly [ZodNumber, ZodLiteral<null>]>; clientInfo: ZodOptional<ZodObject<{ name: ZodString; version: ZodOptional<ZodString> }, $strip>>; locale: ZodOptional<ZodString>; rootPath: ZodOptional<ZodUnion<readonly [ZodString, ZodLiteral<null>]>>; rootUri: ZodUnion<readonly [ZodString, ZodLiteral<null>]>; capabilities: ZodObject<{ workspace: ZodOptional<ZodObject<{ applyEdit: ZodOptional<ZodBoolean>; workspaceEdit: ZodOptional<ZodObject<{ documentChanges: ...; resourceOperations: ...; failureHandling: ...; normalizesLineEndings: ...; changeAnnotationSupport: ...; metadataSupport: ...; snippetEditSupport: ... }, $strip>>; didChangeConfiguration: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; didChangeWatchedFiles: ZodOptional<ZodObject<{ dynamicRegistration: ...; relativePatternSupport: ... }, $strip>>; symbol: ZodOptional<ZodObject<{ dynamicRegistration: ...; symbolKind: ...; tagSupport: ...; resolveSupport: ... }, $strip>>; executeCommand: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; workspaceFolders: ZodOptional<ZodBoolean>; configuration: ZodOptional<ZodBoolean>; semanticTokens: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; codeLens: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; fileOperations: ZodOptional<ZodObject<{ dynamicRegistration: ...; didCreate: ...; willCreate: ...; didRename: ...; willRename: ...; didDelete: ...; willDelete: ... }, $strip>>; inlineValue: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; inlayHint: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; diagnostics: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; foldingRange: ZodOptional<ZodObject<{ refreshSupport: ... }, $strip>>; textDocumentContent: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>> }, $strip>>; textDocument: ZodOptional<ZodObject<{ synchronization: ZodOptional<ZodObject<{ dynamicRegistration: ...; willSave: ...; willSaveWaitUntil: ...; didSave: ... }, $strip>>; filters: ZodOptional<ZodObject<{ relativePatternSupport: ... }, $strip>>; completion: ZodOptional<ZodObject<{ dynamicRegistration: ...; completionItem: ...; completionItemKind: ...; insertTextMode: ...; contextSupport: ...; completionList: ... }, $strip>>; hover: ZodOptional<ZodObject<{ dynamicRegistration: ...; contentFormat: ... }, $strip>>; signatureHelp: ZodOptional<ZodObject<{ dynamicRegistration: ...; signatureInformation: ...; contextSupport: ... }, $strip>>; declaration: ZodOptional<ZodObject<{ dynamicRegistration: ...; linkSupport: ... }, $strip>>; definition: ZodOptional<ZodObject<{ dynamicRegistration: ...; linkSupport: ... }, $strip>>; typeDefinition: ZodOptional<ZodObject<{ dynamicRegistration: ...; linkSupport: ... }, $strip>>; implementation: ZodOptional<ZodObject<{ dynamicRegistration: ...; linkSupport: ... }, $strip>>; references: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; documentHighlight: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; documentSymbol: ZodOptional<ZodObject<{ dynamicRegistration: ...; symbolKind: ...; hierarchicalDocumentSymbolSupport: ...; tagSupport: ...; labelSupport: ... }, $strip>>; codeAction: ZodOptional<ZodObject<{ dynamicRegistration: ...; codeActionLiteralSupport: ...; isPreferredSupport: ...; disabledSupport: ...; dataSupport: ...; resolveSupport: ...; honorsChangeAnnotations: ...; documentationSupport: ...; tagSupport: ... }, $strip>>; codeLens: ZodOptional<ZodObject<{ dynamicRegistration: ...; resolveSupport: ... }, $strip>>; documentLink: ZodOptional<ZodObject<{ dynamicRegistration: ...; tooltipSupport: ... }, $strip>>; colorProvider: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; formatting: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; rangeFormatting: ZodOptional<ZodObject<{ dynamicRegistration: ...; rangesSupport: ... }, $strip>>; onTypeFormatting: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; rename: ZodOptional<ZodObject<{ dynamicRegistration: ...; prepareSupport: ...; prepareSupportDefaultBehavior: ...; honorsChangeAnnotations: ... }, $strip>>; foldingRange: ZodOptional<ZodObject<{ dynamicRegistration: ...; rangeLimit: ...; lineFoldingOnly: ...; foldingRangeKind: ...; foldingRange: ... }, $strip>>; selectionRange: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; publishDiagnostics: ZodOptional<ZodObject<{ relatedInformation: ...; tagSupport: ...; codeDescriptionSupport: ...; dataSupport: ...; versionSupport: ... }, $strip>>; callHierarchy: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; semanticTokens: ZodOptional<ZodObject<{ dynamicRegistration: ...; requests: ...; tokenTypes: ...; tokenModifiers: ...; formats: ...; overlappingTokenSupport: ...; multilineTokenSupport: ...; serverCancelSupport: ...; augmentsSyntaxTokens: ... }, $strip>>; linkedEditingRange: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; moniker: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; typeHierarchy: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; inlineValue: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>>; inlayHint: ZodOptional<ZodObject<{ dynamicRegistration: ...; resolveSupport: ... }, $strip>>; diagnostic: ZodOptional<ZodObject<{ relatedInformation: ...; tagSupport: ...; codeDescriptionSupport: ...; dataSupport: ...; dynamicRegistration: ...; relatedDocumentSupport: ...; markupMessageSupport: ... }, $strip>>; inlineCompletion: ZodOptional<ZodObject<{ dynamicRegistration: ... }, $strip>> }, $strip>>; notebookDocument: ZodOptional<ZodObject<{ synchronization: ZodObject<{ dynamicRegistration: ZodOptional<(...)>; executionSummarySupport: ZodOptional<(...)> }, $strip> }, $strip>>; window: ZodOptional<ZodObject<{ workDoneProgress: ZodOptional<ZodBoolean>; showMessage: ZodOptional<ZodObject<{ messageActionItem: ... }, $strip>>; showDocument: ZodOptional<ZodObject<{ support: ... }, $strip>> }, $strip>>; general: ZodOptional<ZodObject<{ staleRequestSupport: ZodOptional<ZodObject<{ cancel: ...; retryOnContentModified: ... }, $strip>>; regularExpressions: ZodOptional<ZodObject<{ engine: ...; version: ... }, $strip>>; markdown: ZodOptional<ZodObject<{ parser: ...; version: ...; allowedTags: ... }, $strip>>; positionEncodings: ZodOptional<ZodArray<ZodUnion<(...)>>> }, $strip>>; experimental: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; initializationOptions: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>; trace: ZodOptional<ZodUnion<readonly [ZodLiteral<"off">, ZodLiteral<"messages">, ZodLiteral<"compact">, ZodLiteral<"verbose">]>>; workspaceFolders: ZodOptional<ZodUnion<readonly [ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>>, ZodLiteral<null>]>> }, $strip>; initialized: ZodObject<{}, $strip>; inlayHint/resolve: ZodObject<{ position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; label: ZodUnion<readonly [ZodString, ZodArray<ZodObject<{ value: ZodString; tooltip: ZodOptional<ZodUnion<readonly [(...), (...)]>>; location: ZodOptional<ZodObject<{ uri: ...; range: ... }, $strip>>; command: ZodOptional<ZodObject<{ title: ...; tooltip: ...; command: ...; arguments: ... }, $strip>> }, $strip>>]>; kind: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>>; textEdits: ZodOptional<ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip>; newText: ZodString }, $strip>>>; tooltip: ZodOptional<ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>]>; value: ZodString }, $strip>]>>; paddingLeft: ZodOptional<ZodBoolean>; paddingRight: ZodOptional<ZodBoolean>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>; notebookDocument/didChange: ZodObject<{ notebookDocument: ZodObject<{ version: ZodNumber; uri: ZodString }, $strip>; change: ZodObject<{ metadata: ZodOptional<ZodRecord<ZodString, ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>>; cells: ZodOptional<ZodObject<{ structure: ZodOptional<ZodObject<{ array: ...; didOpen: ...; didClose: ... }, $strip>>; data: ZodOptional<ZodArray<ZodObject<(...), (...)>>>; textContent: ZodOptional<ZodArray<ZodObject<(...), (...)>>> }, $strip>> }, $strip> }, $strip>; notebookDocument/didClose: ZodObject<{ notebookDocument: ZodObject<{ uri: ZodString }, $strip>; cellTextDocuments: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; notebookDocument/didOpen: ZodObject<{ notebookDocument: ZodObject<{ uri: ZodString; notebookType: ZodString; version: ZodNumber; metadata: ZodOptional<ZodRecord<ZodString, ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>>; cells: ZodArray<ZodObject<{ kind: ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>]>; document: ZodString; metadata: ZodOptional<ZodRecord<ZodString, ZodLazy<(...)>>>; executionSummary: ZodOptional<ZodObject<{ executionOrder: ...; success: ... }, $strip>> }, $strip>> }, $strip>; cellTextDocuments: ZodArray<ZodObject<{ uri: ZodString; languageId: ZodUnion<readonly [ZodLiteral<"abap">, ZodLiteral<"bat">, ZodLiteral<"bibtex">, ZodLiteral<"clojure">, ZodLiteral<"coffeescript">, ZodLiteral<"c">, ZodLiteral<"cpp">, ZodLiteral<"csharp">, ZodLiteral<"css">, ZodLiteral<"d">, ZodLiteral<"pascal">, ZodLiteral<"diff">, ZodLiteral<"dart">, ZodLiteral<"dockerfile">, ZodLiteral<"elixir">, ZodLiteral<"erlang">, ZodLiteral<"fsharp">, ZodLiteral<"git-commit">, ZodLiteral<"git-rebase">, ZodLiteral<"go">, ZodLiteral<"groovy">, ZodLiteral<"handlebars">, ZodLiteral<"haskell">, ZodLiteral<"html">, ZodLiteral<"ini">, ZodLiteral<"java">, ZodLiteral<"javascript">, ZodLiteral<"javascriptreact">, ZodLiteral<"json">, ZodLiteral<"latex">, ZodLiteral<"less">, ZodLiteral<"lua">, ZodLiteral<"makefile">, ZodLiteral<"markdown">, ZodLiteral<"objective-c">, ZodLiteral<"objective-cpp">, ZodLiteral<"pascal">, ZodLiteral<"perl">, ZodLiteral<"perl6">, ZodLiteral<"php">, ZodLiteral<"plaintext">, ZodLiteral<"powershell">, ZodLiteral<"jade">, ZodLiteral<"python">, ZodLiteral<"r">, ZodLiteral<"razor">, ZodLiteral<"ruby">, ZodLiteral<"rust">, ZodLiteral<"scss">, ZodLiteral<"sass">, ZodLiteral<"scala">, ZodLiteral<"shaderlab">, ZodLiteral<"shellscript">, ZodLiteral<"sql">, ZodLiteral<"swift">, ZodLiteral<"typescript">, ZodLiteral<"typescriptreact">, ZodLiteral<"tex">, ZodLiteral<"vb">, ZodLiteral<"xml">, ZodLiteral<"xsl">, ZodLiteral<"yaml">, ZodString]>; version: ZodNumber; text: ZodString }, $strip>> }, $strip>; notebookDocument/didSave: ZodObject<{ notebookDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; telemetry/event: ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>; textDocument/codeAction: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; context: ZodObject<{ diagnostics: ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; severity: ZodOptional<ZodUnion<readonly [(...), (...), (...), (...)]>>; code: ZodOptional<ZodUnion<readonly [(...), (...)]>>; codeDescription: ZodOptional<ZodObject<{ href: ... }, $strip>>; source: ZodOptional<ZodString>; message: ZodUnion<readonly [ZodString, ZodObject<(...), (...)>]>; tags: ZodOptional<ZodArray<ZodUnion<(...)>>>; relatedInformation: ZodOptional<ZodArray<ZodObject<(...), (...)>>>; data: ZodOptional<ZodLazy<ZodType<(...), (...), (...)>>> }, $strip>>; only: ZodOptional<ZodArray<ZodUnion<readonly [ZodLiteral<"">, ZodLiteral<"quickfix">, ZodLiteral<"refactor">, ZodLiteral<"refactor.extract">, ZodLiteral<"refactor.inline">, ZodLiteral<"refactor.move">, ZodLiteral<"refactor.rewrite">, ZodLiteral<"source">, ZodLiteral<"source.organizeImports">, ZodLiteral<"source.fixAll">, ZodLiteral<"notebook">, ZodString]>>>; triggerKind: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>> }, $strip> }, $strip>; textDocument/codeLens: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/colorPresentation: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; color: ZodObject<{ red: ZodNumber; green: ZodNumber; blue: ZodNumber; alpha: ZodNumber }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip> }, $strip>; textDocument/completion: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; context: ZodOptional<ZodObject<{ triggerKind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]>; triggerCharacter: ZodOptional<ZodString> }, $strip>> }, $strip>; textDocument/declaration: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/definition: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/diagnostic: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; identifier: ZodOptional<ZodString>; previousResultId: ZodOptional<ZodString> }, $strip>; textDocument/didChange: ZodObject<{ textDocument: ZodObject<{ uri: ZodString; version: ZodNumber }, $strip>; contentChanges: ZodArray<ZodUnion<readonly [ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; rangeLength: ZodOptional<ZodNumber>; text: ZodString }, $strip>, ZodObject<{ text: ZodString }, $strip>]>> }, $strip>; textDocument/didClose: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/didOpen: ZodObject<{ textDocument: ZodObject<{ uri: ZodString; languageId: ZodUnion<readonly [ZodLiteral<"abap">, ZodLiteral<"bat">, ZodLiteral<"bibtex">, ZodLiteral<"clojure">, ZodLiteral<"coffeescript">, ZodLiteral<"c">, ZodLiteral<"cpp">, ZodLiteral<"csharp">, ZodLiteral<"css">, ZodLiteral<"d">, ZodLiteral<"pascal">, ZodLiteral<"diff">, ZodLiteral<"dart">, ZodLiteral<"dockerfile">, ZodLiteral<"elixir">, ZodLiteral<"erlang">, ZodLiteral<"fsharp">, ZodLiteral<"git-commit">, ZodLiteral<"git-rebase">, ZodLiteral<"go">, ZodLiteral<"groovy">, ZodLiteral<"handlebars">, ZodLiteral<"haskell">, ZodLiteral<"html">, ZodLiteral<"ini">, ZodLiteral<"java">, ZodLiteral<"javascript">, ZodLiteral<"javascriptreact">, ZodLiteral<"json">, ZodLiteral<"latex">, ZodLiteral<"less">, ZodLiteral<"lua">, ZodLiteral<"makefile">, ZodLiteral<"markdown">, ZodLiteral<"objective-c">, ZodLiteral<"objective-cpp">, ZodLiteral<"pascal">, ZodLiteral<"perl">, ZodLiteral<"perl6">, ZodLiteral<"php">, ZodLiteral<"plaintext">, ZodLiteral<"powershell">, ZodLiteral<"jade">, ZodLiteral<"python">, ZodLiteral<"r">, ZodLiteral<"razor">, ZodLiteral<"ruby">, ZodLiteral<"rust">, ZodLiteral<"scss">, ZodLiteral<"sass">, ZodLiteral<"scala">, ZodLiteral<"shaderlab">, ZodLiteral<"shellscript">, ZodLiteral<"sql">, ZodLiteral<"swift">, ZodLiteral<"typescript">, ZodLiteral<"typescriptreact">, ZodLiteral<"tex">, ZodLiteral<"vb">, ZodLiteral<"xml">, ZodLiteral<"xsl">, ZodLiteral<"yaml">, ZodString]>; version: ZodNumber; text: ZodString }, $strip> }, $strip>; textDocument/didSave: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; text: ZodOptional<ZodString> }, $strip>; textDocument/documentColor: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/documentHighlight: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/documentLink: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/documentSymbol: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/foldingRange: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/formatting: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; options: ZodObject<{ tabSize: ZodNumber; insertSpaces: ZodBoolean; trimTrailingWhitespace: ZodOptional<ZodBoolean>; insertFinalNewline: ZodOptional<ZodBoolean>; trimFinalNewlines: ZodOptional<ZodBoolean> }, $strip> }, $strip>; textDocument/hover: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/implementation: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/inlayHint: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip> }, $strip>; textDocument/inlineCompletion: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; context: ZodObject<{ triggerKind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>]>; selectedCompletionInfo: ZodOptional<ZodObject<{ range: ZodObject<{ start: ZodObject<(...), (...)>; end: ZodObject<(...), (...)> }, $strip>; text: ZodString }, $strip>> }, $strip> }, $strip>; textDocument/inlineValue: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; context: ZodObject<{ frameId: ZodNumber; stoppedLocation: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip> }, $strip> }, $strip>; textDocument/linkedEditingRange: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/moniker: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/onTypeFormatting: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; ch: ZodString; options: ZodObject<{ tabSize: ZodNumber; insertSpaces: ZodBoolean; trimTrailingWhitespace: ZodOptional<ZodBoolean>; insertFinalNewline: ZodOptional<ZodBoolean>; trimFinalNewlines: ZodOptional<ZodBoolean> }, $strip> }, $strip>; textDocument/prepareCallHierarchy: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/prepareRename: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/prepareTypeHierarchy: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/publishDiagnostics: ZodObject<{ uri: ZodString; version: ZodOptional<ZodNumber>; diagnostics: ZodArray<ZodObject<{ range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; severity: ZodOptional<ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>]>>; code: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; codeDescription: ZodOptional<ZodObject<{ href: ZodString }, $strip>>; source: ZodOptional<ZodString>; message: ZodUnion<readonly [ZodString, ZodObject<{ kind: ZodUnion<(...)>; value: ZodString }, $strip>]>; tags: ZodOptional<ZodArray<ZodUnion<readonly [ZodLiteral<(...)>, ZodLiteral<(...)>]>>>; relatedInformation: ZodOptional<ZodArray<ZodObject<{ location: ZodObject<(...), (...)>; message: ZodString }, $strip>>>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip>> }, $strip>; textDocument/rangeFormatting: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; options: ZodObject<{ tabSize: ZodNumber; insertSpaces: ZodBoolean; trimTrailingWhitespace: ZodOptional<ZodBoolean>; insertFinalNewline: ZodOptional<ZodBoolean>; trimFinalNewlines: ZodOptional<ZodBoolean> }, $strip> }, $strip>; textDocument/rangesFormatting: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; ranges: ZodArray<ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>>; options: ZodObject<{ tabSize: ZodNumber; insertSpaces: ZodBoolean; trimTrailingWhitespace: ZodOptional<ZodBoolean>; insertFinalNewline: ZodOptional<ZodBoolean>; trimFinalNewlines: ZodOptional<ZodBoolean> }, $strip> }, $strip>; textDocument/references: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; context: ZodObject<{ includeDeclaration: ZodBoolean }, $strip> }, $strip>; textDocument/rename: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; newName: ZodString }, $strip>; textDocument/selectionRange: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; positions: ZodArray<ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>> }, $strip>; textDocument/semanticTokens/full: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip> }, $strip>; textDocument/semanticTokens/full/delta: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; previousResultId: ZodString }, $strip>; textDocument/semanticTokens/range: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; textDocument: ZodObject<{ uri: ZodString }, $strip>; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip> }, $strip>; textDocument/signatureHelp: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; context: ZodOptional<ZodObject<{ triggerKind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]>; triggerCharacter: ZodOptional<ZodString>; isRetrigger: ZodBoolean; activeSignatureHelp: ZodOptional<ZodObject<{ signatures: ZodArray<ZodObject<(...), (...)>>; activeSignature: ZodOptional<ZodNumber>; activeParameter: ZodOptional<ZodUnion<(...)>> }, $strip>> }, $strip>> }, $strip>; textDocument/typeDefinition: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; position: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>> }, $strip>; textDocument/willSave: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; reason: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]> }, $strip>; textDocument/willSaveWaitUntil: ZodObject<{ textDocument: ZodObject<{ uri: ZodString }, $strip>; reason: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]> }, $strip>; typeHierarchy/subtypes: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; item: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; selectionRange: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }, $strip>; typeHierarchy/supertypes: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; item: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; detail: ZodOptional<ZodString>; uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; selectionRange: ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }, $strip>; window/logMessage: ZodObject<{ type: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>]>; message: ZodString }, $strip>; window/showDocument: ZodObject<{ uri: ZodString; external: ZodOptional<ZodBoolean>; takeFocus: ZodOptional<ZodBoolean>; selection: ZodOptional<ZodObject<{ start: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip>; end: ZodObject<{ line: ZodNumber; character: ZodNumber }, $strip> }, $strip>> }, $strip>; window/showMessage: ZodObject<{ type: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>]>; message: ZodString }, $strip>; window/showMessageRequest: ZodObject<{ type: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>]>; message: ZodString; actions: ZodOptional<ZodArray<ZodObject<{ title: ZodString }, $strip>>> }, $strip>; window/workDoneProgress/cancel: ZodObject<{ token: ZodUnion<readonly [ZodNumber, ZodString]> }, $strip>; window/workDoneProgress/create: ZodObject<{ token: ZodUnion<readonly [ZodNumber, ZodString]> }, $strip>; workspace/applyEdit: ZodObject<{ label: ZodOptional<ZodString>; edit: ZodObject<{ changes: ZodOptional<ZodRecord<ZodString, ZodArray<ZodObject<{ range: ZodObject<(...), (...)>; newText: ZodString }, $strip>>>>; documentChanges: ZodOptional<ZodArray<ZodUnion<readonly [ZodObject<{ textDocument: ...; edits: ... }, $strip>, ZodObject<{ kind: ...; annotationId: ...; uri: ...; options: ... }, $strip>, ZodObject<{ kind: ...; annotationId: ...; oldUri: ...; newUri: ...; options: ... }, $strip>, ZodObject<{ kind: ...; annotationId: ...; uri: ...; options: ... }, $strip>]>>>; changeAnnotations: ZodOptional<ZodRecord<ZodString, ZodObject<{ label: ZodString; needsConfirmation: ZodOptional<ZodBoolean>; description: ZodOptional<ZodString> }, $strip>>> }, $strip>; metadata: ZodOptional<ZodObject<{ isRefactoring: ZodOptional<ZodBoolean> }, $strip>> }, $strip>; workspace/configuration: ZodObject<{ items: ZodArray<ZodObject<{ scopeUri: ZodOptional<ZodString>; section: ZodOptional<ZodString> }, $strip>> }, $strip>; workspace/diagnostic: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; identifier: ZodOptional<ZodString>; previousResultIds: ZodArray<ZodObject<{ uri: ZodString; value: ZodString }, $strip>> }, $strip>; workspace/didChangeConfiguration: ZodObject<{ settings: ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>> }, $strip>; workspace/didChangeWatchedFiles: ZodObject<{ changes: ZodArray<ZodObject<{ uri: ZodString; type: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>]> }, $strip>> }, $strip>; workspace/didChangeWorkspaceFolders: ZodObject<{ event: ZodObject<{ added: ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>>; removed: ZodArray<ZodObject<{ uri: ZodString; name: ZodString }, $strip>> }, $strip> }, $strip>; workspace/didCreateFiles: ZodObject<{ files: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; workspace/didDeleteFiles: ZodObject<{ files: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; workspace/didRenameFiles: ZodObject<{ files: ZodArray<ZodObject<{ oldUri: ZodString; newUri: ZodString }, $strip>> }, $strip>; workspace/executeCommand: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; command: ZodString; arguments: ZodOptional<ZodArray<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>>> }, $strip>; workspace/symbol: ZodObject<{ workDoneToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; partialResultToken: ZodOptional<ZodUnion<readonly [ZodNumber, ZodString]>>; query: ZodString }, $strip>; workspace/textDocumentContent: ZodObject<{ uri: ZodString }, $strip>; workspace/textDocumentContent/refresh: ZodObject<{ uri: ZodString }, $strip>; workspace/willCreateFiles: ZodObject<{ files: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; workspace/willDeleteFiles: ZodObject<{ files: ZodArray<ZodObject<{ uri: ZodString }, $strip>> }, $strip>; workspace/willRenameFiles: ZodObject<{ files: ZodArray<ZodObject<{ oldUri: ZodString; newUri: ZodString }, $strip>> }, $strip>; workspaceSymbol/resolve: ZodObject<{ name: ZodString; kind: ZodUnion<readonly [ZodLiteral<1>, ZodLiteral<2>, ZodLiteral<3>, ZodLiteral<4>, ZodLiteral<5>, ZodLiteral<6>, ZodLiteral<7>, ZodLiteral<8>, ZodLiteral<9>, ZodLiteral<10>, ZodLiteral<11>, ZodLiteral<12>, ZodLiteral<13>, ZodLiteral<14>, ZodLiteral<15>, ZodLiteral<16>, ZodLiteral<17>, ZodLiteral<18>, ZodLiteral<19>, ZodLiteral<20>, ZodLiteral<21>, ZodLiteral<22>, ZodLiteral<23>, ZodLiteral<24>, ZodLiteral<25>, ZodLiteral<26>]>; tags: ZodOptional<ZodArray<ZodLiteral<1>>>; containerName: ZodOptional<ZodString>; location: ZodUnion<readonly [ZodObject<{ uri: ZodString; range: ZodObject<{ start: ZodObject<{ line: ...; character: ... }, $strip>; end: ZodObject<{ line: ...; character: ... }, $strip> }, $strip> }, $strip>, ZodObject<{ uri: ZodString }, $strip>]>; data: ZodOptional<ZodLazy<ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>>> }, $strip> }
 ```
 
 ### WorkspaceFileChangeTypes
@@ -2467,6 +2955,32 @@ Singleton token that is never cancelled
 ### CancellationToken
 
 Read-only handle for observing cancellation state.
+
+### ServerCapabilities
+
+### ClientCapabilities
+
+### InitializeParams
+
+### InitializeResult
+
+### HoverParams
+
+### Hover
+
+### CompletionParams
+
+### CompletionList
+
+### CompletionItem
+
+### DefinitionParams
+
+### Definition
+
+```ts
+type Definition = Location | Location[]
+```
 
 ### LSPRequestMethod
 
