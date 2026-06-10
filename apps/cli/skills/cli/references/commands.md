@@ -5,7 +5,7 @@
 callHierarchy operations
 
 ```
-npx @lsproxy/cli callHierarchy [options] [command]
+lsproxy callHierarchy [options] [command]
 ```
 
 ## codeAction
@@ -13,7 +13,7 @@ npx @lsproxy/cli callHierarchy [options] [command]
 codeAction operations
 
 ```
-npx @lsproxy/cli codeAction [options] [command]
+lsproxy codeAction [options] [command]
 ```
 
 ## codeLens
@@ -21,7 +21,7 @@ npx @lsproxy/cli codeAction [options] [command]
 codeLens operations
 
 ```
-npx @lsproxy/cli codeLens [options] [command]
+lsproxy codeLens [options] [command]
 ```
 
 ## completionItem
@@ -29,7 +29,7 @@ npx @lsproxy/cli codeLens [options] [command]
 completionItem operations
 
 ```
-npx @lsproxy/cli completionItem [options] [command]
+lsproxy completionItem [options] [command]
 ```
 
 ## documentLink
@@ -37,7 +37,7 @@ npx @lsproxy/cli completionItem [options] [command]
 documentLink operations
 
 ```
-npx @lsproxy/cli documentLink [options] [command]
+lsproxy documentLink [options] [command]
 ```
 
 ## inlayHint
@@ -45,7 +45,7 @@ npx @lsproxy/cli documentLink [options] [command]
 inlayHint operations
 
 ```
-npx @lsproxy/cli inlayHint [options] [command]
+lsproxy inlayHint [options] [command]
 ```
 
 ## textDocument
@@ -53,7 +53,7 @@ npx @lsproxy/cli inlayHint [options] [command]
 textDocument operations
 
 ```
-npx @lsproxy/cli textDocument [options] [command]
+lsproxy textDocument [options] [command]
 ```
 
 ## workspace
@@ -61,7 +61,7 @@ npx @lsproxy/cli textDocument [options] [command]
 workspace operations
 
 ```
-npx @lsproxy/cli workspace [options] [command]
+lsproxy workspace [options] [command]
 ```
 
 ## workspaceSymbol
@@ -69,7 +69,7 @@ npx @lsproxy/cli workspace [options] [command]
 workspaceSymbol operations
 
 ```
-npx @lsproxy/cli workspaceSymbol [options] [command]
+lsproxy workspaceSymbol [options] [command]
 ```
 
 ## call
@@ -77,7 +77,7 @@ npx @lsproxy/cli workspaceSymbol [options] [command]
 Send any LSP request by method name with raw JSON params
 
 ```
-npx @lsproxy/cli call [options] <method>
+lsproxy call [options] <method>
 ```
 
 ### Options

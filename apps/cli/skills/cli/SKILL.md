@@ -17,8 +17,8 @@ name: cli
 ## Quick Start
 
 ```
-npx @lsproxy/cli <namespace> <command> [args] [flags]
-npx @lsproxy/cli call <method> --params <json>
+lsproxy <namespace> <command> [args] [flags]
+lsproxy call <method> --params <json>
 ```
 
 Commands are built from the server's capabilities at startup. Available namespaces:
@@ -26,14 +26,14 @@ Commands are built from the server's capabilities at startup. Available namespac
 `inlayHint`, `textDocument`, `workspace`, `workspaceSymbol`.
 
 ```bash
-npx @lsproxy/cli textDocument hover           src/foo.ts 12:7
-npx @lsproxy/cli textDocument rename          src/foo.ts 12:7 newName
-npx @lsproxy/cli textDocument references      src/foo.ts 12:7
-npx @lsproxy/cli textDocument definition      src/foo.ts 12:7
-npx @lsproxy/cli textDocument formatting      src/foo.ts
-npx @lsproxy/cli textDocument rangeFormatting src/foo.ts 1:1-50:1
-npx @lsproxy/cli workspace   symbol           MyClass
-npx @lsproxy/cli call        textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
+lsproxy textDocument hover           src/foo.ts 12:7
+lsproxy textDocument rename          src/foo.ts 12:7 newName
+lsproxy textDocument references      src/foo.ts 12:7
+lsproxy textDocument definition      src/foo.ts 12:7
+lsproxy textDocument formatting      src/foo.ts
+lsproxy textDocument rangeFormatting src/foo.ts 1:1-50:1
+lsproxy workspace   symbol           MyClass
+lsproxy call        textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
 ```
 
 ### Code actions
@@ -43,21 +43,21 @@ When exactly one action carries an edit it is applied automatically; when zero o
 multiple carry edits the array is printed and no files are changed.
 
 ```bash
-npx @lsproxy/cli textDocument codeAction --dry-run src/foo.ts 12:1-12:20
+lsproxy textDocument codeAction --dry-run src/foo.ts 12:1-12:20
 ```
 
 ## Troubleshooting
 
-**Commands missing from `--help`** — npx @lsproxy/cli only registers commands for capabilities the
+**Commands missing from `--help`** — lsproxy only registers commands for capabilities the
 server actually advertises. If `textDocument rename` doesn't appear, the server doesn't
-support `renameProvider`. Use `npx @lsproxy/cli call initialize --params '{}'` to inspect the
+support `renameProvider`. Use `lsproxy call initialize --params '{}'` to inspect the
 server's capability response.
 
 **Wrong positions** — Positions must be 1-based (`line:col`). Most editors display
-1-based positions; LSP protocol is 0-based internally but npx @lsproxy/cli converts for you.
+1-based positions; LSP protocol is 0-based internally but lsproxy converts for you.
 Passing 0-based values shifts edits by one line/column.
 
-**Server not found** — Without `--server`, npx @lsproxy/cli walks up from `--root` looking for
+**Server not found** — Without `--server`, lsproxy walks up from `--root` looking for
 `lsp.json`. If it can't find one it will time out. Either add `lsp.json` to the project
 root or pass `--server <cmd>` explicitly.
 
@@ -73,7 +73,7 @@ callHierarchy operations
 
 **Usage:**
 ```
-npx @lsproxy/cli callHierarchy [options] [command]
+lsproxy callHierarchy [options] [command]
 ```
 
 ### codeAction
@@ -82,7 +82,7 @@ codeAction operations
 
 **Usage:**
 ```
-npx @lsproxy/cli codeAction [options] [command]
+lsproxy codeAction [options] [command]
 ```
 
 ### codeLens
@@ -91,7 +91,7 @@ codeLens operations
 
 **Usage:**
 ```
-npx @lsproxy/cli codeLens [options] [command]
+lsproxy codeLens [options] [command]
 ```
 
 ### completionItem
@@ -100,7 +100,7 @@ completionItem operations
 
 **Usage:**
 ```
-npx @lsproxy/cli completionItem [options] [command]
+lsproxy completionItem [options] [command]
 ```
 
 ### documentLink
@@ -109,7 +109,7 @@ documentLink operations
 
 **Usage:**
 ```
-npx @lsproxy/cli documentLink [options] [command]
+lsproxy documentLink [options] [command]
 ```
 
 ### inlayHint
@@ -118,7 +118,7 @@ inlayHint operations
 
 **Usage:**
 ```
-npx @lsproxy/cli inlayHint [options] [command]
+lsproxy inlayHint [options] [command]
 ```
 
 ### textDocument
@@ -127,7 +127,7 @@ textDocument operations
 
 **Usage:**
 ```
-npx @lsproxy/cli textDocument [options] [command]
+lsproxy textDocument [options] [command]
 ```
 
 ### workspace
@@ -136,7 +136,7 @@ workspace operations
 
 **Usage:**
 ```
-npx @lsproxy/cli workspace [options] [command]
+lsproxy workspace [options] [command]
 ```
 
 ### workspaceSymbol
@@ -145,7 +145,7 @@ workspaceSymbol operations
 
 **Usage:**
 ```
-npx @lsproxy/cli workspaceSymbol [options] [command]
+lsproxy workspaceSymbol [options] [command]
 ```
 
 ### call
@@ -154,7 +154,7 @@ Send any LSP request by method name with raw JSON params
 
 **Usage:**
 ```
-npx @lsproxy/cli call [options] <method>
+lsproxy call [options] <method>
 ```
 
 | Flag | Type | Required | Default | Env | Description |

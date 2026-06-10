@@ -93,6 +93,12 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@skillit/cli':
+        specifier: ^0.4.0
+        version: 0.4.0(commander@15.0.0)
+      typedoc-plugin-skillit:
+        specifier: ^1.4.0
+        version: 1.4.0(typedoc@0.28.19(typescript@6.0.3))
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -202,6 +208,68 @@ importers:
         version: 4.4.3
 
 packages:
+
+  '@ast-grep/napi-darwin-arm64@0.43.0':
+    resolution: {integrity: sha512-JBWYRNJsQ/8yfcMDARFxcl1fVZ6+kv3sHB+ClKgSCe9DNoLvGQfqGr9UGRrNOModvXY6cX+c87iAPqPGftUUiw==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@ast-grep/napi-darwin-x64@0.43.0':
+    resolution: {integrity: sha512-oqE/bC/uAEctnAbzqobplidExsPym4CQq7JDVD9HpkHpDHzMzPBF69whv/Qu0ZwrkXr48GCMKO5G6p+OB5n+kQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@ast-grep/napi-linux-arm64-gnu@0.43.0':
+    resolution: {integrity: sha512-yJSRPxwwrvVW94J2rtaatcixSAGWcSaHNbAh6soXD6HXgq6I7uMc+cyMnJstFL789yd6Pu3QIhTlpD9VY0oYhw==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@ast-grep/napi-linux-arm64-musl@0.43.0':
+    resolution: {integrity: sha512-mknXLDsf66HvT/JEl18ZQSvR7/qWgWfqh3eHuVRqD2lE6cKBDXRnAzx9ZNZkUnL2Z5ph54Yk8dKVu09k45cegA==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@ast-grep/napi-linux-x64-gnu@0.43.0':
+    resolution: {integrity: sha512-KM6M5KKFsHG9Y7VKCKnMsWQQ1sYwj/SPdyr91SKp66AeFJ5xMtXb13WVQ3Joe9NEsi84dzzOBIJgMddz+UMvQw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@ast-grep/napi-linux-x64-musl@0.43.0':
+    resolution: {integrity: sha512-NfjI74m7CEEOsLi7ZkYwcxY10CfKIHPHRrr9aqMulmnrC4FGvxQMk1qpDrTqkjmEd8LdZt3PsPrmBa8AZCErew==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@ast-grep/napi-win32-arm64-msvc@0.43.0':
+    resolution: {integrity: sha512-8qwXz3oogh834bXmNLtgsQYsuQi4ZDu4e1He/q+ENhVfjIr4IZRAUc1CoKZgWn+ZSE+B0NJJIxT8Vre2l0Q1Lg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@ast-grep/napi-win32-ia32-msvc@0.43.0':
+    resolution: {integrity: sha512-wUI/B9QNPzi0K7LlyO7eWvwhqFChM6+O4r5dfBfnOlkP1s/AZ04FdYaC9KAZiODE4FCWbeHbfO03RYOdWeF6eg==}
+    engines: {node: '>= 10'}
+    cpu: [ia32]
+    os: [win32]
+
+  '@ast-grep/napi-win32-x64-msvc@0.43.0':
+    resolution: {integrity: sha512-GsGIwYiThKiK9XPGBEguZAs4aIBgv6+DgosBs6ve2a3L390AaLqitoc+bbRz4Eu51URlFKmNP7TtvnAJbMi8QQ==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@ast-grep/napi@0.43.0':
+    resolution: {integrity: sha512-dPugC04xwgk3gJl17jJvTjVjx1IXtWI9EcEQ0szlh0jg1UfvGDdZJo9/S9Pk7gzGBNd2bW8hIL3dG6K4T8PEJA==}
+    engines: {node: '>= 10'}
 
   '@babel/helper-string-parser@7.29.7':
     resolution: {integrity: sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==}
@@ -1183,6 +1251,22 @@ packages:
 
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
+
+  '@skillit/cli@0.4.0':
+    resolution: {integrity: sha512-jJx7o8pKKHwZtaGEw6FSdsQr5r+WUwjQqNLm4/RqZZeZ6Z88EEYZ7ZoDl/r0ZVsOp5++X3Xlp6MtSNtkFuIb3g==}
+    peerDependencies:
+      commander: '>=12.0.0'
+    peerDependenciesMeta:
+      commander:
+        optional: true
+
+  '@skillit/core@1.5.0':
+    resolution: {integrity: sha512-g49Wm1AXZ/S7LjejPZ9X7tiSsEwabZi4n9OWR1ZjLljSE6LD80gPuPIUUgBVVWtpOjSJprbNiV08rhkDpcGxRg==}
+
+  '@skillit/typedoc@1.1.0':
+    resolution: {integrity: sha512-f2Qba50bY1mD/izGH6MMlrj6aSjztJLi6Qd8Nb+lyaXr0wPhQnVhsqp7s4t2Hfy24Ct7EkrI01zPK+cNq5aFvQ==}
+    peerDependencies:
+      typedoc: '>=0.28.0'
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -2313,6 +2397,11 @@ packages:
     peerDependencies:
       typedoc: 0.28.x
 
+  typedoc-plugin-skillit@1.4.0:
+    resolution: {integrity: sha512-HbzR0BsYyXv+bIin5qEu9BzTpH/C3KMCAryIBpv3Wf7WH9WDi93TNmMe5aNpewYZ7vhSR+X5dOCb46Kb+rPAdQ==}
+    peerDependencies:
+      typedoc: '>=0.28.0'
+
   typedoc-plugin-to-skills@1.3.1:
     resolution: {integrity: sha512-iAnov5xX8UByu7OI6YDQQ3tPOmk59NW9eUb6hbNKW1kGSng5n7pd7nDnUwGmd7DpEhvAKHikhy1IL86VIBOjhA==}
     peerDependencies:
@@ -2575,6 +2664,45 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@ast-grep/napi-darwin-arm64@0.43.0':
+    optional: true
+
+  '@ast-grep/napi-darwin-x64@0.43.0':
+    optional: true
+
+  '@ast-grep/napi-linux-arm64-gnu@0.43.0':
+    optional: true
+
+  '@ast-grep/napi-linux-arm64-musl@0.43.0':
+    optional: true
+
+  '@ast-grep/napi-linux-x64-gnu@0.43.0':
+    optional: true
+
+  '@ast-grep/napi-linux-x64-musl@0.43.0':
+    optional: true
+
+  '@ast-grep/napi-win32-arm64-msvc@0.43.0':
+    optional: true
+
+  '@ast-grep/napi-win32-ia32-msvc@0.43.0':
+    optional: true
+
+  '@ast-grep/napi-win32-x64-msvc@0.43.0':
+    optional: true
+
+  '@ast-grep/napi@0.43.0':
+    optionalDependencies:
+      '@ast-grep/napi-darwin-arm64': 0.43.0
+      '@ast-grep/napi-darwin-x64': 0.43.0
+      '@ast-grep/napi-linux-arm64-gnu': 0.43.0
+      '@ast-grep/napi-linux-arm64-musl': 0.43.0
+      '@ast-grep/napi-linux-x64-gnu': 0.43.0
+      '@ast-grep/napi-linux-x64-musl': 0.43.0
+      '@ast-grep/napi-win32-arm64-msvc': 0.43.0
+      '@ast-grep/napi-win32-ia32-msvc': 0.43.0
+      '@ast-grep/napi-win32-x64-msvc': 0.43.0
 
   '@babel/helper-string-parser@7.29.7': {}
 
@@ -3277,6 +3405,22 @@ snapshots:
       '@types/hast': 3.0.4
 
   '@shikijs/vscode-textmate@10.0.2': {}
+
+  '@skillit/cli@0.4.0(commander@15.0.0)':
+    dependencies:
+      '@skillit/core': 1.5.0
+    optionalDependencies:
+      commander: 15.0.0
+
+  '@skillit/core@1.5.0':
+    dependencies:
+      '@ast-grep/napi': 0.43.0
+      yaml: 2.9.0
+
+  '@skillit/typedoc@1.1.0(typedoc@0.28.19(typescript@6.0.3))':
+    dependencies:
+      '@skillit/core': 1.5.0
+      typedoc: 0.28.19(typescript@6.0.3)
 
   '@standard-schema/spec@1.1.0': {}
 
@@ -4424,6 +4568,11 @@ snapshots:
 
   typedoc-plugin-markdown@4.12.0(typedoc@0.28.19(typescript@6.0.3)):
     dependencies:
+      typedoc: 0.28.19(typescript@6.0.3)
+
+  typedoc-plugin-skillit@1.4.0(typedoc@0.28.19(typescript@6.0.3)):
+    dependencies:
+      '@skillit/typedoc': 1.1.0(typedoc@0.28.19(typescript@6.0.3))
       typedoc: 0.28.19(typescript@6.0.3)
 
   typedoc-plugin-to-skills@1.3.1(typedoc@0.28.19(typescript@6.0.3)):
