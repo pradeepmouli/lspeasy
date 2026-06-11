@@ -1,7 +1,7 @@
 // apps/cli/src/connect.ts
 import { spawn } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { existsSync, mkdirSync, openSync, readFileSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 import { createConnection } from 'node:net';
 import { SocketTransport } from '@lspeasy/core/node';
 import { socketPath } from '@lsproxy/proxy';
@@ -22,22 +22,38 @@ async function tryConnect(sockPath: string): Promise<boolean> {
   });
 }
 
-async function pollForSocket(sockPath: string, timeoutMs: number): Promise<void> {
+async function pollForSocket(sockPath: string, timeoutMs: number, logPath: string): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (existsSync(sockPath) && (await tryConnect(sockPath))) return;
     await new Promise<void>((r) => setTimeout(r, POLL_INTERVAL_MS));
   }
-  throw new Error(`Proxy daemon did not start within ${timeoutMs}ms (socket: ${sockPath})`);
+  // The daemon is detached; if it crashed on startup its only trace is the log
+  // file. Surface a tail of it so a fatal error (e.g. a missing dependency)
+  // isn't masked by this generic timeout.
+  let tail = '';
+  try {
+    const lines = readFileSync(logPath, 'utf8').trimEnd().split('\n');
+    if (lines[0]) tail = `\nDaemon log (${logPath}):\n  ${lines.slice(-8).join('\n  ')}`;
+  } catch {
+    tail = `\nDaemon log: ${logPath} (empty — daemon may not have started)`;
+  }
+  throw new Error(`Proxy daemon did not start within ${timeoutMs}ms (socket: ${sockPath})${tail}`);
 }
 
-function spawnDaemon(root: string, sockPath: string): void {
-  mkdirSync(dirname(sockPath), { recursive: true });
+function spawnDaemon(root: string, sockPath: string): string {
+  const dir = dirname(sockPath);
+  mkdirSync(dir, { recursive: true });
+  // Capture daemon stdout/stderr to a log instead of discarding it, so a
+  // startup crash is diagnosable rather than surfacing only as a poll timeout.
+  const logPath = join(dir, `daemon-${basename(sockPath, '.sock')}.log`);
+  const log = openSync(logPath, 'a');
   const child = spawn(process.execPath, [PROXY_BIN, '--root', root, '--socket', sockPath], {
     detached: true,
-    stdio: 'ignore'
+    stdio: ['ignore', log, log]
   });
   child.unref();
+  return logPath;
 }
 
 export interface ConnectOptions {
@@ -54,8 +70,8 @@ export async function connectViaProxy(opts: ConnectOptions): Promise<RefactorSes
 
   if (!alreadyUp) {
     if (opts.verbose) process.stderr.write(`[lsproxy] spawning proxy daemon\n`);
-    spawnDaemon(opts.root, sockPath);
-    await pollForSocket(sockPath, POLL_TIMEOUT_MS);
+    const logPath = spawnDaemon(opts.root, sockPath);
+    await pollForSocket(sockPath, POLL_TIMEOUT_MS, logPath);
   }
 
   if (opts.verbose) process.stderr.write(`[lsproxy] connecting via proxy ${sockPath}\n`);
