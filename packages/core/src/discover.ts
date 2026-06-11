@@ -92,12 +92,38 @@ export function selectExtensionMap(config: LspJson): Record<string, string> {
   return map;
 }
 
+/**
+ * Walk the directory tree from `root` to the filesystem root, checking
+ * `lsp.json`, `.claude/lsp.json`, and `.github/lsp.json` at each level, then
+ * fall back to `~/.claude/lsp.json`.  Returns the first entry whose
+ * `fileExtensions` map contains `fileExt` (or the first entry overall when
+ * `fileExt` is empty).
+ *
+ * @pitfalls Returns `null` silently when no `lsp.json` is found anywhere in
+ *   the search path (including the global `~/.claude/lsp.json` fallback).
+ *   Callers that skip the null check will silently fail to resolve a server
+ *   command — for the CLI this means `lsproxy` exits before the proxy daemon
+ *   is ever spawned.  Create an `lsp.json` at the workspace root or at
+ *   `~/.claude/lsp.json` for a per-user fallback.
+ */
 export function discoverServer(root: string, fileExt: string): ResolvedServer | null {
   const config = loadConfig(root);
   if (!config) return null;
   return selectServer(config, fileExt);
 }
 
+/**
+ * Walk the directory tree from `root` looking for a `lsp.json` entry whose
+ * `fileExtensions` map maps any extension to `languageId`.
+ *
+ * @pitfalls Returns `null` silently when no matching entry is found.  The
+ *   proxy daemon's `BackendPool` calls this function on every new language
+ *   connection — if `lsp.json` is absent or omits the requested language, the
+ *   daemon starts successfully but throws `"No LSP server configured for
+ *   languageId"` the moment a client request arrives.  An `lsp.json` must be
+ *   present in the workspace (or at `~/.claude/lsp.json`) before the proxy
+ *   server can serve any language.
+ */
 export function discoverServerByLanguageId(
   root: string,
   languageId: string
