@@ -61,7 +61,7 @@ Key APIs: `MessageDispatcher`, `PartialResultSender`, `ResponseError`
 
 Top pitfall per package:
 - NEVER construct `CapabilityGuard` before the `initialize` handshake completes. Server capabilities are only known after the `InitializeResult` is received; instantiating the guard too early will treat all methods as unsupported. (client)
-- NEVER set `enableReconnect: true` in server mode (`socket` provided) — the option is silently ignored (reconnect has no URL to reconnect to), but the intent is misleading and suggests lifecycle management will be handled when it is not. (core)
+- Returns `null` silently when no `lsp.json` is found anywhere in   the search path (including the global `~/.claude/lsp.json` fallback).   Callers that skip the null check will silently fail to resolve a server   command — for the CLI this means `lsproxy` exits before the proxy daemon   is ever spawned.  Create an `lsp.json` at the workspace root or at   `~/.claude/lsp.json` for a per-user fallback. (core)
 - NEVER register the same method in both the request and notification handler registries — the dispatcher uses separate lookup tables and the method will only match one path, silently ignoring the other. (server)
 
 ## Anti-Rationalization

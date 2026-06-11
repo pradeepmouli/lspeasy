@@ -99,7 +99,7 @@ export function selectExtensionMap(config: LspJson): Record<string, string> {
  * `fileExtensions` map contains `fileExt` (or the first entry overall when
  * `fileExt` is empty).
  *
- * @pitfalls Returns `null` silently when no `lsp.json` is found anywhere in
+ * @never Returns `null` silently when no `lsp.json` is found anywhere in
  *   the search path (including the global `~/.claude/lsp.json` fallback).
  *   Callers that skip the null check will silently fail to resolve a server
  *   command — for the CLI this means `lsproxy` exits before the proxy daemon
@@ -116,7 +116,7 @@ export function discoverServer(root: string, fileExt: string): ResolvedServer | 
  * Walk the directory tree from `root` looking for a `lsp.json` entry whose
  * `fileExtensions` map maps any extension to `languageId`.
  *
- * @pitfalls Returns `null` silently when no matching entry is found.  The
+ * @never Returns `null` silently when no matching entry is found.  The
  *   proxy daemon's `BackendPool` calls this function on every new language
  *   connection — if `lsp.json` is absent or omits the requested language, the
  *   daemon starts successfully but throws `"No LSP server configured for

@@ -118,8 +118,10 @@ document change notification.
 - `selectServer`
 - `selectServerByLanguageId`
 - `selectExtensionMap`
-- `discoverServer`
-- `discoverServerByLanguageId`
+- `discoverServer`: Walk the directory tree from `root` to the filesystem root, checking
+`lsp.
+- `discoverServerByLanguageId`: Walk the directory tree from `root` looking for a `lsp.json` entry whose
+`fileExtensions` map maps any extension to `languageId`.
 - `discoverExtensionMap`
 - `tokenizeCommand`: Split a server launch command into argv tokens, honoring single- and
 double-quoted spans so an argument containing spaces survives intact (e.

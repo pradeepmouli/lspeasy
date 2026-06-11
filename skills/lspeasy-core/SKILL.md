@@ -63,6 +63,8 @@ API surface: 62 functions, 11 classes, 122 types, 1 enums, 106 constants
 
 ## NEVER
 
+- Returns `null` silently when no `lsp.json` is found anywhere in   the search path (including the global `~/.claude/lsp.json` fallback).   Callers that skip the null check will silently fail to resolve a server   command — for the CLI this means `lsproxy` exits before the proxy daemon   is ever spawned.  Create an `lsp.json` at the workspace root or at   `~/.claude/lsp.json` for a per-user fallback.
+- Returns `null` silently when no matching entry is found.  The   proxy daemon's `BackendPool` calls this function on every new language   connection — if `lsp.json` is absent or omits the requested language, the   daemon starts successfully but throws `"No LSP server configured for   languageId"` the moment a client request arrives.  An `lsp.json` must be   present in the workspace (or at `~/.claude/lsp.json`) before the proxy   server can serve any language.
 - NEVER set `enableReconnect: true` in server mode (`socket` provided) — the option is silently ignored (reconnect has no URL to reconnect to), but the intent is misleading and suggests lifecycle management will be handled when it is not.
 - NEVER send messages before `isConnected()` returns `true`. In client mode the socket is in CONNECTING state immediately after construction; `send()` will throw until the open event fires.
 - NEVER use `ConsoleLogger` in a stdio LSP server (`StdioTransport`) — the LSP base protocol uses stdout as the message channel. Any `console.log` / `console.info` / `console.debug` output will corrupt the stdio stream. Use `NullLogger` or a file-based logger instead, and send diagnostic messages via `window/logMessage` notifications.
@@ -82,7 +84,8 @@ them left-to-right, each delegating to the next via `next()`), `executeMiddlewar
 calls `finalHandler` if no middleware short-circuits), `createScopedMiddleware` (Wraps a middleware with a filter so it only runs for matching LSP messages), `createTypedMiddleware` (Creates a typed, method-scoped middleware with full TypeScript inference for
 the message params and result), `createFullDidChangeParams` (Builds `DidChangeTextDocumentParams` for a full-document text replacement), `createIncrementalDidChangeParams` (Builds `DidChangeTextDocumentParams` for an incremental (range-based)
 document change notification), `createProgressBegin` (Creates a `WorkDoneProgressBegin` payload to start a work-done progress notification), `createProgressReport` (Creates a `WorkDoneProgressReport` payload to update an in-progress work-done notification), `buildMethodSets` (Builds the full set of LSP methods and the subset that are always allowed
-(not gated by a capability) for a given capability key)
+(not gated by a capability) for a given capability key), `discoverServer` (Walk the directory tree from `root` to the filesystem root, checking
+`lsp), `discoverServerByLanguageId` (Walk the directory tree from `root` looking for a `lsp)
 **Key classes:** `WebSocketTransport` (WebSocket-based transport for LSP communication), `DisposableStore` (Collects multiple `Disposable` instances and releases them together), `CancellationTokenSource` (Controller that creates and manages a `CancellationToken`), `ConsoleLogger` (Logger implementation that writes to the process console with level filtering), `NullLogger` (No-op logger that silently discards all messages), `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `DocumentVersionTracker` (Tracks monotonically increasing version numbers for open text documents)
 
 *302 exports total — see references/ for full API.*
