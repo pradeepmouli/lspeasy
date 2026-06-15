@@ -94,8 +94,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skillit/cli':
-        specifier: ^0.4.0
-        version: 0.4.0(commander@15.0.0)
+        specifier: ^0.5.0
+        version: 0.5.0(commander@15.0.0)
       typedoc-plugin-skillit:
         specifier: ^1.4.0
         version: 1.4.0(typedoc@0.28.19(typescript@6.0.3))
@@ -1252,8 +1252,8 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
-  '@skillit/cli@0.4.0':
-    resolution: {integrity: sha512-jJx7o8pKKHwZtaGEw6FSdsQr5r+WUwjQqNLm4/RqZZeZ6Z88EEYZ7ZoDl/r0ZVsOp5++X3Xlp6MtSNtkFuIb3g==}
+  '@skillit/cli@0.5.0':
+    resolution: {integrity: sha512-yMXXV91YVryKYboyd7D8hyTVwB5xnzN+VA2YJ1FXVHitSf+Jr5ouc8NbrIDWledC/KPMXh/66BtgFBHWpBOfCw==}
     peerDependencies:
       commander: '>=12.0.0'
     peerDependenciesMeta:
@@ -1262,6 +1262,9 @@ packages:
 
   '@skillit/core@1.5.0':
     resolution: {integrity: sha512-g49Wm1AXZ/S7LjejPZ9X7tiSsEwabZi4n9OWR1ZjLljSE6LD80gPuPIUUgBVVWtpOjSJprbNiV08rhkDpcGxRg==}
+
+  '@skillit/core@2.0.0':
+    resolution: {integrity: sha512-PBCaJMMXVVedT74iMGJg9m9jbMpGDVWq8ntXWhhvZMnCUKBYTQadJtQfGIwO0Z+Ov1ciPbFO2fIBJcUEpwsxLw==}
 
   '@skillit/typedoc@1.1.0':
     resolution: {integrity: sha512-f2Qba50bY1mD/izGH6MMlrj6aSjztJLi6Qd8Nb+lyaXr0wPhQnVhsqp7s4t2Hfy24Ct7EkrI01zPK+cNq5aFvQ==}
@@ -3406,13 +3409,18 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@skillit/cli@0.4.0(commander@15.0.0)':
+  '@skillit/cli@0.5.0(commander@15.0.0)':
     dependencies:
-      '@skillit/core': 1.5.0
+      '@skillit/core': 2.0.0
     optionalDependencies:
       commander: 15.0.0
 
   '@skillit/core@1.5.0':
+    dependencies:
+      '@ast-grep/napi': 0.43.0
+      yaml: 2.9.0
+
+  '@skillit/core@2.0.0':
     dependencies:
       '@ast-grep/napi': 0.43.0
       yaml: 2.9.0
