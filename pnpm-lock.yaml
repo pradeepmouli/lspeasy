@@ -97,8 +97,8 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0(commander@15.0.0)
       typedoc-plugin-skillit:
-        specifier: ^1.4.0
-        version: 1.4.0(typedoc@0.28.19(typescript@6.0.3))
+        specifier: ^1.4.1
+        version: 1.4.1(typedoc@0.28.19(typescript@6.0.3))
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1263,8 +1263,11 @@ packages:
   '@skillit/core@1.5.0':
     resolution: {integrity: sha512-g49Wm1AXZ/S7LjejPZ9X7tiSsEwabZi4n9OWR1ZjLljSE6LD80gPuPIUUgBVVWtpOjSJprbNiV08rhkDpcGxRg==}
 
-  '@skillit/typedoc@1.1.0':
-    resolution: {integrity: sha512-f2Qba50bY1mD/izGH6MMlrj6aSjztJLi6Qd8Nb+lyaXr0wPhQnVhsqp7s4t2Hfy24Ct7EkrI01zPK+cNq5aFvQ==}
+  '@skillit/core@2.0.0':
+    resolution: {integrity: sha512-PBCaJMMXVVedT74iMGJg9m9jbMpGDVWq8ntXWhhvZMnCUKBYTQadJtQfGIwO0Z+Ov1ciPbFO2fIBJcUEpwsxLw==}
+
+  '@skillit/typedoc@1.2.0':
+    resolution: {integrity: sha512-bF7kkAiSYMzlyRlWbtsJCxeQnPzvm01T5Zdtn6oM4WVf2jt9miCRg5H88FJDitc/nCipeBfno2Xxn5rP9vthvg==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -2400,8 +2403,8 @@ packages:
     peerDependencies:
       typedoc: 0.28.x
 
-  typedoc-plugin-skillit@1.4.0:
-    resolution: {integrity: sha512-HbzR0BsYyXv+bIin5qEu9BzTpH/C3KMCAryIBpv3Wf7WH9WDi93TNmMe5aNpewYZ7vhSR+X5dOCb46Kb+rPAdQ==}
+  typedoc-plugin-skillit@1.4.1:
+    resolution: {integrity: sha512-GHuxbe562LxF7B/p2dvjtnr9YqroZ0Qc1uNBVXN/SbdgHRpQsSb89A/yD0MaVb5zeZYw714LR9pkGH1Eft/RWA==}
     peerDependencies:
       typedoc: '>=0.28.0'
 
@@ -3420,9 +3423,14 @@ snapshots:
       '@ast-grep/napi': 0.43.0
       yaml: 2.9.0
 
-  '@skillit/typedoc@1.1.0(typedoc@0.28.19(typescript@6.0.3))':
+  '@skillit/core@2.0.0':
     dependencies:
-      '@skillit/core': 1.5.0
+      '@ast-grep/napi': 0.43.0
+      yaml: 2.9.0
+
+  '@skillit/typedoc@1.2.0(typedoc@0.28.19(typescript@6.0.3))':
+    dependencies:
+      '@skillit/core': 2.0.0
       typedoc: 0.28.19(typescript@6.0.3)
 
   '@standard-schema/spec@1.1.0': {}
@@ -4575,9 +4583,9 @@ snapshots:
     dependencies:
       typedoc: 0.28.19(typescript@6.0.3)
 
-  typedoc-plugin-skillit@1.4.0(typedoc@0.28.19(typescript@6.0.3)):
+  typedoc-plugin-skillit@1.4.1(typedoc@0.28.19(typescript@6.0.3)):
     dependencies:
-      '@skillit/typedoc': 1.1.0(typedoc@0.28.19(typescript@6.0.3))
+      '@skillit/typedoc': 1.2.0(typedoc@0.28.19(typescript@6.0.3))
       typedoc: 0.28.19(typescript@6.0.3)
 
   typedoc-plugin-to-skills@1.3.1(typedoc@0.28.19(typescript@6.0.3)):
