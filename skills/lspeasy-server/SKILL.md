@@ -1,12 +1,11 @@
 ---
+description: "Documentation site for lspeasy Use when: The client sets `partialResultToken` in the request params and you want to...."
 name: lspeasy-server
-description: "Build LSP language servers with a simple, fully-typed API Use when: The client sets `partialResultToken` in the request params and you want to.... Also: lsp, language-server-protocol, lsp-server, language-server."
-license: MIT
 ---
 
 # @lspeasy/server
 
-Build LSP language servers with a simple, fully-typed API
+Documentation site for lspeasy
 
 Use `@lspeasy/server` when you need to build the **provider** side of the
 Language Server Protocol — a daemon that editors and language-client tooling
@@ -56,37 +55,6 @@ handlers for capabilities the server never advertised.
 - NotificationHandler — fire-and-forget; unhandled rejections
   surface via `server.onError()`.
 
-## Quick Start
-
-Create a minimal hover server in less than 30 lines:
-
-```typescript
-import { LSPServer, StdioTransport } from '@lspeasy/server';
-import type { HoverParams, Hover } from '@lspeasy/server';
-
-// Create server with capabilities (fluent, returns narrowed type)
-const server = new LSPServer({
-  name: 'my-language-server',
-  version: '1.0.0'
-}).registerCapabilities({
-  hoverProvider: true
-});
-
-// Register hover handler via capability-aware namespace
-server.textDocument.onHover(async (params) => {
-  return {
-    contents: {
-      kind: 'markdown',
-      value: `# Hover\nLine ${params.position.line}`
-    }
-  };
-});
-
-// Start server
-const transport = new StdioTransport();
-await server.listen(transport);
-```
-
 ## When to Use
 
 **Use this skill when:**
@@ -96,7 +64,7 @@ await server.listen(transport);
 **Do NOT use when:**
 - You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead.
 
-API surface: 4 classes, 16 types, 1 enums, 2 constants
+API surface: 4 classes, 27 types, 1 enums, 2 constants
 
 ## NEVER
 
@@ -113,28 +81,19 @@ API surface: 4 classes, 16 types, 1 enums, 2 constants
 
 ## Quick Reference
 
-**Server:** `MessageDispatcher` (Routes incoming JSON-RPC requests and notifications to their registered handlers), `PartialResultSender` (Emits typed `$/progress` partial-result batches from server-side request handlers), `LSPServer` (Full-featured LSP server with automatic lifecycle management, typed handlers,
-capability-aware namespaces, and pluggable middleware), `LSPServer` (Constructs an LSPServer instance)
-**Errors:** `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `JSONRPCErrorCode` (Numeric error codes defined by JSON-RPC 2)
-**Logging:** `ConsoleLogger` (Logger implementation that writes to the process console with level filtering)
-**Handler:** `RequestHandler` (Signature for LSP request handlers registered via `LSPServer), `NotificationHandler` (Signature for LSP notification handlers registered via
-`LSPServer), `NotebookDocumentHandlerNamespace` (Namespace for registering notebook-document lifecycle notification handlers), `RequestContext` (Context provided to request handlers alongside params and the cancellation token), `NotificationContext` (Context provided to notification handlers alongside params)
-**capability-methods.d:** `Server` (Combined Server type with handlers and send methods), `AvailableRequests` (Mapped type of all available LSP request methods and thei...), `AvailableNotifications` (Mapped type of all available LSP notification methods and...)
-**cancellation.d:** `CancellationToken` (Singleton token that is never cancelled)
-**Lifecycle:** `CancellationToken` (Read-only handle for observing cancellation state), `ServerState` (Lifecycle state of an `LSPServer` instance)
-**infer.d:** `LSPRequestMethod` (Union type of all valid LSP request method names), `LSPNotificationMethod` (Union type of all valid LSP notification method names), `ParamsForRequest` (Infer request parameters from method name), `ResultForRequest` (Infer request result from method name), `ParamsForNotification` (Infer notification parameters from method name)
+**Key classes:** `MessageDispatcher` (Routes incoming JSON-RPC requests and notifications to their registered handlers), `PartialResultSender` (Emits typed `$/progress` partial-result batches from server-side request handlers), `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `ConsoleLogger` (Logger implementation that writes to the process console with level filtering)
+
+*34 exports total — see references/ for full API.*
 
 ## References
 
 Load these on demand — do NOT read all at once:
 
-- When using a class → read `references/classes/` for properties, methods, and inheritance
+- When using a class → read `references/classes.md` for properties, methods, and inheritance
 - When defining typed variables or function parameters → read `references/types.md`
-- When using enum values → read `references/enums.md`
 - When using exported constants → read `references/variables.md`
 - When configuring options → read `references/config.md` for all settings and defaults
 
 ## Links
 
-- [Repository](https://github.com/pradeepmouli/lspeasy)
 - Author: Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)

@@ -11,7 +11,7 @@ import type {
   FileSystemWatcher,
   WatchKind,
   FileChangeType
-} from 'vscode-languageserver-protocol';
+} from './types.js';
 
 // Re-export file watching types
 export type {

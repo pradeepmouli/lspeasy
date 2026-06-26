@@ -109,4 +109,42 @@ describe('capability → command → dispatch integration', () => {
       })
     );
   });
+
+  it('reads --params on a raw-pattern namespace command (workspace/willRenameFiles)', async () => {
+    // Regression: the zodToCommander action read commander's Command instance as
+    // the options object (`cmdArgs.at(-1)`), so `--params` never reached
+    // marshalParams. For a raw-pattern method (no positional shape) that made
+    // params look absent and threw "requires --params". The action now reads
+    // options via the Command's `.opts()`.
+    const sendRequest = vi.fn(async () => ({ changes: {} }));
+    const fakeSession = {
+      lsp: { sendRequest },
+      takeCapturedEdits: () => [],
+      requestWithRetry: (run: () => Promise<unknown>) => run()
+    } as any;
+
+    const program = new Command().exitOverride();
+    buildCommandTree(
+      program,
+      { workspace: { fileOperations: { willRename: { filters: [] } } } } as any,
+      fakeSession,
+      FLAGS
+    );
+
+    vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+    const params = JSON.stringify({
+      files: [{ oldUri: 'file:///project/a.ts', newUri: 'file:///project/b.ts' }]
+    });
+    await program.parseAsync(['workspace', 'willRenameFiles', '--params', params], {
+      from: 'user'
+    });
+
+    expect(sendRequest).toHaveBeenCalledWith(
+      'workspace/willRenameFiles',
+      expect.objectContaining({
+        files: [{ oldUri: 'file:///project/a.ts', newUri: 'file:///project/b.ts' }]
+      })
+    );
+  });
 });

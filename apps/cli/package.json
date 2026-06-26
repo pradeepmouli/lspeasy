@@ -1,6 +1,6 @@
 {
   "name": "@lsproxy/cli",
-  "version": "0.2.0",
+  "version": "0.4.5",
   "description": "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and move-symbol",
   "private": false,
   "keywords": [
@@ -26,7 +26,7 @@
   },
   "type": "module",
   "bin": {
-    "lspeasy": "./dist/cli.js"
+    "lsproxy": "./dist/cli.js"
   },
   "exports": {
     ".": {
@@ -38,7 +38,9 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "skills",
+    "skillit-postinstall.cjs"
   ],
   "publishConfig": {
     "access": "public"
@@ -47,19 +49,22 @@
     "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit"
+    "type-check": "tsgo --noEmit",
+    "postinstall": "node ./skillit-postinstall.cjs"
   },
   "dependencies": {
     "@lspeasy/client": "workspace:*",
     "@lspeasy/core": "workspace:*",
     "@lsproxy/proxy": "workspace:*",
-    "commander": "^12.1.0",
+    "commander": "^15.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@skillit/cli": "^0.4.0",
+    "typedoc-plugin-skillit": "^1.4.1",
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.12.0"
   }
 }

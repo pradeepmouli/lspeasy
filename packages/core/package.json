@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/core",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Core types, transports, and utilities for LSP SDK",
   "private": false,
   "keywords": [
@@ -83,8 +83,7 @@
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "typescript": "^6.0.3",
-    "vscode-languageserver-protocol": "^3.17.5"
+    "typescript": "^6.0.3"
   },
   "engines": {
     "node": ">=20.0.0"

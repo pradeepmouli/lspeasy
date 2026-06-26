@@ -115,6 +115,16 @@ document change notification.
 - `buildMethodSets`: Builds the full set of LSP methods and the subset that are always allowed
 (not gated by a capability) for a given capability key.
 - `checkMethod`: Shared validation logic for checking if a method is allowed based on capabilities.
+- `selectServer`
+- `selectServerByLanguageId`
+- `selectExtensionMap`
+- `discoverServer`: Walk the directory tree from `root` to the filesystem root, checking
+`lsp.
+- `discoverServerByLanguageId`: Walk the directory tree from `root` looking for a `lsp.json` entry whose
+`fileExtensions` map maps any extension to `languageId`.
+- `discoverExtensionMap`
+- `tokenizeCommand`: Split a server launch command into argv tokens, honoring single- and
+double-quoted spans so an argument containing spaces survives intact (e.
 - `DedicatedWorkerTransport`: JSON-RPC transport backed by a Dedicated Worker instance.
 - `SharedWorkerTransport`: JSON-RPC transport for Shared Worker environments with per-client envelope routing.
 - `WebSocketTransport`: WebSocket-based transport for LSP communication.
@@ -126,6 +136,47 @@ document change notification.
 - `NullLogger`: No-op logger that silently discards all messages.
 - `ResponseError`: An `Error` subclass that maps to a JSON-RPC 2.0 error response.
 - `DocumentVersionTracker`: Tracks monotonically increasing version numbers for open text documents.
+- `ApplyKind`: LSP Protocol Enums
+
+Emitted as const objects + union type aliases for structural compatibility
+with vscode-languageserver-protocol, which uses the ...
+- `CodeActionKind`
+- `CodeActionTag`
+- `CodeActionTriggerKind`
+- `CompletionItemKind`
+- `CompletionItemTag`
+- `CompletionTriggerKind`
+- `DiagnosticSeverity`
+- `DiagnosticTag`
+- `DocumentDiagnosticReportKind`
+- `DocumentHighlightKind`
+- `ErrorCodes`
+- `FailureHandlingKind`
+- `FileOperationPatternKind`
+- `FoldingRangeKind`
+- `InlayHintKind`
+- `InlineCompletionTriggerKind`
+- `InsertTextFormat`
+- `InsertTextMode`
+- `LanguageKind`
+- `LSPErrorCodes`
+- `MarkupKind`
+- `MessageType`
+- `MonikerKind`
+- `NotebookCellKind`
+- `PositionEncodingKind`
+- `PrepareSupportDefaultBehavior`
+- `ResourceOperationKind`
+- `SemanticTokenModifiers`
+- `SemanticTokenTypes`
+- `SignatureHelpTriggerKind`
+- `SymbolKind`
+- `SymbolTag`
+- `TextDocumentSaveReason`
+- `TextDocumentSyncKind`
+- `TokenFormat`
+- `TraceValue`
+- `UniquenessLevel`
 - `RequestMethodMap`: Runtime map from every LSP request method string to its metadata
 (direction, server capability, client capability).
 - `NotificationMethodMap`: Runtime map from every LSP notification method string to its metadata
@@ -170,6 +221,7 @@ Uses discriminated union based on presence of 'method' and 'id'
 - `DocumentSymbolSchema`
 - `CodeActionContextSchema`
 - `CodeActionParamsSchema`
+- `CodeActionSchema`
 - `FormattingOptionsSchema`
 - `DocumentFormattingParamsSchema`
 - `DocumentRangeFormattingParamsSchema`
@@ -205,6 +257,47 @@ Used by `ClientCapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
 
 ### Types
 
+- `ApplyKind`: LSP Protocol Enums
+
+Emitted as const objects + union type aliases for structural compatibility
+with vscode-languageserver-protocol, which uses the ...
+- `CodeActionKind`
+- `CodeActionTag`
+- `CodeActionTriggerKind`
+- `CompletionItemKind`
+- `CompletionItemTag`
+- `CompletionTriggerKind`
+- `DiagnosticSeverity`
+- `DiagnosticTag`
+- `DocumentDiagnosticReportKind`
+- `DocumentHighlightKind`
+- `ErrorCodes`
+- `FailureHandlingKind`
+- `FileOperationPatternKind`
+- `FoldingRangeKind`
+- `InlayHintKind`
+- `InlineCompletionTriggerKind`
+- `InsertTextFormat`
+- `InsertTextMode`
+- `LanguageKind`
+- `LSPErrorCodes`
+- `MarkupKind`
+- `MessageType`
+- `MonikerKind`
+- `NotebookCellKind`
+- `PositionEncodingKind`
+- `PrepareSupportDefaultBehavior`
+- `ResourceOperationKind`
+- `SemanticTokenModifiers`
+- `SemanticTokenTypes`
+- `SignatureHelpTriggerKind`
+- `SymbolKind`
+- `SymbolTag`
+- `TextDocumentSaveReason`
+- `TextDocumentSyncKind`
+- `TokenFormat`
+- `TraceValue`
+- `UniquenessLevel`
 - `LSPRequestMethod`: Union type of all valid LSP request method names
 - `LSPNotificationMethod`: Union type of all valid LSP notification method names
 - `ParamsForRequest`: Infer request parameters from method name
@@ -286,6 +379,10 @@ methods, notification send methods, and server-to-client handler registr...
 - `Server`: Combined Server type with handlers and send methods
 - `AvailableRequests`: Mapped type of all available LSP request methods and their handler signatures
 - `AvailableNotifications`: Mapped type of all available LSP notification methods and their handler signatures
+- `FileChangeType`
+- `FileChangeType`
+- `WatchKind`
+- `WatchKind`
 - `WorkDoneProgressValue`: WorkDoneProgress value types
 - `PartialResultParams`: A parameter literal used to pass a partial result token.
 - `DynamicRegistration`: A single LSP dynamic capability registration entry.
@@ -301,6 +398,9 @@ methods, notification send methods, and server-to-client handler registr...
 - `SharedWorkerLike`: Shared worker wrapper exposing a message port.
 - `WorkerMessageEventLike`: Lightweight event shape shared by worker and message port adapters.
 - `WorkerTransportEnvelope`: Envelope used by shared worker transport to preserve client isolation.
+- `LspServerEntry`
+- `LspJson`
+- `ResolvedServer`
 - `LogLevel`: Numeric severity levels for filtering log output.
 
 ## @lspeasy/server
@@ -333,6 +433,17 @@ capability-aware namespaces, and pluggable middleware.
 - `AvailableNotifications`: Mapped type of all available LSP notification methods and their handler signatures
 - `CancellationToken`: Singleton token that is never cancelled
 - `CancellationToken`: Read-only handle for observing cancellation state.
+- `ServerCapabilities`
+- `ClientCapabilities`
+- `InitializeParams`
+- `InitializeResult`
+- `HoverParams`
+- `Hover`
+- `CompletionParams`
+- `CompletionList`
+- `CompletionItem`
+- `DefinitionParams`
+- `Definition`
 - `LSPRequestMethod`: Union type of all valid LSP request method names
 - `LSPNotificationMethod`: Union type of all valid LSP notification method names
 - `ParamsForRequest`: Infer request parameters from method name

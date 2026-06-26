@@ -139,7 +139,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   private state: ServerState = ServerState.Created;
   private cancellationTokens = new Map<number | string, AbortController>();
   private clientCapabilities?: ClientCapabilities;
-  private clientInfo?: { name: string; version?: string };
+  private clientInfo?: { name: string; version?: string | undefined };
   public readonly notebookDocument: NotebookDocumentHandlerNamespace;
 
   constructor(options: ServerOptions<Capabilities> = {}) {
@@ -548,7 +548,7 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
   /**
    * Get client info (available after initialization)
    */
-  getClientInfo(): { name: string; version?: string } | undefined {
+  getClientInfo(): { name: string; version?: string | undefined } | undefined {
     return this.clientInfo;
   }
 

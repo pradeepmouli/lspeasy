@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/server",
-  "version": "4.1.0",
+  "version": "4.1.2",
   "description": "Build LSP language servers with a simple, fully-typed API",
   "private": false,
   "keywords": [
@@ -40,17 +40,18 @@
     "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit"
+    "type-check": "tsgo -p tsconfig.typecheck.json"
   },
   "dependencies": {
-    "@lspeasy/core": "workspace:*"
+    "@lspeasy/core": "workspace:*",
+    "camelcase": "^9.0.0"
   },
   "optionalDependencies": {
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "typescript": "^6.0.3",
-    "vscode-languageserver-protocol": "^3.17.5"
+    "vscode-languageserver-protocol": "^3.18.0"
   },
   "engines": {
     "node": ">=20.0.0"

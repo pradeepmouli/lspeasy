@@ -3,7 +3,7 @@ import type {
   Range,
   TextDocumentContentChangeEvent,
   VersionedTextDocumentIdentifier
-} from 'vscode-languageserver-protocol';
+} from '../protocol/types.js';
 
 /**
  * Tracks monotonically increasing version numbers for open text documents.

@@ -2,6 +2,203 @@
 
 ## protocol
 
+### `ApplyKind`
+LSP Protocol Enums
+
+Emitted as const objects + union type aliases for structural compatibility
+with vscode-languageserver-protocol, which uses the same pattern.
+
+Auto-generated from metaModel.json
+DO NOT EDIT MANUALLY
+```ts
+const ApplyKind: { Replace: 1; Merge: 2 }
+```
+
+### `CodeActionKind`
+```ts
+const CodeActionKind: { Empty: ""; QuickFix: "quickfix"; Refactor: "refactor"; RefactorExtract: "refactor.extract"; RefactorInline: "refactor.inline"; RefactorMove: "refactor.move"; RefactorRewrite: "refactor.rewrite"; Source: "source"; SourceOrganizeImports: "source.organizeImports"; SourceFixAll: "source.fixAll"; Notebook: "notebook" }
+```
+
+### `CodeActionTag`
+```ts
+const CodeActionTag: { LLMGenerated: 1 }
+```
+
+### `CodeActionTriggerKind`
+```ts
+const CodeActionTriggerKind: { Invoked: 1; Automatic: 2 }
+```
+
+### `CompletionItemKind`
+```ts
+const CompletionItemKind: { Text: 1; Method: 2; Function: 3; Constructor: 4; Field: 5; Variable: 6; Class: 7; Interface: 8; Module: 9; Property: 10; Unit: 11; Value: 12; Enum: 13; Keyword: 14; Snippet: 15; Color: 16; File: 17; Reference: 18; Folder: 19; EnumMember: 20; Constant: 21; Struct: 22; Event: 23; Operator: 24; TypeParameter: 25 }
+```
+
+### `CompletionItemTag`
+```ts
+const CompletionItemTag: { Deprecated: 1 }
+```
+
+### `CompletionTriggerKind`
+```ts
+const CompletionTriggerKind: { Invoked: 1; TriggerCharacter: 2; TriggerForIncompleteCompletions: 3 }
+```
+
+### `DiagnosticSeverity`
+```ts
+const DiagnosticSeverity: { Error: 1; Warning: 2; Information: 3; Hint: 4 }
+```
+
+### `DiagnosticTag`
+```ts
+const DiagnosticTag: { Unnecessary: 1; Deprecated: 2 }
+```
+
+### `DocumentDiagnosticReportKind`
+```ts
+const DocumentDiagnosticReportKind: { Full: "full"; Unchanged: "unchanged" }
+```
+
+### `DocumentHighlightKind`
+```ts
+const DocumentHighlightKind: { Text: 1; Read: 2; Write: 3 }
+```
+
+### `ErrorCodes`
+```ts
+const ErrorCodes: { ParseError: -32700; InvalidRequest: -32600; MethodNotFound: -32601; InvalidParams: -32602; InternalError: -32603; ServerNotInitialized: -32002; UnknownErrorCode: -32001 }
+```
+
+### `FailureHandlingKind`
+```ts
+const FailureHandlingKind: { Abort: "abort"; Transactional: "transactional"; TextOnlyTransactional: "textOnlyTransactional"; Undo: "undo" }
+```
+
+### `FileOperationPatternKind`
+```ts
+const FileOperationPatternKind: { file: "file"; folder: "folder" }
+```
+
+### `FoldingRangeKind`
+```ts
+const FoldingRangeKind: { Comment: "comment"; Imports: "imports"; Region: "region" }
+```
+
+### `InlayHintKind`
+```ts
+const InlayHintKind: { Type: 1; Parameter: 2 }
+```
+
+### `InlineCompletionTriggerKind`
+```ts
+const InlineCompletionTriggerKind: { Invoked: 1; Automatic: 2 }
+```
+
+### `InsertTextFormat`
+```ts
+const InsertTextFormat: { PlainText: 1; Snippet: 2 }
+```
+
+### `InsertTextMode`
+```ts
+const InsertTextMode: { asIs: 1; adjustIndentation: 2 }
+```
+
+### `LanguageKind`
+```ts
+const LanguageKind: { ABAP: "abap"; WindowsBat: "bat"; BibTeX: "bibtex"; Clojure: "clojure"; Coffeescript: "coffeescript"; C: "c"; CPP: "cpp"; CSharp: "csharp"; CSS: "css"; D: "d"; Delphi: "pascal"; Diff: "diff"; Dart: "dart"; Dockerfile: "dockerfile"; Elixir: "elixir"; Erlang: "erlang"; FSharp: "fsharp"; GitCommit: "git-commit"; GitRebase: "git-rebase"; Go: "go"; Groovy: "groovy"; Handlebars: "handlebars"; Haskell: "haskell"; HTML: "html"; Ini: "ini"; Java: "java"; JavaScript: "javascript"; JavaScriptReact: "javascriptreact"; JSON: "json"; LaTeX: "latex"; Less: "less"; Lua: "lua"; Makefile: "makefile"; Markdown: "markdown"; ObjectiveC: "objective-c"; ObjectiveCPP: "objective-cpp"; Pascal: "pascal"; Perl: "perl"; Perl6: "perl6"; PHP: "php"; Plaintext: "plaintext"; Powershell: "powershell"; Pug: "jade"; Python: "python"; R: "r"; Razor: "razor"; Ruby: "ruby"; Rust: "rust"; SCSS: "scss"; SASS: "sass"; Scala: "scala"; ShaderLab: "shaderlab"; ShellScript: "shellscript"; SQL: "sql"; Swift: "swift"; TypeScript: "typescript"; TypeScriptReact: "typescriptreact"; TeX: "tex"; VisualBasic: "vb"; XML: "xml"; XSL: "xsl"; YAML: "yaml" }
+```
+
+### `LSPErrorCodes`
+```ts
+const LSPErrorCodes: { RequestFailed: -32803; ServerCancelled: -32802; ContentModified: -32801; RequestCancelled: -32800 }
+```
+
+### `MarkupKind`
+```ts
+const MarkupKind: { PlainText: "plaintext"; Markdown: "markdown" }
+```
+
+### `MessageType`
+```ts
+const MessageType: { Error: 1; Warning: 2; Info: 3; Log: 4; Debug: 5 }
+```
+
+### `MonikerKind`
+```ts
+const MonikerKind: { import: "import"; export: "export"; local: "local" }
+```
+
+### `NotebookCellKind`
+```ts
+const NotebookCellKind: { Markup: 1; Code: 2 }
+```
+
+### `PositionEncodingKind`
+```ts
+const PositionEncodingKind: { UTF8: "utf-8"; UTF16: "utf-16"; UTF32: "utf-32" }
+```
+
+### `PrepareSupportDefaultBehavior`
+```ts
+const PrepareSupportDefaultBehavior: { Identifier: 1 }
+```
+
+### `ResourceOperationKind`
+```ts
+const ResourceOperationKind: { Create: "create"; Rename: "rename"; Delete: "delete" }
+```
+
+### `SemanticTokenModifiers`
+```ts
+const SemanticTokenModifiers: { declaration: "declaration"; definition: "definition"; readonly: "readonly"; static: "static"; deprecated: "deprecated"; abstract: "abstract"; async: "async"; modification: "modification"; documentation: "documentation"; defaultLibrary: "defaultLibrary" }
+```
+
+### `SemanticTokenTypes`
+```ts
+const SemanticTokenTypes: { namespace: "namespace"; type: "type"; class: "class"; enum: "enum"; interface: "interface"; struct: "struct"; typeParameter: "typeParameter"; parameter: "parameter"; variable: "variable"; property: "property"; enumMember: "enumMember"; event: "event"; function: "function"; method: "method"; macro: "macro"; keyword: "keyword"; modifier: "modifier"; comment: "comment"; string: "string"; number: "number"; regexp: "regexp"; operator: "operator"; decorator: "decorator"; label: "label" }
+```
+
+### `SignatureHelpTriggerKind`
+```ts
+const SignatureHelpTriggerKind: { Invoked: 1; TriggerCharacter: 2; ContentChange: 3 }
+```
+
+### `SymbolKind`
+```ts
+const SymbolKind: { File: 1; Module: 2; Namespace: 3; Package: 4; Class: 5; Method: 6; Property: 7; Field: 8; Constructor: 9; Enum: 10; Interface: 11; Function: 12; Variable: 13; Constant: 14; String: 15; Number: 16; Boolean: 17; Array: 18; Object: 19; Key: 20; Null: 21; EnumMember: 22; Struct: 23; Event: 24; Operator: 25; TypeParameter: 26 }
+```
+
+### `SymbolTag`
+```ts
+const SymbolTag: { Deprecated: 1 }
+```
+
+### `TextDocumentSaveReason`
+```ts
+const TextDocumentSaveReason: { Manual: 1; AfterDelay: 2; FocusOut: 3 }
+```
+
+### `TextDocumentSyncKind`
+```ts
+const TextDocumentSyncKind: { None: 0; Full: 1; Incremental: 2 }
+```
+
+### `TokenFormat`
+```ts
+const TokenFormat: { Relative: "relative" }
+```
+
+### `TraceValue`
+```ts
+const TraceValue: { Off: "off"; Messages: "messages"; Compact: "compact"; Verbose: "verbose" }
+```
+
+### `UniquenessLevel`
+```ts
+const UniquenessLevel: { document: "document"; project: "project"; group: "group"; scheme: "scheme"; global: "global" }
+```
+
 ### `RequestMethodMap`
 Runtime map from every LSP request method string to its metadata
 (direction, server capability, client capability).
@@ -32,12 +229,6 @@ const ClientNotificationMethodToCapabilityMap: Map<string, string | undefined>
 
 ### `LSPRequest`
 LSP Request methods organized by namespace
-```ts
-let LSPRequest: { CallHierarchy: { IncomingCalls: { Method: "callHierarchy/incomingCalls"; Direction: "clientToServer" }; OutgoingCalls: { Method: "callHierarchy/outgoingCalls"; Direction: "clientToServer" } }; Client: { Registration: { Method: "client/registerCapability"; Direction: "serverToClient" }; Unregistration: { Method: "client/unregisterCapability"; Direction: "serverToClient" } }; CodeAction: { Resolve: { Method: "codeAction/resolve"; Direction: "clientToServer"; ServerCapability: "codeActionProvider.resolveProvider"; ClientCapability: "textDocument.codeAction.resolveSupport" } }; CodeLens: { Resolve: { Method: "codeLens/resolve"; Direction: "clientToServer"; ServerCapability: "codeLensProvider.resolveProvider"; ClientCapability: "textDocument.codeLens.resolveSupport" } }; CompletionItem: { CompletionResolve: { Method: "completionItem/resolve"; Direction: "clientToServer"; ServerCapability: "completionProvider.resolveProvider"; ClientCapability: "textDocument.completion.completionItem.resolveSupport" } }; DocumentLink: { Resolve: { Method: "documentLink/resolve"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider.resolveProvider"; ClientCapability: "textDocument.documentLink" } }; InlayHint: { Resolve: { Method: "inlayHint/resolve"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider.resolveProvider"; ClientCapability: "textDocument.inlayHint.resolveSupport" } }; Lifecycle: { Initialize: { Method: "initialize"; Direction: "clientToServer" }; Shutdown: { Method: "shutdown"; Direction: "clientToServer" } }; TextDocument: { Implementation: { Method: "textDocument/implementation"; Direction: "clientToServer"; ServerCapability: "implementationProvider"; ClientCapability: "textDocument.implementation" }; TypeDefinition: { Method: "textDocument/typeDefinition"; Direction: "clientToServer"; ServerCapability: "typeDefinitionProvider"; ClientCapability: "textDocument.typeDefinition" }; DocumentColor: { Method: "textDocument/documentColor"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; ColorPresentation: { Method: "textDocument/colorPresentation"; Direction: "clientToServer"; ServerCapability: "colorProvider"; ClientCapability: "textDocument.colorProvider" }; FoldingRange: { Method: "textDocument/foldingRange"; Direction: "clientToServer"; ServerCapability: "foldingRangeProvider"; ClientCapability: "textDocument.foldingRange" }; Declaration: { Method: "textDocument/declaration"; Direction: "clientToServer"; ServerCapability: "declarationProvider"; ClientCapability: "textDocument.declaration" }; SelectionRange: { Method: "textDocument/selectionRange"; Direction: "clientToServer"; ServerCapability: "selectionRangeProvider"; ClientCapability: "textDocument.selectionRange" }; CallHierarchyPrepare: { Method: "textDocument/prepareCallHierarchy"; Direction: "clientToServer"; ServerCapability: "callHierarchyProvider"; ClientCapability: "textDocument.callHierarchy" }; SemanticTokens: { Method: "textDocument/semanticTokens/full"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider"; ClientCapability: "textDocument.semanticTokens"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensDelta: { Method: "textDocument/semanticTokens/full/delta"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.full.delta"; ClientCapability: "textDocument.semanticTokens.requests.full.delta"; RegistrationMethod: "textDocument/semanticTokens" }; SemanticTokensRange: { Method: "textDocument/semanticTokens/range"; Direction: "clientToServer"; ServerCapability: "semanticTokensProvider.range"; ClientCapability: "textDocument.semanticTokens.requests.range"; RegistrationMethod: "textDocument/semanticTokens" }; LinkedEditingRange: { Method: "textDocument/linkedEditingRange"; Direction: "clientToServer"; ServerCapability: "linkedEditingRangeProvider"; ClientCapability: "textDocument.linkedEditingRange" }; Moniker: { Method: "textDocument/moniker"; Direction: "clientToServer"; ServerCapability: "monikerProvider"; ClientCapability: "textDocument.moniker" }; TypeHierarchyPrepare: { Method: "textDocument/prepareTypeHierarchy"; Direction: "clientToServer"; ServerCapability: "typeHierarchyProvider"; ClientCapability: "textDocument.typeHierarchy" }; InlineValue: { Method: "textDocument/inlineValue"; Direction: "clientToServer"; ServerCapability: "inlineValueProvider"; ClientCapability: "textDocument.inlineValue" }; InlayHint: { Method: "textDocument/inlayHint"; Direction: "clientToServer"; ServerCapability: "inlayHintProvider"; ClientCapability: "textDocument.inlayHint" }; DocumentDiagnostic: { Method: "textDocument/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider"; ClientCapability: "textDocument.diagnostic" }; InlineCompletion: { Method: "textDocument/inlineCompletion"; Direction: "clientToServer"; ServerCapability: "inlineCompletionProvider"; ClientCapability: "textDocument.inlineCompletion" }; WillSaveTextDocumentWaitUntil: { Method: "textDocument/willSaveWaitUntil"; Direction: "clientToServer"; ServerCapability: "textDocumentSync.willSaveWaitUntil"; ClientCapability: "textDocument.synchronization.willSaveWaitUntil" }; Completion: { Method: "textDocument/completion"; Direction: "clientToServer"; ServerCapability: "completionProvider"; ClientCapability: "textDocument.completion" }; Hover: { Method: "textDocument/hover"; Direction: "clientToServer"; ServerCapability: "hoverProvider"; ClientCapability: "textDocument.hover" }; SignatureHelp: { Method: "textDocument/signatureHelp"; Direction: "clientToServer"; ServerCapability: "signatureHelpProvider"; ClientCapability: "textDocument.signatureHelp" }; Definition: { Method: "textDocument/definition"; Direction: "clientToServer"; ServerCapability: "definitionProvider"; ClientCapability: "textDocument.definition" }; References: { Method: "textDocument/references"; Direction: "clientToServer"; ServerCapability: "referencesProvider"; ClientCapability: "textDocument.references" }; DocumentHighlight: { Method: "textDocument/documentHighlight"; Direction: "clientToServer"; ServerCapability: "documentHighlightProvider"; ClientCapability: "textDocument.documentHighlight" }; DocumentSymbol: { Method: "textDocument/documentSymbol"; Direction: "clientToServer"; ServerCapability: "documentSymbolProvider"; ClientCapability: "textDocument.documentSymbol" }; CodeAction: { Method: "textDocument/codeAction"; Direction: "clientToServer"; ServerCapability: "codeActionProvider"; ClientCapability: "textDocument.codeAction" }; CodeLens: { Method: "textDocument/codeLens"; Direction: "clientToServer"; ServerCapability: "codeLensProvider"; ClientCapability: "textDocument.codeLens" }; DocumentLink: { Method: "textDocument/documentLink"; Direction: "clientToServer"; ServerCapability: "documentLinkProvider"; ClientCapability: "textDocument.documentLink" }; DocumentFormatting: { Method: "textDocument/formatting"; Direction: "clientToServer"; ServerCapability: "documentFormattingProvider"; ClientCapability: "textDocument.formatting" }; DocumentRangeFormatting: { Method: "textDocument/rangeFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider"; ClientCapability: "textDocument.rangeFormatting" }; DocumentRangesFormatting: { Method: "textDocument/rangesFormatting"; Direction: "clientToServer"; ServerCapability: "documentRangeFormattingProvider.rangesSupport"; ClientCapability: "textDocument.rangeFormatting.rangesSupport" }; DocumentOnTypeFormatting: { Method: "textDocument/onTypeFormatting"; Direction: "clientToServer"; ServerCapability: "documentOnTypeFormattingProvider"; ClientCapability: "textDocument.onTypeFormatting" }; Rename: { Method: "textDocument/rename"; Direction: "clientToServer"; ServerCapability: "renameProvider"; ClientCapability: "textDocument.rename" }; PrepareRename: { Method: "textDocument/prepareRename"; Direction: "clientToServer"; ServerCapability: "renameProvider.prepareProvider"; ClientCapability: "textDocument.rename.prepareSupport" } }; TypeHierarchy: { Supertypes: { Method: "typeHierarchy/supertypes"; Direction: "clientToServer" }; Subtypes: { Method: "typeHierarchy/subtypes"; Direction: "clientToServer" } }; Window: { WorkDoneProgressCreate: { Method: "window/workDoneProgress/create"; Direction: "serverToClient"; ClientCapability: "window.workDoneProgress" }; ShowDocument: { Method: "window/showDocument"; Direction: "serverToClient"; ClientCapability: "window.showDocument.support" }; ShowMessage: { Method: "window/showMessageRequest"; Direction: "serverToClient"; ClientCapability: "window.showMessage" } }; Workspace: { WillCreateFiles: { Method: "workspace/willCreateFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willCreate"; ClientCapability: "workspace.fileOperations.willCreate" }; WillRenameFiles: { Method: "workspace/willRenameFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willRename"; ClientCapability: "workspace.fileOperations.willRename" }; WillDeleteFiles: { Method: "workspace/willDeleteFiles"; Direction: "clientToServer"; ServerCapability: "workspace.fileOperations.willDelete"; ClientCapability: "workspace.fileOperations.willDelete" }; Diagnostic: { Method: "workspace/diagnostic"; Direction: "clientToServer"; ServerCapability: "diagnosticProvider.workspaceDiagnostics"; ClientCapability: "workspace.diagnostics" }; TextDocumentContent: { Method: "workspace/textDocumentContent"; Direction: "clientToServer"; ServerCapability: "workspace.textDocumentContent"; ClientCapability: "workspace.textDocumentContent" }; Symbol: { Method: "workspace/symbol"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider"; ClientCapability: "workspace.symbol" }; ExecuteCommand: { Method: "workspace/executeCommand"; Direction: "clientToServer"; ServerCapability: "executeCommandProvider"; ClientCapability: "workspace.executeCommand" }; Folders: { Method: "workspace/workspaceFolders"; Direction: "serverToClient"; ServerCapability: "workspace.workspaceFolders"; ClientCapability: "workspace.workspaceFolders" }; Configuration: { Method: "workspace/configuration"; Direction: "serverToClient"; ClientCapability: "workspace.configuration" }; FoldingRangeRefresh: { Method: "workspace/foldingRange/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.foldingRange.refreshSupport" }; SemanticTokensRefresh: { Method: "workspace/semanticTokens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.semanticTokens.refreshSupport" }; InlineValueRefresh: { Method: "workspace/inlineValue/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlineValue.refreshSupport" }; InlayHintRefresh: { Method: "workspace/inlayHint/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.inlayHint.refreshSupport" }; DiagnosticRefresh: { Method: "workspace/diagnostic/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.diagnostics.refreshSupport" }; TextDocumentContentRefresh: { Method: "workspace/textDocumentContent/refresh"; Direction: "serverToClient" }; CodeLensRefresh: { Method: "workspace/codeLens/refresh"; Direction: "serverToClient"; ClientCapability: "workspace.codeLens" }; ApplyWorkspaceEdit: { Method: "workspace/applyEdit"; Direction: "serverToClient"; ClientCapability: "workspace.applyEdit" } }; WorkspaceSymbol: { Resolve: { Method: "workspaceSymbol/resolve"; Direction: "clientToServer"; ServerCapability: "workspaceSymbolProvider.resolveProvider"; ClientCapability: "workspace.symbol.resolveSupport" } } }
-```
-
-### `LSPNotification`
-LSP Notification methods organized by namespace
 ```ts
 
 <!-- truncated -->

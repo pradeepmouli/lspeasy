@@ -1,12 +1,11 @@
 ---
+description: "Documentation site for lspeasy Use when: You are implementing a custom client layer and need the same validation...."
 name: lspeasy-client
-description: "Connect to LSP servers with typed client API Use when: You are implementing a custom client layer and need the same validation.... Also: lsp, language-server-protocol, lsp-client, language-client."
-license: MIT
 ---
 
 # @lspeasy/client
 
-Connect to LSP servers with typed client API
+Documentation site for lspeasy
 
 Use `@lspeasy/client` when you need to build the **consumer** side of the
 Language Server Protocol — an editor extension, a CLI analysis tool, a test
@@ -51,44 +50,6 @@ ConnectionState.
 The client handles `client/registerCapability` and
 `client/unregisterCapability` requests from the server automatically,
 updating the typed namespaces at runtime.
-
-## Quick Start
-
-```typescript
-import { LSPClient } from '@lspeasy/client';
-import { StdioTransport } from '@lspeasy/core';
-import { spawn } from 'child_process';
-
-// Spawn language server
-const serverProcess = spawn('typescript-language-server', ['--stdio']);
-
-// Create transport
-const transport = new StdioTransport({
-  input: serverProcess.stdout,
-  output: serverProcess.stdin
-});
-
-// Create client
-const client = new LSPClient({
-  name: 'My Client',
-  version: '1.0.0',
-  transport
-});
-
-// Connect to server (sends initialize + initialized)
-await client.connect(transport);
-
-// Use high-level API
-const hover = await client.textDocument.hover({
-  textDocument: { uri: 'file:///path/to/file.ts' },
-  position: { line: 10, character: 5 }
-});
-
-console.log('Hover:', hover?.contents);
-
-// Disconnect
-await client.disconnect();
-```
 
 ## When to Use
 
@@ -135,13 +96,11 @@ handshake, and exposes capability-aware request namespaces), `InitializeResult` 
 
 Load these on demand — do NOT read all at once:
 
-- When using a class → read `references/classes/` for properties, methods, and inheritance
+- When using a class → read `references/classes.md` for properties, methods, and inheritance
 - When defining typed variables or function parameters → read `references/types.md`
-- When using enum values → read `references/enums.md`
 - When using exported constants → read `references/variables.md`
 - When configuring options → read `references/config.md` for all settings and defaults
 
 ## Links
 
-- [Repository](https://github.com/pradeepmouli/lspeasy)
 - Author: Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)

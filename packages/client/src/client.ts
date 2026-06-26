@@ -19,6 +19,7 @@ import type {
   LSPNotificationMethod,
   ParamsForNotification,
   InitializeParams,
+  LSPAny,
   ServerCapabilities,
   ClientCapabilities,
   Client,
@@ -180,7 +181,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   };
   private capabilities?: ClientCaps;
   public serverCapabilities?: ServerCapabilities;
-  private serverInfo?: { name: string; version?: string };
+  private serverInfo?: { name: string; version?: string | undefined };
   private readonly onValidationError?: ClientOptions<ClientCaps>['onValidationError'];
   private capabilityGuard?: CapabilityGuard;
   private clientCapabilityGuard?: ClientCapabilityGuard;
@@ -302,7 +303,11 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
           ? { workspaceFolders: this.options.workspaceFolders }
           : {}),
         ...(this.options.initializationOptions !== undefined
-          ? { initializationOptions: this.options.initializationOptions }
+          ? // `initializationOptions` is user-supplied arbitrary data that the LSP
+            // spec types as `LSPAny` (it is JSON-serialized on the wire). The public
+            // ClientOptions keeps it as the more lenient `unknown`; assert LSPAny at
+            // this boundary so it satisfies InitializeParams.
+            { initializationOptions: this.options.initializationOptions as LSPAny }
           : {})
       };
 
@@ -793,7 +798,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   /**
    * Get server info
    */
-  getServerInfo(): { name: string; version?: string } | undefined {
+  getServerInfo(): { name: string; version?: string | undefined } | undefined {
     return this.serverInfo;
   }
 

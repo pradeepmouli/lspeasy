@@ -21,15 +21,15 @@ import { RefactorSession } from './session.js';
 import { connectViaProxy } from './connect.js';
 import { buildCommandTree } from './build-commands.js';
 
-const STATIC_HELP = `lspeasy — LSP-driven CLI
+const STATIC_HELP = `lsproxy — LSP-driven CLI
 
 Usage:
-  lspeasy <namespace> <command> [args]
-  lspeasy call <method> --params <json>
+  lsproxy <namespace> <command> [args]
+  lsproxy call <method> --params <json>
 
 Available commands depend on the connected server's advertised capabilities.
 Run with a file argument to see available commands for that language:
-  lspeasy textDocument hover --help src/foo.ts
+  lsproxy textDocument hover --help src/foo.ts
 
 Global flags:
   --server <cmd>        LSP server launch command (overrides lsp.json discovery)
@@ -126,16 +126,45 @@ async function main(): Promise<void> {
       ? firstSubArg
       : undefined;
 
+  // workspace file-operation methods (workspace/willRenameFiles, willCreateFiles,
+  // willDeleteFiles) carry their file in `--params { files: [{ oldUri | uri }] }`
+  // (or a `textDocument.uri`), NOT a positional — so the file-detection above
+  // skips them. Without an anchor file the session never opens a document, the TS
+  // server loads no program, and getEditsForFileRename returns zero edits; the
+  // languageId also stays 'plaintext' so even a didOpen wouldn't register as TS.
+  // Mine the --params JSON (parseArgs leaves it in positionals, or in values when
+  // given as --params=...) for a file URI to anchor on.
+  const anchorFromParams = (): string | undefined => {
+    const candidates = [...positionals];
+    const paramsVal = (values as Record<string, unknown>)['params'];
+    if (typeof paramsVal === 'string') candidates.push(paramsVal);
+    for (const c of candidates) {
+      if (!c.startsWith('{')) continue;
+      try {
+        const o = JSON.parse(c) as {
+          files?: Array<{ oldUri?: string; uri?: string }>;
+          textDocument?: { uri?: string };
+        };
+        const uri = o.files?.[0]?.oldUri ?? o.files?.[0]?.uri ?? o.textDocument?.uri;
+        if (typeof uri === 'string') return fileURLToPath(uri);
+      } catch {
+        /* not the params JSON — keep scanning */
+      }
+    }
+    return undefined;
+  };
+  const anchorFile = subArgFile ?? anchorFromParams();
+
   if (flags.server) {
     serverCommand = flags.server;
     // Infer languageId from the file extension when --server bypasses discovery.
-    if (subArgFile) {
-      const ext = extname(subArgFile);
+    if (anchorFile) {
+      const ext = extname(anchorFile);
       const discovered = discoverServer(flags.root, ext);
       if (discovered) languageId = discovered.languageId;
     }
   } else {
-    const ext = subArgFile ? extname(subArgFile) : '';
+    const ext = anchorFile ? extname(anchorFile) : '';
 
     if (!ext) {
       // No file argument — try lsp.json discovery with a wildcard lookup so
@@ -182,12 +211,12 @@ async function main(): Promise<void> {
   }
 
   try {
-    if (subArgFile && !values.help) {
-      const absPath = resolvePathArg(subArgFile, flags);
+    if (anchorFile && !values.help) {
+      const absPath = resolvePathArg(anchorFile, flags);
       await session.open(absPath);
     }
 
-    const program = new Command('lspeasy');
+    const program = new Command('lsproxy');
 
     // Declare global options so Commander does not reject them in pass 2
     program
@@ -212,7 +241,7 @@ async function main(): Promise<void> {
  * True when this module is the process entry point (vs. imported by a test).
  *
  * Compares resolved real paths of import.meta.url and argv[1]. The bin
- * (lspeasy) is installed as a symlink to dist/cli.js, so argv[1] is the
+ * (lsproxy) is installed as a symlink to dist/cli.js, so argv[1] is the
  * symlink path while import.meta.url is Node's realpath — a plain compare
  * would mismatch and never run main(). realpathSync on both sides makes the
  * symlinked-bin and direct-invocation cases agree.

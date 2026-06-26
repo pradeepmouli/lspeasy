@@ -1,14 +1,45 @@
 {
   "name": "@lsproxy/proxy",
-  "version": "0.1.0",
-  "description": "Per-root LSP proxy daemon — holds warm language server connections for @lsproxy/cli",
+  "version": "1.0.1",
+  "description": "Per-root LSP multiplexing daemon — holds warm language server connections for @lsproxy/cli",
+  "private": false,
+  "keywords": [
+    "lsp",
+    "language-server-protocol",
+    "lsp-proxy",
+    "language-server",
+    "cli"
+  ],
+  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
+  "bugs": {
+    "url": "https://github.com/pradeepmouli/lspeasy/issues"
+  },
+  "license": "MIT",
+  "author": "Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeepmouli/lspeasy.git",
+    "directory": "apps/proxy"
+  },
   "type": "module",
-  "bin": { "lsproxy": "./dist/main.js" },
+  "bin": {
+    "lsps": "./dist/main.js"
+  },
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
@@ -18,6 +49,10 @@
     "@lspeasy/client": "workspace:*",
     "@lspeasy/core": "workspace:*"
   },
-  "devDependencies": { "typescript": "^6.0.3" },
-  "engines": { "node": ">=22.0.0" }
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }

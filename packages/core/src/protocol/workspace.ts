@@ -19,7 +19,7 @@ import type {
   FileEvent,
   FileChangeType,
   DidChangeWorkspaceFoldersParams
-} from 'vscode-languageserver-protocol';
+} from './types.js';
 
 // Re-export workspace folder types
 export type {

@@ -82,6 +82,33 @@ Lifecycle state of an `LSPServer` instance.
 - `ShuttingDown` = `"shutting_down"`
 - `Shutdown` = `"shutdown"`
 
+## types.d
+
+### `ServerCapabilities`
+
+### `ClientCapabilities`
+
+### `InitializeParams`
+
+### `InitializeResult`
+
+### `HoverParams`
+
+### `Hover`
+
+### `CompletionParams`
+
+### `CompletionList`
+
+### `CompletionItem`
+
+### `DefinitionParams`
+
+### `Definition`
+```ts
+Location | Location[]
+```
+
 ## infer.d
 
 ### `LSPRequestMethod`

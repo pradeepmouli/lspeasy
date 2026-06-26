@@ -1,7 +1,6 @@
 ---
 name: lspeasy
-description: "Use when working with lspeasy (client, core, server). Covers: lsp, language-server-protocol, lsp-client, language-client, jsonrpc, transport, lsp-server, language-server."
-license: MIT
+description: "Use when working with lspeasy (client, core, server)."
 ---
 # lspeasy
 
@@ -10,15 +9,15 @@ license: MIT
 ## When to Use
 
 Use this router when:
-- Connect to LSP servers with typed client API
-- Core types, transports, and utilities for LSP SDK
-- Build LSP language servers with a simple, fully-typed API
+- Documentation site for lspeasy
+- Documentation site for lspeasy
+- Documentation site for lspeasy
 
 ## Decision Tree
 
-1. Connect to LSP servers with typed client API? → `lspeasy-client`
-2. Core types, transports, and utilities for LSP SDK? → `lspeasy-core`
-3. Build LSP language servers with a simple, fully-typed API? → `lspeasy-server`
+1. Documentation site for lspeasy? → `lspeasy-client`
+2. Documentation site for lspeasy? → `lspeasy-core`
+3. Documentation site for lspeasy? → `lspeasy-server`
 
 ## Routing Logic
 
@@ -62,26 +61,26 @@ Key APIs: `MessageDispatcher`, `PartialResultSender`, `ResponseError`
 
 Top pitfall per package:
 - NEVER construct `CapabilityGuard` before the `initialize` handshake completes. Server capabilities are only known after the `InitializeResult` is received; instantiating the guard too early will treat all methods as unsupported. (client)
-- NEVER set `enableReconnect: true` in server mode (`socket` provided) — the option is silently ignored (reconnect has no URL to reconnect to), but the intent is misleading and suggests lifecycle management will be handled when it is not. (core)
+- Returns `null` silently when no `lsp.json` is found anywhere in   the search path (including the global `~/.claude/lsp.json` fallback).   Callers that skip the null check will silently fail to resolve a server   command — for the CLI this means `lsproxy` exits before the proxy daemon   is ever spawned.  Create an `lsp.json` at the workspace root or at   `~/.claude/lsp.json` for a per-user fallback. (core)
 - NEVER register the same method in both the request and notification handler registries — the dispatcher uses separate lookup tables and the method will only match one path, silently ignoring the other. (server)
 
 ## Anti-Rationalization
 
 | Thought | Reality |
 |---------|---------|
-| "I'll just use client for everything" | client is for connect to lsp servers with typed client api. The transport already provides its own keep-alive mechanism (e.g. WebSocket ping frames) — adding a heartbeat on top creates redundant round-trips and may interfere with the transport's own timeout logic. |
-| "I'll just use core for everything" | core is for core types, transports, and utilities for lsp sdk. You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. |
-| "I'll just use server for everything" | server is for build lsp language servers with a simple, fully-typed api. You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. |
+| "I'll just use client for everything" | client is for documentation site for lspeasy. The transport already provides its own keep-alive mechanism (e.g. WebSocket ping frames) — adding a heartbeat on top creates redundant round-trips and may interfere with the transport's own timeout logic. |
+| "I'll just use core for everything" | core is for documentation site for lspeasy. You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. |
+| "I'll just use server for everything" | server is for documentation site for lspeasy. You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. |
 
 ## Example Invocations
 
-User: "I need to connect to lsp servers with typed client api"  
+User: "I need to documentation site for lspeasy"  
 → Load `lspeasy-client`
 
-User: "I need to core types, transports, and utilities for lsp sdk"  
+User: "I need to documentation site for lspeasy"  
 → Load `lspeasy-core`
 
-User: "I need to build lsp language servers with a simple, fully-typed api"  
+User: "I need to documentation site for lspeasy"  
 → Load `lspeasy-server`
 
 ## NEVER
