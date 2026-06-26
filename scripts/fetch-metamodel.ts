@@ -222,7 +222,7 @@ export async function fetchMetaModel(options: FetchMetaModelOptions = {}): Promi
     }
   }
 
-  // Validate the freshly-downloaded JSON before trusting it.
+  // Validate JSON
   let metaModel: MetaModel;
   try {
     metaModel = JSON.parse(content) as MetaModel;
@@ -235,24 +235,13 @@ export async function fetchMetaModel(options: FetchMetaModelOptions = {}): Promi
     throw new Error('Invalid metaModel.json structure: missing requests or notifications');
   }
 
-  if (!cache) {
-    console.log('✅ Successfully fetched and parsed metaModel.json');
-    return metaModel;
+  // Save to cache
+  if (cache) {
+    saveToCache(cachePath, content);
   }
 
-  // Persist the download, then return the metaModel READ BACK FROM THE CACHE
-  // FILE rather than the live network response. The cache file is the trust
-  // boundary: downstream code generators consume the metaModel from a local,
-  // reviewable on-disk artifact — never directly from an HTTP body — so
-  // generated source files are not written from untrusted network data
-  // (CodeQL js/http-to-file-access).
-  saveToCache(cachePath, content);
-  const persisted = loadFromCache(cachePath);
-  if (persisted === null) {
-    throw new Error(`Failed to read back cached metaModel from ${cachePath}`);
-  }
-  console.log('✅ Successfully fetched and cached metaModel.json');
-  return JSON.parse(persisted) as MetaModel;
+  console.log('✅ Successfully fetched and parsed metaModel.json');
+  return metaModel;
 }
 
 /**
