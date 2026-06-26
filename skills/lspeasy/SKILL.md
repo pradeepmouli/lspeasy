@@ -9,15 +9,15 @@ description: "Use when working with lspeasy (client, core, server)."
 ## When to Use
 
 Use this router when:
-- Documentation site for lspeasy
-- Documentation site for lspeasy
-- Documentation site for lspeasy
+- LSP client package for connecting to language servers.
+- Core types, transports, and utilities shared by all lspeasy packages.
+- LSP server package for hosting Language Server Protocol (LSP) servers.
 
 ## Decision Tree
 
-1. Documentation site for lspeasy? → `lspeasy-client`
-2. Documentation site for lspeasy? → `lspeasy-core`
-3. Documentation site for lspeasy? → `lspeasy-server`
+1. LSP client package for connecting to language servers.? → `lspeasy-client`
+2. Core types, transports, and utilities shared by all lspeasy packages.? → `lspeasy-core`
+3. LSP server package for hosting Language Server Protocol (LSP) servers.? → `lspeasy-server`
 
 ## Routing Logic
 
@@ -68,19 +68,19 @@ Top pitfall per package:
 
 | Thought | Reality |
 |---------|---------|
-| "I'll just use client for everything" | client is for documentation site for lspeasy. The transport already provides its own keep-alive mechanism (e.g. WebSocket ping frames) — adding a heartbeat on top creates redundant round-trips and may interfere with the transport's own timeout logic. |
-| "I'll just use core for everything" | core is for documentation site for lspeasy. You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. |
-| "I'll just use server for everything" | server is for documentation site for lspeasy. You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. |
+| "I'll just use client for everything" | client is for lsp client package for connecting to language servers.. The transport already provides its own keep-alive mechanism (e.g. WebSocket ping frames) — adding a heartbeat on top creates redundant round-trips and may interfere with the transport's own timeout logic. |
+| "I'll just use core for everything" | core is for core types, transports, and utilities shared by all lspeasy packages.. You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. |
+| "I'll just use server for everything" | server is for lsp server package for hosting language server protocol (lsp) servers.. You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. |
 
 ## Example Invocations
 
-User: "I need to documentation site for lspeasy"  
+User: "I need to lsp client package for connecting to language servers."  
 → Load `lspeasy-client`
 
-User: "I need to documentation site for lspeasy"  
+User: "I need to core types, transports, and utilities shared by all lspeasy packages."  
 → Load `lspeasy-core`
 
-User: "I need to documentation site for lspeasy"  
+User: "I need to lsp server package for hosting language server protocol (lsp) servers."  
 → Load `lspeasy-server`
 
 ## NEVER

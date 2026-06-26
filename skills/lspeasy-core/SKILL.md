@@ -1,11 +1,11 @@
 ---
-description: "Documentation site for lspeasy Use when: You are building a browser-based LSP client, a WebSocket-backed language...."
+description: "Core types, transports, and utilities shared by all lspeasy packages. Use when: You are building a browser-based LSP client, a WebSocket-backed language...."
 name: lspeasy-core
 ---
 
 # @lspeasy/core
 
-Documentation site for lspeasy
+Core types, transports, and utilities shared by all lspeasy packages.
 
 `@lspeasy/core` is the shared foundation for the lspeasy SDK. It contains
 everything needed to build custom LSP integrations, and re-exports the
