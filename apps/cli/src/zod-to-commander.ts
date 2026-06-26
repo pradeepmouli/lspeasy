@@ -317,8 +317,15 @@ export function zodToCommander(
   }
 
   cmd.action(async (...cmdArgs) => {
-    const cmdOpts = cmdArgs.at(-1) as Record<string, unknown>;
-    const positional = cmdArgs.slice(0, -1).map(String);
+    // Commander passes (...declaredArgs, options, command): the Command instance
+    // is LAST and the parsed options object is second-to-last. This previously
+    // read `at(-1)` as the options — but that's the Command, so `--params` (and
+    // every other option) never reached marshalParams. For raw-pattern methods
+    // (e.g. workspace/willRenameFiles) that made `--params` look absent and threw
+    // "requires --params". Read options off the Command via `.opts()`.
+    const command = cmdArgs.at(-1) as { opts(): Record<string, unknown> };
+    const cmdOpts = command.opts();
+    const positional = cmdArgs.slice(0, -2).map(String);
 
     try {
       const rawParams = marshalParams(pattern, positional, cmdOpts, flags);

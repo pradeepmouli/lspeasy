@@ -126,16 +126,45 @@ async function main(): Promise<void> {
       ? firstSubArg
       : undefined;
 
+  // workspace file-operation methods (workspace/willRenameFiles, willCreateFiles,
+  // willDeleteFiles) carry their file in `--params { files: [{ oldUri | uri }] }`
+  // (or a `textDocument.uri`), NOT a positional — so the file-detection above
+  // skips them. Without an anchor file the session never opens a document, the TS
+  // server loads no program, and getEditsForFileRename returns zero edits; the
+  // languageId also stays 'plaintext' so even a didOpen wouldn't register as TS.
+  // Mine the --params JSON (parseArgs leaves it in positionals, or in values when
+  // given as --params=...) for a file URI to anchor on.
+  const anchorFromParams = (): string | undefined => {
+    const candidates = [...positionals];
+    const paramsVal = (values as Record<string, unknown>)['params'];
+    if (typeof paramsVal === 'string') candidates.push(paramsVal);
+    for (const c of candidates) {
+      if (!c.startsWith('{')) continue;
+      try {
+        const o = JSON.parse(c) as {
+          files?: Array<{ oldUri?: string; uri?: string }>;
+          textDocument?: { uri?: string };
+        };
+        const uri = o.files?.[0]?.oldUri ?? o.files?.[0]?.uri ?? o.textDocument?.uri;
+        if (typeof uri === 'string') return fileURLToPath(uri);
+      } catch {
+        /* not the params JSON — keep scanning */
+      }
+    }
+    return undefined;
+  };
+  const anchorFile = subArgFile ?? anchorFromParams();
+
   if (flags.server) {
     serverCommand = flags.server;
     // Infer languageId from the file extension when --server bypasses discovery.
-    if (subArgFile) {
-      const ext = extname(subArgFile);
+    if (anchorFile) {
+      const ext = extname(anchorFile);
       const discovered = discoverServer(flags.root, ext);
       if (discovered) languageId = discovered.languageId;
     }
   } else {
-    const ext = subArgFile ? extname(subArgFile) : '';
+    const ext = anchorFile ? extname(anchorFile) : '';
 
     if (!ext) {
       // No file argument — try lsp.json discovery with a wildcard lookup so
@@ -182,8 +211,8 @@ async function main(): Promise<void> {
   }
 
   try {
-    if (subArgFile && !values.help) {
-      const absPath = resolvePathArg(subArgFile, flags);
+    if (anchorFile && !values.help) {
+      const absPath = resolvePathArg(anchorFile, flags);
       await session.open(absPath);
     }
 
