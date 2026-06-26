@@ -282,35 +282,6 @@ class ProtocolTypeGenerator {
     const enumerations = this.parser.getAllEnumerations();
     const enumNames = new Set(enumerations.map((e) => e.name));
 
-    // Detect type aliases involved in mutual cycles (e.g. LSPAny ↔ LSPObject).
-    // A topo-sort DFS marks any alias encountered while still "in progress" as cyclic.
-    // Cyclic aliases are emitted as `unknown` to avoid TS2456.
-    const visited = new Set<string>();
-    const inProgress = new Set<string>();
-    const cyclicAliases = new Set<string>();
-
-    const aliasDepsOf = (name: string): string[] => {
-      const a = typeAliases.find((x) => x.name === name);
-      if (!a || enumNames.has(a.name)) return [];
-      const refs = new Set<string>();
-      this.collectTypeRefs(a.type, refs);
-      refs.delete(name);
-      return [...refs].filter((r) => !enumNames.has(r) && typeAliases.some((x) => x.name === r));
-    };
-
-    const visitAlias = (name: string): void => {
-      if (visited.has(name) || enumNames.has(name)) return;
-      if (inProgress.has(name)) {
-        cyclicAliases.add(name);
-        return;
-      }
-      inProgress.add(name);
-      for (const dep of aliasDepsOf(name)) visitAlias(dep);
-      inProgress.delete(name);
-      visited.add(name);
-    };
-    for (const a of typeAliases) visitAlias(a.name);
-
     const lines: string[] = [];
 
     lines.push('/**');
@@ -347,14 +318,14 @@ class ProtocolTypeGenerator {
 
     for (const a of typeAliases) {
       if (enumNames.has(a.name)) continue;
-      if (cyclicAliases.has(a.name)) {
-        // Mutual cycles (e.g. LSPAny ↔ LSPObject) cannot be expressed as recursive type
-        // aliases in TypeScript without triggering TS2456. These are all "any JSON value"
-        // types in practice; `unknown` is the safe approximation.
-        lines.push(`export type ${assertSafeIdentifier(a.name)} = unknown;`);
-      } else {
-        lines.push(`export type ${assertSafeIdentifier(a.name)} = ${this.typeToTsType(a.type)};`);
-      }
+      // Mutually-recursive JSON-value aliases (LSPAny ↔ LSPArray ↔ LSPObject)
+      // recurse THROUGH structural types — object index signatures and arrays —
+      // which TypeScript permits; TS2456 only fires on a DIRECT type-alias
+      // self-cycle. Emitting the real metaModel type therefore preserves the
+      // JSON shape (so callers can't pass non-JSON values) and keeps these types
+      // in lockstep with the recursive runtime zod schemas (LSPAnySchema etc.),
+      // instead of collapsing to `unknown`.
+      lines.push(`export type ${assertSafeIdentifier(a.name)} = ${this.typeToTsType(a.type)};`);
     }
 
     lines.push('');
@@ -752,10 +723,23 @@ class ProtocolTypeGenerator {
       }
       case 'map': {
         const mt = type as MapType;
-        return `Record<${this.typeToTsType(mt.key)}, ${this.typeToTsType(mt.value)}>`;
+        const key = this.typeToTsType(mt.key);
+        const value = this.typeToTsType(mt.value);
+        // String-keyed maps use an inline index signature rather than
+        // `Record<string, V>`: TS resolves index-signature value types lazily, so
+        // mutually-recursive JSON aliases (LSPObject ↔ LSPArray ↔ LSPAny) compile,
+        // whereas `Record<string, LSPAny>` instantiates eagerly and trips TS2456.
+        // Non-`string` keys (e.g. identifier aliases) keep `Record<>` — index
+        // signature key types are restricted to string/number/symbol.
+        return key === 'string' ? `{ [key: string]: ${value} }` : `Record<${key}, ${value}>`;
       }
-      case 'or':
-        return (type as OrType).items.map((t) => this.typeToTsType(t)).join(' | ');
+      case 'or': {
+        // Dedupe structurally-identical members: integer/uinteger/decimal all map
+        // to `number`, so a raw union (e.g. LSPAny) would emit `number | number |
+        // number`. Set-dedup on the rendered member keeps the union minimal.
+        const members = (type as OrType).items.map((t) => this.typeToTsType(t));
+        return [...new Set(members)].join(' | ');
+      }
       case 'and':
         return (type as AndType).items.map((t) => this.typeToTsType(t)).join(' & ');
       case 'tuple':

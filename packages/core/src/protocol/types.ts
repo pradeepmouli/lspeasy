@@ -304,7 +304,7 @@ export type CreateFilesParams = {
 };
 
 export type WorkspaceEdit = {
-  changes?: Record<string, TextEdit[]>;
+  changes?: { [key: string]: TextEdit[] };
   documentChanges?: (TextDocumentEdit | CreateFile | RenameFile | DeleteFile)[];
   changeAnnotations?: Record<ChangeAnnotationIdentifier, ChangeAnnotation>;
 };
@@ -447,10 +447,9 @@ export type DocumentDiagnosticParams = {
 };
 
 export type DocumentDiagnosticReportPartialResult = {
-  relatedDocuments: Record<
-    string,
-    FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport
-  >;
+  relatedDocuments: {
+    [key: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport;
+  };
 };
 
 export type DiagnosticServerCancellationData = {
@@ -1364,19 +1363,17 @@ export type RelatedFullDocumentDiagnosticReport = {
   kind: 'full';
   resultId?: string;
   items: Diagnostic[];
-  relatedDocuments?: Record<
-    string,
-    FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport
-  >;
+  relatedDocuments?: {
+    [key: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport;
+  };
 };
 
 export type RelatedUnchangedDocumentDiagnosticReport = {
   kind: 'unchanged';
   resultId: string;
-  relatedDocuments?: Record<
-    string,
-    FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport
-  >;
+  relatedDocuments?: {
+    [key: string]: FullDocumentDiagnosticReport | UnchangedDocumentDiagnosticReport;
+  };
 };
 
 export type FullDocumentDiagnosticReport = {
@@ -2649,8 +2646,8 @@ export type ClientSemanticTokensRequestFullDelta = {
 
 export type Definition = Location | Location[];
 export type DefinitionLink = LocationLink;
-export type LSPArray = unknown;
-export type LSPAny = unknown;
+export type LSPArray = LSPAny[];
+export type LSPAny = LSPObject | LSPArray | string | number | boolean | null;
 export type Declaration = Location | Location[];
 export type DeclarationLink = LocationLink;
 export type InlineValue =
@@ -2672,7 +2669,7 @@ export type TextDocumentContentChangeEvent =
   | TextDocumentContentChangeWholeDocument;
 export type MarkedString = string | MarkedStringWithLanguage;
 export type DocumentFilter = TextDocumentFilter | NotebookCellTextDocumentFilter;
-export type LSPObject = Record<string, LSPAny>;
+export type LSPObject = { [key: string]: LSPAny };
 export type GlobPattern = Pattern | RelativePattern;
 export type TextDocumentFilter =
   | TextDocumentFilterLanguage
