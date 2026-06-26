@@ -1,0 +1,15 @@
+name: 'lspeasy CodeQL config'
+
+# Exclude maintainer-run build tooling from analysis.
+#
+# scripts/ holds dev-time codegen + fetch tooling (e.g. fetch-metamodel.ts,
+# generate-protocol-types.ts) that intentionally downloads the official LSP
+# metaModel over HTTPS from a hardcoded microsoft/vscode-languageserver-node
+# source and writes generated protocol types (+ a local cache) to fixed repo
+# paths. CodeQL's js/http-to-file-access flags this inherent download→codegen
+# flow, but it is trusted-source, fixed-path, PR-reviewed developer tooling —
+# not shipped/runtime code (the published surface is apps/ + packages/). The
+# flow is not code-fixable (the tool's purpose is to write spec-derived files),
+# so the build scripts are scoped out of security scanning here.
+paths-ignore:
+  - scripts
