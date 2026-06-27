@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.actor != 'github-actions[bot]' &&
+      github.head_ref != 'develop' &&
+      github.head_ref != 'master' &&
       !startsWith(github.head_ref, 'changeset-release/') &&
       !startsWith(github.head_ref, 'changeset/') &&
       !startsWith(github.head_ref, 'dependabot/') &&

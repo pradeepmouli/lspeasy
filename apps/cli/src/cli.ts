@@ -126,14 +126,18 @@ async function main(): Promise<void> {
       ? firstSubArg
       : undefined;
 
-  // workspace file-operation methods (workspace/willRenameFiles, willCreateFiles,
-  // willDeleteFiles) carry their file in `--params { files: [{ oldUri | uri }] }`
-  // (or a `textDocument.uri`), NOT a positional — so the file-detection above
-  // skips them. Without an anchor file the session never opens a document, the TS
-  // server loads no program, and getEditsForFileRename returns zero edits; the
-  // languageId also stays 'plaintext' so even a didOpen wouldn't register as TS.
-  // Mine the --params JSON (parseArgs leaves it in positionals, or in values when
-  // given as --params=...) for a file URI to anchor on.
+  // Some methods carry their file in `--params` rather than a positional, so the
+  // file-detection above skips them. Without an anchor file the session never
+  // opens a document, the TS server loads no program, and the request fails
+  // (rename edits come back empty; refactors throw "No Project"); the languageId
+  // also stays 'plaintext' so even a didOpen wouldn't register as TS. Mine the
+  // --params JSON (parseArgs leaves it in positionals, or in values when given as
+  // --params=...) for a file to anchor on:
+  //   • workspace/willRename|willCreate|willDeleteFiles → `files[].oldUri|uri`
+  //   • any textDocument/* raw call            → `textDocument.uri`
+  //   • workspace/executeCommand refactors     → `arguments[0].file` (a plain
+  //     path, e.g. _typescript.applyRefactoring's "Move to file") — opening it
+  //     loads the whole tsconfig program, so the move's target file is in scope.
   const anchorFromParams = (): string | undefined => {
     const candidates = [...positionals];
     const paramsVal = (values as Record<string, unknown>)['params'];
@@ -144,9 +148,12 @@ async function main(): Promise<void> {
         const o = JSON.parse(c) as {
           files?: Array<{ oldUri?: string; uri?: string }>;
           textDocument?: { uri?: string };
+          arguments?: Array<{ file?: string }>;
         };
         const uri = o.files?.[0]?.oldUri ?? o.files?.[0]?.uri ?? o.textDocument?.uri;
         if (typeof uri === 'string') return fileURLToPath(uri);
+        const cmdFile = o.arguments?.[0]?.file;
+        if (typeof cmdFile === 'string') return cmdFile;
       } catch {
         /* not the params JSON — keep scanning */
       }
