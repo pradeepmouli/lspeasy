@@ -48,7 +48,8 @@ those platforms' native formats.
 | Class | Platforms | Stores | Two-way? |
 |---|---|---|---|
 | Explicit-command | `lsp.json` (canonical), Copilot CLI | full `command`/`args`/extensions | yes, 1:1 |
-| Plugin-toggle | Claude Code (`~/.claude/settings.json`), Codex (`~/.codex/config.toml`) | *which* installed plugins are enabled (`<plugin>@<marketplace>: true`) | yes, via local plugin resolver |
+| Plugin-toggle | Claude Code (`~/.claude/settings.json`) | *which* installed plugins are enabled (`<plugin>@<marketplace>: true`) | yes, via local plugin resolver |
+| Plugin-toggle (read-only v1) | Codex (`~/.codex/config.toml`) | same, in TOML | read in v1; write deferred (avoids TOML surgical-write) |
 | No portable model | VS Code | per-extension; no server map | detected-but-unsupported in v1 |
 
 **Key fact (verified):** each installed plugin ships a `.lsp.json` at
@@ -93,9 +94,18 @@ change) and exist solely for round-trip preservation. Add a
 as a fallback when a source names a language but omits extensions. Lives in core
 beside `discover.ts` (e.g. `language-extensions.ts`).
 
-## Components (`apps/cli/src/config/`)
+## Components
 
-### Adapter interface + registry (`adapter.ts`, `registry.ts`)
+Placement follows reusability:
+- **`@lspeasy/core`** (beside `discover.ts`, depended on by both `@lsproxy/cli`
+  and `@lsproxy/proxy`): canonical model, the local plugin resolver, the
+  `languageId → extensions` table. Tool-agnostic; the proxy daemon can reuse the
+  resolver as a server-discovery source.
+- **`apps/cli/src/config/`**: the `PlatformAdapter` interface + registry, the
+  tool-specific adapters, and the `lsproxy config` commands. Third-party-tool
+  formats stay out of the protocol SDK.
+
+### Adapter interface + registry — `apps/cli/src/config/` (`adapter.ts`, `registry.ts`)
 ```ts
 type Tier = 'full' | 'plugin-resolved' | 'read-only';
 type Scope = 'user' | 'project';
@@ -116,8 +126,9 @@ interface WriteResult { written: string[]; skipped: Array<{ name: string; reason
 The registry holds the adapters; commands select by `id`. Each adapter is its own
 focused file.
 
-### Local plugin resolver (`plugin-resolver.ts`)
-Provenance-agnostic. Scans `~/.claude/plugins/marketplaces/*/*/.lsp.json` and
+### Local plugin resolver — `@lspeasy/core` (`plugin-resolver.ts`)
+Provenance-agnostic. Lives in core (not the CLI) so the **proxy daemon** can also
+use it to discover/launch plugin-defined servers. Scans `~/.claude/plugins/marketplaces/*/*/.lsp.json` and
 builds a bidirectional map:
 - `resolve(pluginId: string): LspServerEntry[]` — `<plugin>@<marketplace>` → canonical servers (renaming `extensionToLanguage` → `fileExtensions`, stamping `marketplacePlugin`, and **carrying through** `transport`/`initializationOptions`/`settings`/`maxRestarts` verbatim so nothing parsed is lost).
 - `findPluginFor(entry: LspServerEntry): string | undefined` — match a canonical server back to a `<plugin>@<marketplace>` id (prefer the stamped `marketplacePlugin`; else match by `command`).
@@ -125,11 +136,11 @@ builds a bidirectional map:
 
 Used by both plugin adapters. No marketplace/remote concept — purely local installed files.
 
-### Adapters (`adapters/`)
+### Adapters — `apps/cli/src/config/adapters/`
 - `lspjson.ts` — **full**. Reads/writes `lsp.json` (the canonical format itself); the `import`/`export` target.
 - `copilot.ts` — **full**. Reads/writes Copilot CLI's JSON LSP config (format confirmed at implementation against the `lsp-setup` skill / Copilot docs).
 - `claude-code.ts` — **plugin-resolved**. Read: parse enabled `<plugin>@<marketplace>: true` toggles in `~/.claude/settings.json`, resolve via the plugin resolver. Write: for each canonical server, `findPluginFor` → toggle that plugin `true` (surgical key edit); servers with no matching installed plugin are skipped + reported.
-- `codex.ts` — **plugin-resolved**. Same logic over `~/.codex/config.toml` (TOML). Requires a TOML parser dependency. Writes are surgical (toggle the relevant key) to preserve the file's other content.
+- `codex.ts` — **plugin-resolved, read-only in v1**. Read: parse enabled plugin toggles from `~/.codex/config.toml` (requires a TOML parser dependency) and resolve via the plugin resolver. No `write()` in v1 — TOML surgical-writes (preserving the file's mcp/marketplace content) are deferred to a later iteration.
 - `vscode.ts` — **read-only**, v1 = **detected-but-unsupported**: `detect()` reports presence; `read()` returns empty with a clear "no portable LSP server map" notice. Revisit if a faithful source (e.g. a Piebald VS Code extension reusing `.lsp.json`) is confirmed.
 
 ### CLI commands (`commands.ts`, wired into `cli.ts`)
@@ -149,10 +160,12 @@ Used by both plugin adapters. No marketplace/remote concept — purely local ins
 
 - Missing platform config or absent plugin dir → skip with a notice, never error
   (matches discovery's never-error ethos; `@never`-style silent fallbacks documented).
-- **Writes to existing user files are surgical and backed up.** For `settings.json`
-  (JSON) and `config.toml` (TOML), parse → set only the specific key(s) → write,
-  preserving unrelated content; write a `<file>.bak` first. Never full-rewrite a
-  user's hand-authored file in a way that drops comments/ordering where avoidable.
+- **Writes to existing user files are surgical and backed up.** The only
+  plugin-platform write path in v1 is Claude Code's `settings.json` (JSON): parse →
+  set only the specific toggle key(s) → write, preserving unrelated content; write a
+  `<file>.bak` first. (Codex `config.toml` is read-only in v1, so no TOML write
+  safety is needed yet.) Never full-rewrite a user's hand-authored file in a way
+  that drops content where avoidable.
 - **Lossy export** (canonical server with no matching installed plugin for a
   plugin-toggle platform) → warn, skip that server, list it in the `WriteResult.skipped`
   summary; non-zero exit only in `--json`-consistent error cases, not for partial skips.
@@ -163,12 +176,13 @@ Used by both plugin adapters. No marketplace/remote concept — purely local ins
 ## Testing
 
 - **core**: `language-extensions` table lookups; `LspServerEntry.marketplacePlugin` optional field type.
-- **plugin resolver**: over a fixture plugin tree (`marketplaces/<mp>/<plugin>/.lsp.json`), assert `resolve`, `findPluginFor`, `listAll`, multi-server plugins, the `extensionToLanguage → fileExtensions` rename, and that `transport`/`initializationOptions`/`settings`/`maxRestarts` are carried through verbatim.
-- **adapters**: per-adapter **round-trip** (read→write→read) over fixtures, asserting the preserved-but-unused fields survive intact; Copilot JSON; Claude Code settings.json toggle read + surgical write (assert unrelated keys preserved + `.bak` created); Codex TOML read + surgical write; VS Code detect + empty-read notice.
+- **core — plugin resolver**: over a fixture plugin tree (`marketplaces/<mp>/<plugin>/.lsp.json`), assert `resolve`, `findPluginFor`, `listAll`, multi-server plugins, the `extensionToLanguage → fileExtensions` rename, and that `transport`/`initializationOptions`/`settings`/`maxRestarts` are carried through verbatim.
+- **adapters**: per-adapter **round-trip** (read→write→read) over fixtures, asserting the preserved-but-unused fields survive intact; Copilot JSON; Claude Code settings.json toggle read + surgical write (assert unrelated keys preserved + `.bak` created); Codex TOML read (read-only in v1; no write path); VS Code detect + empty-read notice.
 - **commands**: integration tests over temp config files for `list`/`import`/`export`/`diff`, `--user`/`--project` scoping, `--json` shape, and lossy-export skip reporting.
 
 ## Future (designed-for, not in v1)
 
+- **Codex write** — surgical TOML toggle of plugin keys in `~/.codex/config.toml`, preserving its mcp/marketplace content (deferred from v1 to avoid TOML write complexity).
 - `lsproxy config sync` — declarative reconcile of all platforms to `lsp.json` (needs conflict/merge/drift rules).
 - **Consume** the already-preserved `initializationOptions`/`settings`/`transport`/`maxRestarts` at runtime (e.g. `RefactorSession` honoring `initializationOptions`) — the data is captured in v1; wiring it into behavior is the future step.
 - Promote `apps/cli/src/config/` to a standalone `@lsproxy/config` package if another tool needs it.
