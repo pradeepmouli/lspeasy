@@ -4,7 +4,9 @@ import { existsSync, mkdirSync, openSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { createConnection } from 'node:net';
 import { SocketTransport } from '@lspeasy/core/node';
+import type { Message } from '@lspeasy/core';
 import { socketPath } from '@lsproxy/proxy';
+import type { StatusReport } from '@lsproxy/proxy';
 import { RefactorSession, type SessionOptions } from './session.js';
 
 const PROXY_BIN = new URL('../../proxy/dist/main.js', import.meta.url).pathname;
@@ -54,6 +56,44 @@ function spawnDaemon(root: string, sockPath: string): string {
   });
   child.unref();
   return logPath;
+}
+
+const STATUS_TIMEOUT_MS = 2000;
+
+/**
+ * Ask a running proxy daemon for its status. Returns null when no daemon is
+ * listening on the project's socket — callers fall back to a config-only view.
+ */
+export async function fetchDaemonStatus(root: string): Promise<StatusReport | null> {
+  const sockPath = socketPath(root);
+  if (!existsSync(sockPath) || !(await tryConnect(sockPath))) return null;
+
+  const transport = new SocketTransport({ path: sockPath });
+  await transport.waitForConnect();
+  try {
+    return await new Promise<StatusReport>((resolve, reject) => {
+      const timer = setTimeout(
+        () => reject(new Error('status request timed out')),
+        STATUS_TIMEOUT_MS
+      );
+      const sub = transport.onMessage((m: Message) => {
+        const msg = m as { id?: unknown; result?: StatusReport };
+        if (msg.id === 1) {
+          clearTimeout(timer);
+          sub.dispose();
+          resolve(msg.result as StatusReport);
+        }
+      });
+      void transport.send({
+        jsonrpc: '2.0',
+        id: 1,
+        method: '$/lsproxy.status',
+        params: {}
+      } as Message);
+    });
+  } finally {
+    await transport.close();
+  }
 }
 
 export interface ConnectOptions {

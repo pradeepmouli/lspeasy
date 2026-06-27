@@ -16,32 +16,13 @@ import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 
 import { fail, resolvePathArg, type GlobalFlags } from './io.js';
-import { discoverServer } from '@lspeasy/core';
+import { discoverServer, discoverServers, discoverServerByLanguageId } from '@lspeasy/core';
+import { coldStatusReport } from '@lsproxy/proxy';
 import { RefactorSession } from './session.js';
-import { connectViaProxy } from './connect.js';
+import { connectViaProxy, fetchDaemonStatus } from './connect.js';
 import { buildCommandTree } from './build-commands.js';
-
-const STATIC_HELP = `lsproxy — LSP-driven CLI
-
-Usage:
-  lsproxy <namespace> <command> [args]
-  lsproxy call <method> --params <json>
-
-Available commands depend on the connected server's advertised capabilities.
-Run with a file argument to see available commands for that language:
-  lsproxy textDocument hover --help src/foo.ts
-
-Global flags:
-  --server <cmd>        LSP server launch command (overrides lsp.json discovery)
-  --root <dir>          Project root (default: cwd)
-  --dry-run             Print changes; do not write
-  --json                Machine-readable JSON on stdout; diagnostics to stderr
-  --wait <ms>           Server index wait in ms (default: 15000)
-  --verbose             Progress logging to stderr
-  --allow-outside-root  Allow file paths outside --root
-  --no-proxy            Bypass proxy daemon; connect directly to language server
-  -h, --help            Show this help
-`;
+import { createFormatter } from './format.js';
+import { renderTopLevel, renderDrillDownText, drillDownJson } from './help.js';
 
 const GLOBAL_OPTION_CONFIG = {
   server: { type: 'string' as const },
@@ -101,8 +82,9 @@ async function main(): Promise<void> {
     strict: false
   });
 
-  if (!positionals.length) {
-    process.stdout.write(STATIC_HELP);
+  const helpMode = values.help === true;
+  if (helpMode || positionals.length === 0) {
+    await runHelp(positionals, buildFlags(values as ParsedOptionValues));
     exit(0);
   }
 
@@ -239,6 +221,74 @@ async function main(): Promise<void> {
     buildCommandTree(program, session.capabilities, session, flags);
 
     await program.parseAsync(argv);
+  } finally {
+    await session.stop();
+  }
+}
+
+/**
+ * Help-mode dispatch. Positionals after `--help` mean [language, namespace,
+ * request]. Depth 0 -> top-level language listing (config + live status);
+ * depth >= 1 -> connect to that language's server with indexWaitMs 0 and render
+ * the capability-filtered command tree at the requested level.
+ */
+export async function runHelp(positionals: string[], flags: GlobalFlags): Promise<void> {
+  const [language, ...drillPath] = positionals;
+
+  if (!language) {
+    const live = await fetchDaemonStatus(flags.root);
+    const report = live ?? coldStatusReport(discoverServers(flags.root));
+    if (flags.json) {
+      process.stdout.write(JSON.stringify(report) + '\n');
+    } else {
+      const color = process.stdout.isTTY === true && !process.env['NO_COLOR'];
+      process.stdout.write(renderTopLevel(report, createFormatter(color)));
+    }
+    return;
+  }
+
+  const discovered = flags.server
+    ? { serverCommand: flags.server, languageId: language }
+    : discoverServerByLanguageId(flags.root, language);
+  if (!discovered) {
+    const names = discoverServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
+    fail(
+      `No server configured for language "${language}". Configured: ${[...new Set(names)].join(', ')}`,
+      flags.json
+    );
+    return;
+  }
+
+  const session =
+    flags.noProxy || flags.server
+      ? new RefactorSession({
+          serverCommand: discovered.serverCommand,
+          languageId: discovered.languageId,
+          root: flags.root,
+          indexWaitMs: 0,
+          verbose: flags.verbose
+        })
+      : await connectViaProxy({
+          root: flags.root,
+          languageId: discovered.languageId,
+          indexWaitMs: 0,
+          verbose: flags.verbose
+        });
+  if (flags.noProxy || flags.server) await session.start();
+
+  try {
+    const program = new Command('lsproxy');
+    buildCommandTree(program, session.capabilities, session, flags);
+    if (flags.json) {
+      process.stdout.write(JSON.stringify(drillDownJson(program, language, drillPath)) + '\n');
+    } else {
+      const { ok, text } = renderDrillDownText(program, drillPath);
+      process.stdout.write(text.endsWith('\n') ? text : text + '\n');
+      if (!ok) {
+        await session.stop();
+        exit(1);
+      }
+    }
   } finally {
     await session.stop();
   }
