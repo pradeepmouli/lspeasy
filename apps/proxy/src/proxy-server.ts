@@ -2,11 +2,13 @@
 import { createServer, createConnection, type Server, type Socket } from 'node:net';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { discoverServers } from '@lspeasy/core';
 import { socketToTransport } from '@lspeasy/core/node';
 import { BackendPool, type BackendPoolOptions } from './backend-pool.js';
 import { DocumentStateManager } from './document-state.js';
 import { ClientSession } from './client-session.js';
 import { socketPath, pidPath } from './socket-path.js';
+import { buildStatusReport } from './status.js';
 
 export interface ProxyServerOptions extends BackendPoolOptions {
   root: string;
@@ -27,6 +29,7 @@ export class ProxyServer {
   private readonly activeSockets = new Set<Socket>();
   private idleTimer: ReturnType<typeof setTimeout> | undefined;
   private sessionCounter = 0;
+  private readonly startedAt = Date.now();
 
   constructor(opts: ProxyServerOptions) {
     this.root = opts.root;
@@ -60,7 +63,18 @@ export class ProxyServer {
         pool: this.pool,
         docState: this.docState,
         root: this.root,
-        onEnd: (id) => this.onSessionEnd(id)
+        onEnd: (id) => this.onSessionEnd(id),
+        onStatus: () =>
+          buildStatusReport({
+            now: Date.now(),
+            daemonPid: process.pid,
+            daemonStartedAt: this.startedAt,
+            root: this.root,
+            sessions: this.sessions.size,
+            configured: discoverServers(this.root),
+            backends: this.pool.listBackends(),
+            openDocsByLanguage: this.docState.countByLanguage()
+          })
       });
       this.sessions.set(sessionId, session);
       this.resetIdleTimer();
