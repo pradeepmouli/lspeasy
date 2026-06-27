@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { StatusReport } from '@lsproxy/proxy';
 import { createFormatter } from './format.js';
-import { renderTopLevel } from './help.js';
+import { renderTopLevel, navigateTree, renderDrillDownText, drillDownJson } from './help.js';
+import { buildProgram } from './program.js';
 
 const fmt = createFormatter(false);
 
@@ -41,5 +42,44 @@ describe('renderTopLevel', () => {
       ]
     };
     expect(renderTopLevel(report, fmt)).toMatch(/daemon.*down/i);
+  });
+});
+
+describe('drill-down navigation', () => {
+  it('lists namespaces at the root', () => {
+    const { ok, text } = renderDrillDownText(buildProgram(), []);
+    expect(ok).toBe(true);
+    expect(text).toContain('textDocument');
+    expect(text).toContain('workspace');
+  });
+
+  it('shows a namespace help with its requests', () => {
+    const { ok, text } = renderDrillDownText(buildProgram(), ['textDocument']);
+    expect(ok).toBe(true);
+    expect(text.toLowerCase()).toContain('hover');
+  });
+
+  it('errors with siblings for an unknown namespace', () => {
+    const { ok, text } = renderDrillDownText(buildProgram(), ['nope']);
+    expect(ok).toBe(false);
+    expect(text).toContain('textDocument');
+  });
+
+  it('drillDownJson returns structured namespaces for a language', () => {
+    const json = drillDownJson(buildProgram(), 'typescript', []) as {
+      languageId: string;
+      namespaces: Array<{ name: string }>;
+    };
+    expect(json.languageId).toBe('typescript');
+    expect(json.namespaces.map((n) => n.name)).toContain('textDocument');
+  });
+
+  it('drillDownJson returns request options at depth 2', () => {
+    const json = drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover']) as {
+      request: string;
+      options: Array<{ flags: string }>;
+    };
+    expect(json.request).toBe('hover');
+    expect(Array.isArray(json.options)).toBe(true);
   });
 });
