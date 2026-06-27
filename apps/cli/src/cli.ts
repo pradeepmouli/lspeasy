@@ -279,7 +279,12 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
     const program = new Command('lsproxy');
     buildCommandTree(program, session.capabilities, session, flags);
     if (flags.json) {
-      process.stdout.write(JSON.stringify(drillDownJson(program, language, drillPath)) + '\n');
+      const jsonResult = drillDownJson(program, language, drillPath) as { ok?: boolean };
+      process.stdout.write(JSON.stringify(jsonResult) + '\n');
+      if (jsonResult.ok === false) {
+        await session.stop();
+        exit(1);
+      }
     } else {
       const { ok, text } = renderDrillDownText(program, drillPath);
       process.stdout.write(text.endsWith('\n') ? text : text + '\n');
