@@ -82,4 +82,13 @@ describe('drill-down navigation', () => {
     expect(json.request).toBe('hover');
     expect(Array.isArray(json.options)).toBe(true);
   });
+
+  it('drillDownJson includes positional arguments at depth 2', () => {
+    const json = drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover']) as {
+      arguments: Array<{ name: string; required: boolean; variadic: boolean }>;
+    };
+    expect(Array.isArray(json.arguments)).toBe(true);
+    // hover takes its inputs positionally (<file> <line:col>), not as options.
+    expect(json.arguments.map((a) => a.name)).toContain('file');
+  });
 });

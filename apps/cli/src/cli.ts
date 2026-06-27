@@ -258,22 +258,38 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
     );
   }
 
-  const session =
-    flags.noProxy || flags.server
-      ? new RefactorSession({
-          serverCommand: discovered.serverCommand,
-          languageId: discovered.languageId,
-          root: flags.root,
-          indexWaitMs: 0,
-          verbose: flags.verbose
-        })
-      : await connectViaProxy({
-          root: flags.root,
-          languageId: discovered.languageId,
-          indexWaitMs: 0,
-          verbose: flags.verbose
-        });
-  if (flags.noProxy || flags.server) await session.start();
+  // Connecting (spawn + initialize) can fail when the server command is missing
+  // or crashes. In --json mode that failure must still produce a parseable
+  // { ok: false, error } on stdout, not a fatal text error from main().catch.
+  let session: RefactorSession;
+  try {
+    session =
+      flags.noProxy || flags.server
+        ? new RefactorSession({
+            serverCommand: discovered.serverCommand,
+            languageId: discovered.languageId,
+            root: flags.root,
+            indexWaitMs: 0,
+            verbose: flags.verbose
+          })
+        : await connectViaProxy({
+            root: flags.root,
+            languageId: discovered.languageId,
+            indexWaitMs: 0,
+            verbose: flags.verbose
+          });
+    if (flags.noProxy || flags.server) await session.start();
+  } catch (err) {
+    // fail() emits { ok: false, error } on stdout for --json (and "error: …" on
+    // stderr otherwise), then exits 1 — the same machine-readable error contract
+    // as the unconfigured-language path and the `call` command.
+    fail(
+      `Failed to start "${language}" language server: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+      flags.json
+    );
+  }
 
   try {
     const program = new Command('lsproxy');

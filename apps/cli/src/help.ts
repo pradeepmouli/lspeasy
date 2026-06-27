@@ -83,6 +83,25 @@ function optionInfos(command: Command): OptionInfo[] {
   }));
 }
 
+interface ArgInfo {
+  name: string;
+  description: string;
+  required: boolean;
+  variadic: boolean;
+}
+
+// Many requests take their inputs as positional arguments (e.g. `<file>`,
+// `<line:col>`) rather than options — see zodToCommander. The text help shows
+// them; the JSON drill-down must too, or agents can't construct the request.
+function argumentInfos(command: Command): ArgInfo[] {
+  return command.registeredArguments.map((a) => ({
+    name: a.name(),
+    description: a.description,
+    required: a.required === true,
+    variadic: a.variadic === true
+  }));
+}
+
 /** Structured drill-down for `--json`: namespaces, requests, or request options. */
 export function drillDownJson(program: Command, languageId: string, path: string[]): unknown {
   const result = navigateTree(program, path);
@@ -113,6 +132,7 @@ export function drillDownJson(program: Command, languageId: string, path: string
     languageId,
     namespace: path[0],
     request: path[1],
+    arguments: argumentInfos(node),
     options: optionInfos(node)
   };
 }

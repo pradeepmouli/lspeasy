@@ -147,4 +147,26 @@ describe('runHelp (daemon down)', () => {
       errSpy.mockRestore();
     }
   });
+
+  it('emits structured JSON when the drill-down server fails to start (--json)', async () => {
+    const root = tmpRootWithConfig();
+    const cap = captureStdout();
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((): never => {
+      throw new Error('exit');
+    }) as never);
+    try {
+      // server: '   ' tokenizes to no command, so RefactorSession.start() throws
+      // synchronously — a deterministic stand-in for a missing/crashing server.
+      await expect(
+        runHelp(['typescript', 'textDocument'], { ...baseFlags(root, true), server: '   ' })
+      ).rejects.toThrow('exit');
+      const parsed = JSON.parse(cap.out()) as { ok: boolean; error: string };
+      expect(parsed.ok).toBe(false);
+      expect(parsed.error).toContain('typescript');
+      expect(cap.out()).not.toContain('\x1b');
+    } finally {
+      cap.restore();
+      exitSpy.mockRestore();
+    }
+  });
 });
