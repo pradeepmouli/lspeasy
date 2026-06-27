@@ -1,0 +1,19 @@
+{
+  "name": "lsp-refactor",
+  "version": "0.1.0",
+  "description": "Project-wide rename, file-move-with-importer-updates, and move-symbol via a real language server. Use this whenever a refactor touches more than one file — Claude Code's built-in LSP tool is READ-ONLY and cannot rename, move files, or move symbols. A text-only edit silently misses re-exports, aliased and type-only imports, and {@link} references; this plugin drives the LSP to catch every one.",
+  "author": {
+    "name": "Pradeep Mouli"
+  },
+  "repository": "https://github.com/pradeepmouli/lspeasy",
+  "license": "MIT",
+  "keywords": [
+    "lsp",
+    "language-server",
+    "refactor",
+    "rename",
+    "codemod",
+    "move-symbol",
+    "typescript"
+  ]
+}
