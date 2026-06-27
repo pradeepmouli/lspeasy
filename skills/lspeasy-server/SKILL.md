@@ -1,11 +1,11 @@
 ---
-description: "Documentation site for lspeasy Use when: The client sets `partialResultToken` in the request params and you want to...."
+description: "LSP server package for hosting Language Server Protocol (LSP) servers. Use when: The client sets `partialResultToken` in the request params and you want to...."
 name: lspeasy-server
 ---
 
 # @lspeasy/server
 
-Documentation site for lspeasy
+LSP server package for hosting Language Server Protocol (LSP) servers.
 
 Use `@lspeasy/server` when you need to build the **provider** side of the
 Language Server Protocol — a daemon that editors and language-client tooling
