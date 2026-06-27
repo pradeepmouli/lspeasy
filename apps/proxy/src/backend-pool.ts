@@ -1,5 +1,6 @@
 // apps/proxy/src/backend-pool.ts
 import { spawn } from 'node:child_process';
+import type { BackendRuntime } from './status.js';
 import { resolve, basename } from 'node:path';
 import type { Readable, Writable } from 'node:stream';
 import { pathToFileURL } from 'node:url';
@@ -45,6 +46,8 @@ interface BackendEntry {
   client: LSPClient;
   proc: ReturnType<typeof spawn>;
   idleTimer?: ReturnType<typeof setTimeout>;
+  startedAt: number;
+  requestCount: number;
 }
 
 export class BackendPool {
@@ -67,6 +70,23 @@ export class BackendPool {
 
   getBackend(languageId: string): LSPClient | undefined {
     return this.backends.get(languageId)?.client;
+  }
+
+  /** Increment the forwarded-request counter for a live backend; no-op if cold. */
+  recordRequest(languageId: string): void {
+    const entry = this.backends.get(languageId);
+    if (entry) entry.requestCount += 1;
+  }
+
+  /** Runtime snapshot of every live backend, for status reporting. */
+  listBackends(): BackendRuntime[] {
+    return [...this.backends.entries()].map(([languageId, entry]) => ({
+      languageId,
+      pid: entry.proc.pid ?? -1,
+      startedAt: entry.startedAt,
+      requestCount: entry.requestCount,
+      healthy: entry.proc.exitCode === null
+    }));
   }
 
   async ensureBackend(languageId: string): Promise<LSPClient> {
@@ -116,7 +136,7 @@ export class BackendPool {
 
     await client.connect(transport);
 
-    const entry: BackendEntry = { client, proc };
+    const entry: BackendEntry = { client, proc, startedAt: Date.now(), requestCount: 0 };
     this.backends.set(languageId, entry);
     this.resetIdleTimer(languageId, entry);
     return client;

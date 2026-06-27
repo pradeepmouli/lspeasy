@@ -26,6 +26,8 @@ vi.mock('@lspeasy/client', () => ({
 
 vi.mock('node:child_process', () => ({
   spawn: vi.fn().mockReturnValue({
+    pid: 4242,
+    exitCode: null,
     stdout: { on: vi.fn() },
     stdin: { on: vi.fn() },
     on: vi.fn(),
@@ -97,5 +99,33 @@ describe('BackendPool', () => {
     vi.advanceTimersByTime(400); // now 1000ms after last call — fires
     await vi.runAllTimersAsync();
     expect(client.disconnect).toHaveBeenCalled();
+  });
+
+  it('listBackends reports a live backend with pid, healthy, and zero requests', async () => {
+    const pool = new BackendPool('/project');
+    await pool.ensureBackend('typescript');
+    const list = pool.listBackends();
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      languageId: 'typescript',
+      pid: 4242,
+      requestCount: 0,
+      healthy: true
+    });
+    expect(typeof list[0]!.startedAt).toBe('number');
+  });
+
+  it('recordRequest increments the per-backend counter', async () => {
+    const pool = new BackendPool('/project');
+    await pool.ensureBackend('typescript');
+    pool.recordRequest('typescript');
+    pool.recordRequest('typescript');
+    expect(pool.listBackends()[0]!.requestCount).toBe(2);
+  });
+
+  it('recordRequest is a no-op for an unknown languageId', () => {
+    const pool = new BackendPool('/project');
+    expect(() => pool.recordRequest('python')).not.toThrow();
+    expect(pool.listBackends()).toEqual([]);
   });
 });
