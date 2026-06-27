@@ -1,11 +1,11 @@
 ---
-description: "Documentation site for lspeasy Use when: You are building a browser-based LSP client, a WebSocket-backed language...."
+description: "Core types, transports, and utilities shared by all lspeasy packages. Use when: You are building a browser-based LSP client, a WebSocket-backed language...."
 name: lspeasy-core
 ---
 
 # @lspeasy/core
 
-Documentation site for lspeasy
+Core types, transports, and utilities shared by all lspeasy packages.
 
 `@lspeasy/core` is the shared foundation for the lspeasy SDK. It contains
 everything needed to build custom LSP integrations, and re-exports the
@@ -59,7 +59,7 @@ structured JSON-RPC errors, DocumentVersionTracker for document sync.
 - You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. (`WebSocketTransport`)
 - You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. (`ResponseError`)
 
-API surface: 62 functions, 11 classes, 122 types, 1 enums, 106 constants
+API surface: 63 functions, 11 classes, 123 types, 1 enums, 106 constants
 
 ## NEVER
 
@@ -88,7 +88,7 @@ document change notification), `createProgressBegin` (Creates a `WorkDoneProgres
 `lsp), `discoverServerByLanguageId` (Walk the directory tree from `root` looking for a `lsp)
 **Key classes:** `WebSocketTransport` (WebSocket-based transport for LSP communication), `DisposableStore` (Collects multiple `Disposable` instances and releases them together), `CancellationTokenSource` (Controller that creates and manages a `CancellationToken`), `ConsoleLogger` (Logger implementation that writes to the process console with level filtering), `NullLogger` (No-op logger that silently discards all messages), `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `DocumentVersionTracker` (Tracks monotonically increasing version numbers for open text documents)
 
-*302 exports total — see references/ for full API.*
+*304 exports total — see references/ for full API.*
 
 ## References
 

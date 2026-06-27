@@ -1,11 +1,11 @@
 ---
-description: "Documentation site for lspeasy Use when: You are implementing a custom client layer and need the same validation...."
+description: "LSP client package for connecting to language servers. Use when: You are implementing a custom client layer and need the same validation...."
 name: lspeasy-client
 ---
 
 # @lspeasy/client
 
-Documentation site for lspeasy
+LSP client package for connecting to language servers.
 
 Use `@lspeasy/client` when you need to build the **consumer** side of the
 Language Server Protocol — an editor extension, a CLI analysis tool, a test

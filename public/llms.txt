@@ -123,6 +123,7 @@ document change notification.
 - `discoverServerByLanguageId`: Walk the directory tree from `root` looking for a `lsp.json` entry whose
 `fileExtensions` map maps any extension to `languageId`.
 - `discoverExtensionMap`
+- `discoverServers`: Enumerate every server configured in the discovered lsp.
 - `tokenizeCommand`: Split a server launch command into argv tokens, honoring single- and
 double-quoted spans so an argument containing spaces survives intact (e.
 - `DedicatedWorkerTransport`: JSON-RPC transport backed by a Dedicated Worker instance.
@@ -401,6 +402,7 @@ methods, notification send methods, and server-to-client handler registr...
 - `LspServerEntry`
 - `LspJson`
 - `ResolvedServer`
+- `ConfiguredServer`
 - `LogLevel`: Numeric severity levels for filtering log output.
 
 ## @lspeasy/server
