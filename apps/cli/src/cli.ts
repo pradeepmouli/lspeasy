@@ -256,7 +256,6 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
       `No server configured for language "${language}". Configured: ${[...new Set(names)].join(', ')}`,
       flags.json
     );
-    return;
   }
 
   const session =

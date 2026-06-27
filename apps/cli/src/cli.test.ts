@@ -129,7 +129,7 @@ describe('runHelp (daemon down)', () => {
     expect(parsed.languages.map((l) => l.languageId)).toContain('typescript');
   });
 
-  it('errors for an unconfigured language', () => {
+  it('errors for an unconfigured language', async () => {
     const root = tmpRootWithConfig();
     const errs: string[] = [];
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((): never => {
@@ -140,8 +140,8 @@ describe('runHelp (daemon down)', () => {
       return true;
     }) as never);
     try {
-      // python is not configured -> fail() throws via the stubbed exit
-      expect(runHelp(['python'], baseFlags(root, false))).rejects.toThrow('exit');
+      await expect(runHelp(['python'], baseFlags(root, false))).rejects.toThrow('exit');
+      expect(errs.some((s) => s.includes('python'))).toBe(true);
     } finally {
       exitSpy.mockRestore();
       errSpy.mockRestore();
