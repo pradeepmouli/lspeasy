@@ -19,6 +19,15 @@ export interface ResolvedServer {
   languageId: string;
 }
 
+export interface ConfiguredServer {
+  /** lsp.json server key, e.g. "typescript". */
+  name: string;
+  /** Full spawn command string (same quoting as ResolvedServer.serverCommand). */
+  command: string;
+  /** File extension (".ts") to languageId ("typescript") map for this server. */
+  fileExtensions: Record<string, string>;
+}
+
 const SEARCH_PATHS = ['lsp.json', '.claude/lsp.json', '.github/lsp.json'];
 
 function findLspJsonPath(root: string): string | null {
@@ -137,15 +146,6 @@ export function discoverExtensionMap(root: string): Record<string, string> {
   const config = loadConfig(root);
   if (!config) return {};
   return selectExtensionMap(config);
-}
-
-export interface ConfiguredServer {
-  /** lsp.json server key, e.g. "typescript". */
-  name: string;
-  /** Full spawn command string (same quoting as ResolvedServer.serverCommand). */
-  command: string;
-  /** File extension (".ts") to languageId ("typescript") map for this server. */
-  fileExtensions: Record<string, string>;
 }
 
 /**

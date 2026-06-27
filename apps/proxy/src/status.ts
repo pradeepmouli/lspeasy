@@ -56,17 +56,19 @@ function extensionsByLanguage(server: ConfiguredServer): Map<string, string[]> {
   return byLang;
 }
 
+function coldLanguage(
+  server: ConfiguredServer,
+  languageId: string,
+  extensions: string[]
+): LanguageStatus {
+  return { languageId, name: server.name, extensions, command: server.command, status: 'cold' };
+}
+
 function coldLanguages(configured: ConfiguredServer[]): LanguageStatus[] {
   const out: LanguageStatus[] = [];
   for (const server of configured) {
     for (const [languageId, extensions] of extensionsByLanguage(server)) {
-      out.push({
-        languageId,
-        name: server.name,
-        extensions,
-        command: server.command,
-        status: 'cold'
-      });
+      out.push(coldLanguage(server, languageId, extensions));
     }
   }
   return out;
@@ -92,13 +94,7 @@ export function buildStatusReport(input: BuildStatusInput): StatusReport {
           requestsServed: rt.requestCount
         });
       } else {
-        languages.push({
-          languageId,
-          name: server.name,
-          extensions,
-          command: server.command,
-          status: 'cold'
-        });
+        languages.push(coldLanguage(server, languageId, extensions));
       }
     }
   }

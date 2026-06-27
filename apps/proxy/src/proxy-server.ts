@@ -52,7 +52,7 @@ export class ProxyServer {
   }
 
   /** Assemble the current daemon + backend status snapshot. */
-  getStatus(): StatusReport {
+  public getStatus(): StatusReport {
     return buildStatusReport({
       now: Date.now(),
       daemonPid: process.pid,

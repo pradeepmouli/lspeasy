@@ -1,8 +1,8 @@
 // apps/proxy/src/backend-pool.ts
 import { spawn } from 'node:child_process';
-import type { BackendRuntime } from './status.js';
 import { resolve, basename } from 'node:path';
 import type { Readable, Writable } from 'node:stream';
+import type { BackendRuntime } from './status.js';
 import { pathToFileURL } from 'node:url';
 import { LSPClient } from '@lspeasy/client';
 import {

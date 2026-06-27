@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { StatusReport } from '@lsproxy/proxy';
 import { createFormatter } from './format.js';
-import { renderTopLevel, navigateTree, renderDrillDownText, drillDownJson } from './help.js';
+import { renderTopLevel, renderDrillDownText, drillDownJson } from './help.js';
 import { buildProgram } from './program.js';
 
 const fmt = createFormatter(false);
