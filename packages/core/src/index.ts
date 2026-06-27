@@ -297,14 +297,15 @@ export {
 export type { CheckMethodOptions } from './utils/capability-guard.js';
 
 // Discovery — lsp.json config reader (shared with proxy)
-export type { LspServerEntry, LspJson, ResolvedServer } from './discover.js';
+export type { LspServerEntry, LspJson, ResolvedServer, ConfiguredServer } from './discover.js';
 export {
   selectServer,
   selectServerByLanguageId,
   selectExtensionMap,
   discoverServer,
   discoverServerByLanguageId,
-  discoverExtensionMap
+  discoverExtensionMap,
+  discoverServers
 } from './discover.js';
 
 // Command tokenizer
