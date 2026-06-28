@@ -10,6 +10,7 @@ describe('adapter registry', () => {
   });
   it('looks up an adapter by id', () => {
     expect(getAdapter('lspjson')?.tier).toBe('full');
+    expect(getAdapter('claude-code')?.tier).toBe('plugin-resolved');
     expect(getAdapter('codex')?.tier).toBe('read-only');
     expect(getAdapter('nope')).toBeUndefined();
   });

@@ -30,7 +30,7 @@ function readSettings(home: string): Settings {
 export const claudeCodeAdapter: PlatformAdapter = {
   id: 'claude-code',
   name: 'Claude Code',
-  tier: 'full',
+  tier: 'plugin-resolved',
   detect: (_scope, home) => existsSync(settingsPath(home)),
   configPath: (_scope, home) => settingsPath(home),
   read: (_scope: Scope, home: string): CanonicalServers => {
