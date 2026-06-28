@@ -71,3 +71,31 @@ discoverServers(root: string): ConfiguredServer[]
 **Parameters:**
 - `root: string`
 **Returns:** `ConfiguredServer[]`
+
+### `readLspJsonFile`
+Read a single lsp.json file's `lspServers` map. Returns {} when missing or unparseable.
+```ts
+readLspJsonFile(path: string): Record<string, LspServerEntry>
+```
+**Parameters:**
+- `path: string`
+**Returns:** `Record<string, LspServerEntry>`
+
+### `writeLspJsonFile`
+Write an `lspServers` map to a file as pretty JSON, creating parent dirs.
+```ts
+writeLspJsonFile(path: string, servers: Record<string, LspServerEntry>): void
+```
+**Parameters:**
+- `path: string`
+- `servers: Record<string, LspServerEntry>`
+
+### `mergeServers`
+Merge incoming servers over base; report which keys were added vs updated.
+```ts
+mergeServers(base: Record<string, LspServerEntry>, incoming: Record<string, LspServerEntry>): { merged: Record<string, LspServerEntry>; added: string[]; updated: string[] }
+```
+**Parameters:**
+- `base: Record<string, LspServerEntry>`
+- `incoming: Record<string, LspServerEntry>`
+**Returns:** `{ merged: Record<string, LspServerEntry>; added: string[]; updated: string[] }`

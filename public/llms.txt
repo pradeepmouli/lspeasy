@@ -95,6 +95,8 @@ the message params and result.
 - `createIncrementalDidChangeParams`: Builds `DidChangeTextDocumentParams` for an incremental (range-based)
 document change notification.
 - `getSchemaForMethod`: Looks up the Zod validation schema for a given LSP method.
+- `getResultSchemaForMethod`: Looks up the result schema for a request method.
+Returns `undefined` for notifications or unknown methods.
 - `createWorkspaceFolder`: Helper to create a WorkspaceFolder.
 - `createWorkspaceFoldersChangeEvent`: Helper to create a WorkspaceFoldersChangeEvent.
 - `createFileEvent`: Helper to create a FileEvent.
@@ -124,8 +126,17 @@ document change notification.
 `fileExtensions` map maps any extension to `languageId`.
 - `discoverExtensionMap`
 - `discoverServers`: Enumerate every server configured in the discovered lsp.
+- `readLspJsonFile`: Read a single lsp.json file's `lspServers` map. Returns {} when missing or unparseable.
+- `writeLspJsonFile`: Write an `lspServers` map to a file as pretty JSON, creating parent dirs.
+- `mergeServers`: Merge incoming servers over base; report which keys were added vs updated.
+- `extensionsForLanguage`: Extensions for a languageId, or [] when unknown.
 - `tokenizeCommand`: Split a server launch command into argv tokens, honoring single- and
 double-quoted spans so an argument containing spaces survives intact (e.
+- `exampleFromZod`: Build an illustrative, required-only example value from a Zod schema.
+- `defaultPluginsRoot`: Default install root for plugin marketplaces.
+- `listInstalledPluginServers`: Map every installed plugin's servers, keyed by `<plugin>@<marketplace>`.
+- `resolvePlugin`: Canonical servers for one `<plugin>@<marketplace>` id, keyed by server name, or {} when not installed.
+- `findPluginFor`: Find the plugin id a canonical entry maps to: prefer stamped provenance, else match by command.
 - `DedicatedWorkerTransport`: JSON-RPC transport backed by a Dedicated Worker instance.
 - `SharedWorkerTransport`: JSON-RPC transport for Shared Worker environments with per-client envelope routing.
 - `WebSocketTransport`: WebSocket-based transport for LSP communication.
@@ -243,6 +254,7 @@ Uses discriminated union based on presence of 'method' and 'id'
 - `DidCloseTextDocumentParamsSchema`
 - `DidSaveTextDocumentParamsSchema`
 - `LSPSchemas`: Schema registry for method-based lookup
+- `LSPResultSchemas`: Result schema registry — maps a request method to its result schema.
 - `WorkspaceFileChangeTypes`: File change types enum for convenience
 - `WatchKinds`: Watch kinds for file system watchers
 - `dynamicRegistrationSchema`: Zod schema for validating a single dynamic-registration entry.
@@ -253,6 +265,7 @@ Uses discriminated union based on presence of 'method' and 'id'
 Used by `CapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
 - `CLIENT_METHODS`: Pre-built method sets indexed by client capability.
 Used by `ClientCapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
+- `DEFAULT_EXTENSIONS`: Default file extensions per LSP languageId.
 
 ## Optional
 
