@@ -1,5 +1,12 @@
 # @lspeasy/client
 
+## 3.1.3
+
+### Patch Changes
+
+- Updated dependencies [36f42f6]
+  - @lspeasy/core@2.4.0
+
 ## 3.1.2
 
 ### Patch Changes

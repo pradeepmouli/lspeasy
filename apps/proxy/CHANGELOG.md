@@ -1,5 +1,21 @@
 # @lsproxy/proxy
 
+## 1.1.0
+
+### Minor Changes
+
+- 36f42f6: Dynamic, capability-aware command discovery for `lsproxy`. Bare `lsproxy` lists
+  configured languages with live health/stats from a new `$/lsproxy.status` proxy
+  control message; `lsproxy --help <language> <namespace> <request>` drills down
+  through capability-filtered namespaces to parameter schemas. `--json` emits a
+  stable, ANSI-free status/command contract for agent invocation.
+
+### Patch Changes
+
+- Updated dependencies [36f42f6]
+  - @lspeasy/core@2.4.0
+  - @lspeasy/client@3.1.3
+
 ## 1.0.1
 
 ### Patch Changes
