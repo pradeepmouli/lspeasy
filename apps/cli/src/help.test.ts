@@ -91,4 +91,19 @@ describe('drill-down navigation', () => {
     // hover takes its inputs positionally (<file> <line:col>), not as options.
     expect(json.arguments.map((a) => a.name)).toContain('file');
   });
+
+  it('drillDownJson depth-2 includes params and result JSON Schema', () => {
+    const json = drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover']) as {
+      paramsSchema?: unknown;
+      resultSchema?: unknown;
+    };
+    expect(json.paramsSchema).toBeTypeOf('object');
+    expect(json.resultSchema).toBeTypeOf('object'); // hover has a result
+  });
+
+  it('renderDrillDownText depth-2 includes an illustrative example input block', () => {
+    const { text } = renderDrillDownText(buildProgram(), ['textDocument', 'hover']);
+    expect(text).toMatch(/Example input/i);
+    expect(text).not.toContain('\x1b'); // pure function: no color unless a formatter is passed
+  });
 });

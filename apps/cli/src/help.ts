@@ -1,6 +1,21 @@
 import type { LanguageStatus, StatusReport } from '@lsproxy/proxy';
 import type { Command } from 'commander';
+import { z } from 'zod';
+import { exampleFromZod, getResultSchemaForMethod, getSchemaForMethod } from '@lspeasy/core';
 import { SYMBOLS, type Formatter } from './format.js';
+
+function methodForPath(path: string[]): string | undefined {
+  return path.length >= 2 ? `${path[0]}/${path[1]}` : undefined;
+}
+
+function safeJsonSchema(schema: z.ZodType | undefined): unknown {
+  if (!schema) return undefined;
+  try {
+    return z.toJSONSchema(schema);
+  } catch {
+    return undefined;
+  }
+}
 
 function languageLine(lang: LanguageStatus, fmt: Formatter): string {
   const exts = lang.extensions.join(' ');
@@ -62,11 +77,26 @@ export function renderDrillDownText(
   program: Command,
   path: string[]
 ): { ok: boolean; text: string } {
-  const result = navigateTree(program, path);
-  if ('error' in result) {
-    return { ok: false, text: `${result.error}\nAvailable: ${result.available.join(', ')}\n` };
+  const navResult = navigateTree(program, path);
+  if ('error' in navResult) {
+    return {
+      ok: false,
+      text: `${navResult.error}\nAvailable: ${navResult.available.join(', ')}\n`
+    };
   }
-  return { ok: true, text: result.command.helpInformation() };
+  let text = navResult.command.helpInformation();
+  if (path.length >= 2) {
+    const method = methodForPath(path);
+    const paramsSchema = method ? getSchemaForMethod(method) : undefined;
+    const resultSchema = method ? getResultSchemaForMethod(method) : undefined;
+    if (paramsSchema) {
+      text += `\nExample input (illustrative):\n${JSON.stringify(exampleFromZod(paramsSchema), null, 2)}\n`;
+    }
+    if (resultSchema) {
+      text += `\nExample output (illustrative):\n${JSON.stringify(exampleFromZod(resultSchema), null, 2)}\n`;
+    }
+  }
+  return { ok: true, text };
 }
 
 interface OptionInfo {
@@ -127,12 +157,17 @@ export function drillDownJson(program: Command, languageId: string, path: string
       requests: node.commands.map((r) => r.name())
     };
   }
+  const method = methodForPath(path);
+  const paramsSchema = safeJsonSchema(method ? getSchemaForMethod(method) : undefined);
+  const resultSchema = safeJsonSchema(method ? getResultSchemaForMethod(method) : undefined);
   return {
     ok: true,
     languageId,
     namespace: path[0],
     request: path[1],
     arguments: argumentInfos(node),
-    options: optionInfos(node)
+    options: optionInfos(node),
+    ...(paramsSchema !== undefined && { paramsSchema }),
+    ...(resultSchema !== undefined && { resultSchema })
   };
 }
