@@ -52,7 +52,7 @@ function toCanonical(raw: RawPluginServer, pluginId: string): LspServerEntry {
 }
 
 /**
- * Map every installed plugin's servers, keyed by "<plugin>@<marketplace>".
+ * Map every installed plugin's servers, keyed by `<plugin>@<marketplace>`.
  * `<marketplace>` is the first path segment under the root; `<plugin>` is the
  * directory directly containing the `.lsp.json` (handles flat and nested layouts).
  * Each plugin's value is a record of server name (the outer key in `.lsp.json`) → entry.
@@ -80,7 +80,7 @@ export function listInstalledPluginServers(
   return result;
 }
 
-/** Canonical servers for one "<plugin>@<marketplace>" id, keyed by server name, or {} when not installed. */
+/** Canonical servers for one `<plugin>@<marketplace>` id, keyed by server name, or {} when not installed. */
 export function resolvePlugin(
   pluginId: string,
   pluginsRoot: string = defaultPluginsRoot()
