@@ -319,6 +319,9 @@ export { DEFAULT_EXTENSIONS, extensionsForLanguage } from './language-extensions
 // Command tokenizer
 export { tokenizeCommand } from './utils/tokenize-command.js';
 
+// Example payload generator — builds illustrative required-only samples from Zod schemas
+export { exampleFromZod } from './example-from-zod.js';
+
 // Local plugin resolver — reads installed .lsp.json files under ~/.claude/plugins/marketplaces
 export {
   defaultPluginsRoot,
