@@ -9,10 +9,12 @@ advertised capabilities, so it works with any LSP server out of the box.
 
 - **Semantic refactoring** — project-wide rename, move-file with importer updates, extract symbol
 - **Reference tracking** — find all references, call hierarchy, workspace symbol search
-- **Code actions** — list and apply quick-fixes and refactors at any range
+- **Code actions** — list and apply quick-fixes and refactors at any range; filter by kind with `--code-action-only` or trigger-kind with `--code-action-trigger-kind` instead of writing raw `--params` JSON
 - **Any LSP server** — TypeScript, Rust, Python, Go, or any LSP-compliant server via `lsp.json`
 - **Proxy daemon** — warm server connections for sub-100ms subsequent invocations
 - **Dry-run preview** — `--dry-run` prints diffs without writing; safe to inspect before committing
+- **Multi-platform config interop** — `lsproxy config import/export/diff/list` bridges `lsp.json` with Copilot CLI, Claude Code, and Codex; `--user` targets `~/.claude/lsp.json` for user-level scope
+- **Self-describing discovery** — bare `lsproxy` lists configured languages with live daemon status; `lsproxy --help <language> <namespace> <request>` shows parameter schema, flag list, and illustrative example input/output; add `--json` for machine-readable output for agents
 
 ## Install
 
@@ -70,7 +72,17 @@ multiple carry edits the array is printed and no files are changed.
 
 ```bash
 lsproxy textDocument codeAction --dry-run src/foo.ts 12:1-12:20
+
+# Filter by kind (comma-separated; valid: quickfix, refactor, refactor.extract, source, …)
+lsproxy textDocument codeAction --code-action-only quickfix,refactor src/foo.ts 12:1-12:20
+
+# Specify trigger kind: 1 = Invoked (user gesture), 2 = Automatic (on save / idle)
+lsproxy textDocument codeAction --code-action-trigger-kind 1 src/foo.ts 12:1-12:20
 ```
+
+Run `lsproxy --help typescript textDocument codeAction` to see the full parameter schema
+and an illustrative example input/output for the connected server. Add `--json` for a
+machine-readable response including `paramsSchema` and `resultSchema`.
 
 ## Troubleshooting
 
@@ -93,27 +105,38 @@ unfamiliar codebase.
 
 ## Help output
 
-```
-lsproxy — LSP-driven CLI
+The CLI uses a dynamic discovery model — the help surface is built from live
+server capabilities and `lsp.json` config, not a static command list.
 
-Usage:
-  lsproxy <namespace> <command> [args]
-  lsproxy call <method> --params <json>
+**Depth 0 — bare `lsproxy` (or `lsproxy --help`)**
 
-Available commands depend on the connected server's advertised capabilities.
-Run with a file argument to see available commands for that language:
-  lsproxy textDocument hover --help src/foo.ts
+Lists every configured language with live daemon status (pid, uptime, docs, reqs)
+or cold status (configured but not yet started). Add `--json` for machine-readable
+output suitable for agents.
 
-Global flags:
-  --server <cmd>        LSP server launch command (overrides lsp.json discovery)
-  --root <dir>          Project root (default: cwd)
-  --dry-run             Print changes; do not write
-  --json                Machine-readable JSON on stdout; diagnostics to stderr
-  --wait <ms>           Server index wait in ms (default: 15000)
-  --verbose             Progress logging to stderr
-  --allow-outside-root  Allow file paths outside --root
-  --no-proxy            Bypass proxy daemon; connect directly to language server
-  -h, --help            Show this help
+**Depth 1 — `lsproxy --help <language>`**
+
+Connects to that language's server and shows its advertised namespaces
+(`textDocument`, `workspace`, etc.) filtered to what the server actually supports.
+
+**Depth 2 — `lsproxy --help <language> <namespace>`**
+
+Lists available requests within that namespace for the running server.
+
+**Depth 3 — `lsproxy --help <language> <namespace> <request>`**
+
+Shows the Commander help for that specific command (positional args + all
+flag-mapped params), followed by illustrative **Example input** and **Example
+output** generated from the Zod schemas. Add `--json` to receive a structured
+response with `arguments`, `options`, `paramsSchema`, and `resultSchema` fields —
+useful for building agent prompts or automation scripts.
+
+```bash
+# Text mode — human-readable
+lsproxy --help typescript textDocument codeAction
+
+# JSON mode — machine-readable (paramsSchema + resultSchema included)
+lsproxy --help typescript textDocument codeAction --json
 ```
 
 ## Server discovery — `lsp.json`
@@ -196,6 +219,40 @@ then falling back to `~/.claude/lsp.json`.
 
 The first entry whose `fileExtensions` map contains the file's extension wins.
 Use `--server <cmd>` to bypass discovery entirely.
+
+## Config interop — `lsproxy config`
+
+The `config` command family reads and writes LSP server configuration across
+tools that each maintain their own native format. It uses `lsp.json` as the
+canonical interchange format.
+
+```bash
+lsproxy config list                        # show all platforms + detected servers
+lsproxy config import claude-code          # pull Claude Code MCP servers into lsp.json
+lsproxy config export copilot             # push lsp.json servers to Copilot CLI config
+lsproxy config diff codex                 # diff lsp.json against Codex config (read-only)
+lsproxy config list --user                # user-level scope (~/.claude/lsp.json)
+lsproxy config import claude-code --json  # machine-readable JSON output
+```
+
+**Supported platforms:**
+
+| Platform | ID | Tier |
+|---|---|---|
+| `lsp.json` | `lspjson` | full (canonical) |
+| Copilot CLI | `copilot` | full (read + write) |
+| Claude Code | `claude-code` | plugin-resolved (read + write) |
+| Codex | `codex` | read-only |
+| VS Code | `vscode` | read-only (detected, export unsupported) |
+
+**Scope flags:**
+
+- `--user` — targets `~/.claude/lsp.json` (user-level); default is the project `lsp.json`
+- `--json` — machine-readable output on stdout (`{ ok, platform, added, updated, ... }`)
+
+`import` stamps provenance so a subsequent `export` round-trips correctly.
+`export` skips servers that the target platform cannot represent (e.g. servers
+with unsupported fields) and reports them in the `skipped` array.
 
 ## Global flags
 

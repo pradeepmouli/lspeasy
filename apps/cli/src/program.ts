@@ -53,5 +53,31 @@ export function buildProgram(): Command {
 
   buildCommandTree(program, allCaps, null as unknown as RefactorSession, stubFlags);
 
+  // Register the `config` command family for static introspection.
+  // Actual dispatch lives in cli.ts main(); these entries are metadata-only so
+  // that tools such as `skillit gen --source cli` capture the command surface.
+  // `--json` is already declared as a global option on `program`.
+  const config = program
+    .command('config')
+    .description(
+      'Read/write LSP server config across platforms (lsp.json, Copilot CLI, Claude Code, Codex)'
+    );
+  config
+    .command('list')
+    .description('List detected platforms and their configured servers')
+    .option('--user', 'User-level config (~/.claude/lsp.json) instead of project');
+  config
+    .command('import <platform>')
+    .description("Import a platform's LSP servers into lsp.json")
+    .option('--user', 'User-level config instead of project');
+  config
+    .command('export <platform>')
+    .description("Export lsp.json servers to a platform's native config")
+    .option('--user', 'User-level config instead of project');
+  config
+    .command('diff <platform>')
+    .description("Diff lsp.json against a platform's config")
+    .option('--user', 'User-level config instead of project');
+
   return program;
 }
