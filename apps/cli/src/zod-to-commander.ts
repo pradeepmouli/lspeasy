@@ -5,7 +5,12 @@ import { pathToFileURL } from 'node:url';
 import { parseLineCol, toLspPosition, resolvePathArg } from './io.js';
 import type { GlobalFlags } from './io.js';
 import type { RefactorSession } from './session.js';
-import { WorkspaceEditSchema, TextEditSchema, CodeActionSchema } from '@lspeasy/core';
+import {
+  WorkspaceEditSchema,
+  TextEditSchema,
+  CodeActionSchema,
+  unwrapZodType
+} from '@lspeasy/core';
 import {
   applyWorkspaceEdit,
   planWorkspaceEdit,
@@ -35,13 +40,9 @@ function isZodObjectLike(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape
   return schema instanceof z.ZodObject;
 }
 
-// Unwrap ZodOptional / ZodNullable / ZodDefault using Zod 4 public instanceof API.
-// .unwrap() returns core.$ZodType; cast to z.ZodType (safe at runtime — always a classic instance).
+// Delegate to the shared core helper — peels Optional/Nullable/Default wrappers recursively.
 function unwrapOptional(schema: z.ZodType): z.ZodType {
-  if (schema instanceof z.ZodOptional) return unwrapOptional(schema.unwrap() as z.ZodType);
-  if (schema instanceof z.ZodNullable) return unwrapOptional(schema.unwrap() as z.ZodType);
-  if (schema instanceof z.ZodDefault) return unwrapOptional(schema.unwrap() as z.ZodType);
-  return schema;
+  return unwrapZodType(schema);
 }
 
 /**

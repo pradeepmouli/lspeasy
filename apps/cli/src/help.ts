@@ -17,6 +17,14 @@ function safeJsonSchema(schema: z.ZodType | undefined): unknown {
   }
 }
 
+function safeExample(schema: z.ZodType): unknown | undefined {
+  try {
+    return exampleFromZod(schema);
+  } catch {
+    return undefined;
+  }
+}
+
 function languageLine(lang: LanguageStatus, fmt: Formatter): string {
   const exts = lang.extensions.join(' ');
   if (lang.status !== 'running') {
@@ -88,14 +96,20 @@ export function renderDrillDownText(
   const label = (s: string): string => (fmt ? fmt.yellow(s) : s);
   let text = navResult.command.helpInformation();
   if (path.length >= 2) {
-    const method = methodForPath(path);
-    const paramsSchema = method ? getSchemaForMethod(method) : undefined;
-    const resultSchema = method ? getResultSchemaForMethod(method) : undefined;
+    const method = methodForPath(path)!;
+    const paramsSchema = getSchemaForMethod(method);
+    const resultSchema = getResultSchemaForMethod(method);
     if (paramsSchema) {
-      text += `\n${label('Example input (illustrative):')}\n${JSON.stringify(exampleFromZod(paramsSchema), null, 2)}\n`;
+      const ex = safeExample(paramsSchema);
+      if (ex !== undefined) {
+        text += `\n${label('Example input (illustrative):')}\n${JSON.stringify(ex, null, 2)}\n`;
+      }
     }
     if (resultSchema) {
-      text += `\n${label('Example output (illustrative):')}\n${JSON.stringify(exampleFromZod(resultSchema), null, 2)}\n`;
+      const ex = safeExample(resultSchema);
+      if (ex !== undefined) {
+        text += `\n${label('Example output (illustrative):')}\n${JSON.stringify(ex, null, 2)}\n`;
+      }
     }
   }
   return { ok: true, text };
@@ -159,9 +173,9 @@ export function drillDownJson(program: Command, languageId: string, path: string
       requests: node.commands.map((r) => r.name())
     };
   }
-  const method = methodForPath(path);
-  const paramsSchema = safeJsonSchema(method ? getSchemaForMethod(method) : undefined);
-  const resultSchema = safeJsonSchema(method ? getResultSchemaForMethod(method) : undefined);
+  const method = methodForPath(path)!;
+  const paramsSchema = safeJsonSchema(getSchemaForMethod(method));
+  const resultSchema = safeJsonSchema(getResultSchemaForMethod(method));
   return {
     ok: true,
     languageId,

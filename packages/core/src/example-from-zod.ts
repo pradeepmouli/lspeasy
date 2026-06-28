@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { unwrapZodType } from './zod-introspection.js';
 
 const MAX_DEPTH = 6;
 
@@ -15,12 +16,9 @@ const MAX_DEPTH = 6;
 export function exampleFromZod(schema: z.ZodType, depth = 0): unknown {
   if (depth > MAX_DEPTH) return null;
 
-  // Unwrap wrapper types at the same depth (unwrapping doesn't add nesting).
-  // Cast to z.ZodType: .unwrap() is typed as returning core.$ZodType (the internal base),
-  // but at runtime the value is always a classic ZodType instance.
-  if (schema instanceof z.ZodOptional) return exampleFromZod(schema.unwrap() as z.ZodType, depth);
-  if (schema instanceof z.ZodNullable) return exampleFromZod(schema.unwrap() as z.ZodType, depth);
-  if (schema instanceof z.ZodDefault) return exampleFromZod(schema.unwrap() as z.ZodType, depth);
+  // Unwrap Optional/Nullable/Default wrapper types at the same depth (unwrapping doesn't add nesting).
+  const unwrapped = unwrapZodType(schema);
+  if (unwrapped !== schema) return exampleFromZod(unwrapped, depth);
 
   // ZodLazy: .unwrap() calls the getter and returns the resolved inner schema.
   if (schema instanceof z.ZodLazy) return exampleFromZod(schema.unwrap() as z.ZodType, depth + 1);

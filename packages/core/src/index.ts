@@ -322,6 +322,9 @@ export { tokenizeCommand } from './utils/tokenize-command.js';
 // Example payload generator — builds illustrative required-only samples from Zod schemas
 export { exampleFromZod } from './example-from-zod.js';
 
+// Zod introspection utilities — shared helpers for inspecting Zod 4 schemas
+export { unwrapZodType } from './zod-introspection.js';
+
 // Local plugin resolver — reads installed .lsp.json files under ~/.claude/plugins/marketplaces
 export {
   defaultPluginsRoot,
