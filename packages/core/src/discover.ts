@@ -112,11 +112,7 @@ export function selectExtensionMap(config: LspJson): Record<string, string> {
 }
 
 /**
- * Walk the directory tree from `root` to the filesystem root, checking
- * `lsp.json`, `.claude/lsp.json`, and `.github/lsp.json` at each level, then
- * fall back to `~/.claude/lsp.json`.  Returns the first entry whose
- * `fileExtensions` map contains `fileExt` (or the first entry overall when
- * `fileExt` is empty).
+ * Resolve an LSP server for a file extension by walking up from `root` to the filesystem root then falling back to the global user config.
  *
  * @never Returns `null` silently when no `lsp.json` is found anywhere in
  *   the search path (including the global `~/.claude/lsp.json` fallback).
@@ -132,8 +128,7 @@ export function discoverServer(root: string, fileExt: string): ResolvedServer | 
 }
 
 /**
- * Walk the directory tree from `root` looking for a `lsp.json` entry whose
- * `fileExtensions` map maps any extension to `languageId`.
+ * Resolve an LSP server for a language ID by walking up from `root` to the filesystem root then falling back to the global user config.
  *
  * @never Returns `null` silently when no matching entry is found.  The
  *   proxy daemon's `BackendPool` calls this function on every new language

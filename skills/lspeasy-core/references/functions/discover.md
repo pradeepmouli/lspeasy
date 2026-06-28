@@ -29,11 +29,7 @@ selectExtensionMap(config: LspJson): Record<string, string>
 **Returns:** `Record<string, string>`
 
 ### `discoverServer`
-Walk the directory tree from `root` to the filesystem root, checking
-`lsp.json`, `.claude/lsp.json`, and `.github/lsp.json` at each level, then
-fall back to `~/.claude/lsp.json`.  Returns the first entry whose
-`fileExtensions` map contains `fileExt` (or the first entry overall when
-`fileExt` is empty).
+Resolve an LSP server for a file extension by walking up from `root` to the filesystem root then falling back to the global user config.
 ```ts
 discoverServer(root: string, fileExt: string): ResolvedServer | null
 ```
@@ -43,8 +39,7 @@ discoverServer(root: string, fileExt: string): ResolvedServer | null
 **Returns:** `ResolvedServer | null`
 
 ### `discoverServerByLanguageId`
-Walk the directory tree from `root` looking for a `lsp.json` entry whose
-`fileExtensions` map maps any extension to `languageId`.
+Resolve an LSP server for a language ID by walking up from `root` to the filesystem root then falling back to the global user config.
 ```ts
 discoverServerByLanguageId(root: string, languageId: string): ResolvedServer | null
 ```

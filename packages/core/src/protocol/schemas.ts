@@ -2566,8 +2566,7 @@ export const LSPResultSchemas = {
 } as const;
 
 /**
- * Looks up the result schema for a request method.
- * Returns `undefined` for notifications or unknown methods.
+ * Looks up the result schema for a request method; returns `undefined` for notifications or unknown methods.
  */
 export function getResultSchemaForMethod(method: string): z.ZodType<unknown> | undefined {
   return LSPResultSchemas[method as keyof typeof LSPResultSchemas];

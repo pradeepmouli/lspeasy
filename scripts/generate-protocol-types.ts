@@ -969,8 +969,9 @@ class ProtocolTypeGenerator {
     lines.push('} as const;');
     lines.push('');
     lines.push('/**');
-    lines.push(' * Looks up the result schema for a request method.');
-    lines.push(' * Returns `undefined` for notifications or unknown methods.');
+    lines.push(
+      ' * Looks up the result schema for a request method; returns `undefined` for notifications or unknown methods.'
+    );
     lines.push(' */');
     lines.push(
       'export function getResultSchemaForMethod(method: string): z.ZodType<unknown> | undefined {'
