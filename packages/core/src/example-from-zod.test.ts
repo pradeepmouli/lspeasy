@@ -23,4 +23,8 @@ describe('exampleFromZod', () => {
     const Rec: z.ZodType<unknown> = z.lazy(() => z.object({ child: Rec.optional() }));
     expect(() => exampleFromZod(Rec)).not.toThrow();
   });
+  it('omits nullable (and optional) fields from object examples', () => {
+    const schema = z.object({ a: z.string(), b: z.string().nullable(), c: z.number().optional() });
+    expect(exampleFromZod(schema)).toEqual({ a: 'example' });
+  });
 });
