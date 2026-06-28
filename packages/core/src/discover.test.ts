@@ -40,7 +40,17 @@ describe('discoverServers', () => {
   it('returns an empty array when no lsp.json is found', () => {
     const dir = mkdtempSync(join(tmpdir(), 'lspeasy-empty-'));
     tmpRoots.push(dir);
-    expect(discoverServers(dir)).toEqual([]);
+    // Redirect HOME so the global ~/.claude/lsp.json fallback can't resolve.
+    const origHome = process.env.HOME;
+    const origUserProfile = process.env.USERPROFILE;
+    try {
+      process.env.HOME = dir;
+      process.env.USERPROFILE = dir;
+      expect(discoverServers(dir)).toEqual([]);
+    } finally {
+      process.env.HOME = origHome;
+      process.env.USERPROFILE = origUserProfile;
+    }
   });
 });
 
