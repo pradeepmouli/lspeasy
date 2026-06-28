@@ -55,11 +55,12 @@ function toCanonical(raw: RawPluginServer, pluginId: string): LspServerEntry {
  * Map every installed plugin's servers, keyed by "<plugin>@<marketplace>".
  * `<marketplace>` is the first path segment under the root; `<plugin>` is the
  * directory directly containing the `.lsp.json` (handles flat and nested layouts).
+ * Each plugin's value is a record of server name (the outer key in `.lsp.json`) → entry.
  */
 export function listInstalledPluginServers(
   pluginsRoot: string = defaultPluginsRoot()
-): Record<string, LspServerEntry[]> {
-  const result: Record<string, LspServerEntry[]> = {};
+): Record<string, Record<string, LspServerEntry>> {
+  const result: Record<string, Record<string, LspServerEntry>> = {};
   if (!existsSync(pluginsRoot)) return result;
   for (const file of findLspJsonFiles(pluginsRoot)) {
     const marketplace = relative(pluginsRoot, file).split(sep)[0];
@@ -72,17 +73,19 @@ export function listInstalledPluginServers(
     } catch {
       continue;
     }
-    result[pluginId] = Object.values(raw).map((s) => toCanonical(s, pluginId));
+    const servers: Record<string, LspServerEntry> = {};
+    for (const [name, raw0] of Object.entries(raw)) servers[name] = toCanonical(raw0, pluginId);
+    result[pluginId] = servers;
   }
   return result;
 }
 
-/** Canonical servers for one "<plugin>@<marketplace>" id, or [] when not installed. */
+/** Canonical servers for one "<plugin>@<marketplace>" id, keyed by server name, or {} when not installed. */
 export function resolvePlugin(
   pluginId: string,
   pluginsRoot: string = defaultPluginsRoot()
-): LspServerEntry[] {
-  return listInstalledPluginServers(pluginsRoot)[pluginId] ?? [];
+): Record<string, LspServerEntry> {
+  return listInstalledPluginServers(pluginsRoot)[pluginId] ?? {};
 }
 
 /** Find the plugin id a canonical entry maps to: prefer stamped provenance, else match by command. */
@@ -93,7 +96,7 @@ export function findPluginFor(
   if (entry.marketplacePlugin) return entry.marketplacePlugin;
   const all = listInstalledPluginServers(pluginsRoot);
   for (const [pluginId, servers] of Object.entries(all)) {
-    if (servers.some((s) => s.command === entry.command)) return pluginId;
+    if (Object.values(servers).some((s) => s.command === entry.command)) return pluginId;
   }
   return undefined;
 }

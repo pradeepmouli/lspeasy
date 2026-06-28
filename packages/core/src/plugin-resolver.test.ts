@@ -53,23 +53,27 @@ describe('plugin resolver', () => {
       'rust-analyzer@claude-code-lsps',
       'vscode-langservers@claude-plugins-official'
     ]);
-    expect(all['vscode-langservers@claude-plugins-official']).toHaveLength(2);
+    expect(Object.keys(all['vscode-langservers@claude-plugins-official']).sort()).toEqual([
+      'css',
+      'html'
+    ]);
   });
 
   it('resolvePlugin renames extensionToLanguage and carries preserved fields + provenance', () => {
     const servers = resolvePlugin('rust-analyzer@claude-code-lsps', fixtureRoot());
-    expect(servers).toHaveLength(1);
-    expect(servers[0]).toMatchObject({
+    expect(servers['rust']).toMatchObject({
       command: 'rust-analyzer',
       fileExtensions: { '.rs': 'rust' },
       maxRestarts: 3,
       marketplacePlugin: 'rust-analyzer@claude-code-lsps'
     });
-    expect((servers[0] as { extensionToLanguage?: unknown }).extensionToLanguage).toBeUndefined();
+    expect(
+      (servers['rust'] as { extensionToLanguage?: unknown }).extensionToLanguage
+    ).toBeUndefined();
   });
 
-  it('resolvePlugin returns [] for an unknown plugin', () => {
-    expect(resolvePlugin('nope@nowhere', fixtureRoot())).toEqual([]);
+  it('resolvePlugin returns {} for an unknown plugin', () => {
+    expect(resolvePlugin('nope@nowhere', fixtureRoot())).toEqual({});
   });
 
   it('findPluginFor matches by stamped provenance then by command', () => {

@@ -38,10 +38,7 @@ export const claudeCodeAdapter: PlatformAdapter = {
     const servers: CanonicalServers = {};
     for (const [pluginId, on] of Object.entries(enabled)) {
       if (!on) continue;
-      for (const s of resolvePlugin(pluginId, pluginsRoot(home))) {
-        const lang = Object.values(s.fileExtensions)[0] ?? s.command;
-        servers[lang] = s;
-      }
+      Object.assign(servers, resolvePlugin(pluginId, pluginsRoot(home)));
     }
     return servers;
   },
