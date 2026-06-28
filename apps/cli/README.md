@@ -250,7 +250,7 @@ lsproxy config import claude-code --json  # machine-readable JSON output
 - `--user` — targets `~/.claude/lsp.json` (user-level); default is the project `lsp.json`
 - `--json` — machine-readable output on stdout (`{ ok, platform, added, updated, ... }`)
 
-`import` stamps provenance so a subsequent `export` round-trips correctly.
+Importing from a plugin platform (Claude Code, Codex) stamps `marketplacePlugin` provenance into `lsp.json`, so a later `export` toggles the exact source plugin. Explicit-command platforms (Copilot CLI) round-trip directly via their `command`/`args`.
 `export` skips servers that the target platform cannot represent (e.g. servers
 with unsupported fields) and reports them in the `skipped` array.
 

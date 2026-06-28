@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@skillit/cli": "^0.4.0",
+    "tsx": "^4.22.4",
     "typedoc-plugin-skillit": "^1.4.1",
     "typescript": "^6.0.3"
   },

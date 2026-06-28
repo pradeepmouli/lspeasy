@@ -933,7 +933,7 @@ Send any LSP request by method name with raw JSON params
 
 ### config
 
-Read/write LSP server config across platforms (lsp.json, Copilot CLI, Claude Code, Codex)
+Read/write LSP server config across platforms (lsp.json, Copilot CLI, Claude Code, Codex; VS Code is detected-but-unsupported)
 
 **Usage:**
 ```

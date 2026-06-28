@@ -151,7 +151,10 @@ const skill = await extractCliSkill({
   }
 });
 
-// Flatten subcommand tree → all commands become top-level in references/commands.md
+// flattenSurfaces expands the subcommand tree so each command is an individually
+// addressable surface in SKILL.md. (Note: writeCliSkill truncates references/commands.md
+// at a fixed limit, so later commands like `config`/`call` appear only in SKILL.md,
+// not commands.md — an @skillit/core@1.5.0 limitation.)
 const flatSurfaces = flattenSurfaces(skill.configSurfaces ?? []);
 
 // Enrich with README prose — these fields are part of ExtractedSkill but

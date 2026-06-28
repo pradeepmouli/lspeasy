@@ -60,7 +60,7 @@ export function buildProgram(): Command {
   const config = program
     .command('config')
     .description(
-      'Read/write LSP server config across platforms (lsp.json, Copilot CLI, Claude Code, Codex)'
+      'Read/write LSP server config across platforms (lsp.json, Copilot CLI, Claude Code, Codex; VS Code is detected-but-unsupported)'
     );
   config
     .command('list')
