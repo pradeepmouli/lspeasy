@@ -6,6 +6,16 @@ export interface LspServerEntry {
   command: string;
   args?: string[];
   fileExtensions: Record<string, string>;
+  /** Provenance: qualified plugin id this entry was imported from, e.g.
+   *  "rust-analyzer@claude-code-lsps". Lets export round-trip to a plugin toggle. */
+  marketplacePlugin?: string;
+  /** Preserved-but-not-consumed fields carried verbatim from richer native
+   *  formats (e.g. plugin .lsp.json) so import → export round-trips losslessly.
+   *  The lsproxy runtime ignores these in v1. */
+  transport?: string;
+  initializationOptions?: Record<string, unknown>;
+  settings?: Record<string, unknown>;
+  maxRestarts?: number;
 }
 
 export interface LspJson {
