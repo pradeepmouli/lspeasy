@@ -1,5 +1,13 @@
 # @lsproxy/proxy
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [6d973ba]
+  - @lspeasy/core@2.5.0
+  - @lspeasy/client@3.1.4
+
 ## 1.1.0
 
 ### Minor Changes
