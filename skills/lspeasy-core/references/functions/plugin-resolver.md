@@ -1,0 +1,42 @@
+# Functions
+
+## plugin-resolver
+
+### `defaultPluginsRoot`
+Default install root for plugin marketplaces.
+```ts
+defaultPluginsRoot(): string
+```
+**Returns:** `string`
+
+### `listInstalledPluginServers`
+Map every installed plugin's servers, keyed by `<plugin>@<marketplace>`.
+`<marketplace>` is the first path segment under the root; `<plugin>` is the
+directory directly containing the `.lsp.json` (handles flat and nested layouts).
+Each plugin's value is a record of server name (the outer key in `.lsp.json`) → entry.
+```ts
+listInstalledPluginServers(pluginsRoot: string): Record<string, Record<string, LspServerEntry>>
+```
+**Parameters:**
+- `pluginsRoot: string` — default: `...`
+**Returns:** `Record<string, Record<string, LspServerEntry>>`
+
+### `resolvePlugin`
+Canonical servers for one `<plugin>@<marketplace>` id, keyed by server name, or {} when not installed.
+```ts
+resolvePlugin(pluginId: string, pluginsRoot: string): Record<string, LspServerEntry>
+```
+**Parameters:**
+- `pluginId: string`
+- `pluginsRoot: string` — default: `...`
+**Returns:** `Record<string, LspServerEntry>`
+
+### `findPluginFor`
+Find the plugin id a canonical entry maps to: prefer stamped provenance, else match by command.
+```ts
+findPluginFor(entry: LspServerEntry, pluginsRoot: string): string | undefined
+```
+**Parameters:**
+- `entry: LspServerEntry`
+- `pluginsRoot: string` — default: `...`
+**Returns:** `string | undefined`

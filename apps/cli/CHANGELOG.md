@@ -1,5 +1,23 @@
 # @lspeasy/cli
 
+## 0.6.0
+
+### Minor Changes
+
+- 6d973ba: Multi-platform LSP config interop. `lsproxy config import|export|diff|list`
+  bridges lsproxy's lsp.json with Copilot CLI, Claude Code, and Codex
+  (read-only); VS Code is detected-but-unsupported. A local plugin resolver in
+  @lspeasy/core reads installed `.lsp.json` definitions to translate plugin
+  toggles to/from canonical servers. Richer `.lsp.json` fields are preserved
+  end-to-end. `--json` emits a stable contract at every command.
+
+### Patch Changes
+
+- Updated dependencies [6d973ba]
+  - @lspeasy/core@2.5.0
+  - @lsproxy/proxy@1.1.1
+  - @lspeasy/client@3.1.4
+
 ## 0.5.0
 
 ### Minor Changes

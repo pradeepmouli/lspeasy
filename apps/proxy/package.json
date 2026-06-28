@@ -1,6 +1,6 @@
 {
   "name": "@lsproxy/proxy",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Per-root LSP multiplexing daemon — holds warm language server connections for @lsproxy/cli",
   "private": false,
   "keywords": [
