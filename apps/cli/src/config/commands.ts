@@ -69,7 +69,8 @@ function requireAdapter(platform: string, flags: ConfigFlags): PlatformAdapter {
   return adapter;
 }
 
-export function configImport(platform: string, flags: ConfigFlags, _fmt?: Formatter): void {
+export function configImport(platform: string, flags: ConfigFlags, fmt?: Formatter): void {
+  const f = fmt ?? createFormatter(false);
   const adapter = requireAdapter(platform, flags);
   const incoming = adapter.read(flags.scope, homeForAdapter(adapter.id, flags.root));
   const target = lspjsonAdapter.configPath(flags.scope, flags.root);
@@ -79,12 +80,14 @@ export function configImport(platform: string, flags: ConfigFlags, _fmt?: Format
   emit(
     flags,
     { ok: true, platform, target, added, updated },
-    `imported ${added.length + updated.length} server(s) from ${platform} into ${target}\n` +
-      `  added: ${added.join(', ') || '(none)'}\n  updated: ${updated.join(', ') || '(none)'}\n`
+    `imported ${f.green(String(added.length + updated.length))} server(s) from ${f.yellow(platform)} into ${f.dim(target)}\n` +
+      `  ${f.dim('added:')} ${added.map((n) => f.green(n)).join(', ') || f.dim('(none)')}\n` +
+      `  ${f.dim('updated:')} ${updated.map((n) => f.yellow(n)).join(', ') || f.dim('(none)')}\n`
   );
 }
 
-export function configExport(platform: string, flags: ConfigFlags, _fmt?: Formatter): void {
+export function configExport(platform: string, flags: ConfigFlags, fmt?: Formatter): void {
+  const f = fmt ?? createFormatter(false);
   const adapter = requireAdapter(platform, flags);
   if (!adapter.write) fail(flags, `Platform "${platform}" is read-only and cannot be exported to.`);
   const servers: CanonicalServers = readLspJsonFile(
@@ -94,14 +97,15 @@ export function configExport(platform: string, flags: ConfigFlags, _fmt?: Format
   emit(
     flags,
     { ok: true, platform, ...result },
-    `exported ${result.written.length} server(s) to ${result.path}\n` +
+    `exported ${f.green(String(result.written.length))} server(s) to ${f.green(result.path)}\n` +
       (result.skipped.length
-        ? `  skipped: ${result.skipped.map((s) => `${s.name} (${s.reason})`).join(', ')}\n`
+        ? `  ${f.dim('skipped:')} ${result.skipped.map((s) => `${f.yellow(s.name)} ${f.dim(`(${s.reason})`)}`).join(', ')}\n`
         : '')
   );
 }
 
-export function configDiff(platform: string, flags: ConfigFlags, _fmt?: Formatter): void {
+export function configDiff(platform: string, flags: ConfigFlags, fmt?: Formatter): void {
+  const f = fmt ?? createFormatter(false);
   const adapter = requireAdapter(platform, flags);
   const platformServers = adapter.read(flags.scope, homeForAdapter(adapter.id, flags.root));
   const lspServers = readLspJsonFile(lspjsonAdapter.configPath(flags.scope, flags.root));
@@ -114,7 +118,9 @@ export function configDiff(platform: string, flags: ConfigFlags, _fmt?: Formatte
   emit(
     flags,
     { ok: true, platform, onlyPlatform, onlyLsp, changed },
-    `diff ${platform} vs lsp.json\n  only in ${platform}: ${onlyPlatform.join(', ') || '(none)'}\n` +
-      `  only in lsp.json: ${onlyLsp.join(', ') || '(none)'}\n  changed: ${changed.join(', ') || '(none)'}\n`
+    `${f.dim('diff')} ${f.yellow(platform)} ${f.dim('vs lsp.json')}\n` +
+      `  ${f.dim(`only in ${platform}:`)} ${onlyPlatform.map((k) => f.green(k)).join(', ') || f.dim('(none)')}\n` +
+      `  ${f.dim('only in lsp.json:')} ${onlyLsp.join(', ') || f.dim('(none)')}\n` +
+      `  ${f.dim('changed:')} ${changed.map((k) => f.yellow(k)).join(', ') || f.dim('(none)')}\n`
   );
 }
