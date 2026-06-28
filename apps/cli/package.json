@@ -57,6 +57,7 @@
     "@lspeasy/core": "workspace:*",
     "@lsproxy/proxy": "workspace:*",
     "commander": "^15.0.0",
+    "smol-toml": "^1.7.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
