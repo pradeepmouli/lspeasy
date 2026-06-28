@@ -4,7 +4,9 @@ import { existsSync, mkdirSync, openSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { createConnection } from 'node:net';
 import { SocketTransport } from '@lspeasy/core/node';
+import type { Message } from '@lspeasy/core';
 import { socketPath } from '@lsproxy/proxy';
+import type { StatusReport } from '@lsproxy/proxy';
 import { RefactorSession, type SessionOptions } from './session.js';
 
 const PROXY_BIN = new URL('../../proxy/dist/main.js', import.meta.url).pathname;
@@ -54,6 +56,59 @@ function spawnDaemon(root: string, sockPath: string): string {
   });
   child.unref();
   return logPath;
+}
+
+const STATUS_TIMEOUT_MS = 2000;
+
+/**
+ * Ask a running proxy daemon for its status. Returns null when no daemon is
+ * listening on the project's socket — callers fall back to a config-only view.
+ *
+ * NEVER rejects. Resolves to `null` for any failure: no socket, connect error,
+ * transport hang (waitForConnect included), request timeout, or any thrown
+ * exception. `transport.close()` is always called in a finally block.
+ */
+export async function fetchDaemonStatus(root: string): Promise<StatusReport | null> {
+  const sockPath = socketPath(root);
+  if (!existsSync(sockPath) || !(await tryConnect(sockPath))) return null;
+
+  const transport = new SocketTransport({ path: sockPath });
+  try {
+    // A deadline that resolves (not rejects) to null bounds the whole operation
+    // including waitForConnect(), so a wedged daemon cannot hang bare `lsproxy`.
+    const deadline = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), STATUS_TIMEOUT_MS)
+    );
+
+    const request = new Promise<StatusReport | null>((resolve) => {
+      void (async () => {
+        try {
+          await transport.waitForConnect();
+          const sub = transport.onMessage((m: Message) => {
+            const msg = m as { id?: unknown; result?: StatusReport };
+            if (msg.id === 1) {
+              sub.dispose();
+              resolve(msg.result as StatusReport);
+            }
+          });
+          void transport.send({
+            jsonrpc: '2.0',
+            id: 1,
+            method: '$/lsproxy.status',
+            params: {}
+          } as Message);
+        } catch {
+          resolve(null);
+        }
+      })();
+    });
+
+    return await Promise.race([request, deadline]);
+  } catch {
+    return null;
+  } finally {
+    await transport.close();
+  }
 }
 
 export interface ConnectOptions {

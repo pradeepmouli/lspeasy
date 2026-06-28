@@ -83,6 +83,15 @@ export class DocumentStateManager {
     return this.docs.get(uri)?.content;
   }
 
+  /** Count currently-tracked open documents, grouped by languageId. */
+  countByLanguage(): Record<string, number> {
+    const counts: Record<string, number> = {};
+    for (const entry of this.docs.values()) {
+      counts[entry.languageId] = (counts[entry.languageId] ?? 0) + 1;
+    }
+    return counts;
+  }
+
   private scheduleLazyClose(uri: string, entry: DocEntry): void {
     entry.closeTimer = setTimeout(() => {
       this.docs.delete(uri);

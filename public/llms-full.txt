@@ -1042,6 +1042,21 @@ discoverExtensionMap(root: string): Record<string, string>
 
 **Returns:** `Record<string, string>`
 
+### discoverServers
+
+Enumerate every server configured in the discovered lsp.json. Unlike
+discoverServer, which resolves a single server, this returns the full
+set so callers can present available languages without connecting.
+
+```ts
+discoverServers(root: string): ConfiguredServer[]
+```
+
+**Parameters:**
+- `root: string` — 
+
+**Returns:** `ConfiguredServer[]`
+
 ### tokenizeCommand
 
 Split a server launch command into argv tokens, honoring single- and
@@ -2056,6 +2071,8 @@ Envelope used by shared worker transport to preserve client isolation.
 ### LspJson
 
 ### ResolvedServer
+
+### ConfiguredServer
 
 ### LogLevel
 

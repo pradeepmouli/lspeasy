@@ -19,6 +19,15 @@ export interface ResolvedServer {
   languageId: string;
 }
 
+export interface ConfiguredServer {
+  /** lsp.json server key, e.g. "typescript". */
+  name: string;
+  /** Full spawn command string (same quoting as ResolvedServer.serverCommand). */
+  command: string;
+  /** File extension (".ts") to languageId ("typescript") map for this server. */
+  fileExtensions: Record<string, string>;
+}
+
 const SEARCH_PATHS = ['lsp.json', '.claude/lsp.json', '.github/lsp.json'];
 
 function findLspJsonPath(root: string): string | null {
@@ -137,4 +146,19 @@ export function discoverExtensionMap(root: string): Record<string, string> {
   const config = loadConfig(root);
   if (!config) return {};
   return selectExtensionMap(config);
+}
+
+/**
+ * Enumerate every server configured in the discovered lsp.json. Unlike
+ * {@link discoverServer}, which resolves a single server, this returns the full
+ * set so callers can present available languages without connecting.
+ */
+export function discoverServers(root: string): ConfiguredServer[] {
+  const config = loadConfig(root);
+  if (!config) return [];
+  return Object.entries(config.lspServers).map(([name, entry]) => ({
+    name,
+    command: buildServerCommand(entry),
+    fileExtensions: { ...entry.fileExtensions }
+  }));
 }

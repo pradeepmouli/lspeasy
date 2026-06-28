@@ -60,3 +60,14 @@ discoverExtensionMap(root: string): Record<string, string>
 **Parameters:**
 - `root: string`
 **Returns:** `Record<string, string>`
+
+### `discoverServers`
+Enumerate every server configured in the discovered lsp.json. Unlike
+discoverServer, which resolves a single server, this returns the full
+set so callers can present available languages without connecting.
+```ts
+discoverServers(root: string): ConfiguredServer[]
+```
+**Parameters:**
+- `root: string`
+**Returns:** `ConfiguredServer[]`

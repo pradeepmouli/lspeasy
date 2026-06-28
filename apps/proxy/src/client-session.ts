@@ -4,6 +4,7 @@ import type { Transport } from '@lspeasy/core';
 import type { LSPClient } from '@lspeasy/client';
 import type { BackendPool } from './backend-pool.js';
 import type { DocumentStateManager } from './document-state.js';
+import type { StatusReport } from './status.js';
 
 export interface ClientSessionOptions {
   sessionId: string;
@@ -12,6 +13,7 @@ export interface ClientSessionOptions {
   docState: DocumentStateManager;
   root: string;
   onEnd: (sessionId: string) => void;
+  onStatus: () => StatusReport;
 }
 
 type RawMsg = {
@@ -29,6 +31,7 @@ export class ClientSession {
   private readonly pool: BackendPool;
   private readonly docState: DocumentStateManager;
   private readonly onEnd: (sessionId: string) => void;
+  private readonly onStatus: () => StatusReport;
   private languageId = 'plaintext';
   private requestIdCounter = 0;
   private readonly pendingClientRequests = new Map<string | number, (result: unknown) => void>();
@@ -40,6 +43,7 @@ export class ClientSession {
     this.pool = opts.pool;
     this.docState = opts.docState;
     this.onEnd = opts.onEnd;
+    this.onStatus = opts.onStatus;
 
     this.transport.onMessage((msg) => this.handleMessage(msg as unknown as RawMsg));
     this.transport.onClose(() => this.handleClose());
@@ -99,7 +103,11 @@ export class ClientSession {
       // Ack without tearing down the shared backend
       return null;
     }
-    const backend = this.backendForMsg(msg);
+    if (msg.method === '$/lsproxy.status') {
+      return this.onStatus();
+    }
+    const { backend, languageId } = this.resolveBackend(msg);
+    this.pool.recordRequest(languageId);
     return (backend.sendRequest as (m: string, p: unknown) => Promise<unknown>)(
       msg.method!,
       msg.params
@@ -163,22 +171,23 @@ export class ClientSession {
     }
 
     // Forward all other notifications (didChange, willSave, etc.)
-    const backend = this.backendForMsg(msg);
+    const { backend } = this.resolveBackend(msg);
     await (backend.sendNotification as (m: string, p: unknown) => Promise<void>)(
       msg.method!,
       msg.params
     );
   }
 
-  private backendForMsg(msg: RawMsg): LSPClient {
+  private resolveBackend(msg: RawMsg): { backend: LSPClient; languageId: string } {
     // Prefer routing by URI extension; fall back to session's primary languageId
     const params = msg.params as Record<string, unknown> | undefined;
     const td = params?.['textDocument'] as Record<string, unknown> | undefined;
     const uri = td?.['uri'] as string | undefined;
     const langId = uri ? (this.languageIdForUri(uri) ?? this.languageId) : this.languageId;
-    const backend = this.pool.getBackend(langId) ?? this.pool.getBackend(this.languageId);
+    const byUri = this.pool.getBackend(langId);
+    const backend = byUri ?? this.pool.getBackend(this.languageId);
     if (!backend) throw new Error(`No backend available for languageId "${langId}"`);
-    return backend;
+    return { backend, languageId: byUri ? langId : this.languageId };
   }
 
   private languageIdForUri(uri: string): string {

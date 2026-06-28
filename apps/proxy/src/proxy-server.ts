@@ -2,11 +2,13 @@
 import { createServer, createConnection, type Server, type Socket } from 'node:net';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { discoverServers, type ConfiguredServer } from '@lspeasy/core';
 import { socketToTransport } from '@lspeasy/core/node';
 import { BackendPool, type BackendPoolOptions } from './backend-pool.js';
 import { DocumentStateManager } from './document-state.js';
 import { ClientSession } from './client-session.js';
 import { socketPath, pidPath } from './socket-path.js';
+import { buildStatusReport, type StatusReport } from './status.js';
 
 export interface ProxyServerOptions extends BackendPoolOptions {
   root: string;
@@ -27,9 +29,12 @@ export class ProxyServer {
   private readonly activeSockets = new Set<Socket>();
   private idleTimer: ReturnType<typeof setTimeout> | undefined;
   private sessionCounter = 0;
+  private readonly startedAt = Date.now();
+  private readonly configured: ConfiguredServer[];
 
   constructor(opts: ProxyServerOptions) {
     this.root = opts.root;
+    this.configured = discoverServers(opts.root);
     this.sockPath = opts.socketOverride ?? socketPath(opts.root);
     this.pidFilePath = opts.socketOverride
       ? opts.socketOverride.endsWith('.sock')
@@ -43,6 +48,20 @@ export class ProxyServer {
     this.docState = new DocumentStateManager({
       ...(opts.lazyCloseMs !== undefined && { lazyCloseMs: opts.lazyCloseMs }),
       onClose: (uri) => this.lazyCloseUri(uri)
+    });
+  }
+
+  /** Assemble the current daemon + backend status snapshot. */
+  public getStatus(): StatusReport {
+    return buildStatusReport({
+      now: Date.now(),
+      daemonPid: process.pid,
+      daemonStartedAt: this.startedAt,
+      root: this.root,
+      sessions: this.sessions.size,
+      configured: this.configured,
+      backends: this.pool.listBackends(),
+      openDocsByLanguage: this.docState.countByLanguage()
     });
   }
 
@@ -60,7 +79,8 @@ export class ProxyServer {
         pool: this.pool,
         docState: this.docState,
         root: this.root,
-        onEnd: (id) => this.onSessionEnd(id)
+        onEnd: (id) => this.onSessionEnd(id),
+        onStatus: () => this.getStatus()
       });
       this.sessions.set(sessionId, session);
       this.resetIdleTimer();

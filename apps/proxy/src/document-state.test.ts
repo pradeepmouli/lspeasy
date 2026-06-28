@@ -61,4 +61,12 @@ describe('DocumentStateManager', () => {
     vi.advanceTimersByTime(600);
     expect(m.getContent('file:///a.ts')).toBeUndefined();
   });
+
+  it('countByLanguage tallies open documents per languageId', () => {
+    const mgr = new DocumentStateManager();
+    mgr.onDidOpen('s1', 'file:///a.ts', 'a', 'typescript');
+    mgr.onDidOpen('s1', 'file:///b.ts', 'b', 'typescript');
+    mgr.onDidOpen('s1', 'file:///c.rs', 'c', 'rust');
+    expect(mgr.countByLanguage()).toEqual({ typescript: 2, rust: 1 });
+  });
 });
