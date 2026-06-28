@@ -305,8 +305,22 @@ export {
   discoverServer,
   discoverServerByLanguageId,
   discoverExtensionMap,
-  discoverServers
+  discoverServers,
+  readLspJsonFile,
+  writeLspJsonFile,
+  mergeServers
 } from './discover.js';
+
+// Language extensions — languageId to default extensions table
+export { DEFAULT_EXTENSIONS, extensionsForLanguage } from './language-extensions.js';
 
 // Command tokenizer
 export { tokenizeCommand } from './utils/tokenize-command.js';
+
+// Local plugin resolver — reads installed .lsp.json files under ~/.claude/plugins/marketplaces
+export {
+  defaultPluginsRoot,
+  listInstalledPluginServers,
+  resolvePlugin,
+  findPluginFor
+} from './plugin-resolver.js';

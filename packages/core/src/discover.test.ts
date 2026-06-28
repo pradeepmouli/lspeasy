@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { discoverServers } from './discover.js';
+import type { LspServerEntry } from './discover.js';
+import { discoverServers, readLspJsonFile, writeLspJsonFile, mergeServers } from './discover.js';
 
 const tmpRoots: string[] = [];
 function rootWithConfig(config: unknown): string {
@@ -39,6 +40,62 @@ describe('discoverServers', () => {
   it('returns an empty array when no lsp.json is found', () => {
     const dir = mkdtempSync(join(tmpdir(), 'lspeasy-empty-'));
     tmpRoots.push(dir);
-    expect(discoverServers(dir)).toEqual([]);
+    // Redirect HOME so the global ~/.claude/lsp.json fallback can't resolve.
+    const origHome = process.env.HOME;
+    const origUserProfile = process.env.USERPROFILE;
+    try {
+      process.env.HOME = dir;
+      process.env.USERPROFILE = dir;
+      expect(discoverServers(dir)).toEqual([]);
+    } finally {
+      process.env.HOME = origHome;
+      process.env.USERPROFILE = origUserProfile;
+    }
+  });
+});
+
+describe('LspServerEntry preserved fields', () => {
+  it('accepts provenance and preserved-but-unused fields', () => {
+    const e: LspServerEntry = {
+      command: 'rust-analyzer',
+      fileExtensions: { '.rs': 'rust' },
+      marketplacePlugin: 'rust-analyzer@claude-code-lsps',
+      transport: 'stdio',
+      initializationOptions: { a: 1 },
+      settings: { b: 2 },
+      maxRestarts: 3
+    };
+    expect(e.marketplacePlugin).toBe('rust-analyzer@claude-code-lsps');
+    expect(e.maxRestarts).toBe(3);
+  });
+});
+
+describe('LspJson file IO', () => {
+  it('writes then reads back the same servers', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lspeasy-io-'));
+    try {
+      const servers = { rust: { command: 'rust-analyzer', fileExtensions: { '.rs': 'rust' } } };
+      const file = join(dir, 'lsp.json');
+      writeLspJsonFile(file, servers);
+      expect(readLspJsonFile(file)).toEqual(servers);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns {} for a missing or invalid file', () => {
+    expect(readLspJsonFile('/no/such/lsp.json')).toEqual({});
+  });
+
+  it('mergeServers reports added and updated keys', () => {
+    const base = { a: { command: 'a', fileExtensions: {} } };
+    const incoming = {
+      a: { command: 'a2', fileExtensions: {} },
+      b: { command: 'b', fileExtensions: {} }
+    };
+    const { merged, added, updated } = mergeServers(base, incoming);
+    expect(added).toEqual(['b']);
+    expect(updated).toEqual(['a']);
+    expect(merged.a!.command).toBe('a2');
   });
 });
