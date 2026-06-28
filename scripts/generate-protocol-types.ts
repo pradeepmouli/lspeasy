@@ -771,6 +771,16 @@ class ProtocolTypeGenerator {
     }
   }
 
+  /** Derive a deterministic result-schema base name from a method, e.g. "textDocument/hover" -> "TextDocumentHoverResult". */
+  private resultConstName(method: string): string {
+    const pascal = method
+      .split(/[/_$]/)
+      .filter(Boolean)
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join('');
+    return `${pascal}Result`;
+  }
+
   /** Generate `schemas.ts` — Zod schemas for all LSP structures, enumerations, and type aliases. */
   private generateSchemasFile(): void {
     console.log('📝 Generating schemas.ts...');
@@ -925,6 +935,48 @@ class ProtocolTypeGenerator {
       lines.push(propEntries.join(',\n'));
       lines.push(`});`);
     }
+    lines.push('');
+
+    // Result schemas — one per request method, from its metaModel `result` Type.
+    // Emitted AFTER the structure/alias/enum consts so `XSchema` refs resolve, and
+    // reusing the same `lazyRefs` set so forward references stay wrapped in z.lazy().
+    // Some method-derived names (e.g. `initialize` -> `InitializeResultSchema`) collide
+    // with an existing structure schema of the same name — in that case the structure
+    // schema IS the result schema, so we reference it rather than redeclaring it.
+    const declaredSchemaNames = new Set(ordered.map((n) => `${n}Schema`));
+    const resultEntries: Array<{ method: string; constName: string }> = [];
+    for (const req of requests) {
+      if (!req.result) continue;
+      const constName = `${this.resultConstName(req.method)}Schema`;
+      if (!declaredSchemaNames.has(constName)) {
+        const builder = this.typeToBuilder(req.result, this.resultConstName(req.method), lazyRefs);
+        lines.push(`export const ${constName}: z.ZodType<unknown> = ${builder.text()};`);
+        declaredSchemaNames.add(constName);
+      }
+      resultEntries.push({ method: req.method, constName });
+    }
+
+    lines.push('');
+    lines.push('/**');
+    lines.push(' * Result schema registry — maps a request method to its result schema.');
+    lines.push(' */');
+    lines.push('export const LSPResultSchemas = {');
+    for (const { method, constName } of resultEntries.sort((a, b) =>
+      a.method.localeCompare(b.method)
+    )) {
+      lines.push(`  ${JSON.stringify(method)}: ${constName},`);
+    }
+    lines.push('} as const;');
+    lines.push('');
+    lines.push('/**');
+    lines.push(' * Looks up the result schema for a request method.');
+    lines.push(' * Returns `undefined` for notifications or unknown methods.');
+    lines.push(' */');
+    lines.push(
+      'export function getResultSchemaForMethod(method: string): z.ZodType<unknown> | undefined {'
+    );
+    lines.push('  return LSPResultSchemas[method as keyof typeof LSPResultSchemas];');
+    lines.push('}');
     lines.push('');
 
     // LSPSchemas registry — maps method strings to their params schema

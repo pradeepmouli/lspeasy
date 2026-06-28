@@ -2277,6 +2277,302 @@ export const PrepareRenameResultSchema = z.union([
   PrepareRenameDefaultBehaviorSchema
 ]);
 
+export const TextDocumentImplementationResultSchema: z.ZodType<unknown> = z.union([
+  DefinitionSchema,
+  z.array(DefinitionLinkSchema),
+  z.literal(null)
+]);
+export const TextDocumentTypeDefinitionResultSchema: z.ZodType<unknown> = z.union([
+  DefinitionSchema,
+  z.array(DefinitionLinkSchema),
+  z.literal(null)
+]);
+export const TextDocumentDocumentColorResultSchema: z.ZodType<unknown> =
+  z.array(ColorInformationSchema);
+export const TextDocumentColorPresentationResultSchema: z.ZodType<unknown> =
+  z.array(ColorPresentationSchema);
+export const TextDocumentFoldingRangeResultSchema: z.ZodType<unknown> = z.union([
+  z.array(FoldingRangeSchema),
+  z.literal(null)
+]);
+export const TextDocumentDeclarationResultSchema: z.ZodType<unknown> = z.union([
+  DeclarationSchema,
+  z.array(DeclarationLinkSchema),
+  z.literal(null)
+]);
+export const TextDocumentSelectionRangeResultSchema: z.ZodType<unknown> = z.union([
+  z.array(SelectionRangeSchema),
+  z.literal(null)
+]);
+export const TextDocumentPrepareCallHierarchyResultSchema: z.ZodType<unknown> = z.union([
+  z.array(CallHierarchyItemSchema),
+  z.literal(null)
+]);
+export const CallHierarchyIncomingCallsResultSchema: z.ZodType<unknown> = z.union([
+  z.array(CallHierarchyIncomingCallSchema),
+  z.literal(null)
+]);
+export const CallHierarchyOutgoingCallsResultSchema: z.ZodType<unknown> = z.union([
+  z.array(CallHierarchyOutgoingCallSchema),
+  z.literal(null)
+]);
+export const TextDocumentSemanticTokensFullResultSchema: z.ZodType<unknown> = z.union([
+  SemanticTokensSchema,
+  z.literal(null)
+]);
+export const TextDocumentSemanticTokensFullDeltaResultSchema: z.ZodType<unknown> = z.union([
+  SemanticTokensSchema,
+  SemanticTokensDeltaSchema,
+  z.literal(null)
+]);
+export const TextDocumentSemanticTokensRangeResultSchema: z.ZodType<unknown> = z.union([
+  SemanticTokensSchema,
+  z.literal(null)
+]);
+export const TextDocumentLinkedEditingRangeResultSchema: z.ZodType<unknown> = z.union([
+  LinkedEditingRangesSchema,
+  z.literal(null)
+]);
+export const WorkspaceWillCreateFilesResultSchema: z.ZodType<unknown> = z.union([
+  WorkspaceEditSchema,
+  z.literal(null)
+]);
+export const WorkspaceWillRenameFilesResultSchema: z.ZodType<unknown> = z.union([
+  WorkspaceEditSchema,
+  z.literal(null)
+]);
+export const WorkspaceWillDeleteFilesResultSchema: z.ZodType<unknown> = z.union([
+  WorkspaceEditSchema,
+  z.literal(null)
+]);
+export const TextDocumentMonikerResultSchema: z.ZodType<unknown> = z.union([
+  z.array(MonikerSchema),
+  z.literal(null)
+]);
+export const TextDocumentPrepareTypeHierarchyResultSchema: z.ZodType<unknown> = z.union([
+  z.array(TypeHierarchyItemSchema),
+  z.literal(null)
+]);
+export const TypeHierarchySupertypesResultSchema: z.ZodType<unknown> = z.union([
+  z.array(TypeHierarchyItemSchema),
+  z.literal(null)
+]);
+export const TypeHierarchySubtypesResultSchema: z.ZodType<unknown> = z.union([
+  z.array(TypeHierarchyItemSchema),
+  z.literal(null)
+]);
+export const TextDocumentInlineValueResultSchema: z.ZodType<unknown> = z.union([
+  z.array(InlineValueSchema),
+  z.literal(null)
+]);
+export const TextDocumentInlayHintResultSchema: z.ZodType<unknown> = z.union([
+  z.array(InlayHintSchema),
+  z.literal(null)
+]);
+export const InlayHintResolveResultSchema: z.ZodType<unknown> = InlayHintSchema;
+export const TextDocumentDiagnosticResultSchema: z.ZodType<unknown> =
+  DocumentDiagnosticReportSchema;
+export const WorkspaceDiagnosticResultSchema: z.ZodType<unknown> = WorkspaceDiagnosticReportSchema;
+export const TextDocumentInlineCompletionResultSchema: z.ZodType<unknown> = z.union([
+  InlineCompletionListSchema,
+  z.array(InlineCompletionItemSchema),
+  z.literal(null)
+]);
+export const WorkspaceTextDocumentContentResultSchema: z.ZodType<unknown> =
+  TextDocumentContentResultSchema;
+export const ShutdownResultSchema: z.ZodType<unknown> = z.literal(null);
+export const TextDocumentWillSaveWaitUntilResultSchema: z.ZodType<unknown> = z.union([
+  z.array(TextEditSchema),
+  z.literal(null)
+]);
+export const TextDocumentCompletionResultSchema: z.ZodType<unknown> = z.union([
+  z.array(CompletionItemSchema),
+  CompletionListSchema,
+  z.literal(null)
+]);
+export const CompletionItemResolveResultSchema: z.ZodType<unknown> = CompletionItemSchema;
+export const TextDocumentHoverResultSchema: z.ZodType<unknown> = z.union([
+  HoverSchema,
+  z.literal(null)
+]);
+export const TextDocumentSignatureHelpResultSchema: z.ZodType<unknown> = z.union([
+  SignatureHelpSchema,
+  z.literal(null)
+]);
+export const TextDocumentDefinitionResultSchema: z.ZodType<unknown> = z.union([
+  DefinitionSchema,
+  z.array(DefinitionLinkSchema),
+  z.literal(null)
+]);
+export const TextDocumentReferencesResultSchema: z.ZodType<unknown> = z.union([
+  z.array(LocationSchema),
+  z.literal(null)
+]);
+export const TextDocumentDocumentHighlightResultSchema: z.ZodType<unknown> = z.union([
+  z.array(DocumentHighlightSchema),
+  z.literal(null)
+]);
+export const TextDocumentDocumentSymbolResultSchema: z.ZodType<unknown> = z.union([
+  z.array(SymbolInformationSchema),
+  z.array(DocumentSymbolSchema),
+  z.literal(null)
+]);
+export const TextDocumentCodeActionResultSchema: z.ZodType<unknown> = z.union([
+  z.array(z.union([CommandSchema, CodeActionSchema])),
+  z.literal(null)
+]);
+export const CodeActionResolveResultSchema: z.ZodType<unknown> = CodeActionSchema;
+export const WorkspaceSymbolResultSchema: z.ZodType<unknown> = z.union([
+  z.array(SymbolInformationSchema),
+  z.array(WorkspaceSymbolSchema),
+  z.literal(null)
+]);
+export const WorkspaceSymbolResolveResultSchema: z.ZodType<unknown> = WorkspaceSymbolSchema;
+export const TextDocumentCodeLensResultSchema: z.ZodType<unknown> = z.union([
+  z.array(CodeLensSchema),
+  z.literal(null)
+]);
+export const CodeLensResolveResultSchema: z.ZodType<unknown> = CodeLensSchema;
+export const TextDocumentDocumentLinkResultSchema: z.ZodType<unknown> = z.union([
+  z.array(DocumentLinkSchema),
+  z.literal(null)
+]);
+export const DocumentLinkResolveResultSchema: z.ZodType<unknown> = DocumentLinkSchema;
+export const TextDocumentFormattingResultSchema: z.ZodType<unknown> = z.union([
+  z.array(TextEditSchema),
+  z.literal(null)
+]);
+export const TextDocumentRangeFormattingResultSchema: z.ZodType<unknown> = z.union([
+  z.array(TextEditSchema),
+  z.literal(null)
+]);
+export const TextDocumentRangesFormattingResultSchema: z.ZodType<unknown> = z.union([
+  z.array(TextEditSchema),
+  z.literal(null)
+]);
+export const TextDocumentOnTypeFormattingResultSchema: z.ZodType<unknown> = z.union([
+  z.array(TextEditSchema),
+  z.literal(null)
+]);
+export const TextDocumentRenameResultSchema: z.ZodType<unknown> = z.union([
+  WorkspaceEditSchema,
+  z.literal(null)
+]);
+export const TextDocumentPrepareRenameResultSchema: z.ZodType<unknown> = z.union([
+  PrepareRenameResultSchema,
+  z.literal(null)
+]);
+export const WorkspaceExecuteCommandResultSchema: z.ZodType<unknown> = z.union([
+  z.lazy(() => LSPAnySchema),
+  z.literal(null)
+]);
+export const WorkspaceWorkspaceFoldersResultSchema: z.ZodType<unknown> = z.union([
+  z.array(WorkspaceFolderSchema),
+  z.literal(null)
+]);
+export const WorkspaceConfigurationResultSchema: z.ZodType<unknown> = z.array(
+  z.lazy(() => LSPAnySchema)
+);
+export const WorkspaceFoldingRangeRefreshResultSchema: z.ZodType<unknown> = z.literal(null);
+export const WindowWorkDoneProgressCreateResultSchema: z.ZodType<unknown> = z.literal(null);
+export const WorkspaceSemanticTokensRefreshResultSchema: z.ZodType<unknown> = z.literal(null);
+export const WindowShowDocumentResultSchema: z.ZodType<unknown> = ShowDocumentResultSchema;
+export const WorkspaceInlineValueRefreshResultSchema: z.ZodType<unknown> = z.literal(null);
+export const WorkspaceInlayHintRefreshResultSchema: z.ZodType<unknown> = z.literal(null);
+export const WorkspaceDiagnosticRefreshResultSchema: z.ZodType<unknown> = z.literal(null);
+export const WorkspaceTextDocumentContentRefreshResultSchema: z.ZodType<unknown> = z.literal(null);
+export const ClientRegisterCapabilityResultSchema: z.ZodType<unknown> = z.literal(null);
+export const ClientUnregisterCapabilityResultSchema: z.ZodType<unknown> = z.literal(null);
+export const WindowShowMessageRequestResultSchema: z.ZodType<unknown> = z.union([
+  MessageActionItemSchema,
+  z.literal(null)
+]);
+export const WorkspaceCodeLensRefreshResultSchema: z.ZodType<unknown> = z.literal(null);
+export const WorkspaceApplyEditResultSchema: z.ZodType<unknown> = ApplyWorkspaceEditResultSchema;
+
+/**
+ * Result schema registry — maps a request method to its result schema.
+ */
+export const LSPResultSchemas = {
+  'callHierarchy/incomingCalls': CallHierarchyIncomingCallsResultSchema,
+  'callHierarchy/outgoingCalls': CallHierarchyOutgoingCallsResultSchema,
+  'client/registerCapability': ClientRegisterCapabilityResultSchema,
+  'client/unregisterCapability': ClientUnregisterCapabilityResultSchema,
+  'codeAction/resolve': CodeActionResolveResultSchema,
+  'codeLens/resolve': CodeLensResolveResultSchema,
+  'completionItem/resolve': CompletionItemResolveResultSchema,
+  'documentLink/resolve': DocumentLinkResolveResultSchema,
+  initialize: InitializeResultSchema,
+  'inlayHint/resolve': InlayHintResolveResultSchema,
+  shutdown: ShutdownResultSchema,
+  'textDocument/codeAction': TextDocumentCodeActionResultSchema,
+  'textDocument/codeLens': TextDocumentCodeLensResultSchema,
+  'textDocument/colorPresentation': TextDocumentColorPresentationResultSchema,
+  'textDocument/completion': TextDocumentCompletionResultSchema,
+  'textDocument/declaration': TextDocumentDeclarationResultSchema,
+  'textDocument/definition': TextDocumentDefinitionResultSchema,
+  'textDocument/diagnostic': TextDocumentDiagnosticResultSchema,
+  'textDocument/documentColor': TextDocumentDocumentColorResultSchema,
+  'textDocument/documentHighlight': TextDocumentDocumentHighlightResultSchema,
+  'textDocument/documentLink': TextDocumentDocumentLinkResultSchema,
+  'textDocument/documentSymbol': TextDocumentDocumentSymbolResultSchema,
+  'textDocument/foldingRange': TextDocumentFoldingRangeResultSchema,
+  'textDocument/formatting': TextDocumentFormattingResultSchema,
+  'textDocument/hover': TextDocumentHoverResultSchema,
+  'textDocument/implementation': TextDocumentImplementationResultSchema,
+  'textDocument/inlayHint': TextDocumentInlayHintResultSchema,
+  'textDocument/inlineCompletion': TextDocumentInlineCompletionResultSchema,
+  'textDocument/inlineValue': TextDocumentInlineValueResultSchema,
+  'textDocument/linkedEditingRange': TextDocumentLinkedEditingRangeResultSchema,
+  'textDocument/moniker': TextDocumentMonikerResultSchema,
+  'textDocument/onTypeFormatting': TextDocumentOnTypeFormattingResultSchema,
+  'textDocument/prepareCallHierarchy': TextDocumentPrepareCallHierarchyResultSchema,
+  'textDocument/prepareRename': TextDocumentPrepareRenameResultSchema,
+  'textDocument/prepareTypeHierarchy': TextDocumentPrepareTypeHierarchyResultSchema,
+  'textDocument/rangeFormatting': TextDocumentRangeFormattingResultSchema,
+  'textDocument/rangesFormatting': TextDocumentRangesFormattingResultSchema,
+  'textDocument/references': TextDocumentReferencesResultSchema,
+  'textDocument/rename': TextDocumentRenameResultSchema,
+  'textDocument/selectionRange': TextDocumentSelectionRangeResultSchema,
+  'textDocument/semanticTokens/full': TextDocumentSemanticTokensFullResultSchema,
+  'textDocument/semanticTokens/full/delta': TextDocumentSemanticTokensFullDeltaResultSchema,
+  'textDocument/semanticTokens/range': TextDocumentSemanticTokensRangeResultSchema,
+  'textDocument/signatureHelp': TextDocumentSignatureHelpResultSchema,
+  'textDocument/typeDefinition': TextDocumentTypeDefinitionResultSchema,
+  'textDocument/willSaveWaitUntil': TextDocumentWillSaveWaitUntilResultSchema,
+  'typeHierarchy/subtypes': TypeHierarchySubtypesResultSchema,
+  'typeHierarchy/supertypes': TypeHierarchySupertypesResultSchema,
+  'window/showDocument': WindowShowDocumentResultSchema,
+  'window/showMessageRequest': WindowShowMessageRequestResultSchema,
+  'window/workDoneProgress/create': WindowWorkDoneProgressCreateResultSchema,
+  'workspace/applyEdit': WorkspaceApplyEditResultSchema,
+  'workspace/codeLens/refresh': WorkspaceCodeLensRefreshResultSchema,
+  'workspace/configuration': WorkspaceConfigurationResultSchema,
+  'workspace/diagnostic': WorkspaceDiagnosticResultSchema,
+  'workspace/diagnostic/refresh': WorkspaceDiagnosticRefreshResultSchema,
+  'workspace/executeCommand': WorkspaceExecuteCommandResultSchema,
+  'workspace/foldingRange/refresh': WorkspaceFoldingRangeRefreshResultSchema,
+  'workspace/inlayHint/refresh': WorkspaceInlayHintRefreshResultSchema,
+  'workspace/inlineValue/refresh': WorkspaceInlineValueRefreshResultSchema,
+  'workspace/semanticTokens/refresh': WorkspaceSemanticTokensRefreshResultSchema,
+  'workspace/symbol': WorkspaceSymbolResultSchema,
+  'workspace/textDocumentContent': WorkspaceTextDocumentContentResultSchema,
+  'workspace/textDocumentContent/refresh': WorkspaceTextDocumentContentRefreshResultSchema,
+  'workspace/willCreateFiles': WorkspaceWillCreateFilesResultSchema,
+  'workspace/willDeleteFiles': WorkspaceWillDeleteFilesResultSchema,
+  'workspace/willRenameFiles': WorkspaceWillRenameFilesResultSchema,
+  'workspace/workspaceFolders': WorkspaceWorkspaceFoldersResultSchema,
+  'workspaceSymbol/resolve': WorkspaceSymbolResolveResultSchema
+} as const;
+
+/**
+ * Looks up the result schema for a request method.
+ * Returns `undefined` for notifications or unknown methods.
+ */
+export function getResultSchemaForMethod(method: string): z.ZodType<unknown> | undefined {
+  return LSPResultSchemas[method as keyof typeof LSPResultSchemas];
+}
+
 /**
  * Schema registry for method-based lookup
  */

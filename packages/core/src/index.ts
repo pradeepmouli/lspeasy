@@ -198,7 +198,9 @@ export {
   DidCloseTextDocumentParamsSchema,
   DidSaveTextDocumentParamsSchema,
   LSPSchemas,
-  getSchemaForMethod
+  getSchemaForMethod,
+  LSPResultSchemas,
+  getResultSchemaForMethod
 } from './protocol/schemas.js';
 
 // Advanced protocol features
