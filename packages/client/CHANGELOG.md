@@ -1,5 +1,16 @@
 # @lspeasy/client
 
+## 3.1.3
+
+### Patch Changes
+
+- d655fad: - chore: restore .claude-plugin (plugin marketplace manifest)
+  - chore: also drop .github/agents, prompts, skills, copilot from master
+  - chore: also drop specs/, .claude-plugin/ from master
+  - chore: drop AI tooling files from master
+- Updated dependencies [d655fad]
+  - @lspeasy/core@2.3.1
+
 ## 3.1.2
 
 ### Patch Changes
