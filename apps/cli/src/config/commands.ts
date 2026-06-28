@@ -2,7 +2,7 @@ import { homedir } from 'node:os';
 import { mergeServers, readLspJsonFile, writeLspJsonFile } from '@lspeasy/core';
 import { getAdapters, getAdapter } from './registry.js';
 import { lspjsonAdapter } from './adapters/lspjson.js';
-import type { CanonicalServers, Scope } from './adapter.js';
+import type { CanonicalServers, PlatformAdapter, Scope } from './adapter.js';
 
 export interface ConfigFlags {
   json: boolean;
@@ -39,15 +39,21 @@ function fail(flags: ConfigFlags, message: string): never {
   process.exit(1);
 }
 
-export function configImport(platform: string, flags: ConfigFlags): void {
+function requireAdapter(platform: string, flags: ConfigFlags): PlatformAdapter {
   const adapter = getAdapter(platform);
-  if (!adapter)
+  if (!adapter) {
     fail(
       flags,
       `Unknown platform "${platform}". Known: ${getAdapters()
         .map((a) => a.id)
         .join(', ')}`
     );
+  }
+  return adapter;
+}
+
+export function configImport(platform: string, flags: ConfigFlags): void {
+  const adapter = requireAdapter(platform, flags);
   const incoming = adapter.read(flags.scope, homeForAdapter(adapter.id, flags.root));
   const target = lspjsonAdapter.configPath(flags.scope, flags.root);
   const base = readLspJsonFile(target);
@@ -62,14 +68,7 @@ export function configImport(platform: string, flags: ConfigFlags): void {
 }
 
 export function configExport(platform: string, flags: ConfigFlags): void {
-  const adapter = getAdapter(platform);
-  if (!adapter)
-    fail(
-      flags,
-      `Unknown platform "${platform}". Known: ${getAdapters()
-        .map((a) => a.id)
-        .join(', ')}`
-    );
+  const adapter = requireAdapter(platform, flags);
   if (!adapter.write) fail(flags, `Platform "${platform}" is read-only and cannot be exported to.`);
   const servers: CanonicalServers = readLspJsonFile(
     lspjsonAdapter.configPath(flags.scope, flags.root)
@@ -86,14 +85,7 @@ export function configExport(platform: string, flags: ConfigFlags): void {
 }
 
 export function configDiff(platform: string, flags: ConfigFlags): void {
-  const adapter = getAdapter(platform);
-  if (!adapter)
-    fail(
-      flags,
-      `Unknown platform "${platform}". Known: ${getAdapters()
-        .map((a) => a.id)
-        .join(', ')}`
-    );
+  const adapter = requireAdapter(platform, flags);
   const platformServers = adapter.read(flags.scope, homeForAdapter(adapter.id, flags.root));
   const lspServers = readLspJsonFile(lspjsonAdapter.configPath(flags.scope, flags.root));
   const onlyPlatform = Object.keys(platformServers).filter((k) => !(k in lspServers));
@@ -104,7 +96,7 @@ export function configDiff(platform: string, flags: ConfigFlags): void {
   );
   emit(
     flags,
-    { platform, onlyPlatform, onlyLsp, changed },
+    { ok: true, platform, onlyPlatform, onlyLsp, changed },
     `diff ${platform} vs lsp.json\n  only in ${platform}: ${onlyPlatform.join(', ') || '(none)'}\n` +
       `  only in lsp.json: ${onlyLsp.join(', ') || '(none)'}\n  changed: ${changed.join(', ') || '(none)'}\n`
   );

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mkdtempSync, writeFileSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { configList, configImport } from './commands.js';
@@ -46,7 +46,6 @@ describe('config commands', () => {
   it('import copilot merges the platform config into lsp.json', () => {
     const r = root();
     // seed a Copilot repo config
-    const { mkdirSync } = require('node:fs') as typeof import('node:fs');
     mkdirSync(join(r, '.github'), { recursive: true });
     writeFileSync(
       join(r, '.github', 'lsp.json'),
@@ -59,7 +58,7 @@ describe('config commands', () => {
       cap.restore();
     }
     expect(existsSync(join(r, 'lsp.json'))).toBe(true);
-    const written = JSON.parse(require('node:fs').readFileSync(join(r, 'lsp.json'), 'utf8'));
+    const written = JSON.parse(readFileSync(join(r, 'lsp.json'), 'utf8'));
     expect(written.lspServers.go.command).toBe('gopls');
     const parsed = JSON.parse(cap.out()) as { ok: boolean; added: string[] };
     expect(parsed.ok).toBe(true);
