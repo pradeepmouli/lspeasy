@@ -308,5 +308,8 @@ export {
   discoverServers
 } from './discover.js';
 
+// Language extensions — languageId to default extensions table
+export { DEFAULT_EXTENSIONS, extensionsForLanguage } from './language-extensions.js';
+
 // Command tokenizer
 export { tokenizeCommand } from './utils/tokenize-command.js';
