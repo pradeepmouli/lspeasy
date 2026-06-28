@@ -1,4 +1,4 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { z } from 'zod';
 import { pathToFileURL } from 'node:url';
 
@@ -31,20 +31,84 @@ const PATTERN_FIELDS: Readonly<Record<ArgPattern, ReadonlySet<string>>> = {
   raw: new Set()
 };
 
-function isZodObjectLike(schema: z.ZodType<unknown>): schema is z.ZodObject<z.ZodRawShape> {
+function isZodObjectLike(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
+  return schema instanceof z.ZodObject;
+}
+
+// Unwrap ZodOptional / ZodNullable / ZodDefault using Zod 4 public instanceof API.
+// .unwrap() returns core.$ZodType; cast to z.ZodType (safe at runtime — always a classic instance).
+function unwrapOptional(schema: z.ZodType): z.ZodType {
+  if (schema instanceof z.ZodOptional) return unwrapOptional(schema.unwrap() as z.ZodType);
+  if (schema instanceof z.ZodNullable) return unwrapOptional(schema.unwrap() as z.ZodType);
+  if (schema instanceof z.ZodDefault) return unwrapOptional(schema.unwrap() as z.ZodType);
+  return schema;
+}
+
+/**
+ * Return true when a ZodType represents a single-value or open-ended scalar,
+ * i.e. ZodString / ZodNumber / ZodBoolean / ZodLiteral / ZodEnum.
+ * Used to decide whether a union member is "scalar enough" to surface as a flag.
+ */
+function isScalarMember(schema: z.ZodType): boolean {
   return (
-    schema != null &&
-    typeof schema === 'object' &&
-    'shape' in schema &&
-    schema.shape != null &&
-    typeof schema.shape === 'object'
+    schema instanceof z.ZodString ||
+    schema instanceof z.ZodNumber ||
+    schema instanceof z.ZodBoolean ||
+    schema instanceof z.ZodLiteral ||
+    schema instanceof z.ZodEnum
   );
 }
 
-function unwrapOptional(schema: z.ZodType<unknown>): z.ZodType<unknown> {
-  const def = (schema as { _def?: { typeName?: string; innerType?: z.ZodType<unknown> } })._def;
-  if (def?.typeName === 'ZodOptional' && def.innerType) return unwrapOptional(def.innerType);
-  return schema;
+/**
+ * Return Commander choices (as strings) when the schema is an enum, a literal,
+ * or a union whose members are ALL literals (i.e. every value is known).
+ * Mixed unions that include open-ended scalars (ZodString etc.) return null —
+ * the open-ended member means any string is valid, so we can't enumerate choices.
+ */
+function getChoices(schema: z.ZodType): string[] | null {
+  if (schema instanceof z.ZodEnum) {
+    // ZodEnum.options is Array<T[keyof T]> — always strings for string enums.
+    return (schema.options as unknown[]).map(String);
+  }
+  if (schema instanceof z.ZodLiteral) {
+    // ZodLiteral.values is Set<T> in Zod 4 (replaces legacy .value).
+    return [...schema.values].map(String);
+  }
+  if (schema instanceof z.ZodUnion) {
+    const opts = schema.options as z.ZodType[];
+    // Only attach Commander choices when ALL members are literals — if the union
+    // also includes an open-ended type (e.g. z.string()) any string is valid,
+    // so we can't enumerate a finite choices list.
+    if (opts.every((o) => o instanceof z.ZodLiteral)) {
+      return opts.flatMap((o) =>
+        [...(o as z.ZodLiteral<string | number | boolean>).values].map(String)
+      );
+    }
+  }
+  return null;
+}
+
+/**
+ * If the schema is a ZodArray whose element type is a scalar / enum / scalar-union,
+ * return the (unwrapped) element schema.  Returns null for arrays of objects or
+ * unions that contain non-scalar members (objects, nested arrays, etc.).
+ *
+ * Note: CodeActionKindSchema is z.union([z.literal('quickfix'), ..., z.string()])
+ * — the open-ended z.string() tail is still scalar, so we accept mixed
+ * literal+string unions here; Commander choices for the description are derived
+ * separately via getChoices() which only enumerates pure-literal unions.
+ */
+function getScalarArrayElement(schema: z.ZodType): z.ZodType | null {
+  if (!(schema instanceof z.ZodArray)) return null;
+  const elem = schema.element as z.ZodType;
+  const inner = unwrapOptional(elem);
+  if (isScalarMember(inner)) return inner;
+  if (inner instanceof z.ZodUnion) {
+    const opts = inner.options as z.ZodType[];
+    // Accept any union whose members are all scalars (literals, strings, numbers, booleans).
+    if (opts.every(isScalarMember)) return inner;
+  }
+  return null;
 }
 
 function toKebabCase(str: string): string {
@@ -80,23 +144,47 @@ function fieldCliKey(subcommand: string, fieldName: string, isObject: boolean): 
  * Register Commander options for a schema field not covered by the positional
  * pattern. `cliKey` is the pre-computed kebab-case prefix (see `fieldCliKey`).
  * Object-typed fields are expanded one level deep: sub-fields become
- * `--<cliKey>-<sub-field>`. Primitive fields become `--<cliKey> <value>`.
+ * `--<cliKey>-<sub-field>`. Leaf fields are emitted as:
+ *   - ZodEnum / union-of-literals → `--<key> <value>` with `.choices([...])`
+ *   - ZodArray of scalars/enums  → `--<key> <items>` (comma-separated, in description)
+ *   - Other scalars              → `--<key> <value>`
+ * Arrays of objects, non-literal unions, and nested objects beyond depth 1 are
+ * silently skipped — users must supply them via `--params`.
  */
-function addFieldOptions(
-  cmd: Command,
-  cliKey: string,
-  schema: z.ZodType<unknown>,
-  depth = 0
-): void {
+function addFieldOptions(cmd: Command, cliKey: string, schema: z.ZodType, depth = 0): void {
   const inner = unwrapOptional(schema);
   if (depth < 1 && isZodObjectLike(inner)) {
-    for (const [sub, subSchema] of Object.entries(
-      inner.shape as Record<string, z.ZodType<unknown>>
-    )) {
-      addFieldOptions(cmd, `${cliKey}-${toKebabCase(sub)}`, subSchema, depth + 1);
+    for (const [sub, subSchema] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
+      addFieldOptions(cmd, `${cliKey}-${toKebabCase(sub)}`, subSchema as z.ZodType, depth + 1);
     }
     return;
   }
+
+  // Arrays of objects or unions with non-scalar members → leave to --params fallback.
+  if (inner instanceof z.ZodObject) return;
+  if (inner instanceof z.ZodArray && getScalarArrayElement(inner) === null) return;
+  if (inner instanceof z.ZodUnion) {
+    const opts = inner.options as z.ZodType[];
+    if (!opts.every(isScalarMember)) return;
+  }
+
+  const scalarElem = getScalarArrayElement(inner);
+  if (scalarElem !== null) {
+    // Scalar / enum array → expose as comma-separated string; list valid values in description.
+    const elemChoices = getChoices(scalarElem);
+    const desc = elemChoices
+      ? `${cliKey} — comma-separated (${elemChoices.join('|')})`
+      : `${cliKey} (comma-separated)`;
+    cmd.addOption(new Option(`--${cliKey} <items>`, desc));
+    return;
+  }
+
+  const choices = getChoices(inner);
+  if (choices !== null) {
+    cmd.addOption(new Option(`--${cliKey} <value>`, cliKey).choices(choices));
+    return;
+  }
+
   cmd.option(`--${cliKey} <value>`, cliKey);
 }
 
@@ -104,21 +192,25 @@ function addFieldOptions(
  * Read back all field options registered by `addFieldOptions` and reconstruct
  * the original nested value. Returns `undefined` when none of the sub-options
  * were provided.
+ * Scalar arrays are stored as comma-separated strings and split here.
  */
 function extractFieldValue(
   opts: Record<string, unknown>,
   cliKey: string,
-  schema: z.ZodType<unknown>,
+  schema: z.ZodType,
   depth = 0
 ): unknown {
   const inner = unwrapOptional(schema);
   if (depth < 1 && isZodObjectLike(inner)) {
     const result: Record<string, unknown> = {};
     let hasAny = false;
-    for (const [sub, subSchema] of Object.entries(
-      inner.shape as Record<string, z.ZodType<unknown>>
-    )) {
-      const val = extractFieldValue(opts, `${cliKey}-${toKebabCase(sub)}`, subSchema, depth + 1);
+    for (const [sub, subSchema] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
+      const val = extractFieldValue(
+        opts,
+        `${cliKey}-${toKebabCase(sub)}`,
+        subSchema as z.ZodType,
+        depth + 1
+      );
       if (val !== undefined) {
         result[sub] = val;
         hasAny = true;
@@ -128,6 +220,21 @@ function extractFieldValue(
   }
   const raw = opts[toCamelCase(cliKey)];
   if (raw === undefined) return undefined;
+  // Scalar array: comma-separated → split and parse each item.
+  const scalarElem = getScalarArrayElement(inner);
+  if (scalarElem !== null && typeof raw === 'string') {
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((item) => {
+        try {
+          return JSON.parse(item);
+        } catch {
+          return item;
+        }
+      });
+  }
   if (typeof raw === 'string') {
     try {
       return JSON.parse(raw);
@@ -138,9 +245,9 @@ function extractFieldValue(
   return raw;
 }
 
-export function detectArgPattern(schema: z.ZodType<unknown>): ArgPattern {
+export function detectArgPattern(schema: z.ZodType): ArgPattern {
   if (!isZodObjectLike(schema)) return 'raw';
-  const shape = schema.shape as Record<string, z.ZodType<unknown>>;
+  const shape = schema.shape as Record<string, z.ZodType>;
   if ('textDocument' in shape && 'position' in shape && 'newName' in shape)
     return 'file-position-newname';
   if ('textDocument' in shape && 'position' in shape) return 'file-position';
@@ -267,7 +374,7 @@ function injectRequiredDefaults(method: string, params: unknown): unknown {
 
 export function zodToCommander(
   method: string,
-  schema: z.ZodType<unknown>,
+  schema: z.ZodType,
   session: RefactorSession,
   flags: GlobalFlags
 ): Command {
@@ -305,9 +412,7 @@ export function zodToCommander(
   // Object-typed fields are expanded one level deep via hyphenation.
   if (pattern !== 'raw' && isZodObjectLike(schema)) {
     const covered = PATTERN_FIELDS[pattern];
-    for (const [field, fieldSchema] of Object.entries(
-      schema.shape as Record<string, z.ZodType<unknown>>
-    )) {
+    for (const [field, fieldSchema] of Object.entries(schema.shape as Record<string, z.ZodType>)) {
       if (!covered.has(field)) {
         const inner = unwrapOptional(fieldSchema);
         const cliKey = fieldCliKey(subcommand, field, isZodObjectLike(inner));
@@ -339,7 +444,7 @@ export function zodToCommander(
       ) {
         const covered = PATTERN_FIELDS[pattern];
         for (const [field, fieldSchema] of Object.entries(
-          schema.shape as Record<string, z.ZodType<unknown>>
+          schema.shape as Record<string, z.ZodType>
         )) {
           if (covered.has(field)) continue;
           const inner = unwrapOptional(fieldSchema);
