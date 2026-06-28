@@ -16,6 +16,13 @@ import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 
 import { fail, resolvePathArg, type GlobalFlags } from './io.js';
+import {
+  configList,
+  configImport,
+  configExport,
+  configDiff,
+  type ConfigFlags
+} from './config/commands.js';
 import { discoverServer, discoverServers, discoverServerByLanguageId } from '@lspeasy/core';
 import { coldStatusReport } from '@lsproxy/proxy';
 import { RefactorSession } from './session.js';
@@ -33,6 +40,7 @@ const GLOBAL_OPTION_CONFIG = {
   verbose: { type: 'boolean' as const, default: false },
   'allow-outside-root': { type: 'boolean' as const, default: false },
   'no-proxy': { type: 'boolean' as const, default: false },
+  user: { type: 'boolean' as const, default: false },
   help: { type: 'boolean' as const, short: 'h', default: false }
 };
 
@@ -89,6 +97,26 @@ async function main(): Promise<void> {
   }
 
   const flags = buildFlags(values as ParsedOptionValues);
+
+  if (positionals[0] === 'config') {
+    const sub = positionals[1];
+    const platform = positionals[2];
+    const scope: ConfigFlags['scope'] = (values as Record<string, unknown>)['user']
+      ? 'user'
+      : 'project';
+    const cfg: ConfigFlags = { json: flags.json, root: flags.root, scope };
+    if (sub === 'list') configList(cfg);
+    else if (sub === 'import' && platform) configImport(platform, cfg);
+    else if (sub === 'export' && platform) configExport(platform, cfg);
+    else if (sub === 'diff' && platform) configDiff(platform, cfg);
+    else {
+      process.stderr.write(
+        'usage: lsproxy config <list|import|export|diff> [platform] [--user] [--json]\n'
+      );
+      exit(1);
+    }
+    exit(0);
+  }
 
   let serverCommand: string;
   let languageId = 'plaintext';
