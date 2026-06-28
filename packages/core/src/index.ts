@@ -316,3 +316,11 @@ export { DEFAULT_EXTENSIONS, extensionsForLanguage } from './language-extensions
 
 // Command tokenizer
 export { tokenizeCommand } from './utils/tokenize-command.js';
+
+// Local plugin resolver — reads installed .lsp.json files under ~/.claude/plugins/marketplaces
+export {
+  defaultPluginsRoot,
+  listInstalledPluginServers,
+  resolvePlugin,
+  findPluginFor
+} from './plugin-resolver.js';
