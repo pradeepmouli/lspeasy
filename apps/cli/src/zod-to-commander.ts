@@ -194,7 +194,7 @@ function addFieldOptions(cmd: Command, cliKey: string, schema: z.ZodType, depth 
  * were provided.
  * Scalar arrays are stored as comma-separated strings and split here.
  */
-function extractFieldValue(
+export function extractFieldValue(
   opts: Record<string, unknown>,
   cliKey: string,
   schema: z.ZodType,
