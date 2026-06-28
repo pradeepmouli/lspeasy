@@ -106,4 +106,11 @@ describe('drill-down navigation', () => {
     expect(text).toMatch(/Example input/i);
     expect(text).not.toContain('\x1b'); // pure function: no color unless a formatter is passed
   });
+
+  it('renderDrillDownText colorizes example labels when a color formatter is passed', () => {
+    const colorFmt = createFormatter(true);
+    const { text } = renderDrillDownText(buildProgram(), ['textDocument', 'hover'], colorFmt);
+    expect(text).toMatch(/Example input/i);
+    expect(text).toContain('\x1b'); // ANSI escape present when formatter is enabled
+  });
 });

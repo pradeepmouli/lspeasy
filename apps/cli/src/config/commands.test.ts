@@ -3,6 +3,7 @@ import { mkdtempSync, writeFileSync, rmSync, existsSync, mkdirSync, readFileSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { configList, configImport } from './commands.js';
+import { createFormatter } from '../format.js';
 
 const dirs: string[] = [];
 function root(): string {
@@ -24,6 +25,26 @@ afterEach(() => {
 });
 
 describe('config commands', () => {
+  it('configList text output is ANSI-free when color is disabled', () => {
+    const cap = captureStdout();
+    try {
+      configList({ json: false, root: root(), scope: 'project' });
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).not.toContain('\x1b');
+  });
+
+  it('configList text output contains ANSI codes when a color formatter is passed', () => {
+    const cap = captureStdout();
+    try {
+      configList({ json: false, root: root(), scope: 'project' }, createFormatter(true));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).toContain('\x1b');
+  });
+
   it('list --json reports every adapter with tier and detected flag', () => {
     const cap = captureStdout();
     try {

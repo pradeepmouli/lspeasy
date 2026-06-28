@@ -75,7 +75,8 @@ export function navigateTree(program: Command, path: string[]): NavResult {
 
 export function renderDrillDownText(
   program: Command,
-  path: string[]
+  path: string[],
+  fmt?: Formatter
 ): { ok: boolean; text: string } {
   const navResult = navigateTree(program, path);
   if ('error' in navResult) {
@@ -84,16 +85,17 @@ export function renderDrillDownText(
       text: `${navResult.error}\nAvailable: ${navResult.available.join(', ')}\n`
     };
   }
+  const label = (s: string): string => (fmt ? fmt.yellow(s) : s);
   let text = navResult.command.helpInformation();
   if (path.length >= 2) {
     const method = methodForPath(path);
     const paramsSchema = method ? getSchemaForMethod(method) : undefined;
     const resultSchema = method ? getResultSchemaForMethod(method) : undefined;
     if (paramsSchema) {
-      text += `\nExample input (illustrative):\n${JSON.stringify(exampleFromZod(paramsSchema), null, 2)}\n`;
+      text += `\n${label('Example input (illustrative):')}\n${JSON.stringify(exampleFromZod(paramsSchema), null, 2)}\n`;
     }
     if (resultSchema) {
-      text += `\nExample output (illustrative):\n${JSON.stringify(exampleFromZod(resultSchema), null, 2)}\n`;
+      text += `\n${label('Example output (illustrative):')}\n${JSON.stringify(exampleFromZod(resultSchema), null, 2)}\n`;
     }
   }
   return { ok: true, text };
