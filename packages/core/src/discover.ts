@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 
@@ -171,4 +171,37 @@ export function discoverServers(root: string): ConfiguredServer[] {
     command: buildServerCommand(entry),
     fileExtensions: { ...entry.fileExtensions }
   }));
+}
+
+/** Read a single lsp.json file's `lspServers` map. Returns {} when missing or unparseable. */
+export function readLspJsonFile(path: string): Record<string, LspServerEntry> {
+  if (!existsSync(path)) return {};
+  try {
+    const parsed = JSON.parse(readFileSync(path, 'utf8')) as Partial<LspJson>;
+    return parsed.lspServers ?? {};
+  } catch {
+    return {};
+  }
+}
+
+/** Write an `lspServers` map to a file as pretty JSON, creating parent dirs. */
+export function writeLspJsonFile(path: string, servers: Record<string, LspServerEntry>): void {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify({ lspServers: servers }, null, 2) + '\n', 'utf8');
+}
+
+/** Merge incoming servers over base; report which keys were added vs updated. */
+export function mergeServers(
+  base: Record<string, LspServerEntry>,
+  incoming: Record<string, LspServerEntry>
+): { merged: Record<string, LspServerEntry>; added: string[]; updated: string[] } {
+  const merged = { ...base };
+  const added: string[] = [];
+  const updated: string[] = [];
+  for (const [name, entry] of Object.entries(incoming)) {
+    if (name in base) updated.push(name);
+    else added.push(name);
+    merged[name] = entry;
+  }
+  return { merged, added, updated };
 }

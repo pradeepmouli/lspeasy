@@ -305,7 +305,10 @@ export {
   discoverServer,
   discoverServerByLanguageId,
   discoverExtensionMap,
-  discoverServers
+  discoverServers,
+  readLspJsonFile,
+  writeLspJsonFile,
+  mergeServers
 } from './discover.js';
 
 // Language extensions — languageId to default extensions table

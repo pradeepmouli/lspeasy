@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { LspServerEntry } from './discover.js';
-import { discoverServers } from './discover.js';
+import { discoverServers, readLspJsonFile, writeLspJsonFile, mergeServers } from './discover.js';
 
 const tmpRoots: string[] = [];
 function rootWithConfig(config: unknown): string {
@@ -57,5 +57,35 @@ describe('LspServerEntry preserved fields', () => {
     };
     expect(e.marketplacePlugin).toBe('rust-analyzer@claude-code-lsps');
     expect(e.maxRestarts).toBe(3);
+  });
+});
+
+describe('LspJson file IO', () => {
+  it('writes then reads back the same servers', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lspeasy-io-'));
+    try {
+      const servers = { rust: { command: 'rust-analyzer', fileExtensions: { '.rs': 'rust' } } };
+      const file = join(dir, 'lsp.json');
+      writeLspJsonFile(file, servers);
+      expect(readLspJsonFile(file)).toEqual(servers);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns {} for a missing or invalid file', () => {
+    expect(readLspJsonFile('/no/such/lsp.json')).toEqual({});
+  });
+
+  it('mergeServers reports added and updated keys', () => {
+    const base = { a: { command: 'a', fileExtensions: {} } };
+    const incoming = {
+      a: { command: 'a2', fileExtensions: {} },
+      b: { command: 'b', fileExtensions: {} }
+    };
+    const { merged, added, updated } = mergeServers(base, incoming);
+    expect(added).toEqual(['b']);
+    expect(updated).toEqual(['a']);
+    expect(merged.a!.command).toBe('a2');
   });
 });
