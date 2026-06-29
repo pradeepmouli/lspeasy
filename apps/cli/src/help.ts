@@ -28,11 +28,12 @@ function safeExample(schema: z.ZodType): unknown | undefined {
 function languageLine(lang: LanguageStatus, fmt: Formatter): string {
   const exts = lang.extensions.join(' ');
   const name = fmt.cyan(lang.languageId);
+  // Emoji markers carry their own color, so they are not wrapped in fmt.*.
   if (lang.status !== 'running') {
-    return `  ${fmt.dim(SYMBOLS.cold)} ${name}  ${fmt.dim(exts)}  ${fmt.dim('(cold)')}`;
+    return `  ${SYMBOLS.cold} ${name}  ${fmt.dim(exts)}  ${fmt.dim('(cold)')}`;
   }
-  const mark = lang.healthy ? fmt.green(SYMBOLS.running) : fmt.yellow(SYMBOLS.degraded);
-  const health = lang.healthy ? fmt.green(SYMBOLS.healthy) : fmt.red(SYMBOLS.unhealthy);
+  const mark = lang.healthy ? SYMBOLS.running : SYMBOLS.degraded;
+  const health = lang.healthy ? SYMBOLS.healthy : SYMBOLS.unhealthy;
   const stats = fmt.dim(
     `pid ${lang.pid} · up ${Math.round((lang.uptimeMs ?? 0) / 1000)}s · ` +
       `${lang.openDocuments ?? 0} docs · ${lang.requestsServed ?? 0} reqs`

@@ -17,8 +17,9 @@ describe('createFormatter', () => {
     expect(fmt.green('z')).not.toContain('\x1b');
   });
 
-  it('exposes status glyphs', () => {
-    expect(SYMBOLS.running).toBe('●');
-    expect(SYMBOLS.cold).toBe('○');
+  it('exposes status glyphs (emoji)', () => {
+    expect(SYMBOLS.running).toBe('🟢');
+    expect(SYMBOLS.cold).toBe('⚪');
+    expect(SYMBOLS.degraded).toBe('🟡');
   });
 });

@@ -42,9 +42,9 @@ export function createFormatter(enabled: boolean): Formatter {
 }
 
 export const SYMBOLS = {
-  running: '●',
-  cold: '○',
-  healthy: '✓',
-  unhealthy: '✗',
-  degraded: '⚠'
+  running: '🟢',
+  cold: '⚪',
+  healthy: '✅',
+  unhealthy: '❌',
+  degraded: '🟡'
 } as const;
