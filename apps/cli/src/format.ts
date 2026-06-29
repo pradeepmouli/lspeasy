@@ -5,7 +5,10 @@ const RGB = {
   green: [163, 190, 140], // nord14
   red: [191, 97, 106], // nord11
   yellow: [235, 203, 139], // nord13
-  cyan: [136, 192, 208] // nord8 (frost)
+  cyan: [136, 192, 208], // nord8 (frost) — namespaces
+  blue: [129, 161, 193], // nord9 — methods/requests
+  magenta: [180, 142, 173], // nord15 — options/flags
+  teal: [143, 188, 187] // nord7 — positional arguments
 } as const;
 // bold/dim are SGR attributes, not colors.
 const ATTR = { bold: 1, dim: 2 } as const;
@@ -15,6 +18,9 @@ export interface Formatter {
   red(s: string): string;
   yellow(s: string): string;
   cyan(s: string): string;
+  blue(s: string): string;
+  magenta(s: string): string;
+  teal(s: string): string;
   bold(s: string): string;
   dim(s: string): string;
 }
@@ -41,6 +47,9 @@ export function createFormatter(enabled: boolean): Formatter {
       red: identity,
       yellow: identity,
       cyan: identity,
+      blue: identity,
+      magenta: identity,
+      teal: identity,
       bold: identity,
       dim: identity
     };
@@ -50,6 +59,9 @@ export function createFormatter(enabled: boolean): Formatter {
     red: (s) => rgb(RGB.red, s),
     yellow: (s) => rgb(RGB.yellow, s),
     cyan: (s) => rgb(RGB.cyan, s),
+    blue: (s) => rgb(RGB.blue, s),
+    magenta: (s) => rgb(RGB.magenta, s),
+    teal: (s) => rgb(RGB.teal, s),
     bold: (s) => attr(ATTR.bold, s),
     dim: (s) => attr(ATTR.dim, s)
   };

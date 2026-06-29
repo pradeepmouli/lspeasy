@@ -73,6 +73,18 @@ describe('renderTopLevel', () => {
     expect(out).toContain('\x1b[38;2;136;192;208mrust\x1b[0m'); // nord cyan language name
     expect(out).toContain('\x1b[1mLanguages:\x1b[0m'); // bold section header
   });
+
+  it('applies role colors consistently in the bare view (not all-cyan)', () => {
+    const color = createFormatter(true);
+    const report: StatusReport = { daemon: null, languages: [] };
+    const out = renderTopLevel(report, color);
+    // Same role → same color as the drill-down help: options magenta,
+    // methods/requests blue, args teal, namespaces cyan.
+    expect(out).toContain('\x1b[38;2;180;142;173m--version,\x1b[0m'); // option → magenta
+    expect(out).toContain('\x1b[38;2;129;161;193m<request>\x1b[0m'); // method/request → blue
+    expect(out).toContain('\x1b[38;2;143;188;187m<json>\x1b[0m'); // positional/value arg → teal
+    expect(out).toContain('\x1b[38;2;136;192;208m<namespace>\x1b[0m'); // namespace → cyan
+  });
 });
 
 describe('daemonStatusLine', () => {

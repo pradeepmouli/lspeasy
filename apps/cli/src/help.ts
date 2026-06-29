@@ -60,6 +60,52 @@ export function daemonStatusLine(daemon: StatusReport['daemon'], fmt: Formatter)
       )}`;
 }
 
+// Role of a usage token, mapped to a color so the same role reads the same
+// everywhere (namespaces cyan, methods blue, args teal, options magenta) — the
+// same scheme the drill-down help applies via Commander's per-role style hooks.
+type UsageRole = 'ns' | 'method' | 'arg' | 'option' | 'literal';
+
+// Placeholders whose role can't be inferred from shape alone (`<namespace>` and
+// `<request>` are both `<…>`). Shape handles the rest: `-x`/`--x` → option,
+// other `<…>`/`[…]` → arg, bare words (lsproxy, config) → namespace.
+const USAGE_ROLE: Readonly<Record<string, UsageRole>> = {
+  '<language>': 'ns',
+  '<namespace>': 'ns',
+  '<request>': 'method',
+  '<method>': 'method',
+  '[flags]': 'option',
+  '[options]': 'option'
+};
+
+function classifyUsageToken(tok: string): UsageRole {
+  if (tok.startsWith('-')) return 'option';
+  const mapped = USAGE_ROLE[tok];
+  if (mapped) return mapped;
+  if (tok.startsWith('<') || tok.startsWith('[')) return 'arg';
+  return 'literal';
+}
+
+/** Colorize a usage/command string token-by-token by role. With a disabled
+ *  formatter every color is identity, so the string is returned ANSI-free. */
+function colorizeUsage(s: string, fmt: Formatter): string {
+  return s
+    .split(' ')
+    .map((tok) => {
+      if (tok === '') return tok;
+      switch (classifyUsageToken(tok)) {
+        case 'option':
+          return fmt.magenta(tok);
+        case 'method':
+          return fmt.blue(tok);
+        case 'arg':
+          return fmt.teal(tok);
+        default:
+          return fmt.cyan(tok);
+      }
+    })
+    .join(' ');
+}
+
 /** Render the top-level `lsproxy` view: configured languages + live status. */
 export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
   const header =
@@ -68,16 +114,18 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
         fmt.dim(' — starts on first request; showing configured languages only')
       : daemonStatusLine(report.daemon, fmt);
   const lines = report.languages.map((l) => languageLine(l, fmt));
-  // Color only the command/term portion of each row; keep the description dim.
-  // Pad the plain term before coloring so alignment is by visible width (ANSI
-  // bytes don't count toward padEnd).
-  const row = (term: string, desc: string): string =>
-    `  ${fmt.cyan(term.padEnd(48))}  ${fmt.dim(desc)}`;
+  // Color each row's term by role (namespace/method/arg/option), then pad by
+  // the term's *visible* width — ANSI bytes don't count toward alignment, so we
+  // pad the plain string and color the spacer-free term separately.
+  const row = (term: string, desc: string): string => {
+    const gap = ' '.repeat(Math.max(0, 48 - term.length));
+    return `  ${colorizeUsage(term, fmt)}${gap}  ${fmt.dim(desc)}`;
+  };
 
   const usage = [
     fmt.bold('Usage:'),
-    `  ${fmt.cyan('lsproxy <language> <namespace> <request>')} ${fmt.dim('[args] [flags]')}`,
-    `  ${fmt.cyan('lsproxy call <method>')} ${fmt.dim('--params <json>')}`
+    `  ${colorizeUsage('lsproxy <language> <namespace> <request> [args] [flags]', fmt)}`,
+    `  ${colorizeUsage('lsproxy call <method> --params <json>', fmt)}`
   ].join('\n');
 
   // Non-namespace (meta) commands — listed with descriptions so they're
@@ -155,15 +203,19 @@ export function renderDrillDownText(
   // would let Commander's *own default* styling leak ANSI in NO_COLOR/piped mode.
   if (fmt && fmt.bold('x') !== 'x') {
     // helpInformation() returns a string (no TTY), so Commander would otherwise
-    // suppress styling — force it on for the colored path.
+    // suppress styling — force it on for the colored path. Distinct colors per
+    // role for readability: namespaces (cyan) vs methods (blue) — chosen by drill
+    // depth (depth 0 lists namespaces, deeper lists methods) — options (magenta),
+    // arguments (teal).
+    const subcommandColor = path.length === 0 ? fmt.cyan : fmt.blue;
     navResult.command.configureOutput({ getOutHasColors: () => true });
     navResult.command.configureHelp({
       styleTitle: (s) => fmt.bold(s),
       styleUsage: (s) => fmt.cyan(s),
       styleCommandText: (s) => fmt.cyan(s),
-      styleOptionTerm: (s) => fmt.cyan(s),
-      styleSubcommandTerm: (s) => fmt.cyan(s),
-      styleArgumentTerm: (s) => fmt.cyan(s),
+      styleSubcommandTerm: (s) => subcommandColor(s),
+      styleOptionTerm: (s) => fmt.magenta(s),
+      styleArgumentTerm: (s) => fmt.teal(s),
       styleDescriptionText: (s) => fmt.dim(s)
     });
   }
