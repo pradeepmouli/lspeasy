@@ -25,7 +25,7 @@ import {
 } from './config/commands.js';
 import { discoverServer, discoverServers, discoverServerByLanguageId } from '@lspeasy/core';
 import { coldStatusReport } from '@lsproxy/proxy';
-import { RefactorSession } from './session.js';
+import { RefactorSession, CLI_VERSION } from './session.js';
 import { connectViaProxy, fetchDaemonStatus } from './connect.js';
 import { buildCommandTree } from './build-commands.js';
 import { createFormatter } from './format.js';
@@ -41,6 +41,7 @@ const GLOBAL_OPTION_CONFIG = {
   'allow-outside-root': { type: 'boolean' as const, default: false },
   'no-proxy': { type: 'boolean' as const, default: false },
   user: { type: 'boolean' as const, default: false },
+  version: { type: 'boolean' as const, short: 'V', default: false },
   help: { type: 'boolean' as const, short: 'h', default: false }
 };
 
@@ -89,6 +90,14 @@ async function main(): Promise<void> {
     allowPositionals: true,
     strict: false
   });
+
+  // `--version` / `-V` / `version` print the bare version and exit — handled
+  // before help/dispatch so it works with or without positionals and never
+  // touches the daemon.
+  if (values.version === true || positionals[0] === 'version') {
+    process.stdout.write(`${CLI_VERSION}\n`);
+    exit(0);
+  }
 
   const helpMode = values.help === true;
   if (helpMode || positionals.length === 0) {

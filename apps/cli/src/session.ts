@@ -15,7 +15,7 @@ import { readFileSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const CLI_VERSION: string = (() => {
+export const CLI_VERSION: string = (() => {
   try {
     return (
       JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {

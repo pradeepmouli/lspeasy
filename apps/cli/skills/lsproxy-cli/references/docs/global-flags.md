@@ -10,6 +10,7 @@
 | `--verbose` | off | Progress logging to stderr |
 | `--allow-outside-root` | off | Allow file-path args that resolve outside `--root` |
 | `--no-proxy` | off | Bypass the proxy daemon and spawn the server directly |
+| `--version`, `-V` | — | Print the CLI version and exit (`lsproxy version` also works) |
 
 ### Path resolution
 
