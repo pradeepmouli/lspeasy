@@ -3,6 +3,15 @@ import type { Command } from 'commander';
 import { z } from 'zod';
 import { exampleFromZod, getResultSchemaForMethod, getSchemaForMethod } from '@lspeasy/core';
 import { SYMBOLS, type Formatter } from './format.js';
+import { paramsResidualExample } from './zod-to-commander.js';
+
+function safeResidual(schema: z.ZodType): { ok: boolean; value: unknown } {
+  try {
+    return { ok: true, value: paramsResidualExample(schema) };
+  } catch {
+    return { ok: false, value: undefined };
+  }
+}
 
 function methodForPath(path: string[]): string | undefined {
   return path.length >= 2 ? `${path[0]}/${path[1]}` : undefined;
@@ -118,9 +127,12 @@ export function renderDrillDownText(
     const paramsSchema = getSchemaForMethod(method);
     const resultSchema = getResultSchemaForMethod(method);
     if (paramsSchema) {
-      const ex = safeExample(paramsSchema);
-      if (ex !== undefined) {
-        text += `\n${label('Example input (illustrative):')}\n${JSON.stringify(ex, null, 2)}\n`;
+      const { ok, value } = safeResidual(paramsSchema);
+      if (ok) {
+        text +=
+          value !== undefined
+            ? `\n${label('Example --params (fields not exposed as args/flags):')}\n${JSON.stringify(value, null, 2)}\n`
+            : `\n${label('All inputs map to positional args/flags — no --params needed.')}\n`;
       }
     }
     if (resultSchema) {
@@ -192,8 +204,11 @@ export function drillDownJson(program: Command, languageId: string, path: string
     };
   }
   const method = methodForPath(path)!;
-  const paramsSchema = safeJsonSchema(getSchemaForMethod(method));
+  const zParams = getSchemaForMethod(method);
+  const paramsSchema = safeJsonSchema(zParams);
   const resultSchema = safeJsonSchema(getResultSchemaForMethod(method));
+  // Residual = only the fields that still need --params (not exposed as args/flags).
+  const paramsExample = zParams ? safeResidual(zParams).value : undefined;
   return {
     ok: true,
     languageId,
@@ -202,6 +217,7 @@ export function drillDownJson(program: Command, languageId: string, path: string
     arguments: argumentInfos(node),
     options: optionInfos(node),
     ...(paramsSchema !== undefined && { paramsSchema }),
+    ...(paramsExample !== undefined && { paramsExample }),
     ...(resultSchema !== undefined && { resultSchema })
   };
 }

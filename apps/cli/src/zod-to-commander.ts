@@ -10,7 +10,8 @@ import {
   WorkspaceEditSchema,
   TextEditSchema,
   CodeActionSchema,
-  unwrapZodType
+  unwrapZodType,
+  exampleFromZod
 } from '@lspeasy/core';
 import {
   applyWorkspaceEdit,
@@ -257,6 +258,56 @@ export function detectArgPattern(schema: z.ZodType): ArgPattern {
   if ('textDocument' in shape) return 'file';
   if ('query' in shape) return 'query';
   return 'raw';
+}
+
+/**
+ * A leaf field is exposed as a CLI flag (vs requiring `--params`) when it is a
+ * scalar, an enum/literal-union, or an array of scalars/enums — mirroring
+ * `addFieldOptions`. Objects and arrays-of-objects fall through to `--params`.
+ */
+function isFlagLeaf(inner: z.ZodType): boolean {
+  if (isZodObjectLike(inner)) return false;
+  if (inner instanceof z.ZodArray) return getScalarArrayElement(inner) !== null;
+  if (inner instanceof z.ZodUnion) return (inner.options as z.ZodType[]).every(isScalarMember);
+  return true;
+}
+
+/**
+ * Illustrative example of ONLY the fields a caller must still pass via
+ * `--params` — i.e. the params minus everything zodToCommander already exposes
+ * as a positional arg or a flag. Returns `undefined` when every input maps to an
+ * arg/flag (no `--params` needed). For `raw`-pattern methods (no args/flags) the
+ * full example is returned, since everything goes through `--params`.
+ */
+export function paramsResidualExample(schema: z.ZodType): unknown | undefined {
+  const pattern = detectArgPattern(schema);
+  if (pattern === 'raw' || !isZodObjectLike(schema)) return exampleFromZod(schema);
+
+  const covered = PATTERN_FIELDS[pattern];
+  const shape = schema.shape as Record<string, z.ZodType>;
+  const residual: Record<string, unknown> = {};
+
+  for (const [field, fieldSchema] of Object.entries(shape)) {
+    if (covered.has(field)) continue; // positional arg
+    const inner = unwrapOptional(fieldSchema);
+    if (isZodObjectLike(inner)) {
+      // Object fields are expanded one level: scalar sub-fields become flags;
+      // the rest (nested objects, arrays-of-objects) still need --params.
+      const sub: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
+        if (isFlagLeaf(unwrapOptional(v))) continue;
+        const ex = exampleFromZod(v);
+        if (ex !== undefined) sub[k] = ex;
+      }
+      if (Object.keys(sub).length > 0) residual[field] = sub;
+      continue;
+    }
+    if (isFlagLeaf(inner)) continue; // exposed as a flag
+    const ex = exampleFromZod(fieldSchema);
+    if (ex !== undefined) residual[field] = ex;
+  }
+
+  return Object.keys(residual).length > 0 ? residual : undefined;
 }
 
 export function marshalParams(

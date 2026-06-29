@@ -4,7 +4,8 @@ import {
   detectArgPattern,
   marshalParams,
   zodToCommander,
-  extractFieldValue
+  extractFieldValue,
+  paramsResidualExample
 } from './zod-to-commander.js';
 import {
   TextDocumentPositionParamsSchema,
@@ -192,5 +193,34 @@ describe('extractFieldValue round-trip (deepened flags)', () => {
     >;
     expect(result['only']).toEqual(['quickfix', 'refactor']);
     expect(result['triggerKind']).toBe(1);
+  });
+});
+
+describe('paramsResidualExample — only fields not exposed as args/flags', () => {
+  it('codeAction: residual is just context.diagnostics (file/range/only/triggerKind are args/flags)', () => {
+    const schema = getSchemaForMethod('textDocument/codeAction');
+    expect(schema).toBeDefined();
+    const residual = paramsResidualExample(schema!) as Record<string, unknown>;
+    expect(residual).toBeDefined();
+    // positional / flag fields must be absent from the --params example
+    expect(residual['textDocument']).toBeUndefined();
+    expect(residual['range']).toBeUndefined();
+    const ctx = residual['context'] as Record<string, unknown> | undefined;
+    expect(ctx).toBeDefined();
+    expect(ctx!['diagnostics']).toBeDefined(); // array-of-objects → --params
+    expect(ctx!['only']).toBeUndefined(); // scalar array → flag
+    expect(ctx!['triggerKind']).toBeUndefined(); // enum → flag
+  });
+
+  it('hover: undefined — all inputs map to positional args', () => {
+    const schema = getSchemaForMethod('textDocument/hover');
+    expect(paramsResidualExample(schema!)).toBeUndefined();
+  });
+
+  it('raw method (executeCommand): full example — everything via --params', () => {
+    const schema = getSchemaForMethod('workspace/executeCommand');
+    const residual = paramsResidualExample(schema!) as Record<string, unknown>;
+    expect(residual).toBeDefined();
+    expect(residual['command']).toBeDefined();
   });
 });
