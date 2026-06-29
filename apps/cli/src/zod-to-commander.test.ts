@@ -5,7 +5,8 @@ import {
   marshalParams,
   zodToCommander,
   extractFieldValue,
-  paramsResidualExample
+  paramsResidualExample,
+  deepMergeInto
 } from './zod-to-commander.js';
 import {
   TextDocumentPositionParamsSchema,
@@ -103,15 +104,17 @@ describe('marshalParams', () => {
     });
   });
 
-  it('overrides with --params JSON when provided', () => {
-    const raw = { textDocument: { uri: 'file:///x.ts' }, position: { line: 0, character: 0 } };
+  it('non-raw: builds from positionals and IGNORES --params (merge happens at the command layer)', () => {
+    const raw = { textDocument: { uri: 'file:///x.ts' }, position: { line: 9, character: 9 } };
     const result = marshalParams(
       'file-position',
-      ['/project/src/ignored.ts', '1:1'],
+      ['/project/src/foo.ts', '1:1'],
       { params: JSON.stringify(raw) },
       FLAGS
-    );
-    expect(result).toEqual(raw);
+    ) as Record<string, unknown>;
+    // base comes from the positional, not the --params override
+    expect((result['textDocument'] as Record<string, string>)['uri']).toMatch(/foo\.ts$/);
+    expect(result['position']).toEqual({ line: 0, character: 0 });
   });
 
   it('builds query object for query pattern', () => {
@@ -119,8 +122,24 @@ describe('marshalParams', () => {
     expect(result).toEqual({ query: 'mySymbol' });
   });
 
+  it('raw: returns the --params JSON as the whole body', () => {
+    const raw = { command: 'x', arguments: [1] };
+    expect(marshalParams('raw', [], { params: JSON.stringify(raw) }, FLAGS)).toEqual(raw);
+  });
+
   it('throws for raw pattern without --params', () => {
     expect(() => marshalParams('raw', [], {}, FLAGS)).toThrow('--params');
+  });
+});
+
+describe('deepMergeInto', () => {
+  it('merges nested objects; arrays/scalars replace', () => {
+    const dst = { context: { only: ['quickfix'], triggerKind: 1 }, a: 1 };
+    deepMergeInto(dst, { context: { diagnostics: [{ x: 1 }] }, a: 2 });
+    expect(dst).toEqual({
+      context: { only: ['quickfix'], triggerKind: 1, diagnostics: [{ x: 1 }] },
+      a: 2
+    });
   });
 });
 

@@ -273,11 +273,12 @@ function isFlagLeaf(inner: z.ZodType): boolean {
 }
 
 /**
- * Illustrative example of ONLY the fields a caller must still pass via
- * `--params` — i.e. the params minus everything zodToCommander already exposes
- * as a positional arg or a flag. Returns `undefined` when every input maps to an
- * arg/flag (no `--params` needed). For `raw`-pattern methods (no args/flags) the
- * full example is returned, since everything goes through `--params`.
+ * Illustrative example of ONLY the fields configurable via `--params` — i.e.
+ * the params minus everything zodToCommander already exposes as a positional arg
+ * or a flag. `--params` deep-merges over that base, so this is the residual a
+ * caller adds (not a full override). Returns `undefined` when every input maps
+ * to an arg/flag. For `raw`-pattern methods (no args/flags) the full example is
+ * returned, since everything goes through `--params`.
  */
 export function paramsResidualExample(schema: z.ZodType): unknown | undefined {
   const pattern = detectArgPattern(schema);
@@ -310,13 +311,36 @@ export function paramsResidualExample(schema: z.ZodType): unknown | undefined {
   return Object.keys(residual).length > 0 ? residual : undefined;
 }
 
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+/**
+ * Deep-merge `src` into `dst`: nested objects merge recursively; arrays and
+ * scalars replace. Used to layer `--params` over the positional/flag-derived
+ * base so a caller can pass only the residual JSON (e.g. codeAction's
+ * `context.diagnostics`) without clobbering `textDocument`/`range`/flag fields.
+ */
+export function deepMergeInto(
+  dst: Record<string, unknown>,
+  src: Record<string, unknown>
+): Record<string, unknown> {
+  for (const [k, v] of Object.entries(src)) {
+    const cur = dst[k];
+    if (isPlainObject(cur) && isPlainObject(v)) deepMergeInto(cur, v);
+    else dst[k] = v;
+  }
+  return dst;
+}
+
 export function marshalParams(
   pattern: ArgPattern,
   positional: string[],
   opts: Record<string, unknown>,
   flags: GlobalFlags
 ): unknown {
-  if (typeof opts['params'] === 'string') return JSON.parse(opts['params']);
+  const override =
+    typeof opts['params'] === 'string' ? (JSON.parse(opts['params']) as unknown) : undefined;
 
   switch (pattern) {
     case 'file-position-newname': {
@@ -353,7 +377,9 @@ export function marshalParams(
     case 'query':
       return { query: positional[0] ?? '' };
     case 'raw':
-      throw new Error('This method requires --params <json>');
+      // No positional/flag surface — `--params` is the entire request body.
+      if (override === undefined) throw new Error('This method requires --params <json>');
+      return override;
   }
 }
 
@@ -459,7 +485,10 @@ export function zodToCommander(
       break;
   }
 
-  cmd.option('--params <json>', 'raw LSP params as JSON, overrides positional args');
+  cmd.option(
+    '--params <json>',
+    'extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)'
+  );
 
   // Add Commander options for schema fields not covered by the positional pattern.
   // Object-typed fields are expanded one level deep via hyphenation.
@@ -488,13 +517,17 @@ export function zodToCommander(
     try {
       const rawParams = marshalParams(pattern, positional, cmdOpts, flags);
 
-      // Overlay extra field options onto the pattern-derived base params.
+      // Layer inputs over the positional base, lowest → highest precedence:
+      //   positionals (marshalParams) → flags → --params.
+      // Object fields deep-merge so e.g. context.{only,triggerKind} (flags) and
+      // context.diagnostics (--params) combine instead of clobbering.
       if (
         pattern !== 'raw' &&
         isZodObjectLike(schema) &&
         typeof rawParams === 'object' &&
         rawParams !== null
       ) {
+        const base = rawParams as Record<string, unknown>;
         const covered = PATTERN_FIELDS[pattern];
         for (const [field, fieldSchema] of Object.entries(
           schema.shape as Record<string, z.ZodType>
@@ -503,7 +536,16 @@ export function zodToCommander(
           const inner = unwrapOptional(fieldSchema);
           const cliKey = fieldCliKey(subcommand, field, isZodObjectLike(inner));
           const val = extractFieldValue(cmdOpts, cliKey, fieldSchema);
-          if (val !== undefined) (rawParams as Record<string, unknown>)[field] = val;
+          if (val === undefined) continue;
+          if (isPlainObject(base[field]) && isPlainObject(val)) deepMergeInto(base[field], val);
+          else base[field] = val;
+        }
+        // --params is a residual, deep-merged LAST over positionals + flags
+        // (not a full override) so callers pass only the fields not surfaced as
+        // args/flags. The option help and the drill-down example say so.
+        if (typeof cmdOpts['params'] === 'string') {
+          const override = JSON.parse(cmdOpts['params']) as unknown;
+          if (isPlainObject(override)) deepMergeInto(base, override);
         }
       }
 
