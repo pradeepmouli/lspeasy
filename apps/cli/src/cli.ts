@@ -23,7 +23,8 @@ import {
   configDiff,
   type ConfigFlags
 } from './config/commands.js';
-import { discoverServer, discoverServers, discoverServerByLanguageId } from '@lspeasy/core';
+import { discoverServer } from '@lspeasy/core';
+import { resolveByExtension, resolveByLanguageId, allConfiguredServers } from './resolve.js';
 import { coldStatusReport } from '@lsproxy/proxy';
 import { RefactorSession, CLI_VERSION } from './session.js';
 import { connectViaProxy, fetchDaemonStatus } from './connect.js';
@@ -138,6 +139,9 @@ async function main(): Promise<void> {
 
   let serverCommand: string;
   let languageId = 'plaintext';
+  // True when the server came only from a config platform (not lsp.json), so the
+  // daemon can't spawn it → force a direct session.
+  let fromPlatform = false;
 
   // positionals[0] = namespace, positionals[1] = method/command.
   // The source file can only appear at positionals[2] (the first subcommand
@@ -212,7 +216,7 @@ async function main(): Promise<void> {
         fail('Cannot determine language: pass a file argument or use --server <cmd>.', flags.json);
       }
     } else {
-      const discovered = discoverServer(flags.root, ext);
+      const discovered = resolveByExtension(flags.root, ext);
       if (!discovered) {
         fail(
           `No LSP server configured for ${ext} files.\n` +
@@ -223,11 +227,12 @@ async function main(): Promise<void> {
       }
       serverCommand = discovered.serverCommand;
       languageId = discovered.languageId;
+      fromPlatform = discovered.fromPlatform;
     }
   }
 
   let session: RefactorSession;
-  if (flags.noProxy || !!flags.server || !serverCommand) {
+  if (flags.noProxy || !!flags.server || !serverCommand || fromPlatform) {
     session = new RefactorSession({
       serverCommand,
       languageId,
@@ -283,7 +288,7 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
 
   if (!language) {
     const live = await fetchDaemonStatus(flags.root);
-    const report = live ?? coldStatusReport(discoverServers(flags.root));
+    const report = live ?? coldStatusReport(allConfiguredServers(flags.root));
     if (flags.json) {
       process.stdout.write(JSON.stringify(report) + '\n');
     } else {
@@ -295,9 +300,9 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
 
   const discovered = flags.server
     ? { serverCommand: flags.server, languageId: language }
-    : discoverServerByLanguageId(flags.root, language);
+    : resolveByLanguageId(flags.root, language);
   if (!discovered) {
-    const names = discoverServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
+    const names = allConfiguredServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
     fail(
       `No server configured for language "${language}". Configured: ${[...new Set(names)].join(', ')}`,
       flags.json
@@ -307,24 +312,27 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
   // Connecting (spawn + initialize) can fail when the server command is missing
   // or crashes. In --json mode that failure must still produce a parseable
   // { ok: false, error } on stdout, not a fatal text error from main().catch.
+  // Platform-only resolutions (claude-code/codex) aren't in lsp.json, so the
+  // daemon can't spawn them — use a direct session with the resolved command.
+  const direct =
+    flags.noProxy || !!flags.server || ('fromPlatform' in discovered && discovered.fromPlatform);
   let session: RefactorSession;
   try {
-    session =
-      flags.noProxy || flags.server
-        ? new RefactorSession({
-            serverCommand: discovered.serverCommand,
-            languageId: discovered.languageId,
-            root: flags.root,
-            indexWaitMs: 0,
-            verbose: flags.verbose
-          })
-        : await connectViaProxy({
-            root: flags.root,
-            languageId: discovered.languageId,
-            indexWaitMs: 0,
-            verbose: flags.verbose
-          });
-    if (flags.noProxy || flags.server) await session.start();
+    session = direct
+      ? new RefactorSession({
+          serverCommand: discovered.serverCommand,
+          languageId: discovered.languageId,
+          root: flags.root,
+          indexWaitMs: 0,
+          verbose: flags.verbose
+        })
+      : await connectViaProxy({
+          root: flags.root,
+          languageId: discovered.languageId,
+          indexWaitMs: 0,
+          verbose: flags.verbose
+        });
+    if (direct) await session.start();
   } catch (err) {
     // fail() emits { ok: false, error } on stdout for --json (and "error: …" on
     // stderr otherwise), then exits 1 — the same machine-readable error contract
