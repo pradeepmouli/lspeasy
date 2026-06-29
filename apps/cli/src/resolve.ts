@@ -49,17 +49,25 @@ function platformServers(root: string, scope: Scope): ConfiguredServer[] {
   return out;
 }
 
+/**
+ * A resolution plus its provenance. `fromPlatform: true` means the server was
+ * found only in a config platform (claude-code/codex), NOT lsp.json — so the
+ * proxy daemon (which discovers via lsp.json only) can't spawn it; callers must
+ * use a direct session with `serverCommand` rather than routing through the daemon.
+ */
+export type Resolution = ResolvedServer & { fromPlatform: boolean };
+
 /** Resolve a server for a languageId: lsp.json → detected platforms. */
 export function resolveByLanguageId(
   root: string,
   languageId: string,
   scope: Scope = 'user'
-): ResolvedServer | null {
+): Resolution | null {
   const core = discoverServerByLanguageId(root, languageId);
-  if (core) return core;
+  if (core) return { ...core, fromPlatform: false };
   for (const s of platformServers(root, scope)) {
     if (Object.values(s.fileExtensions).includes(languageId)) {
-      return { serverCommand: s.command, languageId };
+      return { serverCommand: s.command, languageId, fromPlatform: true };
     }
   }
   return null;
@@ -70,13 +78,13 @@ export function resolveByExtension(
   root: string,
   ext: string,
   scope: Scope = 'user'
-): ResolvedServer | null {
+): Resolution | null {
   const core = discoverServer(root, ext);
-  if (core) return core;
+  if (core) return { ...core, fromPlatform: false };
   if (ext === '') return null;
   for (const s of platformServers(root, scope)) {
     const languageId = s.fileExtensions[ext];
-    if (languageId) return { serverCommand: s.command, languageId };
+    if (languageId) return { serverCommand: s.command, languageId, fromPlatform: true };
   }
   return null;
 }
@@ -89,8 +97,14 @@ export function resolveByExtension(
 export function allConfiguredServers(root: string, scope: Scope = 'user'): ConfiguredServer[] {
   const core = discoverServers(root);
   const coreLangs = new Set(core.flatMap((s) => Object.values(s.fileExtensions)));
-  const extra = platformServers(root, scope).filter(
-    (s) => !Object.values(s.fileExtensions).some((l) => coreLangs.has(l))
-  );
+  const extra: ConfiguredServer[] = [];
+  for (const s of platformServers(root, scope)) {
+    // Drop only the extensions whose languageId collides with lsp.json — a
+    // multi-language platform server keeps its non-colliding entries.
+    const fileExtensions = Object.fromEntries(
+      Object.entries(s.fileExtensions).filter(([, lang]) => !coreLangs.has(lang))
+    );
+    if (Object.keys(fileExtensions).length > 0) extra.push({ ...s, fileExtensions });
+  }
   return [...core, ...extra];
 }

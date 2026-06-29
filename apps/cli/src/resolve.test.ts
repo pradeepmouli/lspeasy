@@ -29,14 +29,23 @@ vi.mock('./config/registry.js', () => ({
 
 vi.mock('./config/commands.js', () => ({ homeForAdapter: () => '/home' }));
 
-import { discoverServers } from '@lspeasy/core';
+import { discoverServers, discoverServerByLanguageId } from '@lspeasy/core';
 import { resolveByLanguageId, resolveByExtension, allConfiguredServers } from './resolve.js';
 
 describe('resolve — platform fallback (B)', () => {
-  it('resolveByLanguageId falls back to a detected platform server', () => {
+  it('resolveByLanguageId falls back to a detected platform server (fromPlatform)', () => {
     const r = resolveByLanguageId('/p', 'rust');
     expect(r?.serverCommand).toContain('rust-analyzer');
     expect(r?.languageId).toBe('rust');
+    expect(r?.fromPlatform).toBe(true); // → caller must bypass the daemon
+  });
+
+  it('a lsp.json hit is NOT fromPlatform (daemon can serve it)', () => {
+    vi.mocked(discoverServerByLanguageId).mockReturnValueOnce({
+      serverCommand: '"tsls"',
+      languageId: 'typescript'
+    });
+    expect(resolveByLanguageId('/p', 'typescript')?.fromPlatform).toBe(false);
   });
 
   it('resolveByExtension falls back by extension', () => {
