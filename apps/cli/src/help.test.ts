@@ -34,14 +34,33 @@ describe('renderTopLevel', () => {
     expect(out).not.toContain('\x1b');
   });
 
-  it('shows a daemon-down header when daemon is null', () => {
+  it('shows a "not started" header (not "down") when daemon is null', () => {
     const report: StatusReport = {
       daemon: null,
       languages: [
         { languageId: 'rust', name: 'rust', extensions: ['.rs'], command: '"ra"', status: 'cold' }
       ]
     };
-    expect(renderTopLevel(report, fmt)).toMatch(/daemon.*down/i);
+    const out = renderTopLevel(report, fmt);
+    expect(out).toMatch(/daemon: not started/i);
+    // The daemon status must not read "down" (alarming); "Drill down:" in the
+    // footer is unrelated, so scope the check to the daemon line.
+    expect(out).not.toMatch(/daemon:\s*down/i);
+  });
+
+  it('applies color when the formatter is enabled (polish)', () => {
+    const color = createFormatter(true);
+    const report: StatusReport = {
+      daemon: null,
+      languages: [
+        { languageId: 'rust', name: 'rust', extensions: ['.rs'], command: '"ra"', status: 'cold' }
+      ]
+    };
+    const out = renderTopLevel(report, color);
+    expect(out).toContain('\x1b['); // ANSI present
+    expect(out).toContain('\x1b[33mnot started\x1b[0m'); // yellow status
+    expect(out).toContain('\x1b[36mrust\x1b[0m'); // cyan language name
+    expect(out).toContain('\x1b[1mLanguages:\x1b[0m'); // bold section header
   });
 });
 
