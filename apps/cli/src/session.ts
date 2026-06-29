@@ -289,23 +289,39 @@ export class RefactorSession {
 
   /**
    * Run a request immediately and retry with exponential backoff while the
-   * server returns null (i.e. it is still indexing). Gives up after
-   * `indexWaitMs` total elapsed time and returns null.
+   * server returns null (i.e. it is still indexing) — or, when an
+   * `isIncomplete` predicate is supplied, while it returns a non-null but
+   * incomplete result (e.g. `textDocument/references` that comes back
+   * declaration-only before the workspace project has finished loading).
+   *
+   * Gives up after `indexWaitMs` total elapsed time. On timeout it returns the
+   * best result seen so far (the last non-null, possibly-incomplete value) — not
+   * null — so callers still get a result to act on plus the chance to warn.
    *
    * Initial retry delay: 250 ms, doubling each round, capped at 5 s per
    * attempt. The first attempt is always immediate so fast servers pay no
-   * extra latency at all.
+   * extra latency at all, and a complete result returns on the first try.
    */
-  async requestWithRetry<R>(run: () => Promise<R | null | undefined>): Promise<R | null> {
+  async requestWithRetry<R>(
+    run: () => Promise<R | null | undefined>,
+    isIncomplete?: (result: R) => boolean
+  ): Promise<R | null> {
     const deadline = Date.now() + this.opts.indexWaitMs;
     let delay = 250;
+    let last: R | null = null;
     while (true) {
       const res = await run();
-      if (res !== null && res !== undefined) return res as R;
+      if (res !== null && res !== undefined) {
+        last = res as R;
+        // A complete result returns immediately; a non-null-but-incomplete one
+        // keeps retrying within the budget (the project may still be loading).
+        if (!isIncomplete || !isIncomplete(res as R)) return res as R;
+      }
       const remaining = deadline - Date.now();
-      if (remaining <= 0) return null;
+      if (remaining <= 0) return last;
       const wait = Math.min(delay, remaining);
-      this.log(`null result — retrying in ${wait}ms (${remaining}ms remaining)`);
+      const reason = res === null || res === undefined ? 'null' : 'incomplete';
+      this.log(`${reason} result — retrying in ${wait}ms (${remaining}ms remaining)`);
       await sleep(wait);
       delay = Math.min(delay * 2, 5000);
     }

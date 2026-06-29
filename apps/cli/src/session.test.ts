@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { tokenizeCommand } from '@lspeasy/core';
-import { CapturedEdits } from './session.js';
+import { CapturedEdits, RefactorSession } from './session.js';
 import type { WorkspaceEdit } from './apply.js';
 
 describe('tokenizeCommand', () => {
@@ -96,5 +96,49 @@ describe('CapturedEdits', () => {
     q.push(edit('x.ts'));
     q.drain();
     expect(q.drain()).toEqual([]);
+  });
+});
+
+describe('RefactorSession.requestWithRetry — readiness retry (fix B)', () => {
+  // Constructor does not spawn a server (start() does), so a bare session with a
+  // short indexWaitMs is safe to exercise requestWithRetry in isolation.
+  const makeSession = (indexWaitMs: number) => new RefactorSession({ root: '/tmp', indexWaitMs });
+
+  it('returns a complete result on the first try (no extra latency)', async () => {
+    const session = makeSession(2000);
+    let calls = 0;
+    const run = async () => {
+      calls++;
+      return ['decl', 'ref1', 'ref2'];
+    };
+    const res = await session.requestWithRetry(run, (r) => (r as unknown[]).length <= 1);
+    expect(calls).toBe(1);
+    expect(res).toEqual(['decl', 'ref1', 'ref2']);
+  });
+
+  it('retries while incomplete, then returns the first complete result', async () => {
+    const session = makeSession(5000);
+    let calls = 0;
+    const run = async () => {
+      calls++;
+      return calls < 3 ? ['decl-only'] : ['decl', 'ref1', 'ref2'];
+    };
+    const res = await session.requestWithRetry(run, (r) => (r as unknown[]).length <= 1);
+    expect(calls).toBe(3);
+    expect(res).toEqual(['decl', 'ref1', 'ref2']);
+  });
+
+  it('returns the best-effort (incomplete) result on timeout — not null', async () => {
+    const session = makeSession(80); // tiny budget → times out quickly
+    const run = async () => ['decl-only'];
+    const res = await session.requestWithRetry(run, (r) => (r as unknown[]).length <= 1);
+    expect(res).toEqual(['decl-only']);
+  });
+
+  it('without a predicate, keeps the original null-retry contract', async () => {
+    const session = makeSession(80);
+    const run = async () => null;
+    const res = await session.requestWithRetry(run);
+    expect(res).toBeNull();
   });
 });

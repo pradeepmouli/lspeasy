@@ -457,11 +457,18 @@ export function zodToCommander(
       }
 
       const params = injectRequiredDefaults(method, rawParams);
-      const result = await session.requestWithRetry(() =>
-        (session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>)(
-          method,
-          params
-        )
+      // Retry while the result is null OR looks incomplete (e.g. a
+      // declaration-only `references` answer before the project finished
+      // loading). assessResultQuality only flags references, so other methods
+      // are unaffected; on timeout we keep the best-effort result and the
+      // post-hoc warning below still fires.
+      const result = await session.requestWithRetry(
+        () =>
+          (session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>)(
+            method,
+            params
+          ),
+        (r) => assessResultQuality(method, params, r).partial
       );
 
       // Collect workspace edits from up to four sources:
