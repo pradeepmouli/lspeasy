@@ -24,6 +24,7 @@ const cliDir = resolve(__dirname, '..');
 // Metadata from package.json
 // ---------------------------------------------------------------------------
 interface Pkg {
+  name: string;
   description: string;
   keywords?: string[];
   repository?: { url: string };
@@ -31,6 +32,11 @@ interface Pkg {
   license?: string;
 }
 const pkg = JSON.parse(readFileSync(resolve(cliDir, 'package.json'), 'utf-8')) as Pkg;
+
+// Skill name = "<namespace>-<package>" derived from the package name so the
+// installed skill dir is self-namespacing and cannot clobber an unrelated
+// skill (e.g. a generic `cli`). `@lsproxy/cli` -> `lsproxy-cli`.
+const skillName = pkg.name.replace(/^@/, '').replace(/\//g, '-');
 
 // ---------------------------------------------------------------------------
 // README section extractor
@@ -139,7 +145,7 @@ const program = buildProgram();
 const skill = await extractCliSkill({
   program,
   metadata: {
-    name: 'cli',
+    name: skillName,
     description: pkg.description,
     keywords: pkg.keywords,
     repository: pkg.repository?.url,
