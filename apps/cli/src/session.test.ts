@@ -3,10 +3,12 @@
  * replaced a naive `split(/\s+/)`, which shredded any launch command with a
  * quoted argument containing spaces.
  */
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import { tokenizeCommand } from '@lspeasy/core';
-import { CapturedEdits, RefactorSession } from './session.js';
+import { CapturedEdits, RefactorSession, CLI_VERSION } from './session.js';
 import type { WorkspaceEdit } from './apply.js';
 
 describe('tokenizeCommand', () => {
@@ -140,5 +142,16 @@ describe('RefactorSession.requestWithRetry — readiness retry (fix B)', () => {
     const run = async () => null;
     const res = await session.requestWithRetry(run);
     expect(res).toBeNull();
+  });
+});
+
+describe('CLI_VERSION (--version source)', () => {
+  it('reflects apps/cli/package.json (not the 0.0.0 fallback)', () => {
+    const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+      version: string;
+    };
+    expect(CLI_VERSION).toBe(pkg.version);
+    expect(CLI_VERSION).toMatch(/^\d+\.\d+\.\d+/);
+    expect(CLI_VERSION).not.toBe('0.0.0');
   });
 });
