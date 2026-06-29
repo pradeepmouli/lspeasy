@@ -40,6 +40,14 @@ import { StdioTransport } from '@lspeasy/core/node';
 
 import type { WorkspaceEdit } from './apply.js';
 
+// Upper bound on how long to retry a *non-null but incomplete* result. A
+// declaration-only `references` answer is ambiguous — it can mean the project is
+// still loading OR the symbol genuinely has no other usages (a valid dead-code
+// check) — and the two are indistinguishable. The shorter cap bounds the wait
+// for the genuine-zero-usage case while still covering typical cold project
+// loads; `null` results (clearly "still indexing") keep the full `indexWaitMs`.
+const INCOMPLETE_RETRY_CAP_MS = 8000;
+
 export interface SessionOptions {
   /** Server launch command, e.g. `typescript-language-server --stdio`. Required unless `transport` is supplied. */
   serverCommand?: string;
@@ -294,9 +302,13 @@ export class RefactorSession {
    * incomplete result (e.g. `textDocument/references` that comes back
    * declaration-only before the workspace project has finished loading).
    *
-   * Gives up after `indexWaitMs` total elapsed time. On timeout it returns the
-   * best result seen so far (the last non-null, possibly-incomplete value) — not
-   * null — so callers still get a result to act on plus the chance to warn.
+   * Two budgets: `null` results retry for the full `indexWaitMs`; non-null but
+   * incomplete results retry only for `min(indexWaitMs, INCOMPLETE_RETRY_CAP_MS)`
+   * (see that constant for why the incomplete case is capped).
+   *
+   * On timeout it returns the best result seen so far: the last non-null
+   * (possibly-incomplete) value, or `null` if the server only ever returned
+   * null/undefined. Either way callers can act on it and/or warn.
    *
    * Initial retry delay: 250 ms, doubling each round, capped at 5 s per
    * attempt. The first attempt is always immediate so fast servers pay no
@@ -306,22 +318,26 @@ export class RefactorSession {
     run: () => Promise<R | null | undefined>,
     isIncomplete?: (result: R) => boolean
   ): Promise<R | null> {
-    const deadline = Date.now() + this.opts.indexWaitMs;
+    const start = Date.now();
+    const nullDeadline = start + this.opts.indexWaitMs;
+    const incompleteDeadline = start + Math.min(this.opts.indexWaitMs, INCOMPLETE_RETRY_CAP_MS);
     let delay = 250;
     let last: R | null = null;
     while (true) {
       const res = await run();
-      if (res !== null && res !== undefined) {
+      let kind: 'null' | 'incomplete' | 'complete';
+      if (res === null || res === undefined) {
+        kind = 'null';
+      } else {
         last = res as R;
-        // A complete result returns immediately; a non-null-but-incomplete one
-        // keeps retrying within the budget (the project may still be loading).
-        if (!isIncomplete || !isIncomplete(res as R)) return res as R;
+        kind = isIncomplete && isIncomplete(res as R) ? 'incomplete' : 'complete';
       }
+      if (kind === 'complete') return res as R;
+      const deadline = kind === 'null' ? nullDeadline : incompleteDeadline;
       const remaining = deadline - Date.now();
       if (remaining <= 0) return last;
       const wait = Math.min(delay, remaining);
-      const reason = res === null || res === undefined ? 'null' : 'incomplete';
-      this.log(`${reason} result — retrying in ${wait}ms (${remaining}ms remaining)`);
+      this.log(`${kind} result — retrying in ${wait}ms (${remaining}ms remaining)`);
       await sleep(wait);
       delay = Math.min(delay * 2, 5000);
     }
