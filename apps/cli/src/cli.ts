@@ -23,7 +23,8 @@ import {
   configDiff,
   type ConfigFlags
 } from './config/commands.js';
-import { discoverServer, discoverServers, discoverServerByLanguageId } from '@lspeasy/core';
+import { discoverServer } from '@lspeasy/core';
+import { resolveByExtension, resolveByLanguageId, allConfiguredServers } from './resolve.js';
 import { coldStatusReport } from '@lsproxy/proxy';
 import { RefactorSession, CLI_VERSION } from './session.js';
 import { connectViaProxy, fetchDaemonStatus } from './connect.js';
@@ -205,7 +206,7 @@ async function main(): Promise<void> {
         fail('Cannot determine language: pass a file argument or use --server <cmd>.', flags.json);
       }
     } else {
-      const discovered = discoverServer(flags.root, ext);
+      const discovered = resolveByExtension(flags.root, ext);
       if (!discovered) {
         fail(
           `No LSP server configured for ${ext} files.\n` +
@@ -276,7 +277,7 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
 
   if (!language) {
     const live = await fetchDaemonStatus(flags.root);
-    const report = live ?? coldStatusReport(discoverServers(flags.root));
+    const report = live ?? coldStatusReport(allConfiguredServers(flags.root));
     if (flags.json) {
       process.stdout.write(JSON.stringify(report) + '\n');
     } else {
@@ -288,9 +289,9 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
 
   const discovered = flags.server
     ? { serverCommand: flags.server, languageId: language }
-    : discoverServerByLanguageId(flags.root, language);
+    : resolveByLanguageId(flags.root, language);
   if (!discovered) {
-    const names = discoverServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
+    const names = allConfiguredServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
     fail(
       `No server configured for language "${language}". Configured: ${[...new Set(names)].join(', ')}`,
       flags.json

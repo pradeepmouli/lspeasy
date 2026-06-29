@@ -154,6 +154,12 @@ Without `--server`, the CLI discovers which server to launch by looking for an
 `lsp.json` file, walking up from `--root` (default: cwd) to the filesystem root,
 then falling back to `~/.claude/lsp.json`.
 
+If no `lsp.json` entry matches, discovery falls back to the detected config
+platforms (`lsproxy config list`) — e.g. a Rust server configured via a Claude
+Code plugin is served directly, no `config import` needed. `lsp.json` always
+wins on overlap; the bare `lsproxy` view and `--help <language>` list both
+sources.
+
 **Search order within each directory:**
 1. `lsp.json`
 2. `.claude/lsp.json`
