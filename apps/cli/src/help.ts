@@ -150,10 +150,12 @@ export function renderDrillDownText(
   // Colorize Commander's own help (usage, section titles, option/argument
   // terms) to match the rest of the output. When a plain formatter is passed
   // the style hooks return their input unchanged → zero ANSI.
-  if (fmt) {
-    // Commander suppresses its help styling unless it thinks the output has
-    // colors; helpInformation() returns a string (no TTY), so force it on. With
-    // a plain formatter the hooks return their input unchanged → still no ANSI.
+  // Only force Commander's help styling when the formatter actually emits color
+  // (not the identity/plain one). Forcing getOutHasColors with a plain formatter
+  // would let Commander's *own default* styling leak ANSI in NO_COLOR/piped mode.
+  if (fmt && fmt.bold('x') !== 'x') {
+    // helpInformation() returns a string (no TTY), so Commander would otherwise
+    // suppress styling — force it on for the colored path.
     navResult.command.configureOutput({ getOutHasColors: () => true });
     navResult.command.configureHelp({
       styleTitle: (s) => fmt.bold(s),

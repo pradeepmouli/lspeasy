@@ -175,8 +175,13 @@ describe('drill-down navigation', () => {
     expect(text).toContain('\x1b[38;2;'); // cyan terms (truecolor)
   });
 
-  it('drill-down help is ANSI-free without a formatter', () => {
-    const { text } = renderDrillDownText(buildProgram(), ['config']);
-    expect(text).not.toContain('\x1b');
+  it('drill-down help is ANSI-free without a formatter AND with a disabled one', () => {
+    // The real CLI path always passes createFormatter(color) — including
+    // createFormatter(false) for pipes/NO_COLOR. Neither may leak ANSI (e.g. via
+    // Commander's own default styling when getOutHasColors is forced).
+    expect(renderDrillDownText(buildProgram(), ['config']).text).not.toContain('\x1b');
+    expect(
+      renderDrillDownText(buildProgram(), ['config'], createFormatter(false)).text
+    ).not.toContain('\x1b');
   });
 });
