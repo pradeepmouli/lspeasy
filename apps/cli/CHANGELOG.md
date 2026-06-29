@@ -1,5 +1,16 @@
 # @lspeasy/cli
 
+## 0.9.0
+
+### Minor Changes
+
+- 7336b38: Add `lsproxy daemon <start|stop|status>` to manage the per-root proxy daemon explicitly (it otherwise starts lazily on first request). `start` spawns it (no-op if already running), `stop` SIGTERMs it, `status` prints the daemon line ("up · pid … · N backend(s) · M session(s)" or "not started"). All support `--json` (ANSI-free).
+- 52e3b85: Runtime server discovery now falls back to detected config platforms (Claude Code plugins, Codex, …) when `lsp.json` has no matching entry. A language configured only in a platform's config — e.g. Rust via a Claude Code plugin — is now served directly by `lsproxy <lang> <cmd>` and `lsproxy --help <lang>`, and listed in the bare `lsproxy` discovery view, without first running `config import`. `lsp.json` still wins on overlap.
+
+### Patch Changes
+
+- c223909: Drill-down help (`lsproxy --help <lang> <ns> <request>`) now shows an example of only the `--params` **residual** — the fields not already exposed as positional args or flags — instead of dumping the whole LSP message. For methods fully covered by args/flags (e.g. `hover`) it prints "no --params needed". The deepened codeAction flags (`--code-action-only`, `--code-action-trigger-kind`) already appear in the options list, so the example now reflects only what you actually pass as JSON (e.g. `context.diagnostics`). `--json` drill-down gains a matching `paramsExample` field.
+
 ## 0.8.1
 
 ### Patch Changes
