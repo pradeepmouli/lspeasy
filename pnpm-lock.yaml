@@ -97,8 +97,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skillit/cli':
-        specifier: ^0.6.0
-        version: 0.6.0(commander@15.0.0)
+        specifier: ^0.4.0
+        version: 0.4.0(commander@15.0.0)
       tsx:
         specifier: ^4.22.4
         version: 4.22.4
@@ -1258,19 +1258,19 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
-  '@skillit/cli@0.6.0':
-    resolution: {integrity: sha512-rgkJEsTO+NygOR33YQvBAhUBmGwZQ8nYb+rBfOh6n0nTPVvZ/8g03SBZiGgf12gxZrJg49bmgImqqmyMJkVjHQ==}
+  '@skillit/cli@0.4.0':
+    resolution: {integrity: sha512-jJx7o8pKKHwZtaGEw6FSdsQr5r+WUwjQqNLm4/RqZZeZ6Z88EEYZ7ZoDl/r0ZVsOp5++X3Xlp6MtSNtkFuIb3g==}
     peerDependencies:
       commander: '>=12.0.0'
     peerDependenciesMeta:
       commander:
         optional: true
 
+  '@skillit/core@1.5.0':
+    resolution: {integrity: sha512-g49Wm1AXZ/S7LjejPZ9X7tiSsEwabZi4n9OWR1ZjLljSE6LD80gPuPIUUgBVVWtpOjSJprbNiV08rhkDpcGxRg==}
+
   '@skillit/core@2.0.0':
     resolution: {integrity: sha512-PBCaJMMXVVedT74iMGJg9m9jbMpGDVWq8ntXWhhvZMnCUKBYTQadJtQfGIwO0Z+Ov1ciPbFO2fIBJcUEpwsxLw==}
-
-  '@skillit/core@2.1.0':
-    resolution: {integrity: sha512-iKG/SQuKpgnv2bM4CHoV7geAhsMO7wRQnjk3GjpXzamgfz/Xn2pQWgi4lrAFU7e2Q0Y/GCR90VhjzSVHQ27dUg==}
 
   '@skillit/typedoc@1.2.0':
     resolution: {integrity: sha512-bF7kkAiSYMzlyRlWbtsJCxeQnPzvm01T5Zdtn6oM4WVf2jt9miCRg5H88FJDitc/nCipeBfno2Xxn5rP9vthvg==}
@@ -3422,18 +3422,18 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@skillit/cli@0.6.0(commander@15.0.0)':
+  '@skillit/cli@0.4.0(commander@15.0.0)':
     dependencies:
-      '@skillit/core': 2.1.0
+      '@skillit/core': 1.5.0
     optionalDependencies:
       commander: 15.0.0
 
-  '@skillit/core@2.0.0':
+  '@skillit/core@1.5.0':
     dependencies:
       '@ast-grep/napi': 0.43.0
       yaml: 2.9.0
 
-  '@skillit/core@2.1.0':
+  '@skillit/core@2.0.0':
     dependencies:
       '@ast-grep/napi': 0.43.0
       yaml: 2.9.0
