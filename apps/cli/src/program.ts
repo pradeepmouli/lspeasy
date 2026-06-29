@@ -79,5 +79,15 @@ export function buildProgram(): Command {
     .description("Diff lsp.json against a platform's config")
     .option('--user', 'User-level config instead of project');
 
+  // Register the `daemon` command family (metadata-only; dispatch in cli.ts).
+  const daemon = program
+    .command('daemon')
+    .description('Manage the per-root proxy daemon (otherwise starts lazily on first request)');
+  daemon
+    .command('start')
+    .description('Start the proxy daemon for --root (no-op if already running)');
+  daemon.command('stop').description('Stop the proxy daemon for --root');
+  daemon.command('status').description('Show daemon status for --root');
+
   return program;
 }

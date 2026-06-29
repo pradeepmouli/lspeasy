@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { StatusReport } from '@lsproxy/proxy';
 import { createFormatter } from './format.js';
-import { renderTopLevel, renderDrillDownText, drillDownJson } from './help.js';
+import { renderTopLevel, renderDrillDownText, drillDownJson, daemonStatusLine } from './help.js';
 import { buildProgram } from './program.js';
 
 const fmt = createFormatter(false);
@@ -61,6 +61,23 @@ describe('renderTopLevel', () => {
     expect(out).toContain('\x1b[38;2;235;203;139mnot started\x1b[0m'); // nord yellow status
     expect(out).toContain('\x1b[38;2;136;192;208mrust\x1b[0m'); // nord cyan language name
     expect(out).toContain('\x1b[1mLanguages:\x1b[0m'); // bold section header
+  });
+});
+
+describe('daemonStatusLine', () => {
+  it('reports "not started" when daemon is null', () => {
+    expect(daemonStatusLine(null, fmt)).toMatch(/daemon: not started/);
+  });
+
+  it('reports up with pid/backends/sessions when running', () => {
+    const line = daemonStatusLine(
+      { pid: 7, uptimeMs: 1000, root: '/p', sessions: 3, backends: 2 },
+      fmt
+    );
+    expect(line).toMatch(/daemon: up/);
+    expect(line).toContain('pid 7');
+    expect(line).toContain('2 backend(s)');
+    expect(line).toContain('3 session(s)');
   });
 });
 

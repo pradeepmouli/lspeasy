@@ -27,6 +27,7 @@ import { discoverServer, discoverServers, discoverServerByLanguageId } from '@ls
 import { coldStatusReport } from '@lsproxy/proxy';
 import { RefactorSession, CLI_VERSION } from './session.js';
 import { connectViaProxy, fetchDaemonStatus } from './connect.js';
+import { runDaemon } from './daemon-commands.js';
 import { buildCommandTree } from './build-commands.js';
 import { createFormatter } from './format.js';
 import { renderTopLevel, renderDrillDownText, drillDownJson } from './help.js';
@@ -126,6 +127,12 @@ async function main(): Promise<void> {
       );
       exit(1);
     }
+    exit(0);
+  }
+
+  if (positionals[0] === 'daemon') {
+    const color = process.stdout.isTTY === true && !process.env['NO_COLOR'] && !flags.json;
+    await runDaemon(positionals[1], flags, createFormatter(color));
     exit(0);
   }
 
