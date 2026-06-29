@@ -1,4 +1,14 @@
-const CODES = { green: 32, red: 31, yellow: 33, cyan: 36, bold: 1, dim: 2 } as const;
+// 24-bit (truecolor) palette — Nord ("Minimalist Zen"), cohesive for a
+// line-oriented dev CLI. Modern terminals render these directly and downsample
+// gracefully on older ones.
+const RGB = {
+  green: [163, 190, 140], // nord14
+  red: [191, 97, 106], // nord11
+  yellow: [235, 203, 139], // nord13
+  cyan: [136, 192, 208] // nord8 (frost)
+} as const;
+// bold/dim are SGR attributes, not colors.
+const ATTR = { bold: 1, dim: 2 } as const;
 
 export interface Formatter {
   green(s: string): string;
@@ -9,7 +19,11 @@ export interface Formatter {
   dim(s: string): string;
 }
 
-function wrap(code: number, s: string): string {
+function rgb([r, g, b]: readonly [number, number, number], s: string): string {
+  return `\x1b[38;2;${r};${g};${b}m${s}\x1b[0m`;
+}
+
+function attr(code: number, s: string): string {
   return `\x1b[${code}m${s}\x1b[0m`;
 }
 
@@ -32,12 +46,12 @@ export function createFormatter(enabled: boolean): Formatter {
     };
   }
   return {
-    green: (s) => wrap(CODES.green, s),
-    red: (s) => wrap(CODES.red, s),
-    yellow: (s) => wrap(CODES.yellow, s),
-    cyan: (s) => wrap(CODES.cyan, s),
-    bold: (s) => wrap(CODES.bold, s),
-    dim: (s) => wrap(CODES.dim, s)
+    green: (s) => rgb(RGB.green, s),
+    red: (s) => rgb(RGB.red, s),
+    yellow: (s) => rgb(RGB.yellow, s),
+    cyan: (s) => rgb(RGB.cyan, s),
+    bold: (s) => attr(ATTR.bold, s),
+    dim: (s) => attr(ATTR.dim, s)
   };
 }
 

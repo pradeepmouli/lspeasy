@@ -57,9 +57,9 @@ describe('renderTopLevel', () => {
       ]
     };
     const out = renderTopLevel(report, color);
-    expect(out).toContain('\x1b['); // ANSI present
-    expect(out).toContain('\x1b[33mnot started\x1b[0m'); // yellow status
-    expect(out).toContain('\x1b[36mrust\x1b[0m'); // cyan language name
+    expect(out).toContain('\x1b[38;2;'); // 24-bit truecolor present
+    expect(out).toContain('\x1b[38;2;235;203;139mnot started\x1b[0m'); // nord yellow status
+    expect(out).toContain('\x1b[38;2;136;192;208mrust\x1b[0m'); // nord cyan language name
     expect(out).toContain('\x1b[1mLanguages:\x1b[0m'); // bold section header
   });
 });
