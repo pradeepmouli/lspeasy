@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 
 import { parseLineCol, toLspPosition, resolvePathArg } from './io.js';
 import type { GlobalFlags } from './io.js';
+import { assessResultQuality } from './result-quality.js';
 import type { RefactorSession } from './session.js';
 import {
   WorkspaceEditSchema,
@@ -522,10 +523,21 @@ export function zodToCommander(
         }
         printAppliedChanges(allChanges, method, flags.dryRun, flags.json);
       } else {
+        const quality = assessResultQuality(method, params, result);
         if (flags.json) {
-          process.stdout.write(JSON.stringify({ ok: true, method, result }) + '\n');
+          process.stdout.write(
+            JSON.stringify({
+              ok: true,
+              method,
+              result,
+              ...(quality.partial ? { partial: true, warning: quality.warning } : {})
+            }) + '\n'
+          );
         } else {
           process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+        }
+        if (quality.partial && quality.warning) {
+          process.stderr.write(`warning: ${quality.warning}\n`);
         }
       }
     } catch (err) {

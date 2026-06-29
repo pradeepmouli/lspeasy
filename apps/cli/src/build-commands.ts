@@ -3,6 +3,7 @@ import { LSPSchemas, getSchemaForMethod, getCapabilityForRequestMethod } from '@
 import type { ServerCapabilities } from '@lspeasy/core';
 
 import { zodToCommander, printAppliedChanges } from './zod-to-commander.js';
+import { assessResultQuality } from './result-quality.js';
 import { applyWorkspaceEdit, planWorkspaceEdit } from './apply.js';
 import type { BoundaryGuard } from './apply.js';
 import type { RefactorSession } from './session.js';
@@ -115,10 +116,23 @@ export function buildCommandTree(
             flags.dryRun ? planWorkspaceEdit(edit, guard) : applyWorkspaceEdit(edit, guard)
           );
           printAppliedChanges(allChanges, method, flags.dryRun, flags.json);
-        } else if (flags.json) {
-          process.stdout.write(JSON.stringify({ ok: true, method, result }) + '\n');
         } else {
-          process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+          const quality = assessResultQuality(method, params, result);
+          if (flags.json) {
+            process.stdout.write(
+              JSON.stringify({
+                ok: true,
+                method,
+                result,
+                ...(quality.partial ? { partial: true, warning: quality.warning } : {})
+              }) + '\n'
+            );
+          } else {
+            process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+          }
+          if (quality.partial && quality.warning) {
+            process.stderr.write(`warning: ${quality.warning}\n`);
+          }
         }
       } catch (err) {
         if (flags.json) {
