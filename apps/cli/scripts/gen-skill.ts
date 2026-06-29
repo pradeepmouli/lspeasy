@@ -1,6 +1,8 @@
 #!/usr/bin/env tsx
 /**
- * Generator: produce apps/cli/skills/cli/ from buildProgram() + README.md.
+ * Generator: produce apps/cli/skills/<namespace>-<package>/ (the skill name is
+ * derived from package.json `name`, e.g. `@lsproxy/cli` -> `lsproxy-cli`) from
+ * buildProgram() + README.md.
  *
  * Run via: pnpm --filter @lsproxy/cli run skill:gen
  *   (requires an up-to-date dist/; run `pnpm build` first if program.ts changed)
