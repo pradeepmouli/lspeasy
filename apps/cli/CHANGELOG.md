@@ -1,5 +1,11 @@
 # @lspeasy/cli
 
+## 0.8.0
+
+### Minor Changes
+
+- 1db87b7: Add a version command: `lsproxy --version` / `-V` / `lsproxy version` print the CLI version and exit (previously these printed the tagline). Sourced from `package.json`.
+
 ## 0.7.3
 
 ### Patch Changes
