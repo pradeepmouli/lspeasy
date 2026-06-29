@@ -48,6 +48,17 @@ describe('renderTopLevel', () => {
     expect(out).not.toMatch(/daemon:\s*down/i);
   });
 
+  it('shows base usage + non-namespace commands (config/daemon/call) with descriptions', () => {
+    const report: StatusReport = { daemon: null, languages: [] };
+    const out = renderTopLevel(report, fmt);
+    expect(out).toMatch(/Usage:/);
+    expect(out).toMatch(/lsproxy <language> <namespace> <request>/);
+    expect(out).toMatch(/Commands:/);
+    expect(out).toMatch(/config .*read\/write LSP config/);
+    expect(out).toMatch(/daemon .*manage the per-root proxy daemon/);
+    expect(out).toMatch(/call .*send any LSP request/);
+  });
+
   it('applies color when the formatter is enabled (polish)', () => {
     const color = createFormatter(true);
     const report: StatusReport = {
@@ -155,5 +166,17 @@ describe('drill-down navigation', () => {
     const { text } = renderDrillDownText(buildProgram(), ['textDocument', 'codeAction'], colorFmt);
     expect(text).toMatch(/Example --params/);
     expect(text).toContain('\x1b'); // ANSI escape present when formatter is enabled
+  });
+
+  it("colorizes Commander's own help (title + option/command terms)", () => {
+    const colorFmt = createFormatter(true);
+    const { text } = renderDrillDownText(buildProgram(), ['config'], colorFmt);
+    expect(text).toContain('\x1b[1mUsage:\x1b[0m'); // bold section title
+    expect(text).toContain('\x1b[38;2;'); // cyan terms (truecolor)
+  });
+
+  it('drill-down help is ANSI-free without a formatter', () => {
+    const { text } = renderDrillDownText(buildProgram(), ['config']);
+    expect(text).not.toContain('\x1b');
   });
 });
