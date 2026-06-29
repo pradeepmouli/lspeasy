@@ -13,18 +13,41 @@ jobs:
   cascade:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.1.3
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
       - name: Cascade dependabot PRs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          echo "=== Enabling auto-merge on new dependabot PRs ==="
+          echo "=== Enabling auto-merge on verified dependabot PRs ==="
+          # Dependabot PRs run CI gated (action_required), so the supply-chain
+          # minimumReleaseAge check never runs — yet auto-merge still merges them.
+          # That let an immature version (#162, @skillit/cli 0.6.0) merge and break
+          # the release install. cooldown covers version updates but NOT security
+          # updates, so gate auto-merge here on the policy for every dependabot PR.
+          # `--ignore-scripts` keeps the verify safe (no untrusted dep code runs);
+          # the lockfile policy check still executes.
           gh pr list --author app/dependabot --json number,autoMergeRequest \
             --jq '.[] | select(.autoMergeRequest == null) | .number' | \
           while read pr; do
-            echo "Enabling auto-merge on #$pr"
-            gh pr merge "$pr" --squash --auto 2>&1 || true
+            echo "--- Verifying #$pr against supply-chain policy ---"
+            if gh pr checkout "$pr" --force && pnpm install --frozen-lockfile --ignore-scripts >/dev/null 2>&1; then
+              echo "Enabling auto-merge on #$pr"
+              gh pr merge "$pr" --squash --auto 2>&1 || true
+            else
+              echo "::warning::#$pr fails the supply-chain policy — auto-merge withheld"
+              gh pr comment "$pr" --body "🔒 Auto-merge withheld: this bump's lockfile fails the \`minimumReleaseAge\` supply-chain policy (a dependency is too new to install). It will be re-checked on the next cascade once the release ages, or can be merged manually after review." 2>&1 || true
+            fi
           done
+          git checkout "$GITHUB_SHA" --force 2>/dev/null || true
 
           echo ""
           echo "=== Updating BEHIND PRs ==="
