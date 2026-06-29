@@ -137,16 +137,23 @@ describe('drill-down navigation', () => {
     expect(json.resultSchema).toBeTypeOf('object'); // hover has a result
   });
 
-  it('renderDrillDownText depth-2 includes an illustrative example input block', () => {
-    const { text } = renderDrillDownText(buildProgram(), ['textDocument', 'hover']);
-    expect(text).toMatch(/Example input/i);
+  it('depth-2 shows the --params residual (only fields not exposed as args/flags)', () => {
+    const { text } = renderDrillDownText(buildProgram(), ['textDocument', 'codeAction']);
+    expect(text).toMatch(/Example --params/i);
+    expect(text).toContain('diagnostics'); // array-of-objects → residual
+    expect(text).not.toMatch(/"textDocument"/); // positional, excluded from --params
     expect(text).not.toContain('\x1b'); // pure function: no color unless a formatter is passed
   });
 
-  it('renderDrillDownText colorizes example labels when a color formatter is passed', () => {
+  it('depth-2 says "no --params needed" when every input is a positional arg/flag', () => {
+    const { text } = renderDrillDownText(buildProgram(), ['textDocument', 'hover']);
+    expect(text).toMatch(/no --params needed/i);
+  });
+
+  it('colorizes the example label when a color formatter is passed', () => {
     const colorFmt = createFormatter(true);
-    const { text } = renderDrillDownText(buildProgram(), ['textDocument', 'hover'], colorFmt);
-    expect(text).toMatch(/Example input/i);
+    const { text } = renderDrillDownText(buildProgram(), ['textDocument', 'codeAction'], colorFmt);
+    expect(text).toMatch(/Example --params/);
     expect(text).toContain('\x1b'); // ANSI escape present when formatter is enabled
   });
 });

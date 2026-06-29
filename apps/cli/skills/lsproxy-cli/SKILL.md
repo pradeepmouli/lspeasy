@@ -85,7 +85,7 @@ callHierarchy operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### callHierarchy outgoingCalls
 
@@ -96,7 +96,7 @@ callHierarchy operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### codeAction
 
@@ -116,7 +116,7 @@ codeAction operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### codeLens
 
@@ -136,7 +136,7 @@ codeLens operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### completionItem
 
@@ -156,7 +156,7 @@ completionItem operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### documentLink
 
@@ -176,7 +176,7 @@ documentLink operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### inlayHint
 
@@ -196,7 +196,7 @@ inlayHint operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### textDocument
 
@@ -216,7 +216,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 | `--code-action-only` | `string` | no | — | — | code-action-only (comma-separated) |
@@ -235,7 +235,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -251,7 +251,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 | `--color-presentation-color-red` | `string` | no | — | — | color-presentation-color-red |
@@ -272,7 +272,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 | `--completion-trigger-kind` | `string` | no | — | — | completion-trigger-kind |
@@ -291,7 +291,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -308,7 +308,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -325,7 +325,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 | `--identifier` | `string` | no | — | — | identifier |
@@ -343,7 +343,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -359,7 +359,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -376,7 +376,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -392,7 +392,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -408,7 +408,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -424,7 +424,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--formatting-tab-size` | `string` | no | — | — | formatting-tab-size |
 | `--formatting-insert-spaces` | `string` | no | — | — | formatting-insert-spaces |
@@ -444,7 +444,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 
 **Arguments:**
@@ -460,7 +460,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -477,7 +477,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 
 **Arguments:**
@@ -493,7 +493,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--inline-completion-trigger-kind` | `string` | no | — | — | inline-completion-trigger-kind |
 
@@ -510,7 +510,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--inline-value-frame-id` | `string` | no | — | — | inline-value-frame-id |
 
@@ -527,7 +527,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 
 **Arguments:**
@@ -543,7 +543,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -560,7 +560,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--ch` | `string` | no | — | — | ch |
 | `--on-type-formatting-tab-size` | `string` | no | — | — | on-type-formatting-tab-size |
 | `--on-type-formatting-insert-spaces` | `string` | no | — | — | on-type-formatting-insert-spaces |
@@ -581,7 +581,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 
 **Arguments:**
@@ -597,7 +597,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 
 **Arguments:**
@@ -613,7 +613,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 
 **Arguments:**
@@ -629,7 +629,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--range-formatting-tab-size` | `string` | no | — | — | range-formatting-tab-size |
 | `--range-formatting-insert-spaces` | `string` | no | — | — | range-formatting-insert-spaces |
@@ -650,7 +650,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--ranges-formatting-tab-size` | `string` | no | — | — | ranges-formatting-tab-size |
 | `--ranges-formatting-insert-spaces` | `string` | no | — | — | ranges-formatting-insert-spaces |
@@ -670,7 +670,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 | `--references-include-declaration` | `string` | no | — | — | references-include-declaration |
@@ -688,7 +688,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 
 **Arguments:**
@@ -705,7 +705,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -721,7 +721,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -737,7 +737,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 | `--previous-result-id` | `string` | no | — | — | previous-result-id |
@@ -754,7 +754,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -771,7 +771,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--signature-help-trigger-kind` | `string` | no | — | — | signature-help-trigger-kind |
 | `--signature-help-trigger-character` | `string` | no | — | — | signature-help-trigger-character |
@@ -790,7 +790,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -807,7 +807,7 @@ textDocument operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--reason` | `string` | no | — | — | reason |
 
 **Arguments:**
@@ -831,7 +831,7 @@ workspace operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### workspace executeCommand
 
@@ -842,7 +842,7 @@ workspace operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### workspace symbol
 
@@ -853,7 +853,7 @@ workspace operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 | `--work-done-token` | `string` | no | — | — | work-done-token |
 | `--partial-result-token` | `string` | no | — | — | partial-result-token |
 
@@ -869,7 +869,7 @@ workspace operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### workspace willCreateFiles
 
@@ -880,7 +880,7 @@ workspace operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### workspace willDeleteFiles
 
@@ -891,7 +891,7 @@ workspace operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### workspace willRenameFiles
 
@@ -902,7 +902,7 @@ workspace operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### workspaceSymbol
 
@@ -922,7 +922,7 @@ workspaceSymbol operations
 
 | Flag | Type | Required | Default | Env | Description |
 | --- | --- | --- | --- | --- | --- |
-| `--params` | `string` | no | — | — | raw LSP params as JSON, overrides positional args |
+| `--params` | `string` | no | — | — | extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params) |
 
 ### call
 

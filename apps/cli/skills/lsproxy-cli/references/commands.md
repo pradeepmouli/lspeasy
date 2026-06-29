@@ -18,7 +18,7 @@ callHierarchy operations
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -32,7 +32,7 @@ raw LSP params as JSON, overrides positional args
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -54,7 +54,7 @@ codeAction operations
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -76,7 +76,7 @@ codeLens operations
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -98,7 +98,7 @@ completionItem operations
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -120,7 +120,7 @@ documentLink operations
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -142,7 +142,7 @@ inlayHint operations
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -164,7 +164,7 @@ textDocument operations
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -216,7 +216,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -250,7 +250,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -314,7 +314,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -366,7 +366,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -406,7 +406,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -446,7 +446,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -492,7 +492,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -526,7 +526,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -566,7 +566,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -600,7 +600,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -634,7 +634,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -668,7 +668,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -726,7 +726,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -760,7 +760,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -800,7 +800,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -834,7 +834,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -874,7 +874,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -914,7 +914,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -948,7 +948,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -988,7 +988,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -1052,7 +1052,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -1086,7 +1086,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -1120,7 +1120,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -1154,7 +1154,7 @@ file path (relative to --root)
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -1218,7 +1218,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 
 #### --params
 
-raw LSP params as JSON, overrides positional args
+extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
 
 **Type:** `string`
 
@@ -1247,155 +1247,5 @@ ranges-formatting-trim-trailing-whitespace
 **Type:** `string`
 
 #### --ranges-formatting-insert-final-newline
-
-ranges-formatting-insert-final-newline
-
-**Type:** `string`
-
-#### --ranges-formatting-trim-final-newlines
-
-ranges-formatting-trim-final-newlines
-
-**Type:** `string`
-
-### Arguments
-
-#### `file`
-
-file path (relative to --root)
-
-**Required:** yes
-
-## textDocument references
-
-```
-[options] <file> <line:col>
-```
-
-### Options
-
-#### --params
-
-raw LSP params as JSON, overrides positional args
-
-**Type:** `string`
-
-#### --work-done-token
-
-work-done-token
-
-**Type:** `string`
-
-#### --partial-result-token
-
-partial-result-token
-
-**Type:** `string`
-
-#### --references-include-declaration
-
-references-include-declaration
-
-**Type:** `string`
-
-### Arguments
-
-#### `file`
-
-file path (relative to --root)
-
-**Required:** yes
-
-#### `line:col`
-
-1-based position, e.g. 12:7
-
-**Required:** yes
-
-## textDocument rename
-
-```
-[options] <file> <line:col> <newName>
-```
-
-### Options
-
-#### --params
-
-raw LSP params as JSON, overrides positional args
-
-**Type:** `string`
-
-#### --work-done-token
-
-work-done-token
-
-**Type:** `string`
-
-### Arguments
-
-#### `file`
-
-file path (relative to --root)
-
-**Required:** yes
-
-#### `line:col`
-
-1-based position, e.g. 12:7
-
-**Required:** yes
-
-#### `newName`
-
-new symbol name
-
-**Required:** yes
-
-## textDocument selectionRange
-
-```
-[options] <file>
-```
-
-### Options
-
-#### --params
-
-raw LSP params as JSON, overrides positional args
-
-**Type:** `string`
-
-#### --work-done-token
-
-work-done-token
-
-**Type:** `string`
-
-#### --partial-result-token
-
-partial-result-token
-
-**Type:** `string`
-
-### Arguments
-
-#### `file`
-
-file path (relative to --root)
-
-**Required:** yes
-
-## textDocument semanticTokens-full
-
-```
-[options] <file>
-```
-
-### Options
-
-#### --params
-
-raw LSP params as JSON, overrides positional args
 
 <!-- truncated -->
