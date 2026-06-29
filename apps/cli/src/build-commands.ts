@@ -93,6 +93,18 @@ export function buildCommandTree(
 
     const subCmd = zodToCommander(method as string, schema, session, flags);
     enrichCommandFromCapabilities(method as string, subCmd, capabilities);
+    // executeCommand args are server-defined (opaque LSPAny) and not in the
+    // protocol — the reliable way to get a valid {command, arguments} is to
+    // replay one from a codeAction/codeLens result.
+    if (method === 'workspace/executeCommand') {
+      subCmd.addHelpText(
+        'after',
+        '\nDiscovering commands: server command names (if advertised) appear above as\n' +
+          'capability options. Argument shapes are server-specific — obtain a ready-to-run\n' +
+          '{command, arguments} from a textDocument/codeAction or textDocument/codeLens result and replay it\n' +
+          '(lsproxy auto-runs command-bearing code actions).'
+      );
+    }
     nsCmd.addCommand(subCmd);
   }
 

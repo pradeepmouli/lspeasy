@@ -68,26 +68,48 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
         fmt.dim(' — starts on first request; showing configured languages only')
       : daemonStatusLine(report.daemon, fmt);
   const lines = report.languages.map((l) => languageLine(l, fmt));
-  // Color only the command portion of each hint; keep the description dim. Pad
-  // the plain command before coloring so alignment is by visible width (ANSI
+  // Color only the command/term portion of each row; keep the description dim.
+  // Pad the plain term before coloring so alignment is by visible width (ANSI
   // bytes don't count toward padEnd).
-  const hint = (cmd: string, desc: string): string =>
-    `  ${fmt.cyan(cmd.padEnd(48))}  ${fmt.dim(desc)}`;
-  const footer = [
-    '',
-    fmt.bold('Drill down:'),
-    hint('lsproxy --help <language>', 'namespaces for that server'),
-    hint('lsproxy --help <language> <namespace>', 'requests in that namespace'),
-    hint('lsproxy --help <language> <namespace> <request>', 'parameter schema')
+  const row = (term: string, desc: string): string =>
+    `  ${fmt.cyan(term.padEnd(48))}  ${fmt.dim(desc)}`;
+
+  const usage = [
+    fmt.bold('Usage:'),
+    `  ${fmt.cyan('lsproxy <language> <namespace> <request>')} ${fmt.dim('[args] [flags]')}`,
+    `  ${fmt.cyan('lsproxy call <method>')} ${fmt.dim('--params <json>')}`
   ].join('\n');
+
+  // Non-namespace (meta) commands — listed with descriptions so they're
+  // discoverable from the bare view, not just the per-language drill-down.
+  const commands = [
+    fmt.bold('Commands:'),
+    row('config <list|import|export|diff>', 'read/write LSP config across platforms'),
+    row('daemon <start|stop|status>', 'manage the per-root proxy daemon'),
+    row('call <method> --params <json>', 'send any LSP request by method name'),
+    row('--version, -V', 'print the CLI version')
+  ].join('\n');
+
+  const drill = [
+    fmt.bold('Drill down:'),
+    row('lsproxy --help <language>', 'namespaces for that server'),
+    row('lsproxy --help <language> <namespace>', 'requests in that namespace'),
+    row('lsproxy --help <language> <namespace> <request>', 'parameter schema')
+  ].join('\n');
+
   return [
     fmt.bold('lsproxy — LSP-driven CLI'),
     '',
     header,
     '',
+    usage,
+    '',
     fmt.bold('Languages:'),
     ...lines,
-    footer,
+    '',
+    commands,
+    '',
+    drill,
     ''
   ].join('\n');
 }
@@ -125,6 +147,26 @@ export function renderDrillDownText(
     };
   }
   const label = (s: string): string => (fmt ? fmt.yellow(s) : s);
+  // Colorize Commander's own help (usage, section titles, option/argument
+  // terms) to match the rest of the output. When a plain formatter is passed
+  // the style hooks return their input unchanged → zero ANSI.
+  // Only force Commander's help styling when the formatter actually emits color
+  // (not the identity/plain one). Forcing getOutHasColors with a plain formatter
+  // would let Commander's *own default* styling leak ANSI in NO_COLOR/piped mode.
+  if (fmt && fmt.bold('x') !== 'x') {
+    // helpInformation() returns a string (no TTY), so Commander would otherwise
+    // suppress styling — force it on for the colored path.
+    navResult.command.configureOutput({ getOutHasColors: () => true });
+    navResult.command.configureHelp({
+      styleTitle: (s) => fmt.bold(s),
+      styleUsage: (s) => fmt.cyan(s),
+      styleCommandText: (s) => fmt.cyan(s),
+      styleOptionTerm: (s) => fmt.cyan(s),
+      styleSubcommandTerm: (s) => fmt.cyan(s),
+      styleArgumentTerm: (s) => fmt.cyan(s),
+      styleDescriptionText: (s) => fmt.dim(s)
+    });
+  }
   let text = navResult.command.helpInformation();
   if (path.length >= 2) {
     const method = methodForPath(path)!;
