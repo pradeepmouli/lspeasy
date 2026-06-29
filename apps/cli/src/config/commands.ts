@@ -3,7 +3,7 @@ import { mergeServers, readLspJsonFile, writeLspJsonFile } from '@lspeasy/core';
 import { getAdapters, getAdapter } from './registry.js';
 import { lspjsonAdapter } from './adapters/lspjson.js';
 import type { CanonicalServers, PlatformAdapter, Scope } from './adapter.js';
-import { createFormatter, type Formatter } from '../format.js';
+import { createFormatter, SYMBOLS, type Formatter } from '../format.js';
 
 export interface ConfigFlags {
   json: boolean;
@@ -32,8 +32,10 @@ function renderListText(platforms: PlatformInfo[], fmt: Formatter): string {
   return (
     platforms
       .map(
+        // Match the discovery view: emoji marker (self-colored), cyan id, dim
+        // metadata. detected -> 🟢, not -> ⚪.
         (p) =>
-          `${p.detected ? fmt.green('●') : fmt.dim('○')} ${p.id} ${fmt.dim(`(${p.tier})`)}  ${p.servers.join(' ')}`
+          `${p.detected ? SYMBOLS.running : SYMBOLS.cold} ${fmt.cyan(p.id)} ${fmt.dim(`(${p.tier})`)}  ${fmt.dim(p.servers.join(' '))}`
       )
       .join('\n') + '\n'
   );
