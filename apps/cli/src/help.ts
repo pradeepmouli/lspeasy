@@ -41,19 +41,23 @@ function languageLine(lang: LanguageStatus, fmt: Formatter): string {
   return `  ${mark} ${name}  ${fmt.dim(exts)}  ${health} ${stats}`;
 }
 
+/** One-line daemon status: "daemon: up · pid … · N backend(s) · M session(s)"
+ *  or "daemon: not started". Shared by the top-level view and `daemon status`. */
+export function daemonStatusLine(daemon: StatusReport['daemon'], fmt: Formatter): string {
+  return daemon === null
+    ? `${fmt.dim('daemon: ')}${fmt.yellow('not started')}`
+    : `${fmt.dim('daemon: ')}${fmt.green('up')}${fmt.dim(
+        ` · pid ${daemon.pid} · ${daemon.backends} backend(s) · ${daemon.sessions} session(s)`
+      )}`;
+}
+
 /** Render the top-level `lsproxy` view: configured languages + live status. */
 export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
   const header =
     report.daemon === null
-      ? fmt.dim('daemon: ') +
-        fmt.yellow('not started') +
+      ? daemonStatusLine(report.daemon, fmt) +
         fmt.dim(' — starts on first request; showing configured languages only')
-      : fmt.dim('daemon: ') +
-        fmt.green('up') +
-        fmt.dim(
-          ` · pid ${report.daemon.pid} · ` +
-            `${report.daemon.backends} backend(s) · ${report.daemon.sessions} session(s)`
-        );
+      : daemonStatusLine(report.daemon, fmt);
   const lines = report.languages.map((l) => languageLine(l, fmt));
   // Color only the command portion of each hint; keep the description dim. Pad
   // the plain command before coloring so alignment is by visible width (ANSI

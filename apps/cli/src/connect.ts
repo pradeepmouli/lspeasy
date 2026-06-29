@@ -111,6 +111,40 @@ export async function fetchDaemonStatus(root: string): Promise<StatusReport | nu
   }
 }
 
+/**
+ * Ensure a proxy daemon is running for `root`. Returns whether it was newly
+ * started (vs already up) and the daemon pid. Reuses the same spawn+poll path
+ * as `connectViaProxy`.
+ */
+export async function startDaemon(
+  root: string,
+  verbose = false
+): Promise<{ started: boolean; pid: number | null }> {
+  const sockPath = socketPath(root);
+  if (existsSync(sockPath) && (await tryConnect(sockPath))) {
+    const status = await fetchDaemonStatus(root);
+    return { started: false, pid: status?.daemon?.pid ?? null };
+  }
+  if (verbose) process.stderr.write('[lsproxy] spawning proxy daemon\n');
+  const logPath = spawnDaemon(root, sockPath);
+  await pollForSocket(sockPath, POLL_TIMEOUT_MS, logPath);
+  const status = await fetchDaemonStatus(root);
+  return { started: true, pid: status?.daemon?.pid ?? null };
+}
+
+/** Stop the proxy daemon for `root` (SIGTERM its pid). No-op when none runs. */
+export async function stopDaemon(root: string): Promise<{ stopped: boolean; pid: number | null }> {
+  const status = await fetchDaemonStatus(root);
+  const pid = status?.daemon?.pid ?? null;
+  if (pid === null) return { stopped: false, pid: null };
+  try {
+    process.kill(pid, 'SIGTERM');
+    return { stopped: true, pid };
+  } catch {
+    return { stopped: false, pid };
+  }
+}
+
 export interface ConnectOptions {
   root: string;
   languageId: string;

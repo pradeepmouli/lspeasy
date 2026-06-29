@@ -1010,6 +1010,42 @@ Diff lsp.json against a platform's config
 **Arguments:**
 - `platform` *(required)*
 
+### daemon
+
+Manage the per-root proxy daemon (otherwise starts lazily on first request)
+
+**Usage:**
+```
+[options] [command]
+```
+
+### daemon start
+
+Start the proxy daemon for --root (no-op if already running)
+
+**Usage:**
+```
+[options]
+```
+
+### daemon stop
+
+Stop the proxy daemon for --root
+
+**Usage:**
+```
+[options]
+```
+
+### daemon status
+
+Show daemon status for --root
+
+**Usage:**
+```
+[options]
+```
+
 ## Documentation
 
 - **Dynamic discovery model** — Depth-aware --help surface built from live server capabilities
