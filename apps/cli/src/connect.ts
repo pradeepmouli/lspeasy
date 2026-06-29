@@ -132,17 +132,41 @@ export async function startDaemon(
   return { started: true, pid: status?.daemon?.pid ?? null };
 }
 
-/** Stop the proxy daemon for `root` (SIGTERM its pid). No-op when none runs. */
-export async function stopDaemon(root: string): Promise<{ stopped: boolean; pid: number | null }> {
+const STOP_TIMEOUT_MS = 3000;
+
+/**
+ * Stop the proxy daemon for `root` (SIGTERM its pid) and wait until it's
+ * actually gone. The daemon handles SIGTERM asynchronously and only then
+ * unlinks its socket, so we poll until the socket is unreachable — otherwise a
+ * `stop` → `status`/`start` chain could still see the old daemon.
+ *
+ * `pending: true` means the signal was sent but the daemon hadn't shut down
+ * within the timeout. A `null` pid means none was running.
+ */
+export async function stopDaemon(
+  root: string
+): Promise<{ stopped: boolean; pid: number | null; pending: boolean }> {
   const status = await fetchDaemonStatus(root);
   const pid = status?.daemon?.pid ?? null;
-  if (pid === null) return { stopped: false, pid: null };
+  if (pid === null) return { stopped: false, pid: null, pending: false };
   try {
     process.kill(pid, 'SIGTERM');
-    return { stopped: true, pid };
-  } catch {
-    return { stopped: false, pid };
+  } catch (err) {
+    // ESRCH: the daemon exited between the status fetch and the signal — gone.
+    if ((err as NodeJS.ErrnoException).code === 'ESRCH') {
+      return { stopped: true, pid, pending: false };
+    }
+    return { stopped: false, pid, pending: false };
   }
+  const sockPath = socketPath(root);
+  const deadline = Date.now() + STOP_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    if (!existsSync(sockPath) || !(await tryConnect(sockPath))) {
+      return { stopped: true, pid, pending: false };
+    }
+    await new Promise<void>((r) => setTimeout(r, POLL_INTERVAL_MS));
+  }
+  return { stopped: false, pid, pending: true };
 }
 
 export interface ConnectOptions {
