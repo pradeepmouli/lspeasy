@@ -54,6 +54,27 @@ describe('assessResultQuality — textDocument/references', () => {
     ]);
     expect(q.partial).toBe(false);
   });
+
+  it('does NOT flag an empty result when includeDeclaration:false (legitimate "no other usages")', () => {
+    const noDeclParams = {
+      ...params,
+      context: { includeDeclaration: false }
+    };
+    expect(assessResultQuality('textDocument/references', noDeclParams, []).partial).toBe(false);
+    expect(assessResultQuality('textDocument/references', noDeclParams, null).partial).toBe(false);
+  });
+
+  it('does not throw on a malformed Location (missing range) — degrades to not-partial', () => {
+    // Two malformed entries: a Location whose range lacks start/end, and a non-object.
+    const malformed = [{ uri }, 'not-a-location'];
+    expect(() => assessResultQuality('textDocument/references', params, malformed)).not.toThrow();
+    // Two entries → not the single-result declaration-only shape, so not flagged.
+    expect(assessResultQuality('textDocument/references', params, malformed).partial).toBe(false);
+    // A single malformed Location must also not throw.
+    expect(() =>
+      assessResultQuality('textDocument/references', params, [{ uri, range: {} }])
+    ).not.toThrow();
+  });
 });
 
 describe('assessResultQuality — other methods', () => {

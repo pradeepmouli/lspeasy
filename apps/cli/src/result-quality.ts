@@ -35,10 +35,25 @@ export interface ResultQuality {
 
 const OK: ResultQuality = { partial: false };
 
+function isPosition(value: unknown): value is Position {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return typeof v['line'] === 'number' && typeof v['character'] === 'number';
+}
+
+function isRange(value: unknown): value is Range {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return isPosition(v['start']) && isPosition(v['end']);
+}
+
+// Validate the full nested shape — rangeContains() dereferences range.start/end,
+// so a malformed Location must not slip through and turn a best-effort warning
+// into a hard CLI crash.
 function isLocation(value: unknown): value is Location {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
-  return typeof v['uri'] === 'string' && typeof v['range'] === 'object' && v['range'] !== null;
+  return typeof v['uri'] === 'string' && isRange(v['range']);
 }
 
 function getRequestUri(params: unknown): string | undefined {
@@ -58,23 +73,39 @@ function getRequestPosition(params: unknown): Position | undefined {
   return { line, character };
 }
 
-/** True when `pos` falls within `range` (inclusive). */
+/** True when `pos` falls within `range` (start-inclusive, end-exclusive, per LSP). */
 function rangeContains(range: Range, pos: Position): boolean {
   const afterStart =
     pos.line > range.start.line ||
     (pos.line === range.start.line && pos.character >= range.start.character);
   const beforeEnd =
     pos.line < range.end.line ||
-    (pos.line === range.end.line && pos.character <= range.end.character);
+    (pos.line === range.end.line && pos.character < range.end.character);
   return afterStart && beforeEnd;
+}
+
+/** Read `context.includeDeclaration`; undefined when not specified. */
+function getIncludeDeclaration(params: unknown): boolean | undefined {
+  if (typeof params !== 'object' || params === null) return undefined;
+  const ctx = (params as Record<string, unknown>)['context'];
+  if (typeof ctx !== 'object' || ctx === null) return undefined;
+  const inc = (ctx as Record<string, unknown>)['includeDeclaration'];
+  return typeof inc === 'boolean' ? inc : undefined;
 }
 
 const NOT_INDEXED =
   'the language server may not have the full workspace project loaded — do not treat this as authoritative for deletions or moves; verify with a build/type-check';
 
 function assessReferences(params: unknown, result: unknown): ResultQuality {
-  // null or empty: the symbol's own declaration should have come back (the
-  // caller asked at a real symbol position), so nothing-at-all is suspect.
+  // When the caller explicitly excludes the declaration (`includeDeclaration:
+  // false`, only reachable via raw `call`), an empty or declaration-only result
+  // is a legitimate "no other usages" answer — not a sign of an unindexed
+  // project — so we have no basis to flag it. The typed `references` command
+  // always sets includeDeclaration:true, so it is unaffected.
+  if (getIncludeDeclaration(params) === false) return OK;
+
+  // null or empty: with the declaration expected, the symbol's own declaration
+  // should have come back, so nothing-at-all is suspect.
   if (result === null || result === undefined) {
     return { partial: true, warning: `no references returned — ${NOT_INDEXED}` };
   }
