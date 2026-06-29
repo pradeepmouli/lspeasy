@@ -1,6 +1,6 @@
 {
   "name": "@lsproxy/cli",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and move-symbol",
   "private": false,
   "keywords": [
