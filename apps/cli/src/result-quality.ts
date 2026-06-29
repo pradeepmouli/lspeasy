@@ -107,11 +107,11 @@ function assessReferences(params: unknown, result: unknown): ResultQuality {
  * Assess whether a read-only LSP result looks suspiciously incomplete. Returns
  * `{ partial: false }` for everything it has no opinion on.
  *
- * @never NEVER treat a non-null `textDocument/references` result as authoritative
- * for destructive operations (file move, dead-code deletion) without checking
- * {@link assessResultQuality}: tsserver returns only the declaration's own range
- * (or an empty array) when its workspace project is not fully loaded, so a
- * false-empty result reads as "zero callers" and can green-light an unsafe edit.
+ * Note: tsserver returns only the declaration's own range (or an empty array)
+ * for `textDocument/references` when its workspace project is not fully loaded,
+ * so a non-null-but-empty result can read as "zero callers" and mislead a
+ * destructive operation (file move, dead-code deletion). Callers surface the
+ * resulting `warning` rather than treating such a result as authoritative.
  */
 export function assessResultQuality(
   method: string,

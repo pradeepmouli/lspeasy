@@ -103,6 +103,15 @@ root or pass `--server <cmd>` explicitly.
 produce edits write to disk immediately. Always run with `--dry-run` first on an
 unfamiliar codebase.
 
+**`references` returns only the declaration (or nothing)** — In a multi-package TypeScript
+monorepo (especially with a solution-style root `tsconfig.json` that has `references` but no
+`include`), `textDocument references` can come back with only the symbol's own declaration —
+or an empty result — even when cross-file callers exist. This happens when the language
+server has not loaded the full workspace project. lsproxy flags this case as `partial:true`
+with a `warning` (and a stderr note) instead of a bare `ok:true`. Do not treat a
+partial/empty result as "no callers" for a deletion or a file move; verify with a
+build/type-check, or re-run against a warmed proxy daemon so the project is fully indexed.
+
 ## Help output
 
 The CLI uses a dynamic discovery model — the help surface is built from live
