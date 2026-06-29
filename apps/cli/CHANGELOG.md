@@ -1,5 +1,11 @@
 # @lspeasy/cli
 
+## 0.7.2
+
+### Patch Changes
+
+- 7008f53: Detect empty / declaration-only `textDocument/references` results (which tsserver returns when its workspace project isn't fully loaded) and surface `partial:true` + a `warning` instead of a bare `ok:true`, so a false-empty no longer silently reads as "no callers". Respects `includeDeclaration:false` (an empty result there is a legitimate answer). Adds a references troubleshooting entry to the README/skill.
+
 ## 0.7.1
 
 ### Patch Changes
