@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mkdtempSync, writeFileSync, rmSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { configList, configImport } from './commands.js';
+import { configList, configImport, configExport, configDiff } from './commands.js';
+import { createFormatter } from '../format.js';
 
 const dirs: string[] = [];
 function root(): string {
@@ -24,6 +25,26 @@ afterEach(() => {
 });
 
 describe('config commands', () => {
+  it('configList text output is ANSI-free when color is disabled', () => {
+    const cap = captureStdout();
+    try {
+      configList({ json: false, root: root(), scope: 'project' });
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).not.toContain('\x1b');
+  });
+
+  it('configList text output contains ANSI codes when a color formatter is passed', () => {
+    const cap = captureStdout();
+    try {
+      configList({ json: false, root: root(), scope: 'project' }, createFormatter(true));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).toContain('\x1b');
+  });
+
   it('list --json reports every adapter with tier and detected flag', () => {
     const cap = captureStdout();
     try {
@@ -63,5 +84,152 @@ describe('config commands', () => {
     const parsed = JSON.parse(cap.out()) as { ok: boolean; added: string[] };
     expect(parsed.ok).toBe(true);
     expect(parsed.added).toContain('go');
+  });
+
+  // -- configImport color tests --
+
+  it('configImport text output is ANSI-free when color is disabled', () => {
+    const r = root();
+    mkdirSync(join(r, '.github'), { recursive: true });
+    writeFileSync(
+      join(r, '.github', 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configImport('copilot', { json: false, root: r, scope: 'project' }, createFormatter(false));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).not.toContain('\x1b');
+  });
+
+  it('configImport text output contains ANSI codes when a color formatter is passed', () => {
+    const r = root();
+    mkdirSync(join(r, '.github'), { recursive: true });
+    writeFileSync(
+      join(r, '.github', 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configImport('copilot', { json: false, root: r, scope: 'project' }, createFormatter(true));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).toContain('\x1b');
+  });
+
+  it('configImport --json output is ANSI-free even with a color formatter', () => {
+    const r = root();
+    mkdirSync(join(r, '.github'), { recursive: true });
+    writeFileSync(
+      join(r, '.github', 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configImport('copilot', { json: true, root: r, scope: 'project' }, createFormatter(true));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).not.toContain('\x1b');
+  });
+
+  // -- configExport color tests --
+
+  it('configExport text output is ANSI-free when color is disabled', () => {
+    const r = root();
+    writeFileSync(
+      join(r, 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configExport('copilot', { json: false, root: r, scope: 'project' }, createFormatter(false));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).not.toContain('\x1b');
+  });
+
+  it('configExport text output contains ANSI codes when a color formatter is passed', () => {
+    const r = root();
+    writeFileSync(
+      join(r, 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configExport('copilot', { json: false, root: r, scope: 'project' }, createFormatter(true));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).toContain('\x1b');
+  });
+
+  it('configExport --json output is ANSI-free even with a color formatter', () => {
+    const r = root();
+    writeFileSync(
+      join(r, 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configExport('copilot', { json: true, root: r, scope: 'project' }, createFormatter(true));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).not.toContain('\x1b');
+  });
+
+  // -- configDiff color tests --
+
+  it('configDiff text output is ANSI-free when color is disabled', () => {
+    const r = root();
+    mkdirSync(join(r, '.github'), { recursive: true });
+    writeFileSync(
+      join(r, '.github', 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configDiff('copilot', { json: false, root: r, scope: 'project' }, createFormatter(false));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).not.toContain('\x1b');
+  });
+
+  it('configDiff text output contains ANSI codes when a color formatter is passed', () => {
+    const r = root();
+    mkdirSync(join(r, '.github'), { recursive: true });
+    writeFileSync(
+      join(r, '.github', 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configDiff('copilot', { json: false, root: r, scope: 'project' }, createFormatter(true));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).toContain('\x1b');
+  });
+
+  it('configDiff --json output is ANSI-free even with a color formatter', () => {
+    const r = root();
+    mkdirSync(join(r, '.github'), { recursive: true });
+    writeFileSync(
+      join(r, '.github', 'lsp.json'),
+      JSON.stringify({ lspServers: { go: { command: 'gopls', fileExtensions: { '.go': 'go' } } } })
+    );
+    const cap = captureStdout();
+    try {
+      configDiff('copilot', { json: true, root: r, scope: 'project' }, createFormatter(true));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).not.toContain('\x1b');
   });
 });

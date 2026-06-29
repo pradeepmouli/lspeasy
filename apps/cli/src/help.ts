@@ -1,6 +1,29 @@
 import type { LanguageStatus, StatusReport } from '@lsproxy/proxy';
 import type { Command } from 'commander';
+import { z } from 'zod';
+import { exampleFromZod, getResultSchemaForMethod, getSchemaForMethod } from '@lspeasy/core';
 import { SYMBOLS, type Formatter } from './format.js';
+
+function methodForPath(path: string[]): string | undefined {
+  return path.length >= 2 ? `${path[0]}/${path[1]}` : undefined;
+}
+
+function safeJsonSchema(schema: z.ZodType | undefined): unknown {
+  if (!schema) return undefined;
+  try {
+    return z.toJSONSchema(schema);
+  } catch {
+    return undefined;
+  }
+}
+
+function safeExample(schema: z.ZodType): unknown | undefined {
+  try {
+    return exampleFromZod(schema);
+  } catch {
+    return undefined;
+  }
+}
 
 function languageLine(lang: LanguageStatus, fmt: Formatter): string {
   const exts = lang.extensions.join(' ');
@@ -60,13 +83,36 @@ export function navigateTree(program: Command, path: string[]): NavResult {
 
 export function renderDrillDownText(
   program: Command,
-  path: string[]
+  path: string[],
+  fmt?: Formatter
 ): { ok: boolean; text: string } {
-  const result = navigateTree(program, path);
-  if ('error' in result) {
-    return { ok: false, text: `${result.error}\nAvailable: ${result.available.join(', ')}\n` };
+  const navResult = navigateTree(program, path);
+  if ('error' in navResult) {
+    return {
+      ok: false,
+      text: `${navResult.error}\nAvailable: ${navResult.available.join(', ')}\n`
+    };
   }
-  return { ok: true, text: result.command.helpInformation() };
+  const label = (s: string): string => (fmt ? fmt.yellow(s) : s);
+  let text = navResult.command.helpInformation();
+  if (path.length >= 2) {
+    const method = methodForPath(path)!;
+    const paramsSchema = getSchemaForMethod(method);
+    const resultSchema = getResultSchemaForMethod(method);
+    if (paramsSchema) {
+      const ex = safeExample(paramsSchema);
+      if (ex !== undefined) {
+        text += `\n${label('Example input (illustrative):')}\n${JSON.stringify(ex, null, 2)}\n`;
+      }
+    }
+    if (resultSchema) {
+      const ex = safeExample(resultSchema);
+      if (ex !== undefined) {
+        text += `\n${label('Example output (illustrative):')}\n${JSON.stringify(ex, null, 2)}\n`;
+      }
+    }
+  }
+  return { ok: true, text };
 }
 
 interface OptionInfo {
@@ -127,12 +173,17 @@ export function drillDownJson(program: Command, languageId: string, path: string
       requests: node.commands.map((r) => r.name())
     };
   }
+  const method = methodForPath(path)!;
+  const paramsSchema = safeJsonSchema(getSchemaForMethod(method));
+  const resultSchema = safeJsonSchema(getResultSchemaForMethod(method));
   return {
     ok: true,
     languageId,
     namespace: path[0],
     request: path[1],
     arguments: argumentInfos(node),
-    options: optionInfos(node)
+    options: optionInfos(node),
+    ...(paramsSchema !== undefined && { paramsSchema }),
+    ...(resultSchema !== undefined && { resultSchema })
   };
 }

@@ -3,8 +3,7 @@
 ## protocol
 
 ### `clientSupportsRequest`
-Type-guarding predicate that narrows `capabilities` to include the specific
-client capability key required for the given server-to-client request method.
+Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client request method.
 ```ts
 clientSupportsRequest<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "workspace.workspaceFolders" | "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.configuration" | "workspace.foldingRange.refreshSupport" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```

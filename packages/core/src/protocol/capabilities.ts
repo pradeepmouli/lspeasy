@@ -66,8 +66,7 @@ function getProperty<T, K extends Paths<T> & string>(obj: T, key: K): any {
  */
 
 /**
- * Type-guarding predicate that narrows `capabilities` to include the specific
- * server capability key required for the given client-to-server request method.
+ * Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server request method.
  *
  * @param method - The LSP request method string (e.g. `'textDocument/hover'`).
  * @param capabilities - The `ServerCapabilities` object to test.
@@ -87,8 +86,7 @@ export function serverSupportsRequest<M extends LSPRequestMethod<'clientToServer
 }
 
 /**
- * Type-guarding predicate that narrows `capabilities` to include the specific
- * server capability key required for the given client-to-server notification method.
+ * Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server notification method.
  *
  * @param method - The LSP notification method string (e.g. `'textDocument/didOpen'`).
  * @param capabilities - The `ServerCapabilities` object to test.
@@ -110,8 +108,7 @@ export function serverSupportsNotification<
 }
 
 /**
- * Type-guarding predicate that narrows `capabilities` to include the specific
- * client capability key required for the given server-to-client request method.
+ * Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client request method.
  *
  * @param method - The LSP request method string (e.g. `'client/registerCapability'`).
  * @param capabilities - The `ClientCapabilities` object to test.
@@ -133,8 +130,7 @@ export function clientSupportsRequest<
 }
 
 /**
- * Type-guarding predicate that narrows `capabilities` to include the specific
- * client capability key required for the given server-to-client notification method.
+ * Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client notification method.
  *
  * @param method - The LSP notification method string (e.g. `'window/logMessage'`).
  * @param capabilities - The `ClientCapabilities` object to test.
@@ -156,8 +152,7 @@ export function clientSupportsNotification<
 }
 
 /**
- * Type-guarding predicate that narrows `capabilities` to confirm a specific server capability
- * is enabled at a deep dot-notation path.
+ * Type-guarding predicate that narrows `capabilities` to confirm a specific server capability is enabled at a deep dot-notation path.
  *
  * @param capabilities - The server capabilities to check.
  * @param capability - Dot-notation path of the capability (e.g. `'hoverProvider'`).
@@ -172,8 +167,7 @@ export function hasServerCapability<
 }
 
 /**
- * Type-guarding predicate that narrows `capabilities` to confirm a specific client capability
- * is enabled at a deep dot-notation path.
+ * Type-guarding predicate that narrows `capabilities` to confirm a specific client capability is enabled at a deep dot-notation path.
  *
  * @param capabilities - The client capabilities to check.
  * @param capability - Dot-notation path of the capability (e.g. `'window.workDoneProgress'`).

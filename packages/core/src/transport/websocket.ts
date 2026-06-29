@@ -119,9 +119,7 @@ function getWsWebSocketCtor(): ((url: string) => WebSocketLike) | undefined {
 }
 
 /**
- * Creates a WebSocket client instance, preferring the native
- * `globalThis.WebSocket` (Node ≥ 22.4 / modern browsers) and falling back
- * to the optional `ws` peer dependency.
+ * Creates a WebSocket client instance, preferring the native WebSocket API (Node 22+ or modern browsers) and falling back to the optional `ws` peer dependency.
  *
  * @remarks
  * This is a low-level factory used internally by `WebSocketTransport` in

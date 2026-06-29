@@ -278,8 +278,7 @@ export function getClientCapabilityForNotificationMethod<
 export type RequestDefinition = typeof LSPRequest.CallHierarchy.IncomingCalls;
 
 /**
- * Retrieves the full definition object for a given LSP request method by
- * namespace and method key.
+ * Retrieves the full definition object for a given LSP request method by namespace and method key.
  *
  * @param namespace - A top-level key of `LSPRequest` (e.g. `'TextDocument'`).
  * @param methodKey - A method key within that namespace (e.g. `'Hover'`).
@@ -294,8 +293,7 @@ export function getDefinitionForRequest<
 }
 
 /**
- * Retrieves the full definition object for a given LSP notification method by
- * namespace and method key.
+ * Retrieves the full definition object for a given LSP notification method by namespace and method key.
  *
  * @param namespace - A top-level key of `LSPNotification` (e.g. `'TextDocument'`).
  * @param methodKey - A method key within that namespace (e.g. `'DidOpen'`).

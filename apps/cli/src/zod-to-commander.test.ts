@@ -1,14 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
-import { detectArgPattern, marshalParams } from './zod-to-commander.js';
+import {
+  detectArgPattern,
+  marshalParams,
+  zodToCommander,
+  extractFieldValue
+} from './zod-to-commander.js';
 import {
   TextDocumentPositionParamsSchema,
   RenameParamsSchema,
   FoldingRangeParamsSchema,
   WorkspaceSymbolParamsSchema,
-  InlayHintParamsSchema
+  InlayHintParamsSchema,
+  getSchemaForMethod,
+  CodeActionContextSchema
 } from '@lspeasy/core';
 import type { GlobalFlags } from './io.js';
+import type { RefactorSession } from './session.js';
 
 const FLAGS: GlobalFlags = {
   server: '',
@@ -18,7 +26,8 @@ const FLAGS: GlobalFlags = {
   verbose: false,
   waitMs: 15000,
   allowOutsideRoot: true,
-  overwrite: false
+  overwrite: false,
+  noProxy: false
 };
 
 describe('detectArgPattern', () => {
@@ -111,5 +120,77 @@ describe('marshalParams', () => {
 
   it('throws for raw pattern without --params', () => {
     expect(() => marshalParams('raw', [], {}, FLAGS)).toThrow('--params');
+  });
+});
+
+// Minimal stub — zodToCommander only invokes session inside the action handler,
+// which is never called during option-inspection tests.
+const STUB_SESSION = {} as RefactorSession;
+
+describe('zodToCommander deepened flags', () => {
+  it('codeAction surfaces --params fallback and an --*-only flag (enum array), not just raw JSON', () => {
+    const schema = getSchemaForMethod('textDocument/codeAction')!;
+    const cmd = zodToCommander('textDocument/codeAction', schema, STUB_SESSION, FLAGS);
+    const flags = cmd.options.map((o) => o.flags).join(' ');
+
+    // Fallback must always be present
+    expect(flags).toContain('--params');
+
+    // The `only` sub-field of CodeActionContext (an array of CodeActionKind enum values)
+    // must be surfaced as a dedicated flag — any prefix is acceptable.
+    expect(flags).toMatch(/--\S*only\b/);
+  });
+
+  it('codeAction trigger-kind flag has Commander choices (union of literals)', () => {
+    const schema = getSchemaForMethod('textDocument/codeAction')!;
+    const cmd = zodToCommander('textDocument/codeAction', schema, STUB_SESSION, FLAGS);
+    const triggerOpt = cmd.options.find((o) => /trigger-kind/.test(o.flags));
+    // triggerKind = z.union([z.literal(1), z.literal(2)]) → choices ['1','2']
+    expect(triggerOpt).toBeDefined();
+    expect(triggerOpt?.argChoices).toBeTruthy();
+    expect(triggerOpt?.argChoices?.length).toBeGreaterThan(0);
+  });
+});
+
+describe('extractFieldValue round-trip (deepened flags)', () => {
+  // The codeAction `context` field uses cliKey 'code-action' (fieldCliKey strips
+  // the '-context' suffix from 'code-action-context'). extractFieldValue expands
+  // one level deep so sub-fields map to: codeActionOnly / codeActionTriggerKind.
+
+  it('reconstructs context.only (scalar array) from comma-separated option value', () => {
+    const opts: Record<string, unknown> = {
+      codeActionOnly: 'quickfix,refactor'
+    };
+    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
+      string,
+      unknown
+    >;
+    expect(result).toBeDefined();
+    expect(result['only']).toEqual(['quickfix', 'refactor']);
+  });
+
+  it('reconstructs context.triggerKind (union-of-literals) as a number via JSON.parse', () => {
+    const opts: Record<string, unknown> = {
+      codeActionTriggerKind: '1'
+    };
+    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
+      string,
+      unknown
+    >;
+    expect(result).toBeDefined();
+    expect(result['triggerKind']).toBe(1);
+  });
+
+  it('reconstructs both context sub-fields together', () => {
+    const opts: Record<string, unknown> = {
+      codeActionOnly: 'quickfix,refactor',
+      codeActionTriggerKind: '1'
+    };
+    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
+      string,
+      unknown
+    >;
+    expect(result['only']).toEqual(['quickfix', 'refactor']);
+    expect(result['triggerKind']).toBe(1);
   });
 });

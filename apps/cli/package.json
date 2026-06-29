@@ -50,7 +50,8 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsgo --build --watch",
     "type-check": "tsgo --noEmit",
-    "postinstall": "node ./skillit-postinstall.cjs"
+    "postinstall": "node ./skillit-postinstall.cjs",
+    "skill:gen": "tsx scripts/gen-skill.ts"
   },
   "dependencies": {
     "@lspeasy/client": "workspace:*",
@@ -62,6 +63,7 @@
   },
   "devDependencies": {
     "@skillit/cli": "^0.4.0",
+    "tsx": "^4.22.4",
     "typedoc-plugin-skillit": "^1.4.1",
     "typescript": "^6.0.3"
   },

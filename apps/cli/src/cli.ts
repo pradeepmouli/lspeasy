@@ -105,10 +105,12 @@ async function main(): Promise<void> {
       ? 'user'
       : 'project';
     const cfg: ConfigFlags = { json: flags.json, root: flags.root, scope };
-    if (sub === 'list') configList(cfg);
-    else if (sub === 'import' && platform) configImport(platform, cfg);
-    else if (sub === 'export' && platform) configExport(platform, cfg);
-    else if (sub === 'diff' && platform) configDiff(platform, cfg);
+    const color = process.stdout.isTTY === true && !process.env['NO_COLOR'] && !flags.json;
+    const fmt = createFormatter(color);
+    if (sub === 'list') configList(cfg, fmt);
+    else if (sub === 'import' && platform) configImport(platform, cfg, fmt);
+    else if (sub === 'export' && platform) configExport(platform, cfg, fmt);
+    else if (sub === 'diff' && platform) configDiff(platform, cfg, fmt);
     else {
       process.stderr.write(
         'usage: lsproxy config <list|import|export|diff> [platform] [--user] [--json]\n'
@@ -330,7 +332,8 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
         exit(1);
       }
     } else {
-      const { ok, text } = renderDrillDownText(program, drillPath);
+      const color = process.stdout.isTTY === true && !process.env['NO_COLOR'];
+      const { ok, text } = renderDrillDownText(program, drillPath, createFormatter(color));
       process.stdout.write(text.endsWith('\n') ? text : text + '\n');
       if (!ok) {
         await session.stop();

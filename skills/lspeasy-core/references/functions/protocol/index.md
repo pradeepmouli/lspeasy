@@ -6,22 +6,14 @@
 | [getClientCapabilityForRequestMethod](get-client-capability-for-request-method.md) | Get the client capability key for a given request method at runtime. |
 | [getCapabilityForNotificationMethod](get-capability-for-notification-method.md) | Get the server capability key for a given notification method at runtime. |
 | [getClientCapabilityForNotificationMethod](get-client-capability-for-notification-method.md) | Get the client capability key for a given notification method at runtime. |
-| [getDefinitionForRequest](get-definition-for-request.md) | Retrieves the full definition object for a given LSP request method by
-namespace and method key. |
-| [getDefinitionForNotification](get-definition-for-notification.md) | Retrieves the full definition object for a given LSP notification method by
-namespace and method key. |
-| [serverSupportsRequest](server-supports-request.md) | Type-guarding predicate that narrows `capabilities` to include the specific
-server capability key required for the given client-to-server request method. |
-| [serverSupportsNotification](server-supports-notification.md) | Type-guarding predicate that narrows `capabilities` to include the specific
-server capability key required for the given client-to-server notification method. |
-| [clientSupportsRequest](client-supports-request.md) | Type-guarding predicate that narrows `capabilities` to include the specific
-client capability key required for the given server-to-client request method. |
-| [clientSupportsNotification](client-supports-notification.md) | Type-guarding predicate that narrows `capabilities` to include the specific
-client capability key required for the given server-to-client notification method. |
-| [hasServerCapability](has-server-capability.md) | Type-guarding predicate that narrows `capabilities` to confirm a specific server capability
-is enabled at a deep dot-notation path. |
-| [hasClientCapability](has-client-capability.md) | Type-guarding predicate that narrows `capabilities` to confirm a specific client capability
-is enabled at a deep dot-notation path. |
+| [getDefinitionForRequest](get-definition-for-request.md) | Retrieves the full definition object for a given LSP request method by namespace and method key. |
+| [getDefinitionForNotification](get-definition-for-notification.md) | Retrieves the full definition object for a given LSP notification method by namespace and method key. |
+| [serverSupportsRequest](server-supports-request.md) | Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server request method. |
+| [serverSupportsNotification](server-supports-notification.md) | Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server notification method. |
+| [clientSupportsRequest](client-supports-request.md) | Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client request method. |
+| [clientSupportsNotification](client-supports-notification.md) | Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client notification method. |
+| [hasServerCapability](has-server-capability.md) | Type-guarding predicate that narrows `capabilities` to confirm a specific server capability is enabled at a deep dot-notation path. |
+| [hasClientCapability](has-client-capability.md) | Type-guarding predicate that narrows `capabilities` to confirm a specific client capability is enabled at a deep dot-notation path. |
 | [supportsHover](supports-hover.md) | Returns `true` when `hoverProvider` is declared in the server capabilities. |
 | [supportsCompletion](supports-completion.md) | Returns `true` when `completionProvider` is declared in the server capabilities. |
 | [supportsDefinition](supports-definition.md) | Returns `true` when `definitionProvider` is declared in the server capabilities. |
@@ -32,6 +24,7 @@ is enabled at a deep dot-notation path. |
 | [supportsFileWatching](supports-file-watching.md) | Returns `true` when the client supports dynamic file watching registration. |
 | [supportsWorkDoneProgress](supports-work-done-progress.md) | Returns `true` when the client supports work done progress notifications. |
 | [getSchemaForMethod](get-schema-for-method.md) | Looks up the Zod validation schema for a given LSP method. |
+| [getResultSchemaForMethod](get-result-schema-for-method.md) | Looks up the result schema for a request method; returns `undefined` for notifications or unknown methods. |
 | [createWorkspaceFolder](create-workspace-folder.md) | Helper to create a WorkspaceFolder. |
 | [createWorkspaceFoldersChangeEvent](create-workspace-folders-change-event.md) | Helper to create a WorkspaceFoldersChangeEvent. |
 | [createFileEvent](create-file-event.md) | Helper to create a FileEvent. |
