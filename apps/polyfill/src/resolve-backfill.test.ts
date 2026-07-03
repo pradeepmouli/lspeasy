@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ServerCapabilities, CodeAction } from '@lspeasy/core';
+import type { CodeAction } from '@lspeasy/core';
 import { resolveBackfill } from './resolve-backfill.js';
 
 describe('resolveBackfill.appliesTo', () => {
