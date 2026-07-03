@@ -58,6 +58,18 @@ Capabilities to declare during initialization
 
 **Type:** `Capabilities`
 
+#### preInitializeMethods
+
+Request methods allowed to be answered before the `initialize` handshake
+completes, in addition to `initialize`/`shutdown` themselves.
+
+**Type:** `string[]`
+
+Use for cheap, non-LSP meta-endpoints (health checks, status queries)
+that a caller may need to reach without paying for a full session
+bring-up. Methods here must still be registered via `onRequest` as usual
+— this only exempts them from the `serverNotInitialized` gate.
+
 #### strictCapabilities
 
 Strict capability checking mode

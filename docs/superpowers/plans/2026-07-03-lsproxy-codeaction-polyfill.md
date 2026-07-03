@@ -1133,9 +1133,98 @@ git commit -m "feat(proxy): cut over to ProxySession, remove legacy ClientSessio
 
 ---
 
+### Task 5b: Fix the `e2e/` test-runner discovery gap
+
+**Discovered during Task 5:** `pnpm run test:e2e` (`vitest run e2e`) reports "No test files found." Root cause, confirmed pre-existing (predates this feature — traced to a commit from before this plan existed) and unrelated to the `ProxySession` migration: `vitest.config.ts`'s `include` glob only covers `packages/**` and `apps/**`, never `e2e/**`; and `e2e/` has no `package.json`, so it isn't a pnpm workspace member — `pnpm-workspace.yaml`'s globs (`packages/*`, `packages/*/*`, `apps/*`) don't cover it either. Some `e2e/*.spec.ts` files import packages (`ws`) that aren't hoisted to the root `node_modules`, so even if vitest discovered these files, some imports would fail to resolve.
+
+This blocks Task 9 (which adds a new `e2e/*.spec.ts` file and needs `pnpm run test:e2e` to actually run it), so it's fixed now rather than deferred.
+
+**Scope boundary:** this task fixes the *wiring* (files get discovered, imports resolve) — it does not guarantee every pre-existing `e2e/*.spec.ts` file's assertions pass. If, once runnable, some pre-existing specs fail for reasons unrelated to wiring (e.g. a real behavioral regression, or specs that were already stale/wrong before this feature), treat that the same way as any other unexpected test failure during this plan: investigate whether it's a genuine regression from this plan's work (unlikely, since nothing in Phase 1 touches what these specs exercise) or a separate pre-existing issue, and report back rather than attempting to fix unrelated pre-existing test failures — that's out of scope for this task.
+
+**Files:**
+- Modify: `pnpm-workspace.yaml` (add `e2e` to the `packages` list)
+- Create: `e2e/package.json`
+- Modify: `vitest.config.ts` (extend `include`)
+
+**Interfaces:**
+- None — this is infrastructure/config only, no new exported code.
+
+- [ ] **Step 1: Add `e2e` as a workspace member**
+
+In `pnpm-workspace.yaml`, add `e2e` to the `packages` list:
+
+```yaml
+packages:
+  - 'packages/*'
+  - 'packages/*/*'
+  - 'apps/*'
+  - 'e2e'
+allowBuilds:
+  esbuild: true
+  simple-git-hooks: true
+```
+
+- [ ] **Step 2: Give `e2e/` its own `package.json`**
+
+Create `e2e/package.json`:
+
+```json
+{
+  "name": "e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@lspeasy/client": "workspace:*",
+    "@lspeasy/core": "workspace:*",
+    "@lspeasy/server": "workspace:*",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8",
+    "ws": "^8.20.1"
+  }
+}
+```
+
+- [ ] **Step 3: Extend `vitest.config.ts`'s include glob**
+
+In `vitest.config.ts`, update `test.include`:
+
+```ts
+    include: [
+      'packages/**/test/**/*.test.ts',
+      'packages/**/src/**/*.test.ts',
+      'apps/**/src/**/*.test.ts',
+      'e2e/**/*.spec.ts'
+    ],
+```
+
+(Only this one array changes — everything else in the file stays the same.)
+
+- [ ] **Step 4: Install and verify discovery**
+
+Run: `pnpm install`
+Expected: `e2e` appears as a linked workspace member; no errors.
+
+Run: `pnpm run test:e2e`
+Expected: test files are now discovered and run (no longer "No test files found"). Report back the actual pass/fail counts — do not assume all pre-existing specs pass. If any fail, apply the scope boundary above: check whether the failure is plausibly caused by anything in Phase 1 (it should not be, since nothing there touches transports/middleware/notebook-sync/etc. that these specs exercise) — if it's clearly unrelated and pre-existing, note it and continue; if there's any doubt, stop and report back with the failure details before proceeding.
+
+- [ ] **Step 5: Run the root suite once more for a full sanity check**
+
+Run: `pnpm test && pnpm run test:e2e`
+Expected: both commands now run to completion (pass/fail counts reported, not a runner-discovery error).
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add pnpm-workspace.yaml e2e/package.json vitest.config.ts pnpm-lock.yaml
+git commit -m "fix(e2e): wire e2e/ into the pnpm workspace and vitest's test discovery"
+```
+
+---
+
 ## Phase 2: CodeAction Polyfills
 
-*(Do not begin until every Phase 1 task above is committed and Task 5 Step 13's full-suite run is green.)*
+*(Do not begin until every Phase 1 task above — through Task 5b — is committed and Task 5b Step 5's full-suite run is green.)*
 
 ### Task 6: `@lsproxy/polyfill` package — `CodeActionPolyfill` type, `resolve-backfill`, registry
 
