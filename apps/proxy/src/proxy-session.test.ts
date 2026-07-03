@@ -96,6 +96,13 @@ describe('ProxySession', () => {
     expect(backend.sendRequest).not.toHaveBeenCalled();
   });
 
+  it('answers $/lsproxy.status even before initialize', async () => {
+    const { transport } = makeSession();
+    transport.simulate({ jsonrpc: '2.0', id: 1, method: '$/lsproxy.status', params: {} });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(1));
+    expect(transport.sent[0]).toMatchObject({ id: 1, result: STATUS });
+  });
+
   it('forwards a non-special-cased request and records it against the resolved language', async () => {
     const { transport, backend, recordRequest } = makeSession();
     transport.simulate({

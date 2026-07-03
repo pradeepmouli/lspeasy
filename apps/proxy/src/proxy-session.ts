@@ -36,6 +36,7 @@ export class ProxySession {
     this.server = new LSPServer({
       name: 'lsproxy',
       version: '0.1.0',
+      preInitializeMethods: ['$/lsproxy.status'],
       resolveCapabilities: (params) => this.resolveCapabilities(params)
     });
 
