@@ -1230,15 +1230,15 @@ In `e2e/transport-utils.ts`, find the import of `StdioTransport` from `@lspeasy/
 
 In each of `e2e/connection-health.spec.ts`, `e2e/partial-results.spec.ts`, `e2e/lsp-compliance.spec.ts`, `e2e/workspace-folders.spec.ts`, `e2e/middleware-integration.spec.ts`: replace every call of the form `server.setCapabilities(...)` with `server.registerCapabilities(...)` — same arguments, only the method name changes. Do not change anything else in these files. (Exact call sites and argument shapes vary per file — read each one, this is a straightforward rename, not a behavior change.)
 
-- [ ] **Step 9: Run the e2e suite and confirm it's green**
+- [ ] **Step 9: Run the e2e suite**
 
 Run: `pnpm run test:e2e`
-Expected: all 14 spec files pass (0 failures). If any failure remains after both fixes, stop and report it — do not attempt further fixes without checking in, since this task's scope was specifically these two known root causes, not an open-ended e2e debugging effort.
+Expected: 13/14 spec files pass. `e2e/websocket-native.spec.ts` is a known, separate, in-flight issue (a WebSocket connection-timing bug, unrelated to either root cause fixed here — being diagnosed and fixed independently, in a separate worktree, not gating this task). If any file OTHER than `websocket-native.spec.ts` still fails, stop and report it — do not attempt further fixes without checking in.
 
 - [ ] **Step 10: Run the full workspace suite one more time**
 
 Run: `pnpm test && pnpm run test:e2e`
-Expected: both fully green.
+Expected: `pnpm test` fully green; `pnpm run test:e2e` shows only `websocket-native.spec.ts` failing (known, tracked separately).
 
 - [ ] **Step 11: Commit the spec fixes**
 
@@ -1246,6 +1246,8 @@ Expected: both fully green.
 git add e2e/transport-utils.ts e2e/connection-health.spec.ts e2e/partial-results.spec.ts e2e/lsp-compliance.spec.ts e2e/workspace-folders.spec.ts e2e/middleware-integration.spec.ts
 git commit -m "fix(e2e): repair pre-existing StdioTransport import path and setCapabilities rename"
 ```
+
+**Note:** `e2e/websocket-native.spec.ts`'s connection-timing failure is being fixed independently in a separate worktree/branch, unrelated to this feature. Task 5b is considered complete once Steps 1-11 above land, regardless of that fix's status — it isn't part of this plan.
 
 ---
 
