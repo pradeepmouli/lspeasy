@@ -1,5 +1,12 @@
 # @lspeasy/server
 
+## 4.1.6
+
+### Patch Changes
+
+- Updated dependencies [c44550e]
+  - @lspeasy/core@2.6.1
+
 ## 4.1.5
 
 ### Patch Changes

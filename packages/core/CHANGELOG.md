@@ -1,5 +1,15 @@
 # @lspeasy/core
 
+## 2.6.1
+
+### Patch Changes
+
+- c44550e: Fix `WebSocketTransport` never marking a connection as established when the
+  underlying socket is already open at construction time (the case for every
+  server-accepted socket, e.g. from `ws`'s `WebSocketServer`). Previously this
+  caused `send()` to throw `"WebSocket is not connected"` on the first message
+  from a server-side transport.
+
 ## 2.6.0
 
 ### Minor Changes
