@@ -930,15 +930,165 @@ git commit -m "feat(proxy): ProxySession doc-state notifications and workspace/a
 
 ### Task 5: Cut over `ProxyServer` to `ProxySession`, remove `ClientSession`
 
+**Amendment (discovered during implementation):** `$/lsproxy.status` must be answerable *before* the `initialize` handshake — `lsproxy status`/`lsproxy start` (`apps/cli/src/connect.ts`'s `fetchDaemonStatus`) send it as the very first message on the socket, with no handshake, to cheaply query/wait for the daemon without paying for a full LSP session bring-up. The old hand-rolled `ClientSession` special-cased this unconditionally. `LSPServer`'s built-in dispatch loop rejects any non-`initialize`/`shutdown` request sent before `state === ServerState.Initialized` with `serverNotInitialized()` (`packages/server/src/server.ts:675-681`) — this silently broke `ProxySession`'s `$/lsproxy.status` handler, caught by `apps/cli/src/connect.test.ts`'s `fetchDaemonStatus` test. Fix: extend `@lspeasy/server` with a small, configurable allowlist (same pattern as Task 1's `resolveCapabilities` — extend the SDK rather than route around it in `apps/proxy`), then use it in `ProxySession`.
+
 **Files:**
+- Modify: `packages/server/src/types.ts` (add `ServerOptions.preInitializeMethods`)
+- Modify: `packages/server/src/server.ts:675` (honor it in the pre-Initialized gate)
+- Modify: `packages/server/test/integration/initialize.test.ts` (test the new option)
+- Modify: `apps/proxy/src/proxy-session.ts` (pass `preInitializeMethods: ['$/lsproxy.status']`)
+- Modify: `apps/proxy/src/proxy-session.test.ts` (test status works pre-initialize)
 - Modify: `apps/proxy/src/proxy-server.ts:9,76-84`
 - Delete: `apps/proxy/src/client-session.ts`
 - Delete: `apps/proxy/src/client-session.test.ts`
 
 **Interfaces:**
+- Produces: `ServerOptions<Capabilities>.preInitializeMethods?: string[]` — request method names that bypass the `serverNotInitialized` gate, in addition to the hardcoded `initialize`/`shutdown`.
 - Consumes: `ProxySession` from Task 4 (same constructor shape as today's `ClientSession`, confirmed by Task 3/4's tests).
 
-- [ ] **Step 1: Switch the import and construction site**
+- [ ] **Step 1: Write the failing test for `preInitializeMethods`**
+
+Add to `packages/server/test/integration/initialize.test.ts`, inside the existing `describe('Initialize Handshake Integration', ...)` block:
+
+```ts
+  it('allows a method in preInitializeMethods to be answered before initialize', async () => {
+    const preInitServer = new LSPServer({
+      logLevel: LogLevel.Error,
+      preInitializeMethods: ['$/ping']
+    });
+    preInitServer.onRequest('$/ping', async () => 'pong');
+    const preInitTransport = new TestTransport();
+    await preInitServer.listen(preInitTransport);
+
+    preInitTransport.simulateMessage({ jsonrpc: '2.0', id: 1, method: '$/ping', params: {} });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(preInitTransport.sentMessages[0]).toMatchObject({ id: 1, result: 'pong' });
+
+    await preInitServer.close();
+  });
+
+  it('still rejects a method NOT in preInitializeMethods before initialize', async () => {
+    const preInitServer = new LSPServer({
+      logLevel: LogLevel.Error,
+      preInitializeMethods: ['$/ping']
+    });
+    const preInitTransport = new TestTransport();
+    await preInitServer.listen(preInitTransport);
+
+    preInitTransport.simulateMessage({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'textDocument/hover',
+      params: { textDocument: { uri: 'file:///test.txt' }, position: { line: 0, character: 0 } }
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(preInitTransport.sentMessages[0]).toMatchObject({ id: 1, error: { code: -32002 } });
+
+    await preInitServer.close();
+  });
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `pnpm vitest run packages/server/test/integration/initialize.test.ts`
+Expected: FAIL — `preInitializeMethods` does not exist on `ServerOptions` (type error), or the first new test fails because `$/ping` still gets rejected.
+
+- [ ] **Step 3: Add the option and honor it in the gate**
+
+In `packages/server/src/types.ts`, add to `ServerOptions<Capabilities>`, near `resolveCapabilities`:
+
+```ts
+  /**
+   * Request methods allowed to be answered before the `initialize` handshake
+   * completes, in addition to `initialize`/`shutdown` themselves.
+   *
+   * @remarks
+   * Use for cheap, non-LSP meta-endpoints (health checks, status queries)
+   * that a caller may need to reach without paying for a full session
+   * bring-up. Methods here must still be registered via `onRequest` as usual
+   * — this only exempts them from the `serverNotInitialized` gate.
+   */
+  preInitializeMethods?: string[];
+```
+
+In `packages/server/src/server.ts`, update the gate in `handleMessage` (around line 670-680):
+
+```ts
+      if (isRequestMessage(message)) {
+        const method = message.method;
+        const isLifecycleMethod =
+          ['initialize', 'shutdown'].includes(method) ||
+          (this.options.preInitializeMethods?.includes(method) ?? false);
+
+        if (!isLifecycleMethod && this.state !== ServerState.Initialized) {
+          await this.transport!.send({
+            jsonrpc: '2.0',
+            id: message.id,
+            error: ResponseError.serverNotInitialized().toJSON()
+          });
+          return;
+        }
+      }
+```
+
+(Only the `isLifecycleMethod` line changes — everything else in this block is unchanged.)
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `pnpm vitest run packages/server/test/integration/initialize.test.ts`
+Expected: PASS, all tests including the two new ones.
+
+- [ ] **Step 5: Run the full server package test suite and type-check**
+
+Run: `pnpm vitest run packages/server && pnpm --filter @lspeasy/server type-check`
+Expected: all pass.
+
+- [ ] **Step 6: Wire it into `ProxySession`**
+
+In `apps/proxy/src/proxy-session.ts`, in the `LSPServer` construction inside the constructor, add the option:
+
+```ts
+    this.server = new LSPServer({
+      name: 'lsproxy',
+      version: '0.1.0',
+      preInitializeMethods: ['$/lsproxy.status'],
+      resolveCapabilities: (params) => this.resolveCapabilities(params)
+    });
+```
+
+- [ ] **Step 7: Write the failing test for pre-initialize status**
+
+Add to `apps/proxy/src/proxy-session.test.ts`:
+
+```ts
+  it('answers $/lsproxy.status even before initialize', async () => {
+    const { transport } = makeSession();
+    transport.simulate({ jsonrpc: '2.0', id: 1, method: '$/lsproxy.status', params: {} });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(1));
+    expect(transport.sent[0]).toMatchObject({ id: 1, result: STATUS });
+  });
+```
+
+- [ ] **Step 8: Run test to verify it fails, then passes**
+
+Run: `pnpm vitest run apps/proxy/src/proxy-session.test.ts`
+Expected: FAILs before Step 6/7's changes are combined (status request gets a `serverNotInitialized` error instead of `STATUS`), PASSes after.
+
+- [ ] **Step 9: Run the full proxy test suite and type-check**
+
+Run: `pnpm vitest run apps/proxy && pnpm --filter @lsproxy/proxy type-check`
+Expected: all pass.
+
+- [ ] **Step 10: Commit the SDK fix and ProxySession wiring**
+
+```bash
+git add packages/server/src/types.ts packages/server/src/server.ts packages/server/test/integration/initialize.test.ts apps/proxy/src/proxy-session.ts apps/proxy/src/proxy-session.test.ts
+git commit -m "feat(server): add preInitializeMethods for pre-handshake meta-endpoints"
+```
+
+- [ ] **Step 11: Switch the import and construction site**
 
 In `apps/proxy/src/proxy-server.ts`, change the import (line 9):
 
@@ -960,13 +1110,13 @@ to:
 
 (No other changes in this file — the constructor options object passed is identical, and `this.sessions: Map<string, ClientSession>` should be updated to `Map<string, ProxySession>` at its declaration, line 28.)
 
-- [ ] **Step 2: Delete the old implementation**
+- [ ] **Step 12: Delete the old implementation**
 
 ```bash
 git rm apps/proxy/src/client-session.ts apps/proxy/src/client-session.test.ts
 ```
 
-- [ ] **Step 3: Run the full proxy test suite, type-check, and e2e**
+- [ ] **Step 13: Run the full proxy test suite, type-check, and e2e**
 
 Run: `pnpm vitest run apps/proxy && pnpm --filter @lsproxy/proxy type-check && pnpm --filter @lsproxy/proxy build`
 Expected: all pass, build succeeds.
@@ -974,7 +1124,7 @@ Expected: all pass, build succeeds.
 Run: `pnpm test && pnpm run test:e2e` (root `test` = unit/integration suite across `packages/**`+`apps/**`; `test:e2e` separately runs `vitest run e2e`, per the root `package.json` scripts — `e2e/` is not included in the default `test` run)
 Expected: all pass — this is the regression gate for the whole migration. If any e2e scenario fails, diagnose against `ProxySession` before proceeding to Phase 2 (per the Global Constraint: migration must be fully verified before polyfill work begins).
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 14: Commit**
 
 ```bash
 git add apps/proxy/src/proxy-server.ts
@@ -985,7 +1135,7 @@ git commit -m "feat(proxy): cut over to ProxySession, remove legacy ClientSessio
 
 ## Phase 2: CodeAction Polyfills
 
-*(Do not begin until every Phase 1 task above is committed and Task 5 Step 3's full-suite run is green.)*
+*(Do not begin until every Phase 1 task above is committed and Task 5 Step 13's full-suite run is green.)*
 
 ### Task 6: `@lsproxy/polyfill` package — `CodeActionPolyfill` type, `resolve-backfill`, registry
 
