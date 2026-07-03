@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ServerCapabilities, CodeActionParams, CodeAction, Diagnostic } from '@lspeasy/core';
+import type {
+  ServerCapabilities,
+  CodeActionParams,
+  CodeAction,
+  Command,
+  Diagnostic
+} from '@lspeasy/core';
 import { fixAll } from './fix-all.js';
 
 describe('fixAll.appliesTo', () => {
@@ -34,7 +40,13 @@ describe('fixAll.augmentCodeActions', () => {
     message: 'missing semi'
   };
 
-  function makeBackend(fixesByLine: Record<number, CodeAction[]>) {
+  function makeBackend(
+    fixesByLine: Record<number, (Command | CodeAction)[]>,
+    options: {
+      capabilities?: ServerCapabilities;
+      resolve?: (action: CodeAction) => CodeAction;
+    } = {}
+  ) {
     return {
       sendRequest: vi.fn(async (method: string, params: unknown) => {
         if (method === 'textDocument/diagnostic') {
@@ -44,8 +56,13 @@ describe('fixAll.augmentCodeActions', () => {
           const p = params as { range: { start: { line: number } } };
           return fixesByLine[p.range.start.line] ?? [];
         }
+        if (method === 'codeAction/resolve') {
+          if (!options.resolve) throw new Error('backend does not support resolve');
+          return options.resolve(params as CodeAction);
+        }
         throw new Error(`unexpected method ${method}`);
-      })
+      }),
+      getServerCapabilities: () => options.capabilities ?? {}
     };
   }
 
@@ -138,5 +155,85 @@ describe('fixAll.augmentCodeActions', () => {
     const result = await fixAll.augmentCodeActions!([], params, backend as never);
     expect(result[0]!.edit!.changes!['file:///x.ts']).toHaveLength(1);
     expect(result[0]!.edit!.changes!['file:///x.ts']![0]).toMatchObject({ newText: 'a' });
+  });
+
+  it('skips a bare Command candidate and picks a usable CodeAction later in the list', async () => {
+    const bareCommand: Command = { title: 'Run something', command: 'editor.doThing' };
+    const usableFix: CodeAction = {
+      title: 'Remove unused var',
+      kind: 'quickfix',
+      edit: {
+        changes: {
+          'file:///x.ts': [
+            {
+              range: { start: { line: 0, character: 0 }, end: { line: 0, character: 3 } },
+              newText: ''
+            }
+          ]
+        }
+      }
+    };
+    const backend = makeBackend({ 0: [bareCommand, usableFix] });
+
+    const result = await fixAll.augmentCodeActions!([], params, backend as never);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.edit!.changes!['file:///x.ts']).toHaveLength(1);
+  });
+
+  it('does not count an edit with no actual changes as merged', async () => {
+    const emptyChangesFix: CodeAction = {
+      title: 'No-op fix',
+      kind: 'quickfix',
+      edit: { changes: { 'file:///x.ts': [] } }
+    };
+    const backend = makeBackend({ 0: [emptyChangesFix] });
+
+    const result = await fixAll.augmentCodeActions!([], params, backend as never);
+
+    expect(result).toEqual([]);
+  });
+
+  it('resolves a command-only fix via codeAction/resolve when the backend supports native resolve', async () => {
+    const commandOnlyFix: CodeAction = {
+      title: 'Fix via command',
+      kind: 'quickfix',
+      command: { title: 'Apply fix', command: 'server.applyFix' }
+    };
+    const resolvedEdit = {
+      'file:///x.ts': [
+        {
+          range: { start: { line: 0, character: 0 }, end: { line: 0, character: 3 } },
+          newText: ''
+        }
+      ]
+    };
+    const backend = makeBackend(
+      { 0: [commandOnlyFix] },
+      {
+        capabilities: { codeActionProvider: { resolveProvider: true } },
+        resolve: (action) => ({ ...action, edit: { changes: resolvedEdit } })
+      }
+    );
+
+    const result = await fixAll.augmentCodeActions!([], params, backend as never);
+
+    expect(backend.sendRequest).toHaveBeenCalledWith('codeAction/resolve', commandOnlyFix);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.edit!.changes!['file:///x.ts']).toHaveLength(1);
+  });
+
+  it('skips a command-only fix when the backend does not support native resolve', async () => {
+    const commandOnlyFix: CodeAction = {
+      title: 'Fix via command',
+      kind: 'quickfix',
+      command: { title: 'Apply fix', command: 'server.applyFix' }
+    };
+    const backend = makeBackend({ 0: [commandOnlyFix] });
+
+    const result = await fixAll.augmentCodeActions!([], params, backend as never);
+
+    expect(result).toEqual([]);
+    expect(backend.sendRequest).not.toHaveBeenCalledWith('codeAction/resolve', expect.anything());
   });
 });

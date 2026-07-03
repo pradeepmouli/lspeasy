@@ -2,6 +2,7 @@
 import type {
   CodeAction,
   CodeActionParams,
+  Command,
   Diagnostic,
   ServerCapabilities,
   TextEdit
@@ -28,8 +29,18 @@ function requestsFixAll(params: CodeActionParams): boolean {
   return only.some((kind) => kind === 'source.fixAll' || kind === 'source');
 }
 
-function pickFix(actions: CodeAction[]): CodeAction | undefined {
+function isCodeAction(item: Command | CodeAction): item is CodeAction {
+  return typeof item.command !== 'string';
+}
+
+function pickFix(candidates: (Command | CodeAction)[]): CodeAction | undefined {
+  const actions = candidates.filter(isCodeAction);
   return actions.find((a) => a.isPreferred) ?? actions[0];
+}
+
+function supportsResolve(capabilities: ServerCapabilities): boolean {
+  const provider = capabilities.codeActionProvider;
+  return typeof provider === 'object' && provider.resolveProvider === true;
 }
 
 function rangesOverlap(a: TextEdit['range'], b: TextEdit['range']): boolean {
@@ -69,6 +80,7 @@ export const fixAll: CodeActionPolyfill = {
     )) as { kind: 'full' | 'unchanged'; items?: Diagnostic[] };
     const diagnostics = report.kind === 'full' ? (report.items ?? []) : [];
 
+    const capabilities = backend.getServerCapabilities() ?? {};
     const changes: Record<string, TextEdit[]> = {};
     let mergedCount = 0;
 
@@ -79,15 +91,24 @@ export const fixAll: CodeActionPolyfill = {
         textDocument: params.textDocument,
         range: diagnostic.range,
         context: { diagnostics: [diagnostic], only: ['quickfix'] }
-      })) as CodeAction[] | null;
+      })) as (Command | CodeAction)[] | null;
 
-      const fix = candidates ? pickFix(candidates) : undefined;
+      let fix = candidates ? pickFix(candidates) : undefined;
+      if (fix && !fix.edit?.changes && fix.command && supportsResolve(capabilities)) {
+        fix = (await (backend.sendRequest as (m: string, p: unknown) => Promise<unknown>)(
+          'codeAction/resolve',
+          fix
+        )) as CodeAction;
+      }
       if (!fix?.edit?.changes) continue;
 
+      let mergedAny = false;
       for (const [uri, edits] of Object.entries(fix.edit.changes)) {
+        if (edits.length === 0) continue;
         changes[uri] = mergeEdits(changes[uri] ?? [], edits);
+        mergedAny = true;
       }
-      mergedCount += 1;
+      if (mergedAny) mergedCount += 1;
     }
 
     if (mergedCount === 0) return actions;
