@@ -1213,18 +1213,45 @@ Expected: test files are now discovered and run (no longer "No test files found"
 Run: `pnpm test && pnpm run test:e2e`
 Expected: both commands now run to completion (pass/fail counts reported, not a runner-discovery error).
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Commit the wiring fix**
 
 ```bash
 git add pnpm-workspace.yaml e2e/package.json vitest.config.ts pnpm-lock.yaml
 git commit -m "fix(e2e): wire e2e/ into the pnpm workspace and vitest's test discovery"
 ```
 
+**Amendment:** wiring the e2e runner surfaced 27 pre-existing test failures, confirmed unrelated to this plan (zero changes to `e2e/` exist between `develop` and this branch) and traced to two root causes that predate this feature: (1) `e2e/transport-utils.ts` imports `StdioTransport` from `@lspeasy/core` instead of the `@lspeasy/core/node` subpath where it's actually exported; (2) five spec files call `server.setCapabilities(...)`, renamed to `registerCapabilities` before this branch existed. Fix both now so `test:e2e` is fully green before Phase 2.
+
+- [ ] **Step 7: Fix the `StdioTransport` import**
+
+In `e2e/transport-utils.ts`, find the import of `StdioTransport` from `@lspeasy/core` and change it to import from `@lspeasy/core/node` instead (matching how every other e2e spec that uses `StdioTransport` already imports it — check `e2e/lsp-compliance.spec.ts` or similar for the correct pattern). Leave every other import in the file untouched.
+
+- [ ] **Step 8: Rename `setCapabilities` to `registerCapabilities`**
+
+In each of `e2e/connection-health.spec.ts`, `e2e/partial-results.spec.ts`, `e2e/lsp-compliance.spec.ts`, `e2e/workspace-folders.spec.ts`, `e2e/middleware-integration.spec.ts`: replace every call of the form `server.setCapabilities(...)` with `server.registerCapabilities(...)` — same arguments, only the method name changes. Do not change anything else in these files. (Exact call sites and argument shapes vary per file — read each one, this is a straightforward rename, not a behavior change.)
+
+- [ ] **Step 9: Run the e2e suite and confirm it's green**
+
+Run: `pnpm run test:e2e`
+Expected: all 14 spec files pass (0 failures). If any failure remains after both fixes, stop and report it — do not attempt further fixes without checking in, since this task's scope was specifically these two known root causes, not an open-ended e2e debugging effort.
+
+- [ ] **Step 10: Run the full workspace suite one more time**
+
+Run: `pnpm test && pnpm run test:e2e`
+Expected: both fully green.
+
+- [ ] **Step 11: Commit the spec fixes**
+
+```bash
+git add e2e/transport-utils.ts e2e/connection-health.spec.ts e2e/partial-results.spec.ts e2e/lsp-compliance.spec.ts e2e/workspace-folders.spec.ts e2e/middleware-integration.spec.ts
+git commit -m "fix(e2e): repair pre-existing StdioTransport import path and setCapabilities rename"
+```
+
 ---
 
 ## Phase 2: CodeAction Polyfills
 
-*(Do not begin until every Phase 1 task above — through Task 5b — is committed and Task 5b Step 5's full-suite run is green.)*
+*(Do not begin until every Phase 1 task above — through Task 5b — is committed and Task 5b Step 10's full-suite run is green.)*
 
 ### Task 6: `@lsproxy/polyfill` package — `CodeActionPolyfill` type, `resolve-backfill`, registry
 
