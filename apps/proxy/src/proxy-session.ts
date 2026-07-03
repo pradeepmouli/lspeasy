@@ -2,7 +2,9 @@
 import { extname } from 'node:path';
 import { LSPServer } from '@lspeasy/server';
 import type { InitializeParams, ServerCapabilities, Transport } from '@lspeasy/core';
+import type { CodeAction, CodeActionParams } from '@lspeasy/core';
 import type { LSPClient } from '@lspeasy/client';
+import { applicablePolyfills } from '@lsproxy/polyfill';
 import type { BackendPool } from './backend-pool.js';
 import type { DocumentStateManager } from './document-state.js';
 import type { StatusReport } from './status.js';
@@ -50,6 +52,16 @@ export class ProxySession {
     this.server.onNotification('textDocument/didOpen', (params) => this.handleDidOpen(params));
     this.server.onNotification('textDocument/didClose', (params) => this.handleDidClose(params));
 
+    // Override the generic pass-through for CodeAction methods so we can
+    // patch in polyfilled behavior (fix-all synthesis, resolve backfill)
+    // when the backend doesn't natively support it.
+    this.server.onRequest('textDocument/codeAction', (params) =>
+      this.handleCodeAction(params as CodeActionParams)
+    );
+    this.server.onRequest('codeAction/resolve', (params) =>
+      this.handleResolveCodeAction(params as CodeAction)
+    );
+
     opts.transport.onClose(() => this.handleClose());
 
     void this.server.listen(opts.transport);
@@ -69,7 +81,11 @@ export class ProxySession {
       backend.onRequest as (m: string, h: (p: unknown) => Promise<unknown>) => { dispose(): void }
     )('workspace/applyEdit', (p) => this.server.sendRequest('workspace/applyEdit', p as never));
 
-    return backend.getServerCapabilities() ?? {};
+    const raw = backend.getServerCapabilities() ?? {};
+    return applicablePolyfills(raw).reduce(
+      (caps, polyfill) => polyfill.patchCapabilities?.(caps) ?? caps,
+      raw
+    );
   }
 
   private async handleDidOpen(params: unknown): Promise<void> {
@@ -117,6 +133,46 @@ export class ProxySession {
     if (!backend) throw new Error(`No backend available for languageId "${langId}"`);
     this.pool.recordRequest(uri ? langId : this.languageId);
     return backend;
+  }
+
+  private async handleCodeAction(params: CodeActionParams): Promise<CodeAction[]> {
+    const backend = this.resolveBackend(params);
+    const real = ((await (backend.sendRequest as (m: string, p: unknown) => Promise<unknown>)(
+      'textDocument/codeAction',
+      params
+    )) ?? []) as CodeAction[];
+
+    let actions = real;
+    for (const polyfill of applicablePolyfills(backend.getServerCapabilities() ?? {})) {
+      if (!polyfill.augmentCodeActions) continue;
+      try {
+        actions = await polyfill.augmentCodeActions(actions, params, backend);
+      } catch {
+        // Degrade gracefully: synthesis failure must not fail the whole request.
+      }
+    }
+    return actions;
+  }
+
+  private async handleResolveCodeAction(action: CodeAction): Promise<CodeAction> {
+    const backend = this.pool.getBackend(this.languageId);
+    if (!backend) throw new Error(`No backend available for languageId "${this.languageId}"`);
+    const capabilities = backend.getServerCapabilities() ?? {};
+    const provider = capabilities.codeActionProvider;
+    const hasNativeResolve = typeof provider === 'object' && provider.resolveProvider === true;
+
+    if (hasNativeResolve) {
+      return (await (backend.sendRequest as (m: string, p: unknown) => Promise<unknown>)(
+        'codeAction/resolve',
+        action
+      )) as CodeAction;
+    }
+
+    for (const polyfill of applicablePolyfills(capabilities)) {
+      if (polyfill.resolveCodeAction) return polyfill.resolveCodeAction(action, backend);
+    }
+    // No applicable polyfill and no native support: nothing more we can do.
+    return action;
   }
 
   private languageIdForUri(uri: string): string | undefined {

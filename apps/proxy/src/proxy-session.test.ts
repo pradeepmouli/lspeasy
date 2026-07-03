@@ -240,4 +240,191 @@ describe('ProxySession', () => {
     transport.simulate({ jsonrpc: '2.0', id: requestId, result: { applied: true } });
     await expect(resultPromise).resolves.toEqual({ applied: true });
   });
+
+  it('patches advertised capabilities for an applicable polyfill (resolve-backfill)', async () => {
+    const { transport } = makeSession({ codeActionProvider: true });
+    transport.simulate({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        processId: null,
+        rootUri: null,
+        capabilities: {},
+        initializationOptions: { languageId: 'typescript' }
+      }
+    });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(1));
+    expect(transport.sent[0]).toMatchObject({
+      result: { capabilities: { codeActionProvider: { resolveProvider: true } } }
+    });
+  });
+
+  it('answers codeAction/resolve locally when the backend lacks native resolve', async () => {
+    const { transport, backend } = makeSession({ codeActionProvider: true });
+    transport.simulate({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        processId: null,
+        rootUri: null,
+        capabilities: {},
+        initializationOptions: { languageId: 'typescript' }
+      }
+    });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(1));
+
+    const action = { title: 'Fix', kind: 'quickfix', edit: { changes: {} } };
+    transport.simulate({ jsonrpc: '2.0', id: 2, method: 'codeAction/resolve', params: action });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(2));
+    expect(transport.sent[1]).toMatchObject({ id: 2, result: action });
+    expect(backend.sendRequest).not.toHaveBeenCalledWith('codeAction/resolve', expect.anything());
+  });
+
+  it('forwards codeAction/resolve to the backend when it natively supports resolve', async () => {
+    const { transport, backend } = makeSession({ codeActionProvider: { resolveProvider: true } });
+    transport.simulate({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        processId: null,
+        rootUri: null,
+        capabilities: {},
+        initializationOptions: { languageId: 'typescript' }
+      }
+    });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(1));
+
+    transport.simulate({
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'codeAction/resolve',
+      params: { title: 'Fix', kind: 'quickfix' }
+    });
+    await vi.waitFor(() =>
+      expect(backend.sendRequest).toHaveBeenCalledWith('codeAction/resolve', expect.anything())
+    );
+  });
+
+  it('augments textDocument/codeAction results with applicable polyfill output', async () => {
+    const backend = {
+      sendRequest: vi.fn(async (method: string) => {
+        if (method === 'textDocument/codeAction') return [];
+        if (method === 'textDocument/diagnostic') return { kind: 'full', items: [] };
+        return null;
+      }),
+      sendNotification: vi.fn().mockResolvedValue(undefined),
+      getServerCapabilities: vi.fn().mockReturnValue({ codeActionProvider: true }),
+      onRequest: vi.fn().mockReturnValue({ dispose: vi.fn() })
+    };
+    const pool = {
+      getBackend: vi.fn().mockReturnValue(backend),
+      getLanguageIdForExtension: vi.fn().mockReturnValue('typescript'),
+      ensureBackend: vi.fn().mockResolvedValue(backend),
+      recordRequest: vi.fn()
+    };
+    const transport = new FakeTransport();
+    new ProxySession({
+      sessionId: 's1',
+      transport: transport as never,
+      pool: pool as never,
+      docState: { onSessionEnd: vi.fn(), onDidOpen: vi.fn(), onDidClose: vi.fn() } as never,
+      root: '/proj',
+      onEnd: vi.fn(),
+      onStatus: () => STATUS
+    });
+
+    transport.simulate({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        processId: null,
+        rootUri: null,
+        capabilities: {},
+        initializationOptions: { languageId: 'typescript' }
+      }
+    });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(1));
+
+    transport.simulate({
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'textDocument/codeAction',
+      params: {
+        textDocument: { uri: 'file:///x.ts' },
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        context: { diagnostics: [] }
+      }
+    });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(2));
+    // No diagnostics -> fix-all merges nothing -> real (empty) actions returned unchanged.
+    expect(transport.sent[1]).toMatchObject({ id: 2, result: [] });
+    expect(backend.sendRequest).toHaveBeenCalledWith('textDocument/codeAction', expect.anything());
+  });
+
+  it('degrades gracefully when a polyfill augmentCodeActions call fails, returning the real actions unchanged', async () => {
+    const realAction = { title: 'Real fix', kind: 'quickfix', edit: { changes: {} } };
+    const backend = {
+      sendRequest: vi.fn(async (method: string) => {
+        if (method === 'textDocument/codeAction') return [realAction];
+        // fix-all's augmentCodeActions calls this next; make it blow up to
+        // exercise the try/catch in ProxySession.handleCodeAction.
+        if (method === 'textDocument/diagnostic') throw new Error('backend crashed');
+        return null;
+      }),
+      sendNotification: vi.fn().mockResolvedValue(undefined),
+      getServerCapabilities: vi.fn().mockReturnValue({
+        codeActionProvider: true,
+        diagnosticProvider: { interFileDependencies: false, workspaceDiagnostics: false }
+      }),
+      onRequest: vi.fn().mockReturnValue({ dispose: vi.fn() })
+    };
+    const pool = {
+      getBackend: vi.fn().mockReturnValue(backend),
+      getLanguageIdForExtension: vi.fn().mockReturnValue('typescript'),
+      ensureBackend: vi.fn().mockResolvedValue(backend),
+      recordRequest: vi.fn()
+    };
+    const transport = new FakeTransport();
+    new ProxySession({
+      sessionId: 's1',
+      transport: transport as never,
+      pool: pool as never,
+      docState: { onSessionEnd: vi.fn(), onDidOpen: vi.fn(), onDidClose: vi.fn() } as never,
+      root: '/proj',
+      onEnd: vi.fn(),
+      onStatus: () => STATUS
+    });
+
+    transport.simulate({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        processId: null,
+        rootUri: null,
+        capabilities: {},
+        initializationOptions: { languageId: 'typescript' }
+      }
+    });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(1));
+
+    transport.simulate({
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'textDocument/codeAction',
+      params: {
+        textDocument: { uri: 'file:///x.ts' },
+        range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+        // Requesting source.fixAll drives fix-all's augmentCodeActions into
+        // its textDocument/diagnostic call, which is rigged to throw above.
+        context: { diagnostics: [], only: ['source.fixAll'] }
+      }
+    });
+    await vi.waitFor(() => expect(transport.sent).toHaveLength(2));
+    expect(transport.sent[1]).toMatchObject({ id: 2, result: [realAction] });
+  });
 });
