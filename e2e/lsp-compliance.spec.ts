@@ -246,10 +246,11 @@ describe('LSP 3.17 Conformance', () => {
       await client.connect(clientTransport);
 
       // Send request and cancel it
-      const { cancel } = client.sendCancellableRequest('textDocument/hover', {
+      const { promise, cancel } = client.sendCancellableRequest('textDocument/hover', {
         textDocument: { uri: 'file:///test.ts' },
         position: { line: 0, character: 0 }
       });
+      promise.catch(() => {});
 
       setTimeout(() => cancel(), 50);
 
