@@ -14,7 +14,8 @@ import type {
   LogLevel,
   ServerCapabilities,
   Middleware,
-  ScopedMiddleware
+  ScopedMiddleware,
+  InitializeParams
 } from '@lspeasy/core';
 import type { ZodError } from 'zod';
 import type { ResponseErrorInterface } from '@lspeasy/core';
@@ -81,6 +82,21 @@ export interface ServerOptions<
    */
 
   capabilities?: Capabilities;
+
+  /**
+   * Resolve the capabilities to advertise for a specific connection, computed
+   * from that connection's `initialize` params.
+   *
+   * @remarks
+   * Takes precedence over `registerCapabilities()` for the value returned in
+   * `InitializeResult` only. `registerCapabilities()` still governs the
+   * compile-time capability-aware namespaces and the handler-registration
+   * guard, both of which must remain static — handlers register once, before
+   * any connection exists, so they cannot depend on a specific connection's
+   * resolved capabilities.
+   */
+  resolveCapabilities?(params: InitializeParams): Promise<Capabilities> | Capabilities;
+
   /**
    * Strict capability checking mode
    * When true, throws error if handler registered for unsupported capability

@@ -127,6 +127,41 @@ describe('Initialize Handshake Integration', () => {
     });
   });
 
+  it('uses resolveCapabilities to determine advertised capabilities per connection', async () => {
+    const dynamicServer = new LSPServer({
+      name: 'dynamic-server',
+      version: '1.0.0',
+      logLevel: LogLevel.Error,
+      resolveCapabilities: async (params) => {
+        expect(params.rootUri).toBe('file:///dynamic-root');
+        return { hoverProvider: true, definitionProvider: true };
+      }
+    });
+    const dynamicTransport = new TestTransport();
+    await dynamicServer.listen(dynamicTransport);
+
+    dynamicTransport.simulateMessage({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        processId: null,
+        rootUri: 'file:///dynamic-root',
+        capabilities: {}
+      }
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const response = dynamicTransport.sentMessages[0];
+    expect(response.result.capabilities).toEqual({
+      hoverProvider: true,
+      definitionProvider: true
+    });
+
+    await dynamicServer.close();
+  });
+
   it('should handle initialized notification', async () => {
     // First initialize
     transport.simulateMessage({

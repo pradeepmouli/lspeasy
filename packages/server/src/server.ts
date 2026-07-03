@@ -595,6 +595,11 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       }
       this.dispatcher.setClientCapabilities(params.capabilities);
 
+      if (this.options.resolveCapabilities) {
+        const resolved = await this.options.resolveCapabilities(params);
+        this.lifecycleManager.registerCapabilities(resolved as ServerCapabilities);
+      }
+
       const result = await this.lifecycleManager.handleInitialize(
         params,
         this.transport!,
