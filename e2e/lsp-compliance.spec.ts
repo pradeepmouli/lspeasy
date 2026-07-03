@@ -50,7 +50,7 @@ describe('LSP 3.17 Conformance', () => {
 
   describe('Protocol Lifecycle', () => {
     it('should follow initialize → initialized → shutdown → exit sequence', async () => {
-      server.setCapabilities({
+      server.registerCapabilities({
         hoverProvider: true
       });
 
@@ -78,7 +78,7 @@ describe('LSP 3.17 Conformance', () => {
     });
 
     it('should reject requests after shutdown', async () => {
-      server.setCapabilities({ hoverProvider: true });
+      server.registerCapabilities({ hoverProvider: true });
 
       const { serverTransport, clientTransport } = createConnectedStdioTransports();
 
@@ -132,7 +132,7 @@ describe('LSP 3.17 Conformance', () => {
 
   describe('Message Types', () => {
     it('should handle request messages with id', async () => {
-      server.setCapabilities({ hoverProvider: true });
+      server.registerCapabilities({ hoverProvider: true });
       server.onRequest('textDocument/hover', async () => ({
         contents: { kind: 'plaintext', value: 'test' }
       }));
@@ -176,7 +176,7 @@ describe('LSP 3.17 Conformance', () => {
     });
 
     it('should handle success response messages', async () => {
-      server.setCapabilities({ hoverProvider: true });
+      server.registerCapabilities({ hoverProvider: true });
       server.onRequest('textDocument/hover', async () => ({
         contents: { kind: 'markdown', value: '# Success' }
       }));
@@ -260,7 +260,7 @@ describe('LSP 3.17 Conformance', () => {
 
   describe('Server Capabilities', () => {
     it('should advertise capabilities in initialize response', async () => {
-      server.setCapabilities({
+      server.registerCapabilities({
         hoverProvider: true,
         completionProvider: {
           triggerCharacters: ['.', ':']
