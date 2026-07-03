@@ -1,30 +1,19 @@
 {
-  "name": "@lsproxy/proxy",
-  "version": "1.1.2",
-  "description": "Per-root LSP multiplexing daemon — holds warm language server connections for @lsproxy/cli",
+  "name": "@lsproxy/polyfill",
+  "version": "0.1.0",
+  "description": "CodeAction capability polyfills for lsproxy backends that don't natively support them",
   "private": false,
-  "keywords": [
-    "lsp",
-    "language-server-protocol",
-    "lsp-proxy",
-    "language-server",
-    "cli"
-  ],
+  "keywords": ["lsp", "language-server-protocol", "lsp-proxy", "code-action"],
   "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
-  "bugs": {
-    "url": "https://github.com/pradeepmouli/lspeasy/issues"
-  },
+  "bugs": { "url": "https://github.com/pradeepmouli/lspeasy/issues" },
   "license": "MIT",
   "author": "Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)",
   "repository": {
     "type": "git",
     "url": "https://github.com/pradeepmouli/lspeasy.git",
-    "directory": "apps/proxy"
+    "directory": "apps/polyfill"
   },
   "type": "module",
-  "bin": {
-    "lsps": "./dist/main.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -33,13 +22,8 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
+  "files": ["dist", "README.md"],
+  "publishConfig": { "access": "public" },
   "scripts": {
     "build": "tsgo --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
@@ -47,9 +31,7 @@
   },
   "dependencies": {
     "@lspeasy/client": "workspace:*",
-    "@lspeasy/core": "workspace:*",
-    "@lspeasy/server": "workspace:*",
-    "@lsproxy/polyfill": "workspace:*"
+    "@lspeasy/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
