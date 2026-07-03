@@ -251,16 +251,6 @@ async function initializedServer() {
 }
 
 describe('registerPassThrough', () => {
-  it('registers a handler for every method in the request/notification maps except lifecycle methods', () => {
-    const server = new LSPServer({ logLevel: LogLevel.Error });
-    registerPassThrough(server, () => ({}) as never);
-
-    // Reaching into the dispatcher is not exposed publicly; instead, verify
-    // indirectly via forwarding behavior for a representative sample below,
-    // and via the full-surface loop in the next test.
-    expect(true).toBe(true);
-  });
-
   it('forwards a sample of methods across both request and notification maps to the resolved backend', async () => {
     const { backend, transport } = await initializedServer();
 
