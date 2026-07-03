@@ -16,4 +16,12 @@ describe('applicablePolyfills', () => {
   it('returns an empty list when no polyfill applies', () => {
     expect(applicablePolyfills({})).toEqual([]);
   });
+
+  it('includes fix-all when the backend has pull diagnostics but not source.fixAll', () => {
+    const applicable = applicablePolyfills({
+      codeActionProvider: true,
+      diagnosticProvider: { interFileDependencies: false, workspaceDiagnostics: false }
+    });
+    expect(applicable.map((p) => p.id)).toContain('fix-all');
+  });
 });
