@@ -138,6 +138,9 @@ importers:
       '@lspeasy/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@lspeasy/server':
+        specifier: workspace:*
+        version: link:../../packages/server
     devDependencies:
       typescript:
         specifier: ^6.0.3
