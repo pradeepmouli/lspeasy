@@ -157,6 +157,50 @@ describe('fixAll.augmentCodeActions', () => {
     expect(result[0]!.edit!.changes!['file:///x.ts']![0]).toMatchObject({ newText: 'a' });
   });
 
+  it('does not treat edits on different lines as overlapping just because character offsets are large', async () => {
+    const backend = makeBackend({
+      0: [
+        {
+          title: 'Fix on a very long line 0',
+          kind: 'quickfix',
+          edit: {
+            changes: {
+              'file:///x.ts': [
+                {
+                  range: {
+                    start: { line: 0, character: 100000 },
+                    end: { line: 0, character: 100010 }
+                  },
+                  newText: 'a'
+                }
+              ]
+            }
+          }
+        }
+      ],
+      1: [
+        {
+          title: 'Fix on line 1',
+          kind: 'quickfix',
+          edit: {
+            changes: {
+              'file:///x.ts': [
+                {
+                  range: { start: { line: 1, character: 0 }, end: { line: 1, character: 10 } },
+                  newText: 'b'
+                }
+              ]
+            }
+          }
+        }
+      ]
+    });
+
+    const result = await fixAll.augmentCodeActions!([], params, backend as never);
+
+    expect(result[0]!.edit!.changes!['file:///x.ts']).toHaveLength(2);
+  });
+
   it('skips a bare Command candidate and picks a usable CodeAction later in the list', async () => {
     const bareCommand: Command = { title: 'Run something', command: 'editor.doThing' };
     const usableFix: CodeAction = {

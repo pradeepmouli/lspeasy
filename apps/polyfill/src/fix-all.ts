@@ -4,6 +4,7 @@ import type {
   CodeActionParams,
   Command,
   Diagnostic,
+  Position,
   ServerCapabilities,
   TextEdit
 } from '@lspeasy/core';
@@ -43,12 +44,12 @@ function supportsResolve(capabilities: ServerCapabilities): boolean {
   return typeof provider === 'object' && provider.resolveProvider === true;
 }
 
+function comparePositions(a: Position, b: Position): number {
+  return a.line !== b.line ? a.line - b.line : a.character - b.character;
+}
+
 function rangesOverlap(a: TextEdit['range'], b: TextEdit['range']): boolean {
-  const aStart = a.start.line * 100000 + a.start.character;
-  const aEnd = a.end.line * 100000 + a.end.character;
-  const bStart = b.start.line * 100000 + b.start.character;
-  const bEnd = b.end.line * 100000 + b.end.character;
-  return aStart < bEnd && bStart < aEnd;
+  return comparePositions(a.start, b.end) < 0 && comparePositions(b.start, a.end) < 0;
 }
 
 function mergeEdits(existing: TextEdit[], incoming: TextEdit[]): TextEdit[] {
