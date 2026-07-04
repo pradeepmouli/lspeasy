@@ -77,7 +77,7 @@ API surface: 4 classes, 27 types, 1 enums, 2 constants
 
 ## Configuration
 
-**ServerOptions** — Configuration for an `LSPServer` instance. (11 options — see references/config.md)
+**ServerOptions** — Configuration for an `LSPServer` instance. (12 options — see references/config.md)
 
 ## Quick Reference
 

@@ -95,7 +95,7 @@ export interface ServerOptions<
    * any connection exists, so they cannot depend on a specific connection's
    * resolved capabilities.
    */
-  resolveCapabilities?(params: InitializeParams): Promise<Capabilities> | Capabilities;
+  resolveCapabilities?: (params: InitializeParams) => Promise<Capabilities> | Capabilities;
 
   /**
    * Request methods allowed to be answered before the `initialize` handshake
