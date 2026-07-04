@@ -31,8 +31,6 @@ const FIXTURE_SERVER = fileURLToPath(
 const FIXTURE_URI = 'file:///workspace/unused.fx';
 // Mirrors UNUSED_VAR_DIAGNOSTIC.range in fixtures/codeaction-fixture-server.mjs.
 const UNUSED_VAR_RANGE = { start: { line: 0, character: 0 }, end: { line: 0, character: 13 } };
-// Mirrors MISSING_IMPORT_DIAGNOSTIC.range in fixtures/codeaction-fixture-server.mjs.
-const MISSING_IMPORT_RANGE = { start: { line: 1, character: 0 }, end: { line: 1, character: 3 } };
 
 const roots: string[] = [];
 const servers: ProxyServer[] = [];
