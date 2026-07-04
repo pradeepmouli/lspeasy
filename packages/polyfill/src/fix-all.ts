@@ -1,4 +1,4 @@
-// apps/polyfill/src/fix-all.ts
+// packages/polyfill/src/fix-all.ts
 import type {
   CodeAction,
   CodeActionParams,

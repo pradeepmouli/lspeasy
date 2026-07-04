@@ -10,7 +10,7 @@
     { "path": "../../packages/core" },
     { "path": "../../packages/client" },
     { "path": "../../packages/server" },
-    { "path": "../polyfill" }
+    { "path": "../../packages/polyfill" }
   ],
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"]

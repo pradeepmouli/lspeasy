@@ -6,7 +6,7 @@
  * sending real JSON-RPC requests over the real socket.
  *
  * This is intentionally NOT a repeat of the mocked-backend unit coverage in
- * apps/proxy/src/proxy-session.test.ts (Task 8) or apps/polyfill/src/*.test.ts
+ * apps/proxy/src/proxy-session.test.ts (Task 8) or packages/polyfill/src/*.test.ts
  * (Tasks 6-7) — it proves the whole pipeline (BackendPool spawning a real
  * process from `lsp.json` discovery, ProxySession wiring, and the polyfills
  * themselves) actually connects end-to-end, not each polyfill's edge cases.

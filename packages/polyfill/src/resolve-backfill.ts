@@ -1,4 +1,4 @@
-// apps/polyfill/src/resolve-backfill.ts
+// packages/polyfill/src/resolve-backfill.ts
 import type { ServerCapabilities } from '@lspeasy/core';
 import type { CodeActionPolyfill } from './types.js';
 
