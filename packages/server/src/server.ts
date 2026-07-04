@@ -672,11 +672,12 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       // Check if server is initialized for non-lifecycle messages
       if (isRequestMessage(message)) {
         const method = message.method;
-        const isLifecycleMethod =
-          ['initialize', 'shutdown'].includes(method) ||
-          (this.options.preInitializeMethods?.includes(method) ?? false);
+        const isLifecycleMethod = ['initialize', 'shutdown'].includes(method);
+        const isPreInitExempt =
+          (this.options.preInitializeMethods?.includes(method) ?? false) &&
+          (this.state === ServerState.Created || this.state === ServerState.Initializing);
 
-        if (!isLifecycleMethod && this.state !== ServerState.Initialized) {
+        if (!isLifecycleMethod && !isPreInitExempt && this.state !== ServerState.Initialized) {
           await this.transport!.send({
             jsonrpc: '2.0',
             id: message.id,

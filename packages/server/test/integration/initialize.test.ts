@@ -264,6 +264,37 @@ describe('Initialize Handshake Integration', () => {
     await preInitServer.close();
   });
 
+  it('rejects a preInitializeMethods method once the server has shut down', async () => {
+    const preInitServer = new LSPServer({
+      logLevel: LogLevel.Error,
+      preInitializeMethods: ['$/ping']
+    });
+    preInitServer.onRequest('$/ping', async () => 'pong');
+    const preInitTransport = new TestTransport();
+    await preInitServer.listen(preInitTransport);
+
+    preInitTransport.simulateMessage({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: { processId: null, rootUri: null, capabilities: {} }
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    preInitTransport.simulateMessage({ jsonrpc: '2.0', id: 2, method: 'shutdown', params: null });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    preInitTransport.simulateMessage({ jsonrpc: '2.0', id: 3, method: '$/ping', params: {} });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(preInitTransport.sentMessages.find((msg) => msg.id === 3)).toMatchObject({
+      id: 3,
+      error: { code: -32002 }
+    });
+
+    await preInitServer.close();
+  });
+
   it('should reject double initialization', async () => {
     // First initialize
     transport.simulateMessage({
