@@ -1,4 +1,4 @@
-// apps/polyfill/src/registry.ts
+// packages/polyfill/src/registry.ts
 import type { ServerCapabilities } from '@lspeasy/core';
 import type { CodeActionPolyfill } from './types.js';
 import { resolveBackfill } from './resolve-backfill.js';

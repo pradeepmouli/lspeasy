@@ -130,19 +130,6 @@ importers:
         specifier: ^3.5.38
         version: 3.5.39(typescript@6.0.3)
 
-  apps/polyfill:
-    dependencies:
-      '@lspeasy/client':
-        specifier: workspace:*
-        version: link:../../packages/client
-      '@lspeasy/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-    devDependencies:
-      typescript:
-        specifier: ^6.0.3
-        version: 6.0.3
-
   apps/proxy:
     dependencies:
       '@lspeasy/client':
@@ -156,7 +143,7 @@ importers:
         version: link:../../packages/server
       '@lsproxy/polyfill':
         specifier: workspace:*
-        version: link:../polyfill
+        version: link:../../packages/polyfill
     devDependencies:
       typescript:
         specifier: ^6.0.3
@@ -229,6 +216,19 @@ importers:
       '@lspeasy/core':
         specifier: workspace:^
         version: link:../../core
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
+  packages/polyfill:
+    dependencies:
+      '@lspeasy/client':
+        specifier: workspace:*
+        version: link:../client
+      '@lspeasy/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

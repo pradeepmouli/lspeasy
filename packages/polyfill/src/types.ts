@@ -1,4 +1,4 @@
-// apps/polyfill/src/types.ts
+// packages/polyfill/src/types.ts
 import type { CodeAction, CodeActionParams, ServerCapabilities } from '@lspeasy/core';
 import type { LSPClient } from '@lspeasy/client';
 
