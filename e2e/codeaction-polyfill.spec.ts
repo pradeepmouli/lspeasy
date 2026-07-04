@@ -150,4 +150,26 @@ describe('codeAction polyfills (e2e, real proxy + real backend process)', () => 
     const status = server.getStatus();
     expect(status.languages.find((l) => l.languageId === 'fx')?.status).toBe('running');
   });
+
+  it("synthesizes source.organizeImports from the fixture backend's import-related quickfix only", async () => {
+    const root = tmpRoot();
+    await startProxy(root);
+    const { client } = await connectClient(join(root, 'test.sock'));
+
+    const actions = (await client.sendRequest('textDocument/codeAction', {
+      textDocument: { uri: FIXTURE_URI },
+      range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+      context: { diagnostics: [], only: ['source.organizeImports'] }
+    })) as CodeAction[];
+
+    const organizeImportsAction = actions.find((a) => a.kind === 'source.organizeImports');
+    expect(organizeImportsAction).toBeDefined();
+    const edits = organizeImportsAction!.edit!.changes![FIXTURE_URI];
+    expect(edits).toBeDefined();
+    // Only the import quickfix's edit is present — the fixture's separate
+    // "Remove unused variable" quickfix (for a diagnostic whose title has no
+    // "import" in it) must not have been picked up.
+    expect(edits).toHaveLength(1);
+    expect(edits![0]!.newText).toContain('import foo');
+  });
 });
