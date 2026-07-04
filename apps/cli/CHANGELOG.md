@@ -1,5 +1,11 @@
 # @lspeasy/cli
 
+## 0.11.3
+
+### Patch Changes
+
+- @lsproxy/proxy@1.2.1
+
 ## 0.11.2
 
 ### Patch Changes
