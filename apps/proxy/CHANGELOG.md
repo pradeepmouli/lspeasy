@@ -1,5 +1,12 @@
 # @lsproxy/proxy
 
+## 1.2.1
+
+### Patch Changes
+
+- Updated dependencies [194ce36]
+  - @lsproxy/polyfill@0.2.1
+
 ## 1.2.0
 
 ### Minor Changes
