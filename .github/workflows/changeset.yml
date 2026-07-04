@@ -33,11 +33,15 @@ jobs:
     steps:
       - name: Resolve branch name
         id: branch
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "name=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "name=$HEAD_REF" >> "$GITHUB_OUTPUT"
           else
-            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "name=$REF_NAME" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/checkout@v7
@@ -55,9 +59,14 @@ jobs:
 
       - name: Generate and commit changeset
         if: steps.check.outputs.count == '0'
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          CHANGE_TYPE_INPUT: ${{ inputs.type }}
+          PUSH_REF: ${{ steps.branch.outputs.name }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE=$(git merge-base origin/master HEAD)
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            BASE=$(git merge-base "origin/${BASE_REF}" HEAD)
           else
             BASE=$(git describe --tags --abbrev=0 2>/dev/null || echo "master")
           fi
@@ -66,7 +75,11 @@ jobs:
           echo "Commits since base:"
           echo "$COMMITS"
 
-          TYPE="${{ inputs.type }}"
+          CHANGED_FILES=$(git diff --name-only "${BASE}"..HEAD)
+          echo "Changed files since base:"
+          echo "$CHANGED_FILES"
+
+          TYPE="$CHANGE_TYPE_INPUT"
           if [ -z "$TYPE" ] || [ "$TYPE" = "auto" ]; then
             if echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.+\))?!:|BREAKING.CHANGE"; then
               TYPE="major"
@@ -78,13 +91,19 @@ jobs:
           fi
           echo "Change type: $TYPE"
 
-          # Build frontmatter from every publishable workspace (packages/* AND
-          # apps/*), fallback to root package.json. apps/* must be included or
-          # apps-only changes (e.g. @lsproxy/cli, @lsproxy/proxy) generate no
-          # changeset and never publish.
+          # Build frontmatter only from publishable workspace packages whose
+          # own directory actually changed in this diff (packages/*,
+          # packages/*/*, and apps/* — matching pnpm-workspace.yaml), fallback
+          # to root package.json. apps/* must stay included or apps-only
+          # changes (e.g. @lsproxy/cli, @lsproxy/proxy) generate no changeset
+          # and never publish.
           FRONTMATTER=""
-          for pkg_json in packages/*/package.json apps/*/package.json; do
+          for pkg_json in packages/*/package.json packages/*/*/package.json apps/*/package.json; do
             [ -f "$pkg_json" ] || continue
+            PKG_DIR=$(dirname "$pkg_json")
+            if ! echo "$CHANGED_FILES" | grep -q "^${PKG_DIR}/"; then
+              continue
+            fi
             PRIVATE=$(jq -r '.private // false' "$pkg_json" 2>/dev/null || echo 'false')
             NAME=$(jq -r '.name // ""' "$pkg_json" 2>/dev/null || echo '')
             if [ "$PRIVATE" != "true" ] && [ -n "$NAME" ] && [ "$NAME" != "null" ]; then
@@ -102,7 +121,7 @@ jobs:
           fi
 
           if [ -z "$FRONTMATTER" ]; then
-            echo "No publishable packages found — skipping changeset"
+            echo "No changed publishable packages — skipping changeset"
             exit 0
           fi
 
@@ -119,4 +138,4 @@ jobs:
           git config core.hooksPath /dev/null
           git add ".changeset/${TIMESTAMP}.md"
           git commit -m "chore: add auto-generated changeset (${TYPE})"
-          git push origin HEAD:${{ steps.branch.outputs.name }}
+          git push origin "HEAD:${PUSH_REF}"
