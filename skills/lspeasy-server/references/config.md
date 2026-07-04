@@ -58,6 +58,32 @@ Capabilities to declare during initialization
 
 **Type:** `Capabilities`
 
+#### resolveCapabilities
+
+Resolve the capabilities to advertise for a specific connection, computed
+from that connection's `initialize` params.
+
+**Type:** `(params: InitializeParams) => Capabilities | Promise<Capabilities>`
+
+Takes precedence over `registerCapabilities()` for the value returned in
+`InitializeResult` only. `registerCapabilities()` still governs the
+compile-time capability-aware namespaces and the handler-registration
+guard, both of which must remain static — handlers register once, before
+any connection exists, so they cannot depend on a specific connection's
+resolved capabilities.
+
+#### preInitializeMethods
+
+Request methods allowed to be answered before the `initialize` handshake
+completes, in addition to `initialize`/`shutdown` themselves.
+
+**Type:** `string[]`
+
+Use for cheap, non-LSP meta-endpoints (health checks, status queries)
+that a caller may need to reach without paying for a full session
+bring-up. Methods here must still be registered via `onRequest` as usual
+— this only exempts them from the `serverNotInitialized` gate.
+
 #### strictCapabilities
 
 Strict capability checking mode

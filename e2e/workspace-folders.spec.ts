@@ -51,7 +51,7 @@ describe('Workspace Folders Integration', () => {
     const folders = new Map<string, WorkspaceFolder>();
 
     // Set server capabilities
-    server.setCapabilities({
+    server.registerCapabilities({
       workspace: {
         workspaceFolders: {
           supported: true,
@@ -127,7 +127,7 @@ describe('Workspace Folders Integration', () => {
   });
 
   it('should report workspace folder capabilities', async () => {
-    server.setCapabilities({
+    server.registerCapabilities({
       workspace: {
         workspaceFolders: {
           supported: true,

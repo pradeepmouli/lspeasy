@@ -595,6 +595,11 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       }
       this.dispatcher.setClientCapabilities(params.capabilities);
 
+      if (this.options.resolveCapabilities) {
+        const resolved = await this.options.resolveCapabilities(params);
+        this.lifecycleManager.registerCapabilities(resolved as ServerCapabilities);
+      }
+
       const result = await this.lifecycleManager.handleInitialize(
         params,
         this.transport!,
@@ -668,8 +673,11 @@ export class BaseLSPServer<Capabilities extends Partial<ServerCapabilities> = Se
       if (isRequestMessage(message)) {
         const method = message.method;
         const isLifecycleMethod = ['initialize', 'shutdown'].includes(method);
+        const isPreInitExempt =
+          (this.options.preInitializeMethods?.includes(method) ?? false) &&
+          (this.state === ServerState.Created || this.state === ServerState.Initializing);
 
-        if (!isLifecycleMethod && this.state !== ServerState.Initialized) {
+        if (!isLifecycleMethod && !isPreInitExempt && this.state !== ServerState.Initialized) {
           await this.transport!.send({
             jsonrpc: '2.0',
             id: message.id,

@@ -55,7 +55,7 @@ describe('Partial Result Streaming Integration', () => {
     const partialResultToken = createProgressToken();
 
     // Set up server capabilities
-    server.setCapabilities({
+    server.registerCapabilities({
       completionProvider: {
         triggerCharacters: ['.'],
         resolveProvider: false
@@ -175,7 +175,7 @@ describe('Partial Result Streaming Integration', () => {
   });
 
   it('should work without partial result token', async () => {
-    server.setCapabilities({
+    server.registerCapabilities({
       completionProvider: {
         triggerCharacters: ['.']
       }
@@ -215,7 +215,7 @@ describe('Partial Result Streaming Integration', () => {
     const batchSize = 100;
     const receivedBatches: number[] = [];
 
-    server.setCapabilities({
+    server.registerCapabilities({
       completionProvider: {}
     });
 

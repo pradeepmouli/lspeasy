@@ -6,7 +6,7 @@ import { discoverServers, type ConfiguredServer } from '@lspeasy/core';
 import { socketToTransport } from '@lspeasy/core/node';
 import { BackendPool, type BackendPoolOptions } from './backend-pool.js';
 import { DocumentStateManager } from './document-state.js';
-import { ClientSession } from './client-session.js';
+import { ProxySession } from './proxy-session.js';
 import { socketPath, pidPath } from './socket-path.js';
 import { buildStatusReport, type StatusReport } from './status.js';
 
@@ -25,7 +25,7 @@ export class ProxyServer {
   private readonly pool: BackendPool;
   private readonly docState: DocumentStateManager;
   private server: Server | undefined;
-  private readonly sessions = new Map<string, ClientSession>();
+  private readonly sessions = new Map<string, ProxySession>();
   private readonly activeSockets = new Set<Socket>();
   private idleTimer: ReturnType<typeof setTimeout> | undefined;
   private sessionCounter = 0;
@@ -73,7 +73,7 @@ export class ProxyServer {
       socket.on('close', () => this.activeSockets.delete(socket));
       const sessionId = `s${++this.sessionCounter}`;
       const transport = socketToTransport(socket);
-      const session = new ClientSession({
+      const session = new ProxySession({
         sessionId,
         transport,
         pool: this.pool,
