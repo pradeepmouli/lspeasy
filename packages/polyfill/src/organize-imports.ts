@@ -47,6 +47,10 @@ export const organizeImports: CodeActionPolyfill = {
 
   async augmentCodeActions(actions, params, backend: LSPClient) {
     if (!requestsOrganizeImports(params)) return actions;
+    // The backend may implement source.organizeImports without advertising
+    // it in codeActionKinds (e.g. codeActionProvider: true with no explicit
+    // kind list) — if it already returned one, don't synthesize a duplicate.
+    if (actions.some((a) => a.kind === 'source.organizeImports')) return actions;
 
     const { changes, mergedCount } = await aggregateQuickFixes(params, backend, pickImportFix);
     if (mergedCount === 0) return actions;

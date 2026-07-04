@@ -280,4 +280,84 @@ describe('fixAll.augmentCodeActions', () => {
     expect(result).toEqual([]);
     expect(backend.sendRequest).not.toHaveBeenCalledWith('codeAction/resolve', expect.anything());
   });
+
+  it('merges edits from documentChanges when the backend does not use the legacy changes field', async () => {
+    const documentChangesFix: CodeAction = {
+      title: 'Remove unused var',
+      kind: 'quickfix',
+      edit: {
+        documentChanges: [
+          {
+            textDocument: { uri: 'file:///x.ts', version: 1 },
+            edits: [
+              {
+                range: { start: { line: 0, character: 0 }, end: { line: 0, character: 3 } },
+                newText: ''
+              }
+            ]
+          }
+        ]
+      }
+    };
+    const backend = makeBackend({ 0: [documentChangesFix] });
+
+    const result = await fixAll.augmentCodeActions!([], params, backend as never);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]!.edit!.changes!['file:///x.ts']).toHaveLength(1);
+    expect(result[0]!.edit!.changes!['file:///x.ts']![0]).toMatchObject({ newText: '' });
+  });
+
+  it('skips resource operations and snippet edits within documentChanges', async () => {
+    const resourceAndSnippetFix: CodeAction = {
+      title: 'Fix with unsupported operations',
+      kind: 'quickfix',
+      edit: {
+        documentChanges: [
+          { kind: 'create', uri: 'file:///new.ts' },
+          {
+            textDocument: { uri: 'file:///x.ts', version: 1 },
+            edits: [
+              {
+                range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+                snippet: { value: '${1:foo}' }
+              }
+            ]
+          }
+        ]
+      }
+    };
+    const backend = makeBackend({ 0: [resourceAndSnippetFix] });
+
+    const result = await fixAll.augmentCodeActions!([], params, backend as never);
+
+    expect(result).toEqual([]);
+  });
+
+  it('does not synthesize a duplicate source.fixAll when the backend already returned one', async () => {
+    const backend = makeBackend({
+      0: [
+        {
+          title: 'Remove unused var',
+          kind: 'quickfix',
+          edit: {
+            changes: {
+              'file:///x.ts': [
+                {
+                  range: { start: { line: 0, character: 0 }, end: { line: 0, character: 3 } },
+                  newText: ''
+                }
+              ]
+            }
+          }
+        }
+      ]
+    });
+    const nativeFixAll: CodeAction = { title: 'Fix all (native)', kind: 'source.fixAll' };
+
+    const result = await fixAll.augmentCodeActions!([nativeFixAll], params, backend as never);
+
+    expect(result).toEqual([nativeFixAll]);
+    expect(backend.sendRequest).not.toHaveBeenCalled();
+  });
 });

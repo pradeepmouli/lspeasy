@@ -41,6 +41,10 @@ export const fixAll: CodeActionPolyfill = {
 
   async augmentCodeActions(actions, params, backend: LSPClient) {
     if (!requestsFixAll(params)) return actions;
+    // The backend may implement source.fixAll without advertising it in
+    // codeActionKinds (e.g. codeActionProvider: true with no explicit kind
+    // list) — if it already returned one, don't synthesize a duplicate.
+    if (actions.some((a) => a.kind === 'source.fixAll')) return actions;
 
     const { changes, mergedCount } = await aggregateQuickFixes(params, backend, pickFix);
     if (mergedCount === 0) return actions;

@@ -1,12 +1,19 @@
 // packages/polyfill/src/quickfix-aggregation.ts
 import type {
+  AnnotatedTextEdit,
   CodeAction,
   CodeActionParams,
   Command,
+  CreateFile,
+  DeleteFile,
   Diagnostic,
   Position,
+  RenameFile,
   ServerCapabilities,
-  TextEdit
+  SnippetTextEdit,
+  TextDocumentEdit,
+  TextEdit,
+  WorkspaceEdit
 } from '@lspeasy/core';
 import type { LSPClient } from '@lspeasy/client';
 
@@ -34,6 +41,49 @@ export function mergeEdits(existing: TextEdit[], incoming: TextEdit[]): TextEdit
 function supportsResolve(capabilities: ServerCapabilities): boolean {
   const provider = capabilities.codeActionProvider;
   return typeof provider === 'object' && provider.resolveProvider === true;
+}
+
+function isTextDocumentEdit(
+  entry: TextDocumentEdit | CreateFile | RenameFile | DeleteFile
+): entry is TextDocumentEdit {
+  return 'edits' in entry;
+}
+
+function isPlainTextEdit(
+  edit: TextEdit | AnnotatedTextEdit | SnippetTextEdit
+): edit is TextEdit | AnnotatedTextEdit {
+  return 'newText' in edit;
+}
+
+/**
+ * Merges a WorkspaceEdit's edits into one per-URI map, reading both the
+ * legacy `changes` field and the newer `documentChanges` field (many modern
+ * servers — rust-analyzer, newer tsserver-based tooling — return edits
+ * exclusively via the latter). Resource operations (create/rename/delete)
+ * and snippet edits are intentionally skipped: neither can be represented
+ * as a plain `TextEdit` in the synthesized composite action.
+ */
+function collectEditsByUri(edit: WorkspaceEdit | undefined): Record<string, TextEdit[]> {
+  const byUri: Record<string, TextEdit[]> = {};
+
+  for (const [uri, edits] of Object.entries(edit?.changes ?? {})) {
+    if (edits.length === 0) continue;
+    byUri[uri] = [...(byUri[uri] ?? []), ...edits];
+  }
+
+  for (const entry of edit?.documentChanges ?? []) {
+    if (!isTextDocumentEdit(entry)) continue;
+    const textEdits = entry.edits.filter(isPlainTextEdit);
+    if (textEdits.length === 0) continue;
+    const uri = entry.textDocument.uri;
+    byUri[uri] = [...(byUri[uri] ?? []), ...textEdits];
+  }
+
+  return byUri;
+}
+
+function isEditEmpty(edit: WorkspaceEdit | undefined): boolean {
+  return Object.keys(collectEditsByUri(edit)).length === 0;
 }
 
 export interface AggregationResult {
@@ -73,21 +123,21 @@ export async function aggregateQuickFixes(
     )) as (Command | CodeAction)[] | null;
 
     let fix = candidates ? selectFix(candidates) : undefined;
-    if (fix && !fix.edit?.changes && fix.command && supportsResolve(capabilities)) {
+    if (fix && isEditEmpty(fix.edit) && fix.command && supportsResolve(capabilities)) {
       fix = (await (backend.sendRequest as (m: string, p: unknown) => Promise<unknown>)(
         'codeAction/resolve',
         fix
       )) as CodeAction;
     }
-    if (!fix?.edit?.changes) continue;
+    if (!fix) continue;
 
-    let mergedAny = false;
-    for (const [uri, edits] of Object.entries(fix.edit.changes)) {
-      if (edits.length === 0) continue;
+    const editsByUri = collectEditsByUri(fix.edit);
+    if (Object.keys(editsByUri).length === 0) continue;
+
+    for (const [uri, edits] of Object.entries(editsByUri)) {
       changes[uri] = mergeEdits(changes[uri] ?? [], edits);
-      mergedAny = true;
     }
-    if (mergedAny) mergedCount += 1;
+    mergedCount += 1;
   }
 
   return { changes, mergedCount };

@@ -256,4 +256,38 @@ describe('organizeImports.augmentCodeActions', () => {
     expect(result).toHaveLength(1);
     expect(result[0]!.edit!.changes!['file:///x.ts']).toHaveLength(1);
   });
+
+  it('does not synthesize a duplicate source.organizeImports when the backend already returned one', async () => {
+    const backend = makeBackend({
+      0: [
+        {
+          title: 'Add missing import for "foo"',
+          kind: 'quickfix',
+          edit: {
+            changes: {
+              'file:///x.ts': [
+                {
+                  range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
+                  newText: 'import foo;\n'
+                }
+              ]
+            }
+          }
+        }
+      ]
+    });
+    const nativeOrganizeImports: CodeAction = {
+      title: 'Organize Imports (native)',
+      kind: 'source.organizeImports'
+    };
+
+    const result = await organizeImports.augmentCodeActions!(
+      [nativeOrganizeImports],
+      params,
+      backend as never
+    );
+
+    expect(result).toEqual([nativeOrganizeImports]);
+    expect(backend.sendRequest).not.toHaveBeenCalled();
+  });
 });
