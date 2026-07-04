@@ -44,9 +44,8 @@ async function initializedServer(capabilities: Record<string, unknown> = {}) {
 
   const server = new LSPServer({
     logLevel: LogLevel.Error,
-    capabilities: defaultCapabilities,
     validateParams: false
-  });
+  }).registerCapabilities(defaultCapabilities);
   const backend = {
     sendRequest: vi.fn().mockResolvedValue({ ok: true }),
     sendNotification: vi.fn().mockResolvedValue(undefined)
@@ -145,7 +144,10 @@ describe('registerPassThrough — full surface parity', () => {
     };
 
     const backend = { sendRequest: vi.fn().mockResolvedValue(null) };
-    const server = new LSPServer({ logLevel: LogLevel.Error, capabilities, validateParams: false });
+    const server = new LSPServer({
+      logLevel: LogLevel.Error,
+      validateParams: false
+    }).registerCapabilities(capabilities);
     registerPassThrough(server, () => backend as never);
     const transport = new FakeTransport();
     await server.listen(transport);
