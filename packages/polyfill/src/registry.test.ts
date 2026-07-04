@@ -24,4 +24,12 @@ describe('applicablePolyfills', () => {
     });
     expect(applicable.map((p) => p.id)).toContain('fix-all');
   });
+
+  it('includes organize-imports when the backend has pull diagnostics but not source.organizeImports', () => {
+    const applicable = applicablePolyfills({
+      codeActionProvider: true,
+      diagnosticProvider: { interFileDependencies: false, workspaceDiagnostics: false }
+    });
+    expect(applicable.map((p) => p.id)).toContain('organize-imports');
+  });
 });
