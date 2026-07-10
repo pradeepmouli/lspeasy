@@ -8,6 +8,7 @@ import { applyWorkspaceEdit, planWorkspaceEdit } from './apply.js';
 import type { BoundaryGuard } from './apply.js';
 import type { RefactorSession } from './session.js';
 import type { GlobalFlags } from './io.js';
+import { globalOptionsHelpText } from './global-options.js';
 
 function getNestedValue(obj: unknown, path: string): unknown {
   return path
@@ -65,11 +66,25 @@ const CAPABILITY_REFINEMENTS: Readonly<Partial<Record<string, string>>> = {
   'textDocument/semanticTokens/full': 'semanticTokensProvider.full'
 };
 
+// Commander's `addHelpText('after', ...)` only surfaces its text through
+// `outputHelp()`'s emitted 'afterHelp' event — never through `helpInformation()`
+// called directly (see help.ts's `renderDrillDownText`, this CLI's actual
+// leaf-command help renderer, and note the CLI intercepts --help in cli.ts
+// before Commander ever parses, so `outputHelp()` itself is unreachable in
+// practice). Appending the footer here instead makes it part of the string
+// `helpInformation()` returns, so it reaches real users and is testable
+// directly without depending on Commander's event system.
+function appendHelpFooter(cmd: Command, footer: string): void {
+  const base = cmd.helpInformation.bind(cmd);
+  cmd.helpInformation = (context) => `${base(context)}\n${footer}`;
+}
+
 export function buildCommandTree(
   program: Command,
   capabilities: ServerCapabilities,
   session: RefactorSession,
-  flags: GlobalFlags
+  flags: GlobalFlags,
+  anchorFile?: string
 ): void {
   for (const method of Object.keys(LSPSchemas) as Array<keyof typeof LSPSchemas>) {
     const schema = getSchemaForMethod(method as string);
@@ -91,7 +106,7 @@ export function buildCommandTree(
       program.addCommand(nsCmd);
     }
 
-    const subCmd = zodToCommander(method as string, schema, session, flags);
+    const subCmd = zodToCommander(method as string, schema, session, flags, anchorFile);
     enrichCommandFromCapabilities(method as string, subCmd, capabilities);
     // executeCommand args are server-defined (opaque LSPAny) and not in the
     // protocol — the reliable way to get a valid {command, arguments} is to
@@ -105,10 +120,11 @@ export function buildCommandTree(
           '(lsproxy auto-runs command-bearing code actions).'
       );
     }
+    appendHelpFooter(subCmd, globalOptionsHelpText());
     nsCmd.addCommand(subCmd);
   }
 
-  program
+  const callCmd = program
     .command('call <method>')
     .description('Send any LSP request by method name with raw JSON params')
     .option('--params <json>', 'LSP params as JSON')
@@ -155,4 +171,5 @@ export function buildCommandTree(
         process.exit(1);
       }
     });
+  appendHelpFooter(callCmd, globalOptionsHelpText());
 }
