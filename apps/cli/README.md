@@ -24,7 +24,7 @@ npx @lsproxy/cli src/foo.ts textDocument hover 12:7   # zero-install
 pnpm add -g @lsproxy/cli                               # or install globally
 ```
 
-## Breaking changes (0.11 → 0.12)
+## Breaking changes (0.11 → 1.0)
 
 Argument parsing moved onto Commander and the CLI grammar changed. If you have
 scripts using the old `lsproxy <namespace> <command> <file> [args] [flags]`
