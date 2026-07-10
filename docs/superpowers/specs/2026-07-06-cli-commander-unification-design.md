@@ -206,24 +206,71 @@ showing that fewer args = shallower view — since it's the same command,
 not a different `--help`-prefixed one. A new "Global options:" section
 is added, generated from `GLOBAL_OPTIONS`.
 
-### 7. `lsproxy status` — richer per-server info
+### 7. `lsproxy status` — grouped-by-server info
 
 New meta-command, alongside `config`/`daemon` (routed before any language
 resolution, never connects a session on its own). Bare `lsproxy` stays
 exactly as terse as today's top-level view (§5); `status` is the place for
-more detail:
+more detail, organized **by server process**, not by language:
 
-For each entry in the existing `StatusReport.languages` (already carries a
-`command` string — the configured, shell-quoted server command — but
-`languageLine()` never renders it), `status` additionally resolves that
-command's executable to an absolute filesystem path, the way a shell would
-find it: `tokenizeCommand` (already exported by `@lspeasy/core`) splits out
-the first token; a new `resolveBinaryPath(cmd)` checks it directly if it's
-already an absolute/relative path, otherwise searches `$PATH` (and, on
-Windows, each `$PATHEXT` extension) the way `which` would, returning the
-first executable match or `undefined` if the binary can't be found. This is
-best-effort display info, not a spawn-time guarantee — the daemon/session
-still resolve the command themselves when actually launching a server.
+```
+lsproxy status
+
+Servers:
+  🟢 typescript-language-server  running · healthy
+    location   /Users/x/.volta/bin/typescript-language-server
+    source     lsp.json
+    uptime     4s · 11 reqs · 2 open docs
+    languages  typescript (.ts .tsx)
+
+  ⚪ rust-analyzer  not started
+    location   /usr/local/bin/rust-analyzer
+    source     claude-code
+    languages  rust (.rs)
+
+daemon: up · pid 123 · 12s · 2 backend(s) · 1 session(s)
+```
+
+Today's data model (`@lsproxy/proxy`'s `StatusReport`/`LanguageStatus`) is
+keyed **per language**, not per server process — a single server command
+serving two languages produces two `LanguageStatus` entries that happen to
+share a `command` string. `status` groups those client-side by `command`:
+
+- **`location`** — `resolveBinaryPath(cmd)` (§6, unchanged): resolves the
+  command's first token to an absolute path via `$PATH`, `which`-style.
+  Best-effort display info, not a spawn-time guarantee.
+- **`source`** — which config produced this server: `lsp.json` or a
+  platform adapter id (`claude-code`, `codex`, `copilot`, `vscode`). This is
+  new plumbing: `resolve.ts`'s `platformServers()` already knows the
+  matching adapter at the point it builds each `ConfiguredServer`, but
+  discards it. A new `SourcedServer` type (`ConfiguredServer & {source:
+  string}`) carries it through; `allConfiguredServers()` becomes a
+  one-line wrapper around a new `allConfiguredServersWithSource()` so
+  there is exactly one aggregation implementation, not two.
+- **Display name** — the resolved binary's `basename` (e.g.
+  `typescript-language-server`), not the lsp.json config key (`typescript`)
+  — matches how a user would recognize the process, not how it's keyed in
+  config.
+- **`languages`** — every languageId (with its extensions) the group's
+  members cover.
+- **Mixed status (rare edge case):** the daemon's backend pool spawns one
+  process per languageId, not per command — so two languages sharing a
+  command are not *structurally* guaranteed to report the same pid/status
+  (in practice they almost always do, since one server config normally
+  maps 1:1 to a language). Grouping is **optimistic**: the group's headline
+  status is `running` if *any* member is running, and a `mixed: true` flag
+  is set when members disagree. The renderer shows a `(mixed — see below)`
+  note and lists each language's own status underneath instead of the flat
+  `languages` summary line; the JSON shape always includes the per-language
+  detail array regardless of `mixed`, so a caller can always drill in.
+
+`--json` returns `{ daemon, servers: ServerGroupStatus[] }` where each
+`ServerGroupStatus` carries `name`, `command`, `resolvedPath`, `source`,
+`status`, `healthy`, `mixed`, the aggregate `pid`/`uptimeMs`/
+`requestsServed`/`openDocuments` (from whichever running member won the
+optimistic aggregation), and a `languages` array with the same per-language
+detail. No changes to `@lsproxy/proxy`'s actual data model — this is a
+CLI-side re-projection.
 
 Output (text mode) extends each language line with an indented
 `<configured command> → <resolved path>` line (or a "not found on $PATH"
@@ -257,8 +304,17 @@ exactly like `config`/`daemon`.
 - `resolveBinaryPath`: absolute/relative path passthrough, `$PATH` search
   hit and miss, covered with a temp directory + fake executable rather
   than depending on any real binary being installed.
-- `status` command: `--json` output includes `resolvedPath` per language;
-  text output shows the "not found on $PATH" note when resolution fails.
+- `allConfiguredServersWithSource`: each entry tagged with the correct
+  adapter id or `'lsp.json'`; `allConfiguredServers()` still returns the
+  same servers (now via the wrapper) so existing callers are unaffected.
+- `groupServerStatus`: single-language groups pass status/pid/uptime
+  through unchanged; two languages sharing a command produce one group;
+  a synthetic mixed-status pair (one running, one cold) sets `mixed: true`
+  and the group's headline status is the running one (optimistic).
+- `status` command: `--json` output includes `resolvedPath`/`source`/
+  `mixed` per server group with a nested `languages` array; text output
+  shows the "not found on $PATH" note when resolution fails and the
+  mixed-status per-language breakdown when `mixed` is true.
 - README quick-start / usage examples updated to the new grammar.
 
 ## Non-goals
