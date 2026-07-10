@@ -1,7 +1,7 @@
 {
   "name": "@lsproxy/cli",
   "version": "0.11.3",
-  "description": "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and move-symbol",
+  "description": "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and code actions",
   "private": false,
   "keywords": [
     "lsp",
@@ -9,7 +9,6 @@
     "refactor",
     "rename",
     "codemod",
-    "move-symbol",
     "cli",
     "typescript"
   ],
