@@ -25,6 +25,7 @@ import { RefactorSession, CLI_VERSION } from './session.js';
 import { connectViaProxy, fetchDaemonStatus } from './connect.js';
 import { buildConfigCommand } from './config-command.js';
 import { buildDaemonCommand } from './daemon-commands.js';
+import { buildStatusCommand } from './status-command.js';
 import { buildCommandTree } from './build-commands.js';
 import { createFormatter } from './format.js';
 import { renderTopLevel, renderDrillDownText, drillDownJson } from './help.js';
@@ -95,12 +96,13 @@ async function main(): Promise<void> {
 
   const flags = buildFlags(scanOpts);
 
-  if (positionals[0] === 'config' || positionals[0] === 'daemon') {
+  if (positionals[0] === 'config' || positionals[0] === 'daemon' || positionals[0] === 'status') {
     const color = process.stdout.isTTY === true && !process.env['NO_COLOR'] && !flags.json;
     const program = new Command('lsproxy');
     registerGlobalOptions(program);
     program.addCommand(buildConfigCommand(flags));
     program.addCommand(buildDaemonCommand(flags, createFormatter(color)));
+    program.addCommand(buildStatusCommand(flags));
     await program.parseAsync(argv);
     exit(0);
   }

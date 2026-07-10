@@ -142,6 +142,7 @@ describe('renderTopLevel', () => {
     expect(out).toMatch(/Commands:/);
     expect(out).toMatch(/config .*read\/write LSP config/);
     expect(out).toMatch(/daemon .*manage the per-root proxy daemon/);
+    expect(out).toMatch(/status .*grouped by process/);
     expect(out).toMatch(/call .*send any LSP request/);
     expect(out).toMatch(/Global options:/);
     expect(out).toMatch(/--dry-run/);

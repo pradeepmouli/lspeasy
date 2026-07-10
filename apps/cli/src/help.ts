@@ -137,6 +137,7 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
     fmt.bold('Commands:'),
     row('config <list|import|export|diff>', 'read/write LSP config across platforms'),
     row('daemon <start|stop|status>', 'manage the per-root proxy daemon'),
+    row('status', 'servers grouped by process, with location and config source'),
     row('call <method> --params <json>', 'send any LSP request by method name'),
     row('--version, -V', 'print the CLI version')
   ].join('\n');

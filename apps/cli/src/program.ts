@@ -5,6 +5,7 @@ import type { GlobalFlags } from './io.js';
 import { buildCommandTree } from './build-commands.js';
 import { buildConfigCommand } from './config-command.js';
 import { buildDaemonCommand } from './daemon-commands.js';
+import { buildStatusCommand } from './status-command.js';
 import { createFormatter } from './format.js';
 
 /**
@@ -60,6 +61,7 @@ export function buildProgram(): Command {
   // metadata-only tree can never drift from the actual command surface.
   program.addCommand(buildConfigCommand(stubFlags));
   program.addCommand(buildDaemonCommand(stubFlags, createFormatter(false)));
+  program.addCommand(buildStatusCommand(stubFlags));
 
   return program;
 }
