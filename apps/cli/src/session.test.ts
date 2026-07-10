@@ -4,12 +4,18 @@
  * quoted argument containing spaces.
  */
 import { readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
 import { tokenizeCommand } from '@lspeasy/core';
 import { CapturedEdits, RefactorSession, CLI_VERSION } from './session.js';
 import type { WorkspaceEdit } from './apply.js';
+
+const INIT_OPTIONS_FIXTURE = fileURLToPath(
+  new URL('./test-fixtures/init-options-fixture-server.mjs', import.meta.url)
+);
 
 describe('tokenizeCommand', () => {
   it('splits a plain command on whitespace', () => {
@@ -142,6 +148,44 @@ describe('RefactorSession.requestWithRetry — readiness retry (fix B)', () => {
     const run = async () => null;
     const res = await session.requestWithRetry(run);
     expect(res).toBeNull();
+  });
+});
+
+describe('RefactorSession.start — initializationOptions merge (real fixture server)', () => {
+  it('merges configured initializationOptions on top of languageId in the real initialize request', async () => {
+    const session = new RefactorSession({
+      serverCommand: `"${process.execPath}" "${INIT_OPTIONS_FIXTURE}"`,
+      root: tmpdir(),
+      languageId: 'typescript',
+      indexWaitMs: 0,
+      initializationOptions: { supportsMoveToFileCodeAction: true }
+    });
+    try {
+      await session.start();
+      const captured = await session.lsp.sendRequest('$/test.getInitOptions', {});
+      expect(captured).toEqual({
+        languageId: 'typescript',
+        supportsMoveToFileCodeAction: true
+      });
+    } finally {
+      await session.stop();
+    }
+  });
+
+  it('sends just the computed languageId when no initializationOptions are configured', async () => {
+    const session = new RefactorSession({
+      serverCommand: `"${process.execPath}" "${INIT_OPTIONS_FIXTURE}"`,
+      root: tmpdir(),
+      languageId: 'rust',
+      indexWaitMs: 0
+    });
+    try {
+      await session.start();
+      const captured = await session.lsp.sendRequest('$/test.getInitOptions', {});
+      expect(captured).toEqual({ languageId: 'rust' });
+    } finally {
+      await session.stop();
+    }
   });
 });
 

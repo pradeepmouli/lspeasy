@@ -131,7 +131,10 @@ export class BackendPool {
       version: '0.1.0',
       capabilities: CLIENT_CAPABILITIES as ClientCapabilities,
       rootUri,
-      workspaceFolders: [{ uri: rootUri, name: basename(rootDir) }]
+      workspaceFolders: [{ uri: rootUri, name: basename(rootDir) }],
+      ...(discovered.initializationOptions
+        ? { initializationOptions: discovered.initializationOptions }
+        : {})
     });
 
     await client.connect(transport);

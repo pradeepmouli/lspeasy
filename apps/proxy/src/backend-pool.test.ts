@@ -12,8 +12,10 @@ vi.mock('@lspeasy/core', async (importActual) => {
   };
 });
 
+const { lspClientCtor } = vi.hoisted(() => ({ lspClientCtor: vi.fn() }));
 vi.mock('@lspeasy/client', () => ({
-  LSPClient: vi.fn().mockImplementation(function () {
+  LSPClient: vi.fn().mockImplementation(function (this: unknown, opts: unknown) {
+    lspClientCtor(opts);
     return {
       connect: vi.fn().mockResolvedValue(undefined),
       disconnect: vi.fn().mockResolvedValue(undefined),
@@ -127,5 +129,33 @@ describe('BackendPool', () => {
     const pool = new BackendPool('/project');
     expect(() => pool.recordRequest('python')).not.toThrow();
     expect(pool.listBackends()).toEqual([]);
+  });
+
+  it('passes the discovered initializationOptions to the real LSPClient constructor', async () => {
+    (discoverServerByLanguageId as ReturnType<typeof vi.fn>).mockReturnValue({
+      serverCommand: '"typescript-language-server" "--stdio"',
+      languageId: 'typescript',
+      initializationOptions: { supportsMoveToFileCodeAction: true }
+    });
+    lspClientCtor.mockClear();
+    const pool = new BackendPool('/project');
+    await pool.ensureBackend('typescript');
+    expect(lspClientCtor).toHaveBeenCalledTimes(1);
+    expect(lspClientCtor.mock.calls[0]?.[0]).toMatchObject({
+      initializationOptions: { supportsMoveToFileCodeAction: true }
+    });
+  });
+
+  it('omits initializationOptions from the LSPClient constructor when none were discovered', async () => {
+    (discoverServerByLanguageId as ReturnType<typeof vi.fn>).mockReturnValue({
+      serverCommand: '"typescript-language-server" "--stdio"',
+      languageId: 'typescript'
+    });
+    lspClientCtor.mockClear();
+    const pool = new BackendPool('/project');
+    await pool.ensureBackend('typescript');
+    expect(lspClientCtor).toHaveBeenCalledTimes(1);
+    const ctorOpts = lspClientCtor.mock.calls[0]![0] as object;
+    expect('initializationOptions' in ctorOpts).toBe(false);
   });
 });

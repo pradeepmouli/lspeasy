@@ -96,6 +96,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@lspeasy/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       '@skillit/cli':
         specifier: ^0.4.0
         version: 0.4.0(commander@15.0.0)

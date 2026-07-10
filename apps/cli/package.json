@@ -61,6 +61,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@lspeasy/server": "workspace:*",
     "@skillit/cli": "^0.4.0",
     "tsx": "^4.22.4",
     "typedoc-plugin-skillit": "^1.4.1",
