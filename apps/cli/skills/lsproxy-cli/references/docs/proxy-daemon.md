@@ -15,13 +15,13 @@ lsproxy daemon status --json   # machine-readable
 
 ```bash
 # First invocation — daemon spawns, performs the initialize handshake (~1-3s)
-lsproxy textDocument hover src/foo.ts 1:1
+lsproxy src/foo.ts textDocument hover 1:1
 
 # Subsequent invocations — reconnects via Unix socket (<100ms)
-lsproxy textDocument hover src/foo.ts 2:5
+lsproxy src/foo.ts textDocument hover 2:5
 
 # Bypass the daemon entirely
-lsproxy --no-proxy textDocument hover src/foo.ts 1:1
+lsproxy --no-proxy src/foo.ts textDocument hover 1:1
 ```
 
 Socket path: `~/.lsproxy/<hash(root)>.sock`

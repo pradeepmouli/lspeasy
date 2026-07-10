@@ -193,11 +193,46 @@ sources.
       "args": ["<arg>", "…"],
       "fileExtensions": {
         ".<ext>": "<languageId>"
-      }
+      },
+      "initializationOptions": { "<key>": "<value>" }
     }
   }
 }
 ```
+
+`initializationOptions` is optional, arbitrary JSON passed verbatim into the
+server's `initialize` request — for server-specific extension flags the LSP
+spec itself has no standard slot for. lspeasy merges it on top of the
+`languageId` it computes automatically for `textDocument/didOpen`; an
+explicit `languageId` key here overrides that.
+
+### Example — enabling a server-specific extension flag
+
+`typescript-language-server` only offers its deterministic "Move to file"
+refactor code action (as opposed to the default, which auto-generates a new
+filename each call) if the client sets a non-standard
+`supportsMoveToFileCodeAction` capability during `initialize`. There's no
+dedicated `lsproxy` flag for this — it's exactly what `initializationOptions`
+is for:
+
+```json
+{
+  "lspServers": {
+    "typescript": {
+      "command": "typescript-language-server",
+      "args": ["--stdio"],
+      "fileExtensions": { ".ts": "typescript" },
+      "initializationOptions": { "supportsMoveToFileCodeAction": true }
+    }
+  }
+}
+```
+
+With this set, `textDocument codeAction` on a movable symbol returns a
+`refactor.move.file` action (in addition to the always-present
+`refactor.move.newFile`) that can be driven deterministically via
+`workspace executeCommand` with an explicit
+`interactiveRefactorArguments.targetFile` in its `arguments`.
 
 ### Example — multi-language project
 

@@ -3,6 +3,10 @@
 The CLI uses a dynamic discovery model — the help surface is built from live
 server capabilities and `lsp.json` config, not a static command list.
 
+The same tree is used for real dispatch: `lsproxy <language-or-file> <namespace> <request>`
+without enough args to actually run shows the same view as the equivalent
+`--help` invocation below.
+
 **Depth 0 — bare `lsproxy` (or `lsproxy --help`)**
 
 Lists every configured language with live daemon status (pid, uptime, docs, reqs)

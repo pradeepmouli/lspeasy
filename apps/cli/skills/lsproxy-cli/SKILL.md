@@ -1,11 +1,11 @@
 ---
-description: "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and move-symbol Also: lsp, language-server-protocol, refactor, rename, codemod, move-symbol, cli."
+description: "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and code actions Also: lsp, language-server-protocol, refactor, rename, codemod, cli."
 name: lsproxy-cli
 ---
 
 # lsproxy-cli
 
-Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and move-symbol
+Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and code actions
 
 ## Features
 
@@ -17,21 +17,22 @@ Standalone refactor CLI driving any LSP server: project-wide rename, file-move w
 - **Dry-run preview** — `--dry-run` prints diffs without writing; safe to inspect before committing
 - **Multi-platform config interop** — `lsproxy config import/export/diff/list` bridges `lsp.json` with Copilot CLI, Claude Code, and Codex; `--user` targets `~/.claude/lsp.json` for user-level scope
 - **Self-describing discovery** — bare `lsproxy` lists configured languages with live daemon status; `lsproxy --help <language> <namespace> <request>` shows parameter schema, flag list, and illustrative example input/output; add `--json` for machine-readable output for agents
+- **Server visibility** — `lsproxy status` groups every configured server by process, showing its resolved binary location, config source (lsp.json, Claude Code, Codex, Copilot CLI), live connection status/uptime, and which languages it serves
 
 ## Quick Start
 
 ```bash
 # Preview a rename before writing (always do this first)
-lsproxy textDocument rename --dry-run src/auth/login.ts 42:15 "signIn"
+lsproxy src/auth/login.ts textDocument rename --dry-run 42:15 "signIn"
 
 # Find all references to a symbol
-lsproxy textDocument references src/auth/login.ts 42:15
+lsproxy src/auth/login.ts textDocument references 42:15
 
 # List available code actions at a range, then apply the chosen one
-lsproxy textDocument codeAction src/foo.ts 12:1-12:20
+lsproxy src/foo.ts textDocument codeAction 12:1-12:20
 
 # Send any LSP method directly (useful for probing capabilities)
-lsproxy call workspace/executeCommand --params '{"command":"typescript.reloadProjects"}'
+lsproxy typescript call workspace/executeCommand --params '{"command":"typescript.reloadProjects"}'
 ```
 
 Positions are **1-based** (`line:col`, editor-style).
@@ -41,8 +42,8 @@ Write-side commands apply changes to disk automatically — use `--dry-run` to p
 
 **Commands missing from `--help`** — lsproxy only registers commands for capabilities the
 server actually advertises. If `textDocument rename` doesn't appear, the server doesn't
-support `renameProvider`. Use `lsproxy call initialize --params '{}'` to inspect the
-server's capability response.
+support `renameProvider`. Use `lsproxy <language-or-file> call initialize --params '{}'`
+to inspect the server's capability response.
 
 **Wrong positions** — Positions must be 1-based (`line:col`). Most editors display
 1-based positions; LSP protocol is 0-based internally but lsproxy converts for you.
@@ -1040,6 +1041,15 @@ Stop the proxy daemon for --root
 ### daemon status
 
 Show daemon status for --root
+
+**Usage:**
+```
+[options]
+```
+
+### status
+
+Show configured language servers grouped by process, with location and config source
 
 **Usage:**
 ```
