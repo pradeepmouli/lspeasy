@@ -18,7 +18,7 @@ import { Command, CommanderError } from 'commander';
 
 import { fail, resolvePathArg, type GlobalFlags } from './io.js';
 import { buildFlags, registerGlobalOptions, type ParsedOptionValues } from './global-options.js';
-import { resolveEntry, allConfiguredServers } from './resolve.js';
+import { resolveEntry, allConfiguredServers, type EntryResolution } from './resolve.js';
 import { findAnchorFile } from './anchor.js';
 import { coldStatusReport } from '@lsproxy/proxy';
 import { RefactorSession, CLI_VERSION } from './session.js';
@@ -124,6 +124,24 @@ function drillPathFor(path: string[]): string[] {
 }
 
 /**
+ * Resolve the CLI's first positional (language id or file) exactly as
+ * runHelp and runDispatch each need it, or fail with the "not a configured
+ * language or file" error. `fail` never returns, so TypeScript narrows the
+ * result to non-null after the `if (!entry)` check.
+ */
+function resolveEntryOrFail(token: string, flags: GlobalFlags): EntryResolution {
+  const entry = resolveEntry(token, flags.root, flags.server);
+  if (!entry) {
+    const names = allConfiguredServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
+    fail(
+      `"${token}" is not a configured language or a file with a recognized extension. Configured: ${[...new Set(names)].join(', ')}`,
+      flags.json
+    );
+  }
+  return entry;
+}
+
+/**
  * Recursively apply `exitOverride()` to `cmd` and every descendant.
  *
  * Commander's `exitOverride()` only sets the *current* Command's own
@@ -162,14 +180,7 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
     return;
   }
 
-  const entry = resolveEntry(token, flags.root, flags.server);
-  if (!entry) {
-    const names = allConfiguredServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
-    fail(
-      `"${token}" is not a configured language or a file with a recognized extension. Configured: ${[...new Set(names)].join(', ')}`,
-      flags.json
-    );
-  }
+  const entry = resolveEntryOrFail(token, flags);
 
   const direct = flags.noProxy || !!flags.server || entry.fromPlatform;
   let session: RefactorSession;
@@ -233,14 +244,7 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
  */
 export async function runDispatch(positionals: string[], flags: GlobalFlags): Promise<void> {
   const token = positionals[0]!;
-  const entry = resolveEntry(token, flags.root, flags.server);
-  if (!entry) {
-    const names = allConfiguredServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
-    fail(
-      `"${token}" is not a configured language or a file with a recognized extension. Configured: ${[...new Set(names)].join(', ')}`,
-      flags.json
-    );
-  }
+  const entry = resolveEntryOrFail(token, flags);
 
   const path = positionals.slice(1);
   if (path.length < 2) {
@@ -292,6 +296,10 @@ export async function runDispatch(positionals: string[], flags: GlobalFlags): Pr
     applyExitOverride(program);
 
     const rawArgs = argv.slice(2);
+    // Assumes the first argv entry equal to `token` is the language/file
+    // positional itself. Pathological edge case (currently unhandled): if a
+    // preceding option's VALUE happens to equal `token`, this strips that
+    // value instead, not the positional.
     const tokenIdx = rawArgs.indexOf(token);
     const pass2Args =
       tokenIdx === -1 ? rawArgs : [...rawArgs.slice(0, tokenIdx), ...rawArgs.slice(tokenIdx + 1)];
@@ -306,7 +314,7 @@ export async function runDispatch(positionals: string[], flags: GlobalFlags): Pr
             JSON.stringify(drillDownJson(program, entry.languageId, drillPath)) + '\n'
           );
         } else {
-          const color = process.stdout.isTTY === true && !process.env['NO_COLOR'] && !flags.json;
+          const color = process.stdout.isTTY === true && !process.env['NO_COLOR'];
           const { text } = renderDrillDownText(program, drillPath, createFormatter(color));
           process.stdout.write(text.endsWith('\n') ? text : text + '\n');
         }

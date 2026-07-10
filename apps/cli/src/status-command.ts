@@ -17,9 +17,9 @@ export function buildStatusCommand(flags: GlobalFlags): Command {
       'Show configured language servers grouped by process, with location and config source'
     )
     .action(async () => {
-      const live = await fetchDaemonStatus(flags.root);
-      const report = live ?? coldStatusReport(allConfiguredServersWithSource(flags.root));
       const sources = allConfiguredServersWithSource(flags.root);
+      const live = await fetchDaemonStatus(flags.root);
+      const report = live ?? coldStatusReport(sources);
       const servers = groupServerStatus(report.languages, sources);
 
       if (flags.json) {

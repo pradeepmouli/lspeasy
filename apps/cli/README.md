@@ -24,6 +24,16 @@ npx @lsproxy/cli src/foo.ts textDocument hover 12:7   # zero-install
 pnpm add -g @lsproxy/cli                               # or install globally
 ```
 
+## Breaking changes (0.11 → 0.12)
+
+Argument parsing moved onto Commander and the CLI grammar changed. If you have
+scripts using the old `lsproxy <namespace> <command> <file> [args] [flags]`
+order (e.g. `lsproxy textDocument hover src/foo.ts 12:7`), they will now fail
+with a `"<namespace>" is not a configured language or a file with a
+recognized extension` error. Reorder to the new grammar instead: the file (or
+language id) comes first — `lsproxy src/foo.ts textDocument hover 12:7` — see
+[Usage](#usage) below.
+
 ## Quick Start
 
 ```bash
