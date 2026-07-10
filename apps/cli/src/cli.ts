@@ -47,43 +47,8 @@ const GLOBAL_OPTION_CONFIG = {
   help: { type: 'boolean' as const, short: 'h', default: false }
 };
 
-/** Parsed raw flag values from the first pass. */
-export type ParsedOptionValues = {
-  server?: string;
-  root?: string;
-  'dry-run'?: boolean;
-  json?: boolean;
-  wait?: string;
-  verbose?: boolean;
-  'allow-outside-root'?: boolean;
-  'no-proxy'?: boolean;
-};
-
-/**
- * Validate raw flag values and project them onto {@link GlobalFlags}.
- *
- * `--wait` must parse to a finite, non-negative number; a typo like
- * `--wait abc` would otherwise become NaN, which setTimeout coerces to 0,
- * silently skipping the index wait refactor requests depend on.
- */
-export function buildFlags(values: ParsedOptionValues): GlobalFlags {
-  const json = values.json === true;
-  const waitMs = Number(values.wait ?? '15000');
-  if (!Number.isFinite(waitMs) || waitMs < 0) {
-    fail(`--wait must be a non-negative number of milliseconds, got "${values.wait}"`, json);
-  }
-  return {
-    server: values.server ?? '',
-    root: values.root ?? process.cwd(),
-    dryRun: values['dry-run'] === true,
-    json,
-    verbose: values.verbose === true,
-    waitMs,
-    allowOutsideRoot: values['allow-outside-root'] === true,
-    noProxy: values['no-proxy'] === true,
-    overwrite: false // move-file removed; the flag is kept in GlobalFlags for io.ts compatibility
-  };
-}
+import { buildFlags, type ParsedOptionValues } from './global-options.js';
+export { buildFlags, type ParsedOptionValues };
 
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({
