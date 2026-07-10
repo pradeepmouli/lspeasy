@@ -6,6 +6,8 @@
  * config (e.g. rust from a Claude Code plugin) without first running
  * `config import`.
  */
+import { extname } from 'node:path';
+
 import {
   discoverServer,
   discoverServerByLanguageId,
@@ -107,4 +109,51 @@ export function allConfiguredServers(root: string, scope: Scope = 'user'): Confi
     if (Object.keys(fileExtensions).length > 0) extra.push({ ...s, fileExtensions });
   }
   return [...core, ...extra];
+}
+
+export interface EntryResolution {
+  serverCommand: string;
+  languageId: string;
+  fromPlatform: boolean;
+  /** Set only when the token was a file path — it doubles as the request's
+   * implicit target file, so callers don't need to repeat it. */
+  anchorFile?: string;
+}
+
+/**
+ * Resolve the CLI's first positional: either a configured language id, or a
+ * file path whose extension resolves the language (and which becomes the
+ * implicit anchor file for the request). `serverOverride` (`--server`)
+ * bypasses discovery entirely, but the token still supplies a languageId
+ * label and, when it looks like a file, an anchor.
+ */
+export function resolveEntry(
+  token: string,
+  root: string,
+  serverOverride: string,
+  scope: Scope = 'user'
+): EntryResolution | null {
+  const ext = extname(token);
+
+  if (serverOverride) {
+    const discovered = ext ? resolveByExtension(root, ext, scope) : null;
+    return {
+      serverCommand: serverOverride,
+      languageId: discovered?.languageId ?? token,
+      fromPlatform: false,
+      ...(ext ? { anchorFile: token } : {})
+    };
+  }
+
+  const knownLanguages = new Set(
+    allConfiguredServers(root, scope).flatMap((s) => Object.values(s.fileExtensions))
+  );
+  if (knownLanguages.has(token)) {
+    const resolution = resolveByLanguageId(root, token, scope);
+    return resolution ? { ...resolution } : null;
+  }
+
+  if (!ext) return null;
+  const resolution = resolveByExtension(root, ext, scope);
+  return resolution ? { ...resolution, anchorFile: token } : null;
 }
