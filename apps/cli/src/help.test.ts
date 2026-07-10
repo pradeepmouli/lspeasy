@@ -1,10 +1,96 @@
 import { describe, expect, it } from 'vitest';
 import type { StatusReport } from '@lsproxy/proxy';
 import { createFormatter } from './format.js';
-import { renderTopLevel, renderDrillDownText, drillDownJson, daemonStatusLine } from './help.js';
+import {
+  renderTopLevel,
+  renderDrillDownText,
+  drillDownJson,
+  daemonStatusLine,
+  renderStatus
+} from './help.js';
 import { buildProgram } from './program.js';
+import type { ServerGroupStatus } from './server-groups.js';
 
 const fmt = createFormatter(false);
+
+function group(overrides: Partial<ServerGroupStatus> = {}): ServerGroupStatus {
+  return {
+    name: 'typescript-language-server',
+    command: '"tsls"',
+    resolvedPath: '/usr/local/bin/tsls',
+    source: 'lsp.json',
+    status: 'running',
+    healthy: true,
+    mixed: false,
+    pid: 9,
+    uptimeMs: 4000,
+    openDocuments: 2,
+    requestsServed: 11,
+    languages: [
+      {
+        languageId: 'typescript',
+        extensions: ['.ts', '.tsx'],
+        status: 'running',
+        healthy: true,
+        pid: 9
+      }
+    ],
+    ...overrides
+  };
+}
+
+describe('renderStatus', () => {
+  it('shows name, location, source, uptime, and languages for a healthy running server', () => {
+    const out = renderStatus([group()], null, fmt);
+    expect(out).toContain('typescript-language-server');
+    expect(out).toContain('/usr/local/bin/tsls');
+    expect(out).toContain('lsp.json');
+    expect(out).toMatch(/4s/);
+    expect(out).toContain('typescript (.ts .tsx)');
+  });
+
+  it('flags a command that could not be resolved on $PATH', () => {
+    const out = renderStatus(
+      [group({ resolvedPath: undefined, status: 'cold', pid: undefined })],
+      null,
+      fmt
+    );
+    expect(out).toMatch(/not found on \$PATH/);
+  });
+
+  it('shows "not started" and no uptime line for a cold server', () => {
+    const out = renderStatus(
+      [group({ status: 'cold', pid: undefined, uptimeMs: undefined, healthy: undefined })],
+      null,
+      fmt
+    );
+    expect(out).toMatch(/not started/);
+  });
+
+  it('mixed status shows a per-language breakdown instead of the flat languages line', () => {
+    const mixed = group({
+      mixed: true,
+      languages: [
+        { languageId: 'typescript', extensions: ['.ts'], status: 'running', pid: 9 },
+        { languageId: 'javascript', extensions: ['.js'], status: 'cold' }
+      ]
+    });
+    const out = renderStatus([mixed], null, fmt);
+    expect(out).toMatch(/mixed/);
+    expect(out).toContain('typescript');
+    expect(out).toContain('javascript');
+  });
+
+  it('includes the daemon status line', () => {
+    const out = renderStatus(
+      [group()],
+      { pid: 123, uptimeMs: 12000, root: '/p', sessions: 1, backends: 2 },
+      fmt
+    );
+    expect(out).toMatch(/daemon: up/);
+    expect(out).toContain('pid 123');
+  });
+});
 
 describe('renderTopLevel', () => {
   it('lists running and cold languages with the drill-down hint and no ANSI', () => {

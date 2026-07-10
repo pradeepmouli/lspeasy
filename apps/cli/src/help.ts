@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { exampleFromZod, getResultSchemaForMethod, getSchemaForMethod } from '@lspeasy/core';
 import { SYMBOLS, type Formatter } from './format.js';
 import { globalOptionsHelpText } from './global-options.js';
+import type { ServerGroupStatus } from './server-groups.js';
 import { paramsResidualExample } from './zod-to-commander.js';
 
 function safeResidual(schema: z.ZodType): { ok: boolean; value: unknown } {
@@ -168,6 +169,69 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
     explore,
     '',
     globalOpts,
+    ''
+  ].join('\n');
+}
+
+/** Grouped-by-server view for `lsproxy status` — see design doc §7. */
+export function renderStatus(
+  servers: ServerGroupStatus[],
+  daemon: StatusReport['daemon'],
+  fmt: Formatter
+): string {
+  const serverLines = servers.flatMap((s) => {
+    const lines: string[] = [];
+    const mark =
+      s.status === 'running'
+        ? s.healthy === false
+          ? SYMBOLS.degraded
+          : SYMBOLS.running
+        : SYMBOLS.cold;
+    const statusLabel =
+      s.status === 'running'
+        ? fmt.green('running') +
+          (s.mixed
+            ? fmt.dim(' (mixed — see below)')
+            : s.healthy === false
+              ? ` ${fmt.yellow('· unhealthy')}`
+              : ` · ${fmt.dim('healthy')}`)
+        : fmt.dim('not started');
+    lines.push(`  ${mark} ${fmt.cyan(s.name)}  ${statusLabel}`);
+    lines.push(
+      `    ${fmt.dim('location')}   ${s.resolvedPath ?? `${fmt.dim(s.command)}  ${fmt.yellow('(not found on $PATH)')}`}`
+    );
+    lines.push(`    ${fmt.dim('source')}     ${s.source}`);
+    if (s.status === 'running' && !s.mixed) {
+      lines.push(
+        `    ${fmt.dim('uptime')}     ${Math.round((s.uptimeMs ?? 0) / 1000)}s · ${s.requestsServed ?? 0} reqs · ${s.openDocuments ?? 0} open docs`
+      );
+    }
+    if (s.mixed) {
+      lines.push(`    ${fmt.dim('languages')}`);
+      for (const l of s.languages) {
+        const lMark = l.status === 'running' ? SYMBOLS.running : SYMBOLS.cold;
+        const lLabel =
+          l.status === 'running'
+            ? `${fmt.green('running')} · pid ${l.pid} · up ${Math.round((l.uptimeMs ?? 0) / 1000)}s`
+            : fmt.dim('not started');
+        lines.push(`      ${lMark} ${l.languageId}  ${lLabel}`);
+      }
+    } else {
+      const langList = s.languages
+        .map((l) => `${l.languageId} (${l.extensions.join(' ')})`)
+        .join('  ');
+      lines.push(`    ${fmt.dim('languages')}  ${langList}`);
+    }
+    return lines;
+  });
+
+  return [
+    fmt.bold('lsproxy status'),
+    '',
+    fmt.bold('Servers:'),
+    ...(serverLines.length ? serverLines : [fmt.dim('  (none configured)')]),
+    '',
+    daemonStatusLine(daemon, fmt),
     ''
   ].join('\n');
 }
