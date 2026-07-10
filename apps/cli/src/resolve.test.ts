@@ -34,6 +34,7 @@ import {
   resolveByLanguageId,
   resolveByExtension,
   allConfiguredServers,
+  allConfiguredServersWithSource,
   resolveEntry
 } from './resolve.js';
 
@@ -111,5 +112,28 @@ describe('resolveEntry — language-or-file resolution', () => {
     expect(entry?.serverCommand).toBe('my-custom-server');
     expect(entry?.anchorFile).toBeUndefined();
     expect(entry?.languageId).toBe('typescript');
+  });
+});
+
+describe('allConfiguredServersWithSource', () => {
+  it('tags a platform-adapter server with the adapter id', () => {
+    const servers = allConfiguredServersWithSource('/p');
+    const rust = servers.find((s) => s.fileExtensions['.rs'] === 'rust');
+    expect(rust?.source).toBe('claude-code');
+  });
+
+  it('tags an lsp.json server with "lsp.json"', () => {
+    vi.mocked(discoverServers).mockReturnValueOnce([
+      { name: 'typescript', command: '"tsls"', fileExtensions: { '.ts': 'typescript' } }
+    ]);
+    const servers = allConfiguredServersWithSource('/p');
+    const ts = servers.find((s) => s.fileExtensions['.ts'] === 'typescript');
+    expect(ts?.source).toBe('lsp.json');
+  });
+
+  it('allConfiguredServers still returns the same servers via the wrapper', () => {
+    const withSource = allConfiguredServersWithSource('/p');
+    const plain = allConfiguredServers('/p');
+    expect(plain.map((s) => s.command).sort()).toEqual(withSource.map((s) => s.command).sort());
   });
 });
