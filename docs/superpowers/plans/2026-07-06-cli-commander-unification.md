@@ -13,7 +13,8 @@
 - TypeScript strict mode, no `any` in new code.
 - Follow existing code style: named exports, no default exports, JSDoc only where the *why* is non-obvious (matches existing `apps/cli/src` files).
 - This is a breaking CLI syntax change (spec: `docs/superpowers/specs/2026-07-06-cli-commander-unification-design.md`) — no dual-mode/back-compat parsing.
-- Every task must leave `pnpm --filter @lsproxy/cli test`, `pnpm --filter @lsproxy/cli run type-check`, and `pnpm --filter @lsproxy/cli run lint` green before moving on.
+- Every task must leave `pnpm exec vitest run apps/cli/src`, `pnpm --filter @lsproxy/cli run type-check`, and `pnpm exec oxlint apps/cli` green before moving on.
+- Run every `pnpm exec vitest ...`/`pnpm exec oxlint ...` command from the **repo root**, not from inside `apps/cli` — vitest's include globs are defined in the root `vitest.config.ts` and only resolve correctly against root-relative paths (e.g. `apps/cli/src/foo.test.ts`); running from inside `apps/cli` with a `src/...`-relative path silently reports "No test files found". `pnpm --filter @lsproxy/cli run <script>` commands (`type-check`, `build`, `skill:gen`) are fine to run from anywhere — they're real scripts in that package's `package.json`. There is no `test`/`lint` script in `apps/cli/package.json`; those only exist at the repo root, which is why the commands above use `pnpm exec` with an explicit `apps/cli/...` path instead.
 - `apps/proxy/src/main.ts` is out of scope — do not touch it.
 
 ---
@@ -112,7 +113,7 @@ describe('buildFlags', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/global-options.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/global-options.test.ts`
 Expected: FAIL — `Cannot find module './global-options.js'`
 
 - [ ] **Step 3: Write the implementation**
@@ -201,7 +202,7 @@ Place this re-export where `buildFlags` used to be defined, so `cli.test.ts`'s `
 
 - [ ] **Step 5: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/global-options.test.ts src/cli.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/global-options.test.ts apps/cli/src/cli.test.ts`
 Expected: PASS (cli.test.ts's `buildFlags` describe block still passes via the re-export)
 
 - [ ] **Step 6: Commit**
@@ -272,7 +273,7 @@ describe('resolveEntry — language-or-file resolution', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/resolve.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/resolve.test.ts`
 Expected: FAIL — `resolveEntry is not exported`
 
 - [ ] **Step 3: Implement `resolveEntry`**
@@ -330,7 +331,7 @@ export function resolveEntry(
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/resolve.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/resolve.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -405,7 +406,7 @@ describe('findAnchorFile', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/anchor.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/anchor.test.ts`
 Expected: FAIL — `Cannot find module './anchor.js'`
 
 - [ ] **Step 3: Implement**
@@ -471,7 +472,7 @@ export function findAnchorFile(method: string | undefined, args: readonly string
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/anchor.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/anchor.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -549,7 +550,7 @@ Add the needed imports at the top of the test file: `import { getSchemaForMethod
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/zod-to-commander.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/zod-to-commander.test.ts`
 Expected: FAIL — anchor-aware behavior not implemented; `<file>` argument always present
 
 - [ ] **Step 3: Implement**
@@ -665,12 +666,12 @@ Everything else in the action body is unchanged.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/zod-to-commander.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/zod-to-commander.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Run the full existing test suite to check for regressions**
 
-Run: `pnpm --filter @lsproxy/cli test`
+Run: `pnpm exec vitest run apps/cli/src`
 Expected: PASS (existing 4-arg call sites in `build-commands.ts`, `integration.test.ts`, `build-commands.test.ts` are unaffected since `anchorFile` is optional and defaults to `undefined` everywhere it's currently omitted)
 
 - [ ] **Step 6: Commit**
@@ -718,7 +719,7 @@ it('every leaf command and the call command get the global-options help footer',
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/build-commands.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/build-commands.test.ts`
 Expected: FAIL — `<file>` argument still present; no "Global options:" text in help output
 
 - [ ] **Step 3: Implement**
@@ -789,12 +790,12 @@ export function buildCommandTree(
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/build-commands.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/build-commands.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Run the full suite**
 
-Run: `pnpm --filter @lsproxy/cli test`
+Run: `pnpm exec vitest run apps/cli/src`
 Expected: PASS
 
 - [ ] **Step 6: Commit**
@@ -899,7 +900,7 @@ describe('buildConfigCommand', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/config-command.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/config-command.test.ts`
 Expected: FAIL — `Cannot find module './config-command.js'`
 
 - [ ] **Step 3: Implement**
@@ -963,7 +964,7 @@ export function buildConfigCommand(flags: GlobalFlags): Command {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/config-command.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/config-command.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -1034,7 +1035,7 @@ describe('buildDaemonCommand', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/daemon-commands.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/daemon-commands.test.ts`
 Expected: FAIL — `buildDaemonCommand is not exported`
 
 - [ ] **Step 3: Implement**
@@ -1072,7 +1073,7 @@ export function buildDaemonCommand(flags: GlobalFlags, fmt: Formatter): Command 
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/daemon-commands.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/daemon-commands.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -1115,7 +1116,7 @@ import { createFormatter } from './format.js';
 
 - [ ] **Step 2: Run the existing consumers to verify no regression**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/help.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/help.test.ts`
 Expected: PASS — `help.test.ts`'s `renderDrillDownText(buildProgram(), ['config'], colorFmt)` test still gets a real Commander-generated, colorized help block (this was already true before, since `program.ts`'s old hand-rolled tree also produced real `Command` objects — the change is that there is now only one source for that shape, not two).
 
 - [ ] **Step 3: Verify the skill generator still runs**
@@ -1185,7 +1186,7 @@ Add a new test for the corrected role-coloring (position of `<language-or-file>`
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/help.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/help.test.ts`
 Expected: FAIL — old Usage text still present
 
 - [ ] **Step 3: Implement**
@@ -1264,7 +1265,7 @@ Replace `renderTopLevel`'s `usage`/`drill` construction (the `Usage:`/`Drill dow
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/help.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/help.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -1382,7 +1383,7 @@ describe('anchorFile-aware dispatch (form B: file as first token)', () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/cli.test.ts src/integration.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/cli.test.ts apps/cli/src/integration.test.ts`
 Expected: FAIL — `runDispatch` doesn't exist yet; `runHelp` doesn't accept a file token yet
 
 - [ ] **Step 3: Rewrite `cli.ts`**
@@ -1657,12 +1658,12 @@ Leave `isEntryPoint()` and the trailing `if (isEntryPoint()) { main().catch(...)
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/cli.test.ts src/integration.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/cli.test.ts apps/cli/src/integration.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Run the full suite, type-check, and lint**
 
-Run: `pnpm --filter @lsproxy/cli test && pnpm --filter @lsproxy/cli run type-check && pnpm --filter @lsproxy/cli run lint`
+Run: `pnpm exec vitest run apps/cli/src && pnpm --filter @lsproxy/cli run type-check && pnpm exec oxlint apps/cli`
 Expected: all green. Fix any remaining unused-import or type errors surfaced by the rewrite before proceeding (in particular, double-check no file still imports `parseArgs` from `node:util`, and that `discoverServer` has no leftover import in `cli.ts`).
 
 - [ ] **Step 6: Commit**
@@ -1734,7 +1735,7 @@ describe('resolveBinaryPath', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/resolve-binary.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/resolve-binary.test.ts`
 Expected: FAIL — `Cannot find module './resolve-binary.js'`
 
 - [ ] **Step 3: Implement**
@@ -1781,7 +1782,7 @@ export function resolveBinaryPath(cmd: string): string | undefined {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/resolve-binary.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/resolve-binary.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -1836,7 +1837,7 @@ describe('allConfiguredServersWithSource', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/resolve.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/resolve.test.ts`
 Expected: FAIL — `allConfiguredServersWithSource is not exported`
 
 - [ ] **Step 3: Implement**
@@ -1911,12 +1912,12 @@ Delete the old body of `allConfiguredServers` (the loop this replaces) — the n
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/resolve.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/resolve.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Run the full suite to check for regressions**
 
-Run: `pnpm --filter @lsproxy/cli test`
+Run: `pnpm exec vitest run apps/cli/src`
 Expected: PASS — every existing `allConfiguredServers` call site (Tasks 2, 9, 10) is unaffected since its signature and behavior didn't change.
 
 - [ ] **Step 6: Commit**
@@ -1998,7 +1999,7 @@ describe('groupServerStatus', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/server-groups.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/server-groups.test.ts`
 Expected: FAIL — `Cannot find module './server-groups.js'`
 
 - [ ] **Step 3: Implement**
@@ -2107,7 +2108,7 @@ export function groupServerStatus(
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/server-groups.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/server-groups.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -2208,7 +2209,7 @@ Add the imports to the top of `help.test.ts`: `renderStatus` alongside the exist
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/help.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/help.test.ts`
 Expected: FAIL — `renderStatus is not exported`
 
 - [ ] **Step 3: Implement**
@@ -2273,7 +2274,7 @@ export function renderStatus(
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/help.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/help.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -2368,7 +2369,7 @@ describe('buildStatusCommand', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/status-command.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/status-command.test.ts`
 Expected: FAIL — `Cannot find module './status-command.js'`
 
 - [ ] **Step 3: Implement**
@@ -2411,7 +2412,7 @@ Note `coldStatusReport` accepts `ConfiguredServer[]` — passing `SourcedServer[
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/status-command.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/status-command.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -2443,7 +2444,7 @@ Add to `apps/cli/src/help.test.ts`'s existing `'shows base usage + non-namespace
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `pnpm --filter @lsproxy/cli exec vitest run src/help.test.ts`
+Run: `pnpm exec vitest run apps/cli/src/help.test.ts`
 Expected: FAIL — no `status` entry in the `Commands:` section yet
 
 - [ ] **Step 3: Add `status` to the top-level Commands list**
@@ -2491,7 +2492,7 @@ In `apps/cli/src/program.ts`, add the import `import { buildStatusCommand } from
 
 - [ ] **Step 6: Run tests to verify they pass**
 
-Run: `pnpm --filter @lsproxy/cli test`
+Run: `pnpm exec vitest run apps/cli/src`
 Expected: PASS (full suite)
 
 - [ ] **Step 7: Commit**
@@ -2557,7 +2558,7 @@ git commit -m "docs(cli): update README to the unified language-or-file grammar;
 
 - [ ] **Step 1: Full workspace test/type-check/lint**
 
-Run: `pnpm --filter @lsproxy/cli test && pnpm --filter @lsproxy/cli run type-check && pnpm --filter @lsproxy/cli run lint`
+Run: `pnpm exec vitest run apps/cli/src && pnpm --filter @lsproxy/cli run type-check && pnpm exec oxlint apps/cli`
 Expected: all green
 
 - [ ] **Step 2: Manual smoke test against a real TypeScript project**
