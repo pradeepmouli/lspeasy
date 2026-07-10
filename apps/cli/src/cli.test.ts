@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { buildFlags, runHelp, runDispatch } from './cli.js';
+import { buildFlags, runHelp, runDispatch, scanArgs } from './cli.js';
 import type { GlobalFlags } from './io.js';
 
 function withFailStubbed(body: () => void): string[] {
@@ -58,6 +58,45 @@ describe('buildFlags', () => {
 
   it('passes through --server override', () => {
     expect(buildFlags({ root: '/repo', server: 'rust-analyzer' }).server).toBe('rust-analyzer');
+  });
+});
+
+// Regression coverage for the pass-1 flag-parsing bug: main() used to cast
+// Commander's real `scan.opts()` output directly to `ParsedOptionValues`,
+// but Commander camelCases long option names and, for `--no-x`-prefixed
+// options, strips the `no-` prefix and inverts the boolean (`--no-proxy` ->
+// `proxy: false`, not `noProxy: true`). `buildFlags` reads hyphenated keys
+// (`values['dry-run']`, `values['allow-outside-root']`, `values['no-proxy']`)
+// that never existed in that raw shape, so `--dry-run`, `--allow-outside-root`,
+// and `--no-proxy` were silently ignored (always false) — the exact scenario
+// where `--dry-run` failing open means writing to disk instead of previewing.
+// These tests drive real argv through `scanArgs`'s actual
+// `scan.parseOptions()`/`scan.opts()` call, not a hand-built options object,
+// so they exercise the real Commander shape-mapping bug end to end.
+describe('scanArgs -> buildFlags (real Commander opts() mapping)', () => {
+  it('maps a real --dry-run --allow-outside-root --no-proxy argv onto GlobalFlags', () => {
+    const { scanOpts } = scanArgs([
+      'typescript',
+      'textDocument',
+      'hover',
+      '--dry-run',
+      '--allow-outside-root',
+      '--no-proxy',
+      '--root',
+      '/x'
+    ]);
+    const flags = buildFlags(scanOpts);
+    expect(flags.dryRun).toBe(true);
+    expect(flags.allowOutsideRoot).toBe(true);
+    expect(flags.noProxy).toBe(true);
+  });
+
+  it('defaults dryRun/allowOutsideRoot/noProxy to false when the flags are omitted from argv', () => {
+    const { scanOpts } = scanArgs(['typescript', 'textDocument', 'hover', '--root', '/x']);
+    const flags = buildFlags(scanOpts);
+    expect(flags.dryRun).toBe(false);
+    expect(flags.allowOutsideRoot).toBe(false);
+    expect(flags.noProxy).toBe(false);
   });
 });
 

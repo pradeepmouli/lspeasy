@@ -31,15 +31,64 @@ import { renderTopLevel, renderDrillDownText, drillDownJson } from './help.js';
 
 export { buildFlags, type ParsedOptionValues } from './global-options.js';
 
-async function main(): Promise<void> {
+/** Raw shape Commander's `opts()` actually produces for the pass-1 scan:
+ * long option names camelCased, and (for the `--no-x`-prefixed `--no-proxy`
+ * option) the `no-` prefix stripped and the boolean inverted — `proxy`, not
+ * `noProxy`. `version`/`help` are the plain `-V`/`-h` flags declared
+ * separately on `scan`, not part of {@link ParsedOptionValues}. */
+interface RawScanOpts {
+  server?: string;
+  root?: string;
+  dryRun?: boolean;
+  json?: boolean;
+  wait?: string;
+  verbose?: boolean;
+  allowOutsideRoot?: boolean;
+  proxy?: boolean;
+  version?: boolean;
+  help?: boolean;
+}
+
+/**
+ * Pass-1 scan: parse global options plus `-V`/`-h` from raw argv via
+ * Commander's `parseOptions()`, and map Commander's real `opts()` shape
+ * ({@link RawScanOpts}) onto {@link ParsedOptionValues}'s hyphenated-key
+ * shape that `buildFlags` (global-options.ts) expects.
+ */
+export function scanArgs(rawArgv: string[]): {
+  positionals: string[];
+  rawOpts: RawScanOpts;
+  scanOpts: ParsedOptionValues;
+} {
   const scan = new Command('lsproxy').allowUnknownOption(true).helpOption(false);
   registerGlobalOptions(scan);
   scan.option('-V, --version').option('-h, --help');
-  const { operands, unknown } = scan.parseOptions(argv.slice(2));
+  const { operands, unknown } = scan.parseOptions(rawArgv);
   const positionals = [...operands, ...unknown].filter((t) => !t.startsWith('-'));
-  const scanOpts = scan.opts() as ParsedOptionValues & { version?: boolean; help?: boolean };
+  const rawOpts = scan.opts() as RawScanOpts;
+  // Spread each key in conditionally (rather than assigning possibly-`undefined`
+  // values directly) so an omitted flag leaves the key absent from `scanOpts`,
+  // as `exactOptionalPropertyTypes` requires for `ParsedOptionValues`'s
+  // optional properties.
+  const scanOpts: ParsedOptionValues = {
+    ...(rawOpts.server !== undefined && { server: rawOpts.server }),
+    ...(rawOpts.root !== undefined && { root: rawOpts.root }),
+    ...(rawOpts.dryRun !== undefined && { 'dry-run': rawOpts.dryRun }),
+    ...(rawOpts.json !== undefined && { json: rawOpts.json }),
+    ...(rawOpts.wait !== undefined && { wait: rawOpts.wait }),
+    ...(rawOpts.verbose !== undefined && { verbose: rawOpts.verbose }),
+    ...(rawOpts.allowOutsideRoot !== undefined && {
+      'allow-outside-root': rawOpts.allowOutsideRoot
+    }),
+    'no-proxy': rawOpts.proxy === false
+  };
+  return { positionals, rawOpts, scanOpts };
+}
 
-  if (scanOpts.version === true || positionals[0] === 'version') {
+async function main(): Promise<void> {
+  const { positionals, rawOpts, scanOpts } = scanArgs(argv.slice(2));
+
+  if (rawOpts.version === true || positionals[0] === 'version') {
     process.stdout.write(`${CLI_VERSION}\n`);
     exit(0);
   }
@@ -56,7 +105,7 @@ async function main(): Promise<void> {
     exit(0);
   }
 
-  if (scanOpts.help === true || positionals.length === 0) {
+  if (rawOpts.help === true || positionals.length === 0) {
     await runHelp(positionals, flags);
     exit(0);
   }
