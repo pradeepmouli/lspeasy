@@ -215,6 +215,52 @@ describe('extractFieldValue round-trip (deepened flags)', () => {
   });
 });
 
+describe('anchorFile support', () => {
+  it('marshalParams prepends the anchor file for a file-position pattern', () => {
+    const params = marshalParams(
+      'file-position',
+      ['12:7'], // no file — anchor supplies it
+      {},
+      { root: '/project', json: false, allowOutsideRoot: true } as GlobalFlags,
+      '/project/src/foo.ts'
+    ) as { textDocument: { uri: string }; position: { line: number; character: number } };
+    expect(params.textDocument.uri).toContain('foo.ts');
+    expect(params.position).toEqual({ line: 11, character: 6 });
+  });
+
+  it('marshalParams ignores the anchor file for a query pattern', () => {
+    const params = marshalParams(
+      'query',
+      ['MyClass'],
+      {},
+      { root: '/project', json: false, allowOutsideRoot: true } as GlobalFlags,
+      '/project/src/foo.ts'
+    ) as { query: string };
+    expect(params.query).toBe('MyClass');
+  });
+
+  it('zodToCommander omits the <file> argument when an anchor file is provided', () => {
+    const cmd = zodToCommander(
+      'textDocument/hover',
+      getSchemaForMethod('textDocument/hover')!,
+      {} as any,
+      { root: '/project' } as GlobalFlags,
+      '/project/src/foo.ts'
+    );
+    expect(cmd.registeredArguments.map((a) => a.name())).toEqual(['line:col']);
+  });
+
+  it('zodToCommander keeps the <file> argument when no anchor is provided', () => {
+    const cmd = zodToCommander(
+      'textDocument/hover',
+      getSchemaForMethod('textDocument/hover')!,
+      {} as any,
+      { root: '/project' } as GlobalFlags
+    );
+    expect(cmd.registeredArguments.map((a) => a.name())).toEqual(['file', 'line:col']);
+  });
+});
+
 describe('paramsResidualExample — only fields not exposed as args/flags', () => {
   it('codeAction: residual is just context.diagnostics (file/range/only/triggerKind are args/flags)', () => {
     const schema = getSchemaForMethod('textDocument/codeAction');

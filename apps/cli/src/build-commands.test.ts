@@ -65,4 +65,28 @@ describe('buildCommandTree', () => {
     expect(textDocCmds).toHaveLength(1);
     expect(textDocCmds[0]!.commands.length).toBeGreaterThanOrEqual(2);
   });
+
+  it('passes anchorFile through to zodToCommander (file argument omitted)', () => {
+    const program = new Command();
+    buildCommandTree(
+      program,
+      { hoverProvider: true } as any,
+      fakeSession,
+      FLAGS,
+      '/project/src/foo.ts'
+    );
+    const ns = program.commands.find((c) => c.name() === 'textDocument');
+    const hover = ns?.commands.find((c) => c.name() === 'hover');
+    expect(hover?.registeredArguments.map((a) => a.name())).toEqual(['line:col']);
+  });
+
+  it('every leaf command and the call command get the global-options help footer', () => {
+    const program = new Command();
+    buildCommandTree(program, { hoverProvider: true } as any, fakeSession, FLAGS);
+    const ns = program.commands.find((c) => c.name() === 'textDocument');
+    const hover = ns?.commands.find((c) => c.name() === 'hover');
+    const call = program.commands.find((c) => c.name() === 'call');
+    expect(hover?.helpInformation()).toMatch(/Global options:/);
+    expect(call?.helpInformation()).toMatch(/Global options:/);
+  });
 });

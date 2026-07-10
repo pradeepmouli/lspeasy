@@ -6,6 +6,8 @@
  * config (e.g. rust from a Claude Code plugin) without first running
  * `config import`.
  */
+import { extname } from 'node:path';
+
 import {
   discoverServer,
   discoverServerByLanguageId,
@@ -26,11 +28,17 @@ function buildCommand(entry: LspServerEntry): string {
   return parts.map((t) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(' ');
 }
 
+export interface SourcedServer extends ConfiguredServer {
+  /** Adapter id this server config came from: 'lsp.json' or a platform
+   * adapter id (e.g. 'claude-code', 'codex', 'copilot', 'vscode'). */
+  source: string;
+}
+
 // Configured servers from detected config platforms, excluding `lspjson`
 // (already covered by core lsp.json discovery). Platforms (claude-code/codex)
 // are user-scoped.
-function platformServers(root: string, scope: Scope): ConfiguredServer[] {
-  const out: ConfiguredServer[] = [];
+function platformServers(root: string, scope: Scope): SourcedServer[] {
+  const out: SourcedServer[] = [];
   for (const adapter of getAdapters()) {
     if (adapter.id === 'lspjson') continue;
     const base = homeForAdapter(adapter.id, root);
@@ -43,7 +51,12 @@ function platformServers(root: string, scope: Scope): ConfiguredServer[] {
     }
     for (const [name, entry] of Object.entries(servers)) {
       if (!entry.command) continue;
-      out.push({ name, command: buildCommand(entry), fileExtensions: entry.fileExtensions ?? {} });
+      out.push({
+        name,
+        command: buildCommand(entry),
+        fileExtensions: entry.fileExtensions ?? {},
+        source: adapter.id
+      });
     }
   }
   return out;
@@ -90,14 +103,18 @@ export function resolveByExtension(
 }
 
 /**
- * Every configured server across lsp.json + detected platforms, for the bare
- * `lsproxy` discovery view and accurate "available languages" errors. lsp.json
- * wins on language collisions (platform duplicates are dropped).
+ * Every configured server across lsp.json + detected platforms, tagged with
+ * which config produced it. Used by `lsproxy status` (§7 of the design doc)
+ * to show a server's provenance. lsp.json wins on language collisions, same
+ * dedup rule as `allConfiguredServers`.
  */
-export function allConfiguredServers(root: string, scope: Scope = 'user'): ConfiguredServer[] {
-  const core = discoverServers(root);
+export function allConfiguredServersWithSource(
+  root: string,
+  scope: Scope = 'user'
+): SourcedServer[] {
+  const core = discoverServers(root).map((s) => ({ ...s, source: 'lsp.json' }));
   const coreLangs = new Set(core.flatMap((s) => Object.values(s.fileExtensions)));
-  const extra: ConfiguredServer[] = [];
+  const extra: SourcedServer[] = [];
   for (const s of platformServers(root, scope)) {
     // Drop only the extensions whose languageId collides with lsp.json — a
     // multi-language platform server keeps its non-colliding entries.
@@ -107,4 +124,60 @@ export function allConfiguredServers(root: string, scope: Scope = 'user'): Confi
     if (Object.keys(fileExtensions).length > 0) extra.push({ ...s, fileExtensions });
   }
   return [...core, ...extra];
+}
+
+/**
+ * Every configured server across lsp.json + detected platforms, for the bare
+ * `lsproxy` discovery view and accurate "available languages" errors. lsp.json
+ * wins on language collisions (platform duplicates are dropped).
+ */
+export function allConfiguredServers(root: string, scope: Scope = 'user'): ConfiguredServer[] {
+  return allConfiguredServersWithSource(root, scope);
+}
+
+export interface EntryResolution {
+  serverCommand: string;
+  languageId: string;
+  fromPlatform: boolean;
+  /** Set only when the token was a file path — it doubles as the request's
+   * implicit target file, so callers don't need to repeat it. */
+  anchorFile?: string;
+}
+
+/**
+ * Resolve the CLI's first positional: either a configured language id, or a
+ * file path whose extension resolves the language (and which becomes the
+ * implicit anchor file for the request). `serverOverride` (`--server`)
+ * bypasses discovery entirely, but the token still supplies a languageId
+ * label and, when it looks like a file, an anchor.
+ */
+export function resolveEntry(
+  token: string,
+  root: string,
+  serverOverride: string,
+  scope: Scope = 'user'
+): EntryResolution | null {
+  const ext = extname(token);
+
+  if (serverOverride) {
+    const discovered = ext ? resolveByExtension(root, ext, scope) : null;
+    return {
+      serverCommand: serverOverride,
+      languageId: discovered?.languageId ?? (ext ? 'plaintext' : token),
+      fromPlatform: false,
+      ...(ext ? { anchorFile: token } : {})
+    };
+  }
+
+  const knownLanguages = new Set(
+    allConfiguredServers(root, scope).flatMap((s) => Object.values(s.fileExtensions))
+  );
+  if (knownLanguages.has(token)) {
+    const resolution = resolveByLanguageId(root, token, scope);
+    return resolution ? { ...resolution } : null;
+  }
+
+  if (!ext) return null;
+  const resolution = resolveByExtension(root, ext, scope);
+  return resolution ? { ...resolution, anchorFile: token } : null;
 }

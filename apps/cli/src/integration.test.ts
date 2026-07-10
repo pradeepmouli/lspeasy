@@ -148,3 +148,38 @@ describe('capability → command → dispatch integration', () => {
     );
   });
 });
+
+describe('anchorFile-aware dispatch (form B: file as first token)', () => {
+  it('produces identical params whether the file is the first token or the request-level positional', async () => {
+    const sendRequest = vi.fn(async () => ({ contents: { kind: 'markdown', value: 'hi' } }));
+    const fakeSession = {
+      lsp: { sendRequest },
+      takeCapturedEdits: () => [],
+      requestWithRetry: (run: () => Promise<unknown>) => run()
+    } as any;
+
+    // Form A: language given, file repeated at the request level (today's shape).
+    const programA = new Command().exitOverride();
+    buildCommandTree(programA, { hoverProvider: true } as any, fakeSession, FLAGS);
+    await programA.parseAsync(['textDocument', 'hover', '/project/src/foo.ts', '5:10'], {
+      from: 'user'
+    });
+    const paramsA = sendRequest.mock.calls[0]![1];
+
+    sendRequest.mockClear();
+
+    // Form B: file is the pre-resolved anchor; the leaf command's own <file> arg is gone.
+    const programB = new Command().exitOverride();
+    buildCommandTree(
+      programB,
+      { hoverProvider: true } as any,
+      fakeSession,
+      FLAGS,
+      '/project/src/foo.ts'
+    );
+    await programB.parseAsync(['textDocument', 'hover', '5:10'], { from: 'user' });
+    const paramsB = sendRequest.mock.calls[0]![1];
+
+    expect(paramsB).toEqual(paramsA);
+  });
+});

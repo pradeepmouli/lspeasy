@@ -30,7 +30,13 @@ vi.mock('./config/registry.js', () => ({
 vi.mock('./config/commands.js', () => ({ homeForAdapter: () => '/home' }));
 
 import { discoverServers, discoverServerByLanguageId } from '@lspeasy/core';
-import { resolveByLanguageId, resolveByExtension, allConfiguredServers } from './resolve.js';
+import {
+  resolveByLanguageId,
+  resolveByExtension,
+  allConfiguredServers,
+  allConfiguredServersWithSource,
+  resolveEntry
+} from './resolve.js';
 
 describe('resolve — platform fallback (B)', () => {
   it('resolveByLanguageId falls back to a detected platform server (fromPlatform)', () => {
@@ -67,5 +73,78 @@ describe('resolve — platform fallback (B)', () => {
     const all = allConfiguredServers('/p');
     expect(all.filter((s) => s.fileExtensions['.rs'] === 'rust')).toHaveLength(1);
     expect(all[0]?.command).toBe('"my-ra"'); // the lsp.json one, not the platform
+  });
+});
+
+describe('resolveEntry — language-or-file resolution', () => {
+  it('resolves a known language id with no anchor file', () => {
+    vi.mocked(discoverServerByLanguageId).mockReturnValueOnce({
+      serverCommand: '"tsls"',
+      languageId: 'typescript'
+    });
+    vi.mocked(discoverServers).mockReturnValueOnce([
+      { name: 'typescript', command: '"tsls"', fileExtensions: { '.ts': 'typescript' } }
+    ]);
+    const entry = resolveEntry('typescript', '/p', '');
+    expect(entry?.languageId).toBe('typescript');
+    expect(entry?.anchorFile).toBeUndefined();
+  });
+
+  it('resolves a file path by extension, and the file becomes the anchor', () => {
+    const entry = resolveEntry('src/foo.rs', '/p', '');
+    expect(entry?.languageId).toBe('rust');
+    expect(entry?.anchorFile).toBe('src/foo.rs');
+  });
+
+  it('returns null for a token that is neither a configured language nor an extensioned file', () => {
+    expect(resolveEntry('nope', '/p', '')).toBeNull();
+  });
+
+  it('--server bypasses discovery; a file token still becomes the anchor', () => {
+    const entry = resolveEntry('src/foo.rs', '/p', 'rust-analyzer');
+    expect(entry?.serverCommand).toBe('rust-analyzer');
+    expect(entry?.anchorFile).toBe('src/foo.rs');
+    expect(entry?.languageId).toBe('rust'); // inferred from extension even with --server
+  });
+
+  it('--server with a plain language-name token has no anchor and uses the token as languageId', () => {
+    const entry = resolveEntry('typescript', '/p', 'my-custom-server');
+    expect(entry?.serverCommand).toBe('my-custom-server');
+    expect(entry?.anchorFile).toBeUndefined();
+    expect(entry?.languageId).toBe('typescript');
+  });
+
+  it('--server with an unrecognized file extension falls back to "plaintext", not the raw token', () => {
+    // '.py' is not in any configured server's fileExtensions (only '.rs' is,
+    // via the claude-code mock) — resolveByExtension returns null, so the old
+    // code fell back to the raw token ("src/foo.py") as languageId, which is
+    // not a valid LSP languageId. anchorFile must still be set correctly.
+    const entry = resolveEntry('src/foo.py', '/p', 'custom-server');
+    expect(entry?.serverCommand).toBe('custom-server');
+    expect(entry?.anchorFile).toBe('src/foo.py');
+    expect(entry?.languageId).toBe('plaintext');
+  });
+});
+
+describe('allConfiguredServersWithSource', () => {
+  it('tags a platform-adapter server with the adapter id', () => {
+    const servers = allConfiguredServersWithSource('/p');
+    const rust = servers.find((s) => s.fileExtensions['.rs'] === 'rust');
+    expect(rust?.source).toBe('claude-code');
+  });
+
+  it('tags an lsp.json server with "lsp.json"', () => {
+    vi.mocked(discoverServers).mockReturnValueOnce([
+      { name: 'typescript', command: '"tsls"', fileExtensions: { '.ts': 'typescript' } }
+    ]);
+    const servers = allConfiguredServersWithSource('/p');
+    const ts = servers.find((s) => s.fileExtensions['.ts'] === 'typescript');
+    expect(ts?.source).toBe('lsp.json');
+  });
+
+  it('allConfiguredServers still returns the same servers via the wrapper', () => {
+    const withSource = allConfiguredServersWithSource('/p');
+    const plain = allConfiguredServers('/p');
+    expect(plain.map((s) => s.command).sort()).toEqual(withSource.map((s) => s.command).sort());
   });
 });
