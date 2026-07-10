@@ -21,7 +21,13 @@ vi.mock('./config/registry.js', () => ({
       id: 'claude-code',
       detect: () => true,
       read: () => ({
-        rust: { command: 'rust-analyzer', args: [], fileExtensions: { '.rs': 'rust' } }
+        rust: { command: 'rust-analyzer', args: [], fileExtensions: { '.rs': 'rust' } },
+        go: {
+          command: 'gopls',
+          args: [],
+          fileExtensions: { '.go': 'go' },
+          initializationOptions: { usePlaceholders: true }
+        }
       })
     }
   ]
@@ -29,7 +35,7 @@ vi.mock('./config/registry.js', () => ({
 
 vi.mock('./config/commands.js', () => ({ homeForAdapter: () => '/home' }));
 
-import { discoverServers, discoverServerByLanguageId } from '@lspeasy/core';
+import { discoverServers, discoverServerByLanguageId, discoverServer } from '@lspeasy/core';
 import {
   resolveByLanguageId,
   resolveByExtension,
@@ -123,6 +129,56 @@ describe('resolveEntry — language-or-file resolution', () => {
     expect(entry?.serverCommand).toBe('custom-server');
     expect(entry?.anchorFile).toBe('src/foo.py');
     expect(entry?.languageId).toBe('plaintext');
+  });
+});
+
+describe('initializationOptions threading', () => {
+  it('resolveEntry with a language-id token carries initializationOptions from a matched lsp.json entry', () => {
+    vi.mocked(discoverServerByLanguageId).mockReturnValueOnce({
+      serverCommand: '"tsls"',
+      languageId: 'typescript',
+      initializationOptions: { supportsMoveToFileCodeAction: true }
+    });
+    vi.mocked(discoverServers).mockReturnValueOnce([
+      { name: 'typescript', command: '"tsls"', fileExtensions: { '.ts': 'typescript' } }
+    ]);
+    const entry = resolveEntry('typescript', '/p', '');
+    expect(entry?.initializationOptions).toEqual({ supportsMoveToFileCodeAction: true });
+  });
+
+  it('--server override still carries initializationOptions from the extension-matched entry', () => {
+    vi.mocked(discoverServer).mockReturnValueOnce({
+      serverCommand: '"rust-analyzer"',
+      languageId: 'rust',
+      initializationOptions: { cargo: { features: 'all' } }
+    });
+    const entry = resolveEntry('src/foo.rs', '/p', 'my-custom-server');
+    expect(entry?.serverCommand).toBe('my-custom-server');
+    expect(entry?.initializationOptions).toEqual({ cargo: { features: 'all' } });
+  });
+
+  it('a platform-adapter-sourced entry carries initializationOptions through the fallback path', () => {
+    const entry = resolveEntry('go', '/p', '');
+    expect(entry?.fromPlatform).toBe(true);
+    expect(entry?.initializationOptions).toEqual({ usePlaceholders: true });
+  });
+
+  it('resolveByLanguageId platform fallback carries initializationOptions', () => {
+    const r = resolveByLanguageId('/p', 'go');
+    expect(r?.fromPlatform).toBe(true);
+    expect(r?.initializationOptions).toEqual({ usePlaceholders: true });
+  });
+
+  it('resolveByExtension platform fallback carries initializationOptions', () => {
+    const r = resolveByExtension('/p', '.go');
+    expect(r?.fromPlatform).toBe(true);
+    expect(r?.initializationOptions).toEqual({ usePlaceholders: true });
+  });
+
+  it('omits initializationOptions when the matched entry has none', () => {
+    const entry = resolveEntry('src/foo.rs', '/p', '');
+    expect(entry).not.toBeNull();
+    expect('initializationOptions' in (entry as object)).toBe(false);
   });
 });
 

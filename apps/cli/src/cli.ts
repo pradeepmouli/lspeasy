@@ -221,7 +221,10 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
           languageId: entry.languageId,
           root: flags.root,
           indexWaitMs: 0,
-          verbose: flags.verbose
+          verbose: flags.verbose,
+          ...(entry.initializationOptions
+            ? { initializationOptions: entry.initializationOptions }
+            : {})
         })
       : await connectViaProxy({
           root: flags.root,
@@ -296,7 +299,8 @@ export async function runDispatch(positionals: string[], flags: GlobalFlags): Pr
       languageId: entry.languageId,
       root: flags.root,
       indexWaitMs: flags.waitMs,
-      verbose: flags.verbose
+      verbose: flags.verbose,
+      ...(entry.initializationOptions ? { initializationOptions: entry.initializationOptions } : {})
     });
     await session.start();
   } else {

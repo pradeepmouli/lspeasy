@@ -32,6 +32,10 @@ export interface SourcedServer extends ConfiguredServer {
   /** Adapter id this server config came from: 'lsp.json' or a platform
    * adapter id (e.g. 'claude-code', 'codex', 'copilot', 'vscode'). */
   source: string;
+  /** Arbitrary server-specific `initializationOptions` carried from the
+   * adapter-read `LspServerEntry`, threaded through to the real `initialize`
+   * request. */
+  initializationOptions?: Record<string, unknown>;
 }
 
 // Configured servers from detected config platforms, excluding `lspjson`
@@ -55,7 +59,10 @@ function platformServers(root: string, scope: Scope): SourcedServer[] {
         name,
         command: buildCommand(entry),
         fileExtensions: entry.fileExtensions ?? {},
-        source: adapter.id
+        source: adapter.id,
+        ...(entry.initializationOptions
+          ? { initializationOptions: entry.initializationOptions }
+          : {})
       });
     }
   }
@@ -80,7 +87,12 @@ export function resolveByLanguageId(
   if (core) return { ...core, fromPlatform: false };
   for (const s of platformServers(root, scope)) {
     if (Object.values(s.fileExtensions).includes(languageId)) {
-      return { serverCommand: s.command, languageId, fromPlatform: true };
+      return {
+        serverCommand: s.command,
+        languageId,
+        fromPlatform: true,
+        ...(s.initializationOptions ? { initializationOptions: s.initializationOptions } : {})
+      };
     }
   }
   return null;
@@ -97,7 +109,14 @@ export function resolveByExtension(
   if (ext === '') return null;
   for (const s of platformServers(root, scope)) {
     const languageId = s.fileExtensions[ext];
-    if (languageId) return { serverCommand: s.command, languageId, fromPlatform: true };
+    if (languageId) {
+      return {
+        serverCommand: s.command,
+        languageId,
+        fromPlatform: true,
+        ...(s.initializationOptions ? { initializationOptions: s.initializationOptions } : {})
+      };
+    }
   }
   return null;
 }
@@ -142,6 +161,10 @@ export interface EntryResolution {
   /** Set only when the token was a file path — it doubles as the request's
    * implicit target file, so callers don't need to repeat it. */
   anchorFile?: string;
+  /** Arbitrary server-specific `initializationOptions` from the matched
+   * `lsp.json`/platform entry, threaded through to the real `initialize`
+   * request. */
+  initializationOptions?: Record<string, unknown>;
 }
 
 /**
@@ -165,7 +188,10 @@ export function resolveEntry(
       serverCommand: serverOverride,
       languageId: discovered?.languageId ?? (ext ? 'plaintext' : token),
       fromPlatform: false,
-      ...(ext ? { anchorFile: token } : {})
+      ...(ext ? { anchorFile: token } : {}),
+      ...(discovered?.initializationOptions
+        ? { initializationOptions: discovered.initializationOptions }
+        : {})
     };
   }
 

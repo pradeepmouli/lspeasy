@@ -3,7 +3,14 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { LspServerEntry } from './discover.js';
-import { discoverServers, readLspJsonFile, writeLspJsonFile, mergeServers } from './discover.js';
+import {
+  discoverServers,
+  discoverServer,
+  discoverServerByLanguageId,
+  readLspJsonFile,
+  writeLspJsonFile,
+  mergeServers
+} from './discover.js';
 
 const tmpRoots: string[] = [];
 function rootWithConfig(config: unknown): string {
@@ -51,6 +58,77 @@ describe('discoverServers', () => {
       process.env.HOME = origHome;
       process.env.USERPROFILE = origUserProfile;
     }
+  });
+});
+
+describe('initializationOptions threading (ResolvedServer)', () => {
+  it('discoverServer carries initializationOptions verbatim when the entry has them', () => {
+    const root = rootWithConfig({
+      lspServers: {
+        typescript: {
+          command: 'typescript-language-server',
+          args: ['--stdio'],
+          fileExtensions: { '.ts': 'typescript' },
+          initializationOptions: { supportsMoveToFileCodeAction: true }
+        }
+      }
+    });
+    const resolved = discoverServer(root, '.ts');
+    expect(resolved?.initializationOptions).toEqual({ supportsMoveToFileCodeAction: true });
+  });
+
+  it('discoverServer omits initializationOptions (not undefined-valued) when the entry has none', () => {
+    const root = rootWithConfig({
+      lspServers: {
+        typescript: {
+          command: 'typescript-language-server',
+          args: ['--stdio'],
+          fileExtensions: { '.ts': 'typescript' }
+        }
+      }
+    });
+    const resolved = discoverServer(root, '.ts');
+    expect(resolved).not.toBeNull();
+    expect('initializationOptions' in (resolved as object)).toBe(false);
+  });
+
+  it('discoverServerByLanguageId carries initializationOptions verbatim when the entry has them', () => {
+    const root = rootWithConfig({
+      lspServers: {
+        rust: {
+          command: 'rust-analyzer',
+          fileExtensions: { '.rs': 'rust' },
+          initializationOptions: { cargo: { features: 'all' } }
+        }
+      }
+    });
+    const resolved = discoverServerByLanguageId(root, 'rust');
+    expect(resolved?.initializationOptions).toEqual({ cargo: { features: 'all' } });
+  });
+
+  it('discoverServerByLanguageId omits initializationOptions when the entry has none', () => {
+    const root = rootWithConfig({
+      lspServers: {
+        rust: { command: 'rust-analyzer', fileExtensions: { '.rs': 'rust' } }
+      }
+    });
+    const resolved = discoverServerByLanguageId(root, 'rust');
+    expect(resolved).not.toBeNull();
+    expect('initializationOptions' in (resolved as object)).toBe(false);
+  });
+
+  it('discoverServer with no fileExt (first server) still carries initializationOptions', () => {
+    const root = rootWithConfig({
+      lspServers: {
+        typescript: {
+          command: 'typescript-language-server',
+          fileExtensions: { '.ts': 'typescript' },
+          initializationOptions: { a: 1 }
+        }
+      }
+    });
+    const resolved = discoverServer(root, '');
+    expect(resolved?.initializationOptions).toEqual({ a: 1 });
   });
 });
 

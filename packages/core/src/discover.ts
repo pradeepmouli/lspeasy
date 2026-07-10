@@ -27,6 +27,10 @@ export interface ResolvedServer {
   serverCommand: string;
   /** languageId for textDocument/didOpen (e.g. 'typescript', 'rust'). */
   languageId: string;
+  /** Arbitrary server-specific `initializationOptions` from the matched
+   * `lsp.json` entry, merged into the real `initialize` request's
+   * `initializationOptions` on top of the computed `languageId`. */
+  initializationOptions?: Record<string, unknown>;
 }
 
 export interface ConfiguredServer {
@@ -80,10 +84,26 @@ export function selectServer(config: LspJson, fileExt: string): ResolvedServer |
     if (!fileExt) {
       // No extension — return the first configured server with its first languageId.
       const languageId = Object.values(entry.fileExtensions)[0];
-      if (languageId) return { serverCommand: buildServerCommand(entry), languageId };
+      if (languageId) {
+        return {
+          serverCommand: buildServerCommand(entry),
+          languageId,
+          ...(entry.initializationOptions
+            ? { initializationOptions: entry.initializationOptions }
+            : {})
+        };
+      }
     } else {
       const languageId = entry.fileExtensions[fileExt];
-      if (languageId) return { serverCommand: buildServerCommand(entry), languageId };
+      if (languageId) {
+        return {
+          serverCommand: buildServerCommand(entry),
+          languageId,
+          ...(entry.initializationOptions
+            ? { initializationOptions: entry.initializationOptions }
+            : {})
+        };
+      }
     }
   }
   return null;
@@ -95,7 +115,15 @@ export function selectServerByLanguageId(
 ): ResolvedServer | null {
   for (const entry of Object.values(config.lspServers)) {
     for (const lid of Object.values(entry.fileExtensions)) {
-      if (lid === languageId) return { serverCommand: buildServerCommand(entry), languageId };
+      if (lid === languageId) {
+        return {
+          serverCommand: buildServerCommand(entry),
+          languageId,
+          ...(entry.initializationOptions
+            ? { initializationOptions: entry.initializationOptions }
+            : {})
+        };
+      }
     }
   }
   return null;

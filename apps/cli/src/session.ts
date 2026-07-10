@@ -59,6 +59,10 @@ export interface SessionOptions {
   indexWaitMs?: number;
   /** Emit `[lsproxy] …` progress lines to stderr. */
   verbose?: boolean;
+  /** Arbitrary server-specific initializationOptions from lsp.json, merged
+   * on top of the computed `languageId`. An explicit `languageId` key here
+   * overrides the computed one — that's the caller's call, not prevented. */
+  initializationOptions?: Record<string, unknown>;
   /**
    * Pre-built transport to use instead of spawning a server process.
    *
@@ -224,6 +228,7 @@ export class RefactorSession {
       indexWaitMs: 15000,
       verbose: false,
       languageId: 'plaintext',
+      initializationOptions: {},
       ...opts
     };
   }
@@ -262,7 +267,10 @@ export class RefactorSession {
       capabilities: CLIENT_CAPABILITIES as ClientCapabilities,
       rootUri,
       workspaceFolders: [{ uri: rootUri, name: basename(rootDir) }],
-      initializationOptions: { languageId: this.opts.languageId },
+      initializationOptions: {
+        languageId: this.opts.languageId,
+        ...this.opts.initializationOptions
+      },
       // Keep stdout clean; route the SDK's own logging to stderr (or silence it).
       logger: this.opts.verbose ? new StderrLogger() : new NullLogger()
     });
