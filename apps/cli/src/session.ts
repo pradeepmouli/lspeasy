@@ -60,7 +60,8 @@ export interface SessionOptions {
   /** Emit `[lsproxy] …` progress lines to stderr. */
   verbose?: boolean;
   /** Arbitrary server-specific initializationOptions from lsp.json, merged
-   * on top of the computed `languageId` (this cannot override `languageId`). */
+   * on top of the computed `languageId`. An explicit `languageId` key here
+   * overrides the computed one — that's the caller's call, not prevented. */
   initializationOptions?: Record<string, unknown>;
   /**
    * Pre-built transport to use instead of spawning a server process.
