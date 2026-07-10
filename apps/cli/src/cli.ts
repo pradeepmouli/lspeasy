@@ -2,256 +2,104 @@
 /**
  * lspeasy CLI entry point.
  *
- * Two-pass parse: util.parseArgs extracts global flags first (no Commander),
- * then the CLI connects to the server, reads capabilities, builds a
- * namespace/subcommand Commander tree, and hands process.argv back to
- * Commander for final dispatch.
+ * One grammar for both real dispatch and --help:
+ *   lsproxy <language-or-file> <namespace> <request> [args] [flags]
+ * The first positional is either a configured language id, or a file path
+ * whose extension resolves the language (and which becomes the request's
+ * implicit anchor file). Real dispatch (runDispatch) and --help (runHelp)
+ * both resolve it the same way and build the same Commander tree; an
+ * incomplete real call falls back to the same drill-down view --help shows.
  */
 
-import { parseArgs } from 'node:util';
 import { argv, exit } from 'node:process';
-import { extname } from 'node:path';
 import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { Command } from 'commander';
+import { Command, CommanderError } from 'commander';
 
 import { fail, resolvePathArg, type GlobalFlags } from './io.js';
-import {
-  configList,
-  configImport,
-  configExport,
-  configDiff,
-  type ConfigFlags
-} from './config/commands.js';
-import { discoverServer } from '@lspeasy/core';
-import { resolveByExtension, resolveByLanguageId, allConfiguredServers } from './resolve.js';
+import { buildFlags, registerGlobalOptions, type ParsedOptionValues } from './global-options.js';
+import { resolveEntry, allConfiguredServers } from './resolve.js';
+import { findAnchorFile } from './anchor.js';
 import { coldStatusReport } from '@lsproxy/proxy';
 import { RefactorSession, CLI_VERSION } from './session.js';
 import { connectViaProxy, fetchDaemonStatus } from './connect.js';
-import { runDaemon } from './daemon-commands.js';
+import { buildConfigCommand } from './config-command.js';
+import { buildDaemonCommand } from './daemon-commands.js';
 import { buildCommandTree } from './build-commands.js';
 import { createFormatter } from './format.js';
 import { renderTopLevel, renderDrillDownText, drillDownJson } from './help.js';
 
-const GLOBAL_OPTION_CONFIG = {
-  server: { type: 'string' as const },
-  root: { type: 'string' as const },
-  'dry-run': { type: 'boolean' as const, default: false },
-  json: { type: 'boolean' as const, default: false },
-  wait: { type: 'string' as const, default: '15000' },
-  verbose: { type: 'boolean' as const, default: false },
-  'allow-outside-root': { type: 'boolean' as const, default: false },
-  'no-proxy': { type: 'boolean' as const, default: false },
-  user: { type: 'boolean' as const, default: false },
-  version: { type: 'boolean' as const, short: 'V', default: false },
-  help: { type: 'boolean' as const, short: 'h', default: false }
-};
-
-import { buildFlags, type ParsedOptionValues } from './global-options.js';
-export { buildFlags, type ParsedOptionValues };
+export { buildFlags, type ParsedOptionValues } from './global-options.js';
 
 async function main(): Promise<void> {
-  const { values, positionals } = parseArgs({
-    args: argv.slice(2),
-    options: GLOBAL_OPTION_CONFIG,
-    allowPositionals: true,
-    strict: false
-  });
+  const scan = new Command('lsproxy').allowUnknownOption(true).helpOption(false);
+  registerGlobalOptions(scan);
+  scan.option('-V, --version').option('-h, --help');
+  const { operands, unknown } = scan.parseOptions(argv.slice(2));
+  const positionals = [...operands, ...unknown].filter((t) => !t.startsWith('-'));
+  const scanOpts = scan.opts() as ParsedOptionValues & { version?: boolean; help?: boolean };
 
-  // `--version` / `-V` / `version` print the bare version and exit — handled
-  // before help/dispatch so it works with or without positionals and never
-  // touches the daemon.
-  if (values.version === true || positionals[0] === 'version') {
+  if (scanOpts.version === true || positionals[0] === 'version') {
     process.stdout.write(`${CLI_VERSION}\n`);
     exit(0);
   }
 
-  const helpMode = values.help === true;
-  if (helpMode || positionals.length === 0) {
-    await runHelp(positionals, buildFlags(values as ParsedOptionValues));
-    exit(0);
-  }
+  const flags = buildFlags(scanOpts);
 
-  const flags = buildFlags(values as ParsedOptionValues);
-
-  if (positionals[0] === 'config') {
-    const sub = positionals[1];
-    const platform = positionals[2];
-    const scope: ConfigFlags['scope'] = (values as Record<string, unknown>)['user']
-      ? 'user'
-      : 'project';
-    const cfg: ConfigFlags = { json: flags.json, root: flags.root, scope };
+  if (positionals[0] === 'config' || positionals[0] === 'daemon') {
     const color = process.stdout.isTTY === true && !process.env['NO_COLOR'] && !flags.json;
-    const fmt = createFormatter(color);
-    if (sub === 'list') configList(cfg, fmt);
-    else if (sub === 'import' && platform) configImport(platform, cfg, fmt);
-    else if (sub === 'export' && platform) configExport(platform, cfg, fmt);
-    else if (sub === 'diff' && platform) configDiff(platform, cfg, fmt);
-    else {
-      process.stderr.write(
-        'usage: lsproxy config <list|import|export|diff> [platform] [--user] [--json]\n'
-      );
-      exit(1);
-    }
-    exit(0);
-  }
-
-  if (positionals[0] === 'daemon') {
-    const color = process.stdout.isTTY === true && !process.env['NO_COLOR'] && !flags.json;
-    await runDaemon(positionals[1], flags, createFormatter(color));
-    exit(0);
-  }
-
-  let serverCommand: string;
-  let languageId = 'plaintext';
-  // True when the server came only from a config platform (not lsp.json), so the
-  // daemon can't spawn it → force a direct session.
-  let fromPlatform = false;
-
-  // positionals[0] = namespace, positionals[1] = method/command.
-  // The source file can only appear at positionals[2] (the first subcommand
-  // argument). A value is file-like only when it has an extension AND is not
-  // a JSON literal (--params values that parseArgs left in positionals).
-  // workspace/* methods (e.g. workspace/symbol) take a query string as their
-  // first argument, not a file — skip file detection for that namespace to avoid
-  // treating dotted identifiers like React.Component as file paths.
-  const isFileLike = (p: string) =>
-    extname(p) !== '' && !p.startsWith('{') && !p.startsWith('[') && !p.startsWith('"');
-  const firstSubArg = positionals[2];
-  const subArgFile =
-    positionals[0] !== 'workspace' && firstSubArg !== undefined && isFileLike(firstSubArg)
-      ? firstSubArg
-      : undefined;
-
-  // Some methods carry their file in `--params` rather than a positional, so the
-  // file-detection above skips them. Without an anchor file the session never
-  // opens a document, the TS server loads no program, and the request fails
-  // (rename edits come back empty; refactors throw "No Project"); the languageId
-  // also stays 'plaintext' so even a didOpen wouldn't register as TS. Mine the
-  // --params JSON (parseArgs leaves it in positionals, or in values when given as
-  // --params=...) for a file to anchor on:
-  //   • workspace/willRename|willCreate|willDeleteFiles → `files[].oldUri|uri`
-  //   • any textDocument/* raw call            → `textDocument.uri`
-  //   • workspace/executeCommand refactors     → `arguments[0].file` (a plain
-  //     path, e.g. _typescript.applyRefactoring's "Move to file") — opening it
-  //     loads the whole tsconfig program, so the move's target file is in scope.
-  const anchorFromParams = (): string | undefined => {
-    const candidates = [...positionals];
-    const paramsVal = (values as Record<string, unknown>)['params'];
-    if (typeof paramsVal === 'string') candidates.push(paramsVal);
-    for (const c of candidates) {
-      if (!c.startsWith('{')) continue;
-      try {
-        const o = JSON.parse(c) as {
-          files?: Array<{ oldUri?: string; uri?: string }>;
-          textDocument?: { uri?: string };
-          arguments?: Array<{ file?: string }>;
-        };
-        const uri = o.files?.[0]?.oldUri ?? o.files?.[0]?.uri ?? o.textDocument?.uri;
-        if (typeof uri === 'string') return fileURLToPath(uri);
-        const cmdFile = o.arguments?.[0]?.file;
-        if (typeof cmdFile === 'string') return cmdFile;
-      } catch {
-        /* not the params JSON — keep scanning */
-      }
-    }
-    return undefined;
-  };
-  const anchorFile = subArgFile ?? anchorFromParams();
-
-  if (flags.server) {
-    serverCommand = flags.server;
-    // Infer languageId from the file extension when --server bypasses discovery.
-    if (anchorFile) {
-      const ext = extname(anchorFile);
-      const discovered = discoverServer(flags.root, ext);
-      if (discovered) languageId = discovered.languageId;
-    }
-  } else {
-    const ext = anchorFile ? extname(anchorFile) : '';
-
-    if (!ext) {
-      // No file argument — try lsp.json discovery with a wildcard lookup so
-      // file-less commands (e.g. workspace/symbol) can still find a server.
-      const discovered = discoverServer(flags.root, '');
-      if (discovered) {
-        serverCommand = discovered.serverCommand;
-        languageId = discovered.languageId;
-      } else {
-        fail('Cannot determine language: pass a file argument or use --server <cmd>.', flags.json);
-      }
-    } else {
-      const discovered = resolveByExtension(flags.root, ext);
-      if (!discovered) {
-        fail(
-          `No LSP server configured for ${ext} files.\n` +
-            'Add an lsp.json to your project (or ~/.claude/lsp.json) or use --server <cmd>.\n' +
-            'Format: { "lspServers": { "lang": { "command": "...", "args": [...], "fileExtensions": { ".ext": "languageId" } } } }',
-          flags.json
-        );
-      }
-      serverCommand = discovered.serverCommand;
-      languageId = discovered.languageId;
-      fromPlatform = discovered.fromPlatform;
-    }
-  }
-
-  let session: RefactorSession;
-  if (flags.noProxy || !!flags.server || !serverCommand || fromPlatform) {
-    session = new RefactorSession({
-      serverCommand,
-      languageId,
-      root: flags.root,
-      indexWaitMs: flags.waitMs,
-      verbose: flags.verbose
-    });
-    await session.start();
-  } else {
-    session = await connectViaProxy({
-      root: flags.root,
-      languageId,
-      indexWaitMs: flags.waitMs,
-      verbose: flags.verbose
-    });
-  }
-
-  try {
-    if (anchorFile && !values.help) {
-      const absPath = resolvePathArg(anchorFile, flags);
-      await session.open(absPath);
-    }
-
     const program = new Command('lsproxy');
-
-    // Declare global options so Commander does not reject them in pass 2
-    program
-      .option('--server <cmd>')
-      .option('--root <dir>')
-      .option('--dry-run')
-      .option('--json')
-      .option('--wait <ms>')
-      .option('--verbose')
-      .option('--allow-outside-root')
-      .option('--no-proxy');
-
-    buildCommandTree(program, session.capabilities, session, flags);
-
+    registerGlobalOptions(program);
+    program.addCommand(buildConfigCommand(flags));
+    program.addCommand(buildDaemonCommand(flags, createFormatter(color)));
     await program.parseAsync(argv);
-  } finally {
-    await session.stop();
+    exit(0);
   }
+
+  if (scanOpts.help === true || positionals.length === 0) {
+    await runHelp(positionals, flags);
+    exit(0);
+  }
+
+  await runDispatch(positionals, flags);
+}
+
+/** `call`'s "request" is a user-supplied method string, not a second command
+ * level — treat it as a 1-token drill path; every other namespace/request
+ * pair is a 2-token path. Used both by runHelp's own path and by
+ * runDispatch's incomplete-call fallback. */
+function drillPathFor(path: string[]): string[] {
+  return path[0] === 'call' ? path.slice(0, 1) : path.slice(0, 2);
 }
 
 /**
- * Help-mode dispatch. Positionals after `--help` mean [language, namespace,
- * request]. Depth 0 -> top-level language listing (config + live status);
- * depth >= 1 -> connect to that language's server with indexWaitMs 0 and render
- * the capability-filtered command tree at the requested level.
+ * Recursively apply `exitOverride()` to `cmd` and every descendant.
+ *
+ * Commander's `exitOverride()` only sets the *current* Command's own
+ * `_exitCallback`; it is copied onto children created via `.command()` (the
+ * factory method), but NOT onto commands attached via `.addCommand()` —
+ * which is how `buildCommandTree` wires up every namespace/leaf command.
+ * Without this, a leaf command's own error (e.g. a missing required
+ * argument) calls `process.exit()` directly instead of throwing a
+ * `CommanderError` — verified against Commander 15's source
+ * (`Command.addCommand` vs `Command.command`/`copyInheritedSettings`).
+ */
+function applyExitOverride(cmd: Command): void {
+  cmd.exitOverride();
+  for (const sub of cmd.commands) applyExitOverride(sub);
+}
+
+/**
+ * Help-mode dispatch. `positionals` after the language-or-file token mean
+ * [namespace, request, ...]. Depth 0 (no token at all) -> top-level language
+ * listing; otherwise resolve the token (language id or file), connect to
+ * that server with indexWaitMs 0, and render the capability-filtered
+ * command tree at the requested depth.
  */
 export async function runHelp(positionals: string[], flags: GlobalFlags): Promise<void> {
-  const [language, ...drillPath] = positionals;
+  const [token, ...drillPathRaw] = positionals;
 
-  if (!language) {
+  if (!token) {
     const live = await fetchDaemonStatus(flags.root);
     const report = live ?? coldStatusReport(allConfiguredServers(flags.root));
     if (flags.json) {
@@ -263,58 +111,47 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
     return;
   }
 
-  const discovered = flags.server
-    ? { serverCommand: flags.server, languageId: language }
-    : resolveByLanguageId(flags.root, language);
-  if (!discovered) {
+  const entry = resolveEntry(token, flags.root, flags.server);
+  if (!entry) {
     const names = allConfiguredServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
     fail(
-      `No server configured for language "${language}". Configured: ${[...new Set(names)].join(', ')}`,
+      `"${token}" is not a configured language or a file with a recognized extension. Configured: ${[...new Set(names)].join(', ')}`,
       flags.json
     );
   }
 
-  // Connecting (spawn + initialize) can fail when the server command is missing
-  // or crashes. In --json mode that failure must still produce a parseable
-  // { ok: false, error } on stdout, not a fatal text error from main().catch.
-  // Platform-only resolutions (claude-code/codex) aren't in lsp.json, so the
-  // daemon can't spawn them — use a direct session with the resolved command.
-  const direct =
-    flags.noProxy || !!flags.server || ('fromPlatform' in discovered && discovered.fromPlatform);
+  const direct = flags.noProxy || !!flags.server || entry.fromPlatform;
   let session: RefactorSession;
   try {
     session = direct
       ? new RefactorSession({
-          serverCommand: discovered.serverCommand,
-          languageId: discovered.languageId,
+          serverCommand: entry.serverCommand,
+          languageId: entry.languageId,
           root: flags.root,
           indexWaitMs: 0,
           verbose: flags.verbose
         })
       : await connectViaProxy({
           root: flags.root,
-          languageId: discovered.languageId,
+          languageId: entry.languageId,
           indexWaitMs: 0,
           verbose: flags.verbose
         });
     if (direct) await session.start();
   } catch (err) {
-    // fail() emits { ok: false, error } on stdout for --json (and "error: …" on
-    // stderr otherwise), then exits 1 — the same machine-readable error contract
-    // as the unconfigured-language path and the `call` command.
     fail(
-      `Failed to start "${language}" language server: ${
-        err instanceof Error ? err.message : String(err)
-      }`,
+      `Failed to start "${token}" language server: ${err instanceof Error ? err.message : String(err)}`,
       flags.json
     );
   }
 
   try {
     const program = new Command('lsproxy');
-    buildCommandTree(program, session.capabilities, session, flags);
+    registerGlobalOptions(program);
+    buildCommandTree(program, session.capabilities, session, flags, entry.anchorFile);
+    const drillPath = drillPathFor(drillPathRaw);
     if (flags.json) {
-      const jsonResult = drillDownJson(program, language, drillPath) as { ok?: boolean };
+      const jsonResult = drillDownJson(program, entry.languageId, drillPath) as { ok?: boolean };
       process.stdout.write(JSON.stringify(jsonResult) + '\n');
       if (jsonResult.ok === false) {
         await session.stop();
@@ -328,6 +165,103 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
         await session.stop();
         exit(1);
       }
+    }
+  } finally {
+    await session.stop();
+  }
+}
+
+/**
+ * Real dispatch for a complete-or-incomplete command:
+ * `<language-or-file> <namespace> <request> [args] [flags]`. Resolves the
+ * same way runHelp does, connects with a real indexWaitMs (this may execute
+ * a request), and attempts the Commander parse. A missing required argument
+ * (e.g. the file/position `textDocument hover` needs) falls back to the same
+ * drill-down view `--help` would show for that path, instead of Commander's
+ * raw error — any other Commander error propagates normally.
+ */
+export async function runDispatch(positionals: string[], flags: GlobalFlags): Promise<void> {
+  const token = positionals[0]!;
+  const entry = resolveEntry(token, flags.root, flags.server);
+  if (!entry) {
+    const names = allConfiguredServers(flags.root).flatMap((s) => Object.values(s.fileExtensions));
+    fail(
+      `"${token}" is not a configured language or a file with a recognized extension. Configured: ${[...new Set(names)].join(', ')}`,
+      flags.json
+    );
+  }
+
+  const path = positionals.slice(1);
+  if (path.length < 2) {
+    await runHelp(positionals, flags);
+    return;
+  }
+
+  const namespace = path[0]!;
+  const request = path[1]!;
+  const trailingArgs = path.slice(2);
+  const method = namespace === 'call' ? undefined : `${namespace}/${request}`;
+  const openAnchor = entry.anchorFile ?? findAnchorFile(method, trailingArgs);
+
+  const direct = flags.noProxy || !!flags.server || entry.fromPlatform;
+  let session: RefactorSession;
+  if (direct) {
+    session = new RefactorSession({
+      serverCommand: entry.serverCommand,
+      languageId: entry.languageId,
+      root: flags.root,
+      indexWaitMs: flags.waitMs,
+      verbose: flags.verbose
+    });
+    await session.start();
+  } else {
+    session = await connectViaProxy({
+      root: flags.root,
+      languageId: entry.languageId,
+      indexWaitMs: flags.waitMs,
+      verbose: flags.verbose
+    });
+  }
+
+  try {
+    if (openAnchor) {
+      await session.open(resolvePathArg(openAnchor, flags));
+    }
+
+    const program = new Command('lsproxy').exitOverride();
+    registerGlobalOptions(program);
+    buildCommandTree(program, session.capabilities, session, flags, entry.anchorFile);
+    // `exitOverride()` only sets `program`'s own `_exitCallback` — Commander
+    // copies it onto children created via `.command()`, but buildCommandTree
+    // wires up namespace/leaf commands with `.addCommand()`, which does not
+    // copy inherited settings. Without propagating it explicitly, a leaf
+    // command's own missing-argument error (thrown deep in the tree, e.g.
+    // `textDocument hover`) would call `process.exit()` directly instead of
+    // throwing the CommanderError this function needs to catch below.
+    applyExitOverride(program);
+
+    const rawArgs = argv.slice(2);
+    const tokenIdx = rawArgs.indexOf(token);
+    const pass2Args =
+      tokenIdx === -1 ? rawArgs : [...rawArgs.slice(0, tokenIdx), ...rawArgs.slice(tokenIdx + 1)];
+
+    try {
+      await program.parseAsync(pass2Args, { from: 'user' });
+    } catch (err) {
+      if (err instanceof CommanderError && err.code === 'commander.missingArgument') {
+        const drillPath = drillPathFor([namespace, request]);
+        if (flags.json) {
+          process.stdout.write(
+            JSON.stringify(drillDownJson(program, entry.languageId, drillPath)) + '\n'
+          );
+        } else {
+          const color = process.stdout.isTTY === true && !process.env['NO_COLOR'] && !flags.json;
+          const { text } = renderDrillDownText(program, drillPath, createFormatter(color));
+          process.stdout.write(text.endsWith('\n') ? text : text + '\n');
+        }
+        return;
+      }
+      throw err;
     }
   } finally {
     await session.stop();

@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { buildFlags, runHelp } from './cli.js';
+import { buildFlags, runHelp, runDispatch } from './cli.js';
 import type { GlobalFlags } from './io.js';
 
 function withFailStubbed(body: () => void): string[] {
@@ -61,12 +61,64 @@ describe('buildFlags', () => {
   });
 });
 
+// Minimal stdio LSP server used by tests that need a real (fast,
+// deterministic) `initialize` handshake instead of a fictional command name
+// like "tsls" — spawning a nonexistent binary either throws (direct session)
+// or, when routed through the real proxy daemon, hangs forever (the daemon's
+// backend pool doesn't propagate a spawn ENOENT into the pending `initialize`
+// response — a pre-existing gap, out of scope for this task). This script
+// answers `initialize` with a fixed capabilities object over standard LSP
+// Content-Length framing, so `runHelp`/`runDispatch` tests that go through
+// the language-or-file resolution path connect in milliseconds.
+const FAKE_LSP_SERVER_SRC = `
+let buf = Buffer.alloc(0);
+process.stdin.on('data', (chunk) => {
+  buf = Buffer.concat([buf, chunk]);
+  for (;;) {
+    const headerEnd = buf.indexOf('\\r\\n\\r\\n');
+    if (headerEnd === -1) return;
+    const header = buf.subarray(0, headerEnd).toString('utf8');
+    const match = /Content-Length: (\\d+)/i.exec(header);
+    if (!match) return;
+    const length = Number(match[1]);
+    const bodyStart = headerEnd + 4;
+    if (buf.length < bodyStart + length) return;
+    const body = buf.subarray(bodyStart, bodyStart + length).toString('utf8');
+    buf = buf.subarray(bodyStart + length);
+    try { handle(JSON.parse(body)); } catch { /* ignore */ }
+  }
+});
+function send(msg) {
+  const body = JSON.stringify(msg);
+  process.stdout.write('Content-Length: ' + Buffer.byteLength(body, 'utf8') + '\\r\\n\\r\\n' + body);
+}
+function handle(msg) {
+  if (msg.method === 'initialize') {
+    send({ jsonrpc: '2.0', id: msg.id, result: { capabilities: { hoverProvider: true, definitionProvider: true, textDocumentSync: 1 } } });
+  } else if (msg.method === 'shutdown') {
+    send({ jsonrpc: '2.0', id: msg.id, result: null });
+  } else if (msg.method === 'exit') {
+    process.exit(0);
+  } else if (msg.id !== undefined) {
+    send({ jsonrpc: '2.0', id: msg.id, result: null });
+  }
+}
+`;
+
 function tmpRootWithConfig(): string {
   const dir = mkdtempSync(join(tmpdir(), 'lspeasy-help-'));
+  const serverPath = join(dir, 'fake-lsp-server.mjs');
+  writeFileSync(serverPath, FAKE_LSP_SERVER_SRC, 'utf8');
   writeFileSync(
     join(dir, 'lsp.json'),
     JSON.stringify({
-      lspServers: { typescript: { command: 'tsls', fileExtensions: { '.ts': 'typescript' } } }
+      lspServers: {
+        typescript: {
+          command: process.execPath,
+          args: [serverPath],
+          fileExtensions: { '.ts': 'typescript' }
+        }
+      }
     }),
     'utf8'
   );
@@ -167,6 +219,71 @@ describe('runHelp (daemon down)', () => {
     } finally {
       cap.restore();
       exitSpy.mockRestore();
+    }
+  });
+});
+
+describe('runHelp — file-as-first-token (unified grammar)', () => {
+  it('accepts a file path as the first token, same as a language id', async () => {
+    const root = tmpRootWithConfig();
+    writeFileSync(join(root, 'foo.ts'), 'const x = 1;\n', 'utf8');
+    const cap = captureStdout();
+    try {
+      await runHelp(['foo.ts'], baseFlags(root, false));
+    } finally {
+      cap.restore();
+    }
+    expect(cap.out()).toContain('textDocument');
+  });
+});
+
+describe('runDispatch — incomplete real call falls back to the drill-down view', () => {
+  it('shows the same schema view as --help when a required arg is missing', async () => {
+    const root = tmpRootWithConfig();
+    const cap = captureStdout();
+    // runDispatch's pass-2 Commander parse reconstructs its argv from the real
+    // `process.argv` (minus the language-or-file token) rather than from the
+    // `positionals` parameter, so that real CLI flag formatting/quoting
+    // survives verbatim through main()'s two passes. Calling runDispatch
+    // directly (bypassing main()) needs argv stubbed to match, or the
+    // language token is never found and the test-runner's own argv gets fed
+    // to Commander instead. cli.ts imports `argv` as a named binding from
+    // `node:process` (`import { argv } from 'node:process'`), which captures
+    // the array *reference* rather than re-reading `process.argv` on each
+    // access — reassigning `process.argv = [...]` (a new array) would NOT be
+    // visible through that binding, so the stub must mutate the existing
+    // array in place.
+    const originalArgv = [...process.argv];
+    process.argv.splice(2, process.argv.length - 2, 'typescript', 'textDocument', 'hover');
+    try {
+      await runDispatch(['typescript', 'textDocument', 'hover'], baseFlags(root, false));
+    } finally {
+      process.argv.splice(0, process.argv.length, ...originalArgv);
+      cap.restore();
+    }
+    const text = cap.out();
+    expect(text).toMatch(/Usage:/);
+    expect(text.toLowerCase()).toContain('hover');
+  });
+
+  it('an unresolvable first token fails with the configured-languages list', async () => {
+    const root = tmpRootWithConfig();
+    const errs: string[] = [];
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(((): never => {
+      throw new Error('exit');
+    }) as never);
+    const errSpy = vi.spyOn(process.stderr, 'write').mockImplementation(((s: string) => {
+      errs.push(s);
+      return true;
+    }) as never);
+    try {
+      await expect(
+        runDispatch(['nope', 'textDocument', 'hover'], baseFlags(root, false))
+      ).rejects.toThrow('exit');
+      expect(errs.some((s) => s.includes('nope'))).toBe(true);
+    } finally {
+      exitSpy.mockRestore();
+      errSpy.mockRestore();
     }
   });
 });
