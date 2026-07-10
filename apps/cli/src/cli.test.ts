@@ -305,6 +305,38 @@ describe('runDispatch — incomplete real call falls back to the drill-down view
     expect(text.toLowerCase()).toContain('hover');
   });
 
+  it('a preceding global option value equal to the token is not mistaken for the positional', async () => {
+    const root = tmpRootWithConfig();
+    const cap = captureStdout();
+    // `--root`'s VALUE happens to equal the language/file token ('typescript').
+    // The old `rawArgs.indexOf(token)` found that occurrence (index 1) first
+    // and stripped it instead of the real positional (index 3), leaving
+    // 'typescript' as a stray extra operand that Commander's second pass
+    // then tried (and failed) to parse as an unknown subcommand. The '--json'
+    // spacer keeps the two 'typescript' occurrences non-adjacent so stripping
+    // the wrong one vs. the right one produces genuinely different arrays.
+    const originalArgv = [...process.argv];
+    process.argv.splice(
+      2,
+      process.argv.length - 2,
+      '--root',
+      'typescript',
+      '--json',
+      'typescript',
+      'textDocument',
+      'hover'
+    );
+    try {
+      await runDispatch(['typescript', 'textDocument', 'hover'], baseFlags(root, false));
+    } finally {
+      process.argv.splice(0, process.argv.length, ...originalArgv);
+      cap.restore();
+    }
+    const text = cap.out();
+    expect(text).toMatch(/Usage:/);
+    expect(text.toLowerCase()).toContain('hover');
+  });
+
   it('an unresolvable first token fails with the configured-languages list', async () => {
     const root = tmpRootWithConfig();
     const errs: string[] = [];

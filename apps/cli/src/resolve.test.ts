@@ -113,6 +113,17 @@ describe('resolveEntry — language-or-file resolution', () => {
     expect(entry?.anchorFile).toBeUndefined();
     expect(entry?.languageId).toBe('typescript');
   });
+
+  it('--server with an unrecognized file extension falls back to "plaintext", not the raw token', () => {
+    // '.py' is not in any configured server's fileExtensions (only '.rs' is,
+    // via the claude-code mock) — resolveByExtension returns null, so the old
+    // code fell back to the raw token ("src/foo.py") as languageId, which is
+    // not a valid LSP languageId. anchorFile must still be set correctly.
+    const entry = resolveEntry('src/foo.py', '/p', 'custom-server');
+    expect(entry?.serverCommand).toBe('custom-server');
+    expect(entry?.anchorFile).toBe('src/foo.py');
+    expect(entry?.languageId).toBe('plaintext');
+  });
 });
 
 describe('allConfiguredServersWithSource', () => {

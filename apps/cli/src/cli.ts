@@ -17,7 +17,12 @@ import { fileURLToPath } from 'node:url';
 import { Command, CommanderError } from 'commander';
 
 import { fail, resolvePathArg, type GlobalFlags } from './io.js';
-import { buildFlags, registerGlobalOptions, type ParsedOptionValues } from './global-options.js';
+import {
+  buildFlags,
+  registerGlobalOptions,
+  GLOBAL_OPTIONS,
+  type ParsedOptionValues
+} from './global-options.js';
 import { resolveEntry, allConfiguredServers, type EntryResolution } from './resolve.js';
 import { findAnchorFile } from './anchor.js';
 import { coldStatusReport } from '@lsproxy/proxy';
@@ -158,6 +163,31 @@ function applyExitOverride(cmd: Command): void {
   for (const sub of cmd.commands) applyExitOverride(sub);
 }
 
+/** Long-flag names (e.g. `--server`, `--root`, `--wait`) that consume a
+ * following value, derived from {@link GLOBAL_OPTIONS} so this can't drift
+ * out of sync with the actual option definitions. An entry's `flags` string
+ * contains `<...>` iff it takes a value (e.g. `'--server <cmd>'`); boolean
+ * flags (e.g. `'--dry-run'`) don't. None of these entries have a short-flag
+ * alias, so splitting on the first space is enough to get the long name. */
+const VALUE_TAKING_FLAGS = new Set(
+  GLOBAL_OPTIONS.filter((o) => o.flags.includes('<')).map((o) => o.flags.split(' ')[0])
+);
+
+/**
+ * Find the index of `token` in `args` that is the actual positional, not the
+ * VALUE of a preceding value-taking global option that happens to equal
+ * `token` (e.g. `--root src/foo.ts src/foo.ts textDocument hover`, where
+ * `--root`'s value and the language/file positional are the same string).
+ * Scans left to right and skips any occurrence immediately preceded by a
+ * value-taking flag name.
+ */
+function findPositionalIndex(args: string[], token: string): number {
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === token && !(i > 0 && VALUE_TAKING_FLAGS.has(args[i - 1]!))) return i;
+  }
+  return -1;
+}
+
 /**
  * Help-mode dispatch. `positionals` after the language-or-file token mean
  * [namespace, request, ...]. Depth 0 (no token at all) -> top-level language
@@ -296,11 +326,9 @@ export async function runDispatch(positionals: string[], flags: GlobalFlags): Pr
     applyExitOverride(program);
 
     const rawArgs = argv.slice(2);
-    // Assumes the first argv entry equal to `token` is the language/file
-    // positional itself. Pathological edge case (currently unhandled): if a
-    // preceding option's VALUE happens to equal `token`, this strips that
-    // value instead, not the positional.
-    const tokenIdx = rawArgs.indexOf(token);
+    // Find the language/file positional itself, not a preceding global
+    // option's VALUE that happens to equal `token` (see findPositionalIndex).
+    const tokenIdx = findPositionalIndex(rawArgs, token);
     const pass2Args =
       tokenIdx === -1 ? rawArgs : [...rawArgs.slice(0, tokenIdx), ...rawArgs.slice(tokenIdx + 1)];
 

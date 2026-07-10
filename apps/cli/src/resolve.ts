@@ -163,7 +163,7 @@ export function resolveEntry(
     const discovered = ext ? resolveByExtension(root, ext, scope) : null;
     return {
       serverCommand: serverOverride,
-      languageId: discovered?.languageId ?? token,
+      languageId: discovered?.languageId ?? (ext ? 'plaintext' : token),
       fromPlatform: false,
       ...(ext ? { anchorFile: token } : {})
     };
