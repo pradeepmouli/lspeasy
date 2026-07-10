@@ -144,6 +144,8 @@ positionals[0] === 'version'          → print CLI_VERSION, exit
 positionals[0] === 'config'           → build config-only Command tree, parseAsync, exit
                                          (no session ever connects)
 positionals[0] === 'daemon'           → build daemon-only Command tree, parseAsync, exit
+positionals[0] === 'status'           → build status-only Command tree, parseAsync, exit
+                                         (no session ever connects — see §7)
 positionals.length === 0              → top-level status view (unchanged), exit
 otherwise                             → language-or-file dispatch (below)
 ```
@@ -204,7 +206,38 @@ showing that fewer args = shallower view — since it's the same command,
 not a different `--help`-prefixed one. A new "Global options:" section
 is added, generated from `GLOBAL_OPTIONS`.
 
-### 6. Testing
+### 7. `lsproxy status` — richer per-server info
+
+New meta-command, alongside `config`/`daemon` (routed before any language
+resolution, never connects a session on its own). Bare `lsproxy` stays
+exactly as terse as today's top-level view (§5); `status` is the place for
+more detail:
+
+For each entry in the existing `StatusReport.languages` (already carries a
+`command` string — the configured, shell-quoted server command — but
+`languageLine()` never renders it), `status` additionally resolves that
+command's executable to an absolute filesystem path, the way a shell would
+find it: `tokenizeCommand` (already exported by `@lspeasy/core`) splits out
+the first token; a new `resolveBinaryPath(cmd)` checks it directly if it's
+already an absolute/relative path, otherwise searches `$PATH` (and, on
+Windows, each `$PATHEXT` extension) the way `which` would, returning the
+first executable match or `undefined` if the binary can't be found. This is
+best-effort display info, not a spawn-time guarantee — the daemon/session
+still resolve the command themselves when actually launching a server.
+
+Output (text mode) extends each language line with an indented
+`<configured command> → <resolved path>` line (or a "not found on $PATH"
+note in yellow when resolution fails); `--json` adds a `resolvedPath: string
+| null` field to each language entry. No new fields are added anywhere else
+in `StatusReport` — this is purely an additional, resolved-on-demand
+projection computed in the CLI, not a change to `@lsproxy/proxy`'s data
+model.
+
+`status` is also listed in the top-level view's `Commands:` section (§5)
+and included in `program.ts`'s metadata tree (so `skillit gen` picks it up),
+exactly like `config`/`daemon`.
+
+### 8. Testing
 
 - `build-commands.test.ts`: `zodToCommander`/`buildCommandTree` with and
   without a pre-resolved `anchorFile`, asserting the `<file>` argument
@@ -221,6 +254,11 @@ is added, generated from `GLOBAL_OPTIONS`.
 - Existing tests for `--wait` validation, `--version`, bare `lsproxy`,
   and the old two-positional grammar are updated to the new grammar
   (breaking change — no dual-mode parsing to characterize).
+- `resolveBinaryPath`: absolute/relative path passthrough, `$PATH` search
+  hit and miss, covered with a temp directory + fake executable rather
+  than depending on any real binary being installed.
+- `status` command: `--json` output includes `resolvedPath` per language;
+  text output shows the "not found on $PATH" note when resolution fails.
 - README quick-start / usage examples updated to the new grammar.
 
 ## Non-goals
