@@ -30,7 +30,7 @@ describe('renderTopLevel', () => {
     expect(out).toContain('typescript');
     expect(out).toContain('.ts');
     expect(out).toContain('rust');
-    expect(out).toMatch(/lsproxy --help <language>/);
+    expect(out).toContain('lsproxy <language-or-file>');
     expect(out).not.toContain('\x1b');
   });
 
@@ -52,11 +52,13 @@ describe('renderTopLevel', () => {
     const report: StatusReport = { daemon: null, languages: [] };
     const out = renderTopLevel(report, fmt);
     expect(out).toMatch(/Usage:/);
-    expect(out).toMatch(/lsproxy <language> <namespace> <request>/);
+    expect(out).toMatch(/lsproxy <language-or-file> <namespace> <request>/);
     expect(out).toMatch(/Commands:/);
     expect(out).toMatch(/config .*read\/write LSP config/);
     expect(out).toMatch(/daemon .*manage the per-root proxy daemon/);
     expect(out).toMatch(/call .*send any LSP request/);
+    expect(out).toMatch(/Global options:/);
+    expect(out).toMatch(/--dry-run/);
   });
 
   it('applies color when the formatter is enabled (polish)', () => {
@@ -84,6 +86,13 @@ describe('renderTopLevel', () => {
     expect(out).toContain('\x1b[38;2;129;161;193m<request>\x1b[0m'); // method/request → blue
     expect(out).toContain('\x1b[38;2;143;188;187m<json>\x1b[0m'); // positional/value arg → teal
     expect(out).toContain('\x1b[38;2;136;192;208m<namespace>\x1b[0m'); // namespace → cyan
+  });
+
+  it('colorizes <language-or-file> with the namespace role', () => {
+    const color = createFormatter(true);
+    const report: StatusReport = { daemon: null, languages: [] };
+    const out = renderTopLevel(report, color);
+    expect(out).toContain('\x1b[38;2;136;192;208m<language-or-file>\x1b[0m'); // nord cyan
   });
 });
 

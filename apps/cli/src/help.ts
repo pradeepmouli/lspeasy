@@ -3,6 +3,7 @@ import type { Command } from 'commander';
 import { z } from 'zod';
 import { exampleFromZod, getResultSchemaForMethod, getSchemaForMethod } from '@lspeasy/core';
 import { SYMBOLS, type Formatter } from './format.js';
+import { globalOptionsHelpText } from './global-options.js';
 import { paramsResidualExample } from './zod-to-commander.js';
 
 function safeResidual(schema: z.ZodType): { ok: boolean; value: unknown } {
@@ -70,6 +71,7 @@ type UsageRole = 'ns' | 'method' | 'arg' | 'option' | 'literal';
 // other `<…>`/`[…]` → arg, bare words (lsproxy, config) → namespace.
 const USAGE_ROLE: Readonly<Record<string, UsageRole>> = {
   '<language>': 'ns',
+  '<language-or-file>': 'ns',
   '<namespace>': 'ns',
   '<request>': 'method',
   '<method>': 'method',
@@ -124,8 +126,8 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
 
   const usage = [
     fmt.bold('Usage:'),
-    `  ${colorizeUsage('lsproxy <language> <namespace> <request> [args] [flags]', fmt)}`,
-    `  ${colorizeUsage('lsproxy call <method> --params <json>', fmt)}`
+    `  ${colorizeUsage('lsproxy <language-or-file> <namespace> <request> [args] [flags]', fmt)}`,
+    `  ${colorizeUsage('lsproxy <language-or-file> call <method> --params <json>', fmt)}`
   ].join('\n');
 
   // Non-namespace (meta) commands — listed with descriptions so they're
@@ -138,11 +140,17 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
     row('--version, -V', 'print the CLI version')
   ].join('\n');
 
-  const drill = [
-    fmt.bold('Drill down:'),
-    row('lsproxy --help <language>', 'namespaces for that server'),
-    row('lsproxy --help <language> <namespace>', 'requests in that namespace'),
-    row('lsproxy --help <language> <namespace> <request>', 'parameter schema')
+  const explore = [
+    fmt.bold('Explore:'),
+    row('lsproxy <language-or-file>', 'namespaces for that server'),
+    row('lsproxy <language-or-file> <namespace>', 'requests in that namespace'),
+    row('lsproxy <language-or-file> <namespace> <request> --help', 'parameter schema'),
+    fmt.dim('(fewer args than a request needs shows the same schema view instead of an error)')
+  ].join('\n');
+
+  const globalOpts = [
+    fmt.bold('Global options:'),
+    globalOptionsHelpText().split('\n').slice(1).join('\n')
   ].join('\n');
 
   return [
@@ -157,7 +165,9 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
     '',
     commands,
     '',
-    drill,
+    explore,
+    '',
+    globalOpts,
     ''
   ].join('\n');
 }

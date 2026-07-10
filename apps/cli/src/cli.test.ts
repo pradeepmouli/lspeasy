@@ -107,7 +107,7 @@ describe('runHelp (daemon down)', () => {
     }
     const text = cap.out();
     expect(text).toContain('typescript');
-    expect(text).toMatch(/lsproxy --help <language>/);
+    expect(text).toContain('lsproxy <language-or-file>');
     expect(text).not.toContain('\x1b');
   });
 
