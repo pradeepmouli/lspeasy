@@ -3,13 +3,23 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, openSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { createConnection } from 'node:net';
+import { fileURLToPath } from 'node:url';
 import { SocketTransport } from '@lspeasy/core/node';
 import type { Message } from '@lspeasy/core';
 import { socketPath } from '@lsproxy/proxy';
 import type { StatusReport } from '@lsproxy/proxy';
 import { RefactorSession, type SessionOptions } from './session.js';
 
-const PROXY_BIN = new URL('../../proxy/dist/main.js', import.meta.url).pathname;
+// Resolve @lsproxy/proxy's CLI entry point via real module resolution instead
+// of a hardcoded relative path. A hardcoded '../../proxy/dist/main.js' assumes
+// @lsproxy/cli and @lsproxy/proxy are always sibling directories under the
+// same parent — true in this monorepo's dev layout, and true when a package
+// manager hoists @lsproxy/proxy to the same top-level scope, but FALSE when
+// npm nests @lsproxy/proxy under @lsproxy/cli's own node_modules (a normal,
+// valid hoisting outcome for `npm install -g @lsproxy/cli`). import.meta.resolve
+// walks node_modules from this module's own location exactly like a real
+// import/require would, so it finds the package wherever it actually landed.
+const PROXY_BIN = fileURLToPath(import.meta.resolve('@lsproxy/proxy/dist/main.js'));
 const POLL_INTERVAL_MS = 100;
 const POLL_TIMEOUT_MS = 5000;
 

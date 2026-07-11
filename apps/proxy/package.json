@@ -29,7 +29,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./dist/main.js": "./dist/main.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
