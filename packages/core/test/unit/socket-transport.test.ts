@@ -4,7 +4,6 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { existsSync, unlinkSync } from 'node:fs';
 import { SocketTransport, socketToTransport } from '../../src/transport/socket.js';
-import { MessageReader } from '../../src/jsonrpc/reader.js';
 import { MessageWriter } from '../../src/jsonrpc/writer.js';
 import { serializeMessage } from '../../src/jsonrpc/framing.js';
 import type { Message } from '../../src/jsonrpc/messages.js';
