@@ -178,6 +178,43 @@ describe('SocketTransport (Unix domain socket mode)', () => {
     // Cleanup server sockets
     for (const s of serverSockets) s.destroy();
   });
+
+  // Regression test for a real bug: SocketTransport shares one socket
+  // between a MessageReader, a MessageWriter, and its own 'close' handler.
+  // MessageReader/MessageWriter's close() used to call
+  // `stream.removeAllListeners()`, and since 'end' fires before 'close' on a
+  // real socket, MessageReader's 'end'-triggered close() wiped out
+  // SocketTransport's own 'close' handler before 'close' was ever emitted —
+  // so a peer dying abruptly (e.g. the proxy daemon crashing mid-handshake)
+  // never fired the client's onClose(), and LSPClient.handleClose() (which
+  // rejects pending requests) was never called: the pending request just
+  // hung forever instead of rejecting.
+  it('fires onClose when the server abruptly destroys the connection (peer crash), not just on a graceful close()', async () => {
+    const sockPath = tmpSocketPath('unix-abrupt-crash');
+    socketFiles.push(sockPath);
+
+    const server = createServer((socket) => {
+      sockets.push(socket);
+      // Simulate a peer crashing mid-session: destroy the accepted socket
+      // from the server side without any graceful FIN/shutdown handshake,
+      // the same way an uncaught exception kills a Node process and the OS
+      // tears down its file descriptors.
+      socket.destroy();
+    });
+    servers.push(server);
+    await new Promise<void>((resolve) => server.listen(sockPath, resolve));
+
+    const transport = new SocketTransport({ path: sockPath });
+    transports.push(transport);
+
+    const closeFired = vi.fn();
+    transport.onClose(closeFired);
+
+    await waitUntil(() => closeFired.mock.calls.length > 0, 3000);
+
+    expect(closeFired).toHaveBeenCalledTimes(1);
+    expect(transport.isConnected()).toBe(false);
+  });
 });
 
 describe('SocketTransport (TCP mode)', () => {
