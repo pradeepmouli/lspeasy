@@ -1,5 +1,14 @@
 # @lspeasy/server
 
+## 4.2.1
+
+### Patch Changes
+
+- Updated dependencies [8df99f3]
+- Updated dependencies [681ce70]
+- Updated dependencies [944d94d]
+  - @lspeasy/core@2.7.0
+
 ## 4.2.0
 
 ### Minor Changes

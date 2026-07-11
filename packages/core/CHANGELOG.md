@@ -1,5 +1,22 @@
 # @lspeasy/core
 
+## 2.7.0
+
+### Minor Changes
+
+- 681ce70: Wire `lsp.json`'s `initializationOptions` field through to the real LSP `initialize` request, across both the CLI's direct-connect path and the proxy daemon's connect path. Previously this field was parsed and preserved on round-trip but silently ignored at runtime. Now a user can declare `"typescript": {"command": "...", "initializationOptions": {"supportsMoveToFileCodeAction": true}}` in their `lsp.json` and have it actually reach the server — for example, unlocking `typescript-language-server`'s deterministic, target-file-aware "Move to file" refactor code action instead of only the interactive "Move to a new file" variant. This is purely additive and backward-compatible: omitting the field changes nothing.
+- 944d94d: Fix `lsp.json` entries whose `command` field embeds the whole launch command (binary + flags, e.g. `"typescript-language-server --stdio"`) with no separate `args` array. `buildServerCommand` previously quoted that entire string as one token, so `spawn()` failed with `ENOENT` because no binary has a name containing a space. `entry.command` is now tokenized (via the existing `tokenizeCommand` utility) before being combined with `args` and re-quoted, so embedded flags correctly split into separate argv tokens.
+
+  - `@lspeasy/core`: `buildServerCommand` is now exported from `discover.ts` and re-exported from the package's public barrel, since `apps/cli` needed it to eliminate a duplicated copy of the same (buggy) logic.
+  - `@lsproxy/cli`: `apps/cli/src/resolve.ts`'s local `buildCommand` (a private mirror of core's function, kept in sync by hand) is removed; `platformServers()` now calls the shared, fixed `buildServerCommand` from `@lspeasy/core` directly. This closes the same bug for platform-adapter-sourced servers (Claude Code/Codex/Copilot-CLI configs), not just `lsp.json`-sourced ones.
+
+### Patch Changes
+
+- 8df99f3: Fix backend spawn failures crashing the proxy daemon and fix `MessageReader`/`MessageWriter` wiping out other listeners on a shared stream, so a misconfigured `lsp.json` entry (e.g. a binary that isn't on PATH) now surfaces as a clear error to the CLI instead of crashing the entire daemon (taking down every other language's live backend) or leaving the request hanging/silently failing.
+
+  - `BackendPool.startBackend` now attaches an `error` handler to the spawned backend process and rejects `ensureBackend`'s promise with a clear message instead of letting Node's default "unhandled 'error' event" behavior crash the daemon process.
+  - `MessageReader.close()` / `MessageWriter.close()` now remove only their own listeners instead of calling `stream.removeAllListeners()`, which previously deleted other consumers' listeners on a shared socket (e.g. `SocketTransport`'s own `'close'` handler) before the stream's `'close'` event ever fired — silently preventing `LSPClient.handleClose()` from ever running when a peer connection died abruptly.
+
 ## 2.6.1
 
 ### Patch Changes

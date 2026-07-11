@@ -1,5 +1,35 @@
 # @lspeasy/cli
 
+## 1.0.0
+
+### Major Changes
+
+- 99a83b1: Breaking: unified argument parsing onto Commander and changed the CLI grammar. The first positional argument is now either a language id or a filename (which anchors the request, replacing the old requirement to repeat the file later in the args):
+
+  - Old: `lsproxy <namespace> <command> <file> [args] [flags]` (e.g. `lsproxy textDocument hover src/foo.ts 12:7`)
+  - New: `lsproxy <language-or-file> <namespace> <request> [args] [flags]` (e.g. `lsproxy src/foo.ts textDocument hover 12:7`, or `lsproxy typescript textDocument hover src/foo.ts 12:7`)
+
+  `config` and `daemon` are now real Commander subcommands with consistent `--help` output. Added a new `lsproxy status` command showing configured language servers grouped by process, with resolved binary location, config source, live connection status, and served languages.
+
+### Minor Changes
+
+- 681ce70: Wire `lsp.json`'s `initializationOptions` field through to the real LSP `initialize` request, across both the CLI's direct-connect path and the proxy daemon's connect path. Previously this field was parsed and preserved on round-trip but silently ignored at runtime. Now a user can declare `"typescript": {"command": "...", "initializationOptions": {"supportsMoveToFileCodeAction": true}}` in their `lsp.json` and have it actually reach the server — for example, unlocking `typescript-language-server`'s deterministic, target-file-aware "Move to file" refactor code action instead of only the interactive "Move to a new file" variant. This is purely additive and backward-compatible: omitting the field changes nothing.
+
+### Patch Changes
+
+- e1c31ef: Fix the "Capability options:" and "Discovering commands:" help footers (for capability-gated commands and `workspace executeCommand`, respectively) never actually appearing for users. Both were built with Commander's `addHelpText('after', ...)`, which only surfaces text through `outputHelp()`'s `afterHelp` event — but this CLI renders help by calling `helpInformation()` directly, bypassing that event entirely, so the footers were silently dropped. They now use the same `appendHelpFooter` helper already used for the global-options footer, which wraps `helpInformation()` directly and composes correctly across multiple calls.
+- 944d94d: Fix `lsp.json` entries whose `command` field embeds the whole launch command (binary + flags, e.g. `"typescript-language-server --stdio"`) with no separate `args` array. `buildServerCommand` previously quoted that entire string as one token, so `spawn()` failed with `ENOENT` because no binary has a name containing a space. `entry.command` is now tokenized (via the existing `tokenizeCommand` utility) before being combined with `args` and re-quoted, so embedded flags correctly split into separate argv tokens.
+
+  - `@lspeasy/core`: `buildServerCommand` is now exported from `discover.ts` and re-exported from the package's public barrel, since `apps/cli` needed it to eliminate a duplicated copy of the same (buggy) logic.
+  - `@lsproxy/cli`: `apps/cli/src/resolve.ts`'s local `buildCommand` (a private mirror of core's function, kept in sync by hand) is removed; `platformServers()` now calls the shared, fixed `buildServerCommand` from `@lspeasy/core` directly. This closes the same bug for platform-adapter-sourced servers (Claude Code/Codex/Copilot-CLI configs), not just `lsp.json`-sourced ones.
+
+- Updated dependencies [8df99f3]
+- Updated dependencies [681ce70]
+- Updated dependencies [944d94d]
+  - @lsproxy/proxy@1.3.0
+  - @lspeasy/core@2.7.0
+  - @lspeasy/client@3.1.7
+
 ## 0.11.4
 
 ### Patch Changes
