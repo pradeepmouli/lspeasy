@@ -159,7 +159,14 @@ export class BackendPool {
       // started.
       await Promise.race([client.connect(transport), spawnError]);
     } catch (err) {
-      proc.kill();
+      // Best-effort cleanup — proc.kill() can itself throw (e.g. an already-
+      // dead process, permission error); that must never mask the original
+      // spawn/connect error being propagated below.
+      try {
+        proc.kill();
+      } catch {
+        // ignored — see comment above
+      }
       throw err;
     }
 
