@@ -3,6 +3,10 @@ import type { ServerCapabilities } from '@lspeasy/core';
 import type { RefactorSession } from './session.js';
 import type { GlobalFlags } from './io.js';
 import { buildCommandTree } from './build-commands.js';
+import { buildConfigCommand } from './config-command.js';
+import { buildDaemonCommand } from './daemon-commands.js';
+import { buildStatusCommand } from './status-command.js';
+import { createFormatter } from './format.js';
 
 /**
  * Build the full Commander program with all LSP method subcommands populated.
@@ -53,41 +57,11 @@ export function buildProgram(): Command {
 
   buildCommandTree(program, allCaps, null as unknown as RefactorSession, stubFlags);
 
-  // Register the `config` command family for static introspection.
-  // Actual dispatch lives in cli.ts main(); these entries are metadata-only so
-  // that tools such as `skillit gen --source cli` capture the command surface.
-  // `--json` is already declared as a global option on `program`.
-  const config = program
-    .command('config')
-    .description(
-      'Read/write LSP server config across platforms (lsp.json, Copilot CLI, Claude Code, Codex; VS Code is detected-but-unsupported)'
-    );
-  config
-    .command('list')
-    .description('List detected platforms and their configured servers')
-    .option('--user', 'User-level config (~/.claude/lsp.json) instead of project');
-  config
-    .command('import <platform>')
-    .description("Import a platform's LSP servers into lsp.json")
-    .option('--user', 'User-level config instead of project');
-  config
-    .command('export <platform>')
-    .description("Export lsp.json servers to a platform's native config")
-    .option('--user', 'User-level config instead of project');
-  config
-    .command('diff <platform>')
-    .description("Diff lsp.json against a platform's config")
-    .option('--user', 'User-level config instead of project');
-
-  // Register the `daemon` command family (metadata-only; dispatch in cli.ts).
-  const daemon = program
-    .command('daemon')
-    .description('Manage the per-root proxy daemon (otherwise starts lazily on first request)');
-  daemon
-    .command('start')
-    .description('Start the proxy daemon for --root (no-op if already running)');
-  daemon.command('stop').description('Stop the proxy daemon for --root');
-  daemon.command('status').description('Show daemon status for --root');
+  // Registered via the same builders cli.ts uses for real dispatch, so this
+  // metadata-only tree can never drift from the actual command surface.
+  program.addCommand(buildConfigCommand(stubFlags));
+  program.addCommand(buildDaemonCommand(stubFlags, createFormatter(false)));
+  program.addCommand(buildStatusCommand(stubFlags));
 
   return program;
 }

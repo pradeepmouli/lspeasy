@@ -1,5 +1,7 @@
 import { exit } from 'node:process';
 
+import { Command } from 'commander';
+
 import { startDaemon, stopDaemon, fetchDaemonStatus } from './connect.js';
 import { daemonStatusLine } from './help.js';
 import type { Formatter } from './format.js';
@@ -69,4 +71,25 @@ export async function runDaemon(
     // bubbling to main()'s plain-text `fatal:`.
     fail(err instanceof Error ? err.message : String(err));
   }
+}
+
+/** Real Commander command tree for `lsproxy daemon <start|stop|status>`,
+ * wrapping the existing `runDaemon` dispatch. */
+export function buildDaemonCommand(flags: GlobalFlags, fmt: Formatter): Command {
+  const daemon = new Command('daemon').description(
+    'Manage the per-root proxy daemon (otherwise starts lazily on first request)'
+  );
+  daemon
+    .command('start')
+    .description('Start the proxy daemon for --root (no-op if already running)')
+    .action(() => runDaemon('start', flags, fmt));
+  daemon
+    .command('stop')
+    .description('Stop the proxy daemon for --root')
+    .action(() => runDaemon('stop', flags, fmt));
+  daemon
+    .command('status')
+    .description('Show daemon status for --root')
+    .action(() => runDaemon('status', flags, fmt));
+  return daemon;
 }

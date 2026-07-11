@@ -2,6 +2,8 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 
+import { tokenizeCommand } from './utils/tokenize-command.js';
+
 export interface LspServerEntry {
   command: string;
   args?: string[];
@@ -27,6 +29,10 @@ export interface ResolvedServer {
   serverCommand: string;
   /** languageId for textDocument/didOpen (e.g. 'typescript', 'rust'). */
   languageId: string;
+  /** Arbitrary server-specific `initializationOptions` from the matched
+   * `lsp.json` entry, merged into the real `initialize` request's
+   * `initializationOptions` on top of the computed `languageId`. */
+  initializationOptions?: Record<string, unknown>;
 }
 
 export interface ConfiguredServer {
@@ -55,8 +61,24 @@ function findLspJsonPath(root: string): string | null {
   return existsSync(global) ? global : null;
 }
 
-function buildServerCommand(entry: LspServerEntry): string {
-  const parts = [entry.command, ...(entry.args ?? [])].filter(Boolean);
+/**
+ * Build the full spawn command string for an `lsp.json` entry: `entry.command`
+ * is itself tokenized (via {@link tokenizeCommand}) before being combined with
+ * `entry.args`, so a `command` field that embeds flags (e.g.
+ * `"typescript-language-server --stdio"` with no separate `args` array) still
+ * splits into separate argv tokens instead of collapsing into one bogus binary
+ * name once re-quoted below. The common case — a bare executable name/path
+ * with no embedded spaces — tokenizes to a single token, unchanged from before.
+ *
+ * Caveat: because `entry.command` is tokenized on whitespace, a legitimately
+ * space-containing executable path (not embedded flags) must itself be quoted
+ * in `lsp.json` (e.g. `"\"/path with spaces/my-server\""`) or it will be
+ * split into multiple bogus tokens — the same requirement a real shell would
+ * impose.
+ */
+export function buildServerCommand(entry: LspServerEntry): string {
+  const commandTokens = tokenizeCommand(entry.command);
+  const parts = [...commandTokens, ...(entry.args ?? [])].filter(Boolean);
   // Always quote every token so backslashes and spaces are handled uniformly.
   // tokenizeCommand treats \\ inside double-quotes as a literal backslash.
   return parts.map((t) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(' ');
@@ -80,10 +102,26 @@ export function selectServer(config: LspJson, fileExt: string): ResolvedServer |
     if (!fileExt) {
       // No extension — return the first configured server with its first languageId.
       const languageId = Object.values(entry.fileExtensions)[0];
-      if (languageId) return { serverCommand: buildServerCommand(entry), languageId };
+      if (languageId) {
+        return {
+          serverCommand: buildServerCommand(entry),
+          languageId,
+          ...(entry.initializationOptions
+            ? { initializationOptions: entry.initializationOptions }
+            : {})
+        };
+      }
     } else {
       const languageId = entry.fileExtensions[fileExt];
-      if (languageId) return { serverCommand: buildServerCommand(entry), languageId };
+      if (languageId) {
+        return {
+          serverCommand: buildServerCommand(entry),
+          languageId,
+          ...(entry.initializationOptions
+            ? { initializationOptions: entry.initializationOptions }
+            : {})
+        };
+      }
     }
   }
   return null;
@@ -95,7 +133,15 @@ export function selectServerByLanguageId(
 ): ResolvedServer | null {
   for (const entry of Object.values(config.lspServers)) {
     for (const lid of Object.values(entry.fileExtensions)) {
-      if (lid === languageId) return { serverCommand: buildServerCommand(entry), languageId };
+      if (lid === languageId) {
+        return {
+          serverCommand: buildServerCommand(entry),
+          languageId,
+          ...(entry.initializationOptions
+            ? { initializationOptions: entry.initializationOptions }
+            : {})
+        };
+      }
     }
   }
   return null;

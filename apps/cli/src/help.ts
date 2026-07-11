@@ -3,6 +3,8 @@ import type { Command } from 'commander';
 import { z } from 'zod';
 import { exampleFromZod, getResultSchemaForMethod, getSchemaForMethod } from '@lspeasy/core';
 import { SYMBOLS, type Formatter } from './format.js';
+import { globalOptionsHelpText } from './global-options.js';
+import type { ServerGroupStatus } from './server-groups.js';
 import { paramsResidualExample } from './zod-to-commander.js';
 
 function safeResidual(schema: z.ZodType): { ok: boolean; value: unknown } {
@@ -70,6 +72,7 @@ type UsageRole = 'ns' | 'method' | 'arg' | 'option' | 'literal';
 // other `<…>`/`[…]` → arg, bare words (lsproxy, config) → namespace.
 const USAGE_ROLE: Readonly<Record<string, UsageRole>> = {
   '<language>': 'ns',
+  '<language-or-file>': 'ns',
   '<namespace>': 'ns',
   '<request>': 'method',
   '<method>': 'method',
@@ -124,8 +127,8 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
 
   const usage = [
     fmt.bold('Usage:'),
-    `  ${colorizeUsage('lsproxy <language> <namespace> <request> [args] [flags]', fmt)}`,
-    `  ${colorizeUsage('lsproxy call <method> --params <json>', fmt)}`
+    `  ${colorizeUsage('lsproxy <language-or-file> <namespace> <request> [args] [flags]', fmt)}`,
+    `  ${colorizeUsage('lsproxy <language-or-file> call <method> --params <json>', fmt)}`
   ].join('\n');
 
   // Non-namespace (meta) commands — listed with descriptions so they're
@@ -134,15 +137,22 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
     fmt.bold('Commands:'),
     row('config <list|import|export|diff>', 'read/write LSP config across platforms'),
     row('daemon <start|stop|status>', 'manage the per-root proxy daemon'),
+    row('status', 'servers grouped by process, with location and config source'),
     row('call <method> --params <json>', 'send any LSP request by method name'),
     row('--version, -V', 'print the CLI version')
   ].join('\n');
 
-  const drill = [
-    fmt.bold('Drill down:'),
-    row('lsproxy --help <language>', 'namespaces for that server'),
-    row('lsproxy --help <language> <namespace>', 'requests in that namespace'),
-    row('lsproxy --help <language> <namespace> <request>', 'parameter schema')
+  const explore = [
+    fmt.bold('Explore:'),
+    row('lsproxy <language-or-file>', 'namespaces for that server'),
+    row('lsproxy <language-or-file> <namespace>', 'requests in that namespace'),
+    row('lsproxy <language-or-file> <namespace> <request> --help', 'parameter schema'),
+    fmt.dim('(fewer args than a request needs shows the same schema view instead of an error)')
+  ].join('\n');
+
+  const globalOpts = [
+    fmt.bold('Global options:'),
+    globalOptionsHelpText().split('\n').slice(1).join('\n')
   ].join('\n');
 
   return [
@@ -157,7 +167,72 @@ export function renderTopLevel(report: StatusReport, fmt: Formatter): string {
     '',
     commands,
     '',
-    drill,
+    explore,
+    '',
+    globalOpts,
+    ''
+  ].join('\n');
+}
+
+/** Grouped-by-server view for `lsproxy status` — see design doc §7. */
+export function renderStatus(
+  servers: ServerGroupStatus[],
+  daemon: StatusReport['daemon'],
+  fmt: Formatter
+): string {
+  const serverLines = servers.flatMap((s) => {
+    const lines: string[] = [];
+    const mark =
+      s.status === 'running'
+        ? s.healthy === false
+          ? SYMBOLS.degraded
+          : SYMBOLS.running
+        : SYMBOLS.cold;
+    const statusLabel =
+      s.status === 'running'
+        ? fmt.green('running') +
+          (s.mixed
+            ? fmt.dim(' (mixed — see below)')
+            : s.healthy === false
+              ? ` ${fmt.yellow('· unhealthy')}`
+              : ` · ${fmt.dim('healthy')}`)
+        : fmt.dim('not started');
+    lines.push(`  ${mark} ${fmt.cyan(s.name)}  ${statusLabel}`);
+    lines.push(
+      `    ${fmt.dim('location')}   ${s.resolvedPath ?? `${fmt.dim(s.command)}  ${fmt.yellow('(not found on $PATH)')}`}`
+    );
+    lines.push(`    ${fmt.dim('source')}     ${s.source}`);
+    if (s.status === 'running' && !s.mixed) {
+      lines.push(
+        `    ${fmt.dim('uptime')}     ${Math.round((s.uptimeMs ?? 0) / 1000)}s · ${s.requestsServed ?? 0} reqs · ${s.openDocuments ?? 0} open docs`
+      );
+    }
+    if (s.mixed) {
+      lines.push(`    ${fmt.dim('languages')}`);
+      for (const l of s.languages) {
+        const lMark = l.status === 'running' ? SYMBOLS.running : SYMBOLS.cold;
+        const lLabel =
+          l.status === 'running'
+            ? `${fmt.green('running')} · pid ${l.pid} · up ${Math.round((l.uptimeMs ?? 0) / 1000)}s`
+            : fmt.dim('not started');
+        lines.push(`      ${lMark} ${l.languageId}  ${lLabel}`);
+      }
+    } else {
+      const langList = s.languages
+        .map((l) => `${l.languageId} (${l.extensions.join(' ')})`)
+        .join('  ');
+      lines.push(`    ${fmt.dim('languages')}  ${langList}`);
+    }
+    return lines;
+  });
+
+  return [
+    fmt.bold('lsproxy status'),
+    '',
+    fmt.bold('Servers:'),
+    ...(serverLines.length ? serverLines : [fmt.dim('  (none configured)')]),
+    '',
+    daemonStatusLine(daemon, fmt),
     ''
   ].join('\n');
 }

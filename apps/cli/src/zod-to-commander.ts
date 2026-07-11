@@ -337,32 +337,37 @@ export function marshalParams(
   pattern: ArgPattern,
   positional: string[],
   opts: Record<string, unknown>,
-  flags: GlobalFlags
+  flags: GlobalFlags,
+  anchorFile?: string
 ): unknown {
+  const effective =
+    anchorFile !== undefined && pattern !== 'query' && pattern !== 'raw'
+      ? [anchorFile, ...positional]
+      : positional;
   const override =
     typeof opts['params'] === 'string' ? (JSON.parse(opts['params']) as unknown) : undefined;
 
   switch (pattern) {
     case 'file-position-newname': {
-      const file = resolvePathArg(positional[0]!, flags);
-      const pos = parseLineCol(positional[1]!);
+      const file = resolvePathArg(effective[0]!, flags);
+      const pos = parseLineCol(effective[1]!);
       return {
         textDocument: { uri: pathToFileURL(file).href },
         position: toLspPosition(pos),
-        newName: positional[2]
+        newName: effective[2]
       };
     }
     case 'file-position': {
-      const file = resolvePathArg(positional[0]!, flags);
-      const pos = parseLineCol(positional[1]!);
+      const file = resolvePathArg(effective[0]!, flags);
+      const pos = parseLineCol(effective[1]!);
       return {
         textDocument: { uri: pathToFileURL(file).href },
         position: toLspPosition(pos)
       };
     }
     case 'file-range': {
-      const file = resolvePathArg(positional[0]!, flags);
-      const [startStr, endStr] = (positional[1] ?? '').split('-');
+      const file = resolvePathArg(effective[0]!, flags);
+      const [startStr, endStr] = (effective[1] ?? '').split('-');
       const start = parseLineCol(startStr ?? '1:1');
       const end = parseLineCol(endStr ?? startStr ?? '1:1');
       return {
@@ -371,7 +376,7 @@ export function marshalParams(
       };
     }
     case 'file': {
-      const file = resolvePathArg(positional[0]!, flags);
+      const file = resolvePathArg(effective[0]!, flags);
       return { textDocument: { uri: pathToFileURL(file).href } };
     }
     case 'query':
@@ -455,28 +460,30 @@ export function zodToCommander(
   method: string,
   schema: z.ZodType,
   session: RefactorSession,
-  flags: GlobalFlags
+  flags: GlobalFlags,
+  anchorFile?: string
 ): Command {
   const subcommand = method.split('/').slice(1).join('-') || method;
   const cmd = new Command(subcommand);
   const pattern = detectArgPattern(schema);
+  const hasAnchor = anchorFile !== undefined;
 
   switch (pattern) {
     case 'file-position-newname':
-      cmd.argument('<file>', 'file path (relative to --root)');
+      if (!hasAnchor) cmd.argument('<file>', 'file path (relative to --root)');
       cmd.argument('<line:col>', '1-based position, e.g. 12:7');
       cmd.argument('<newName>', 'new symbol name');
       break;
     case 'file-position':
-      cmd.argument('<file>', 'file path (relative to --root)');
+      if (!hasAnchor) cmd.argument('<file>', 'file path (relative to --root)');
       cmd.argument('<line:col>', '1-based position, e.g. 12:7');
       break;
     case 'file-range':
-      cmd.argument('<file>', 'file path (relative to --root)');
+      if (!hasAnchor) cmd.argument('<file>', 'file path (relative to --root)');
       cmd.argument('<range>', 'range as startLine:col-endLine:col, e.g. 2:1-4:5');
       break;
     case 'file':
-      cmd.argument('<file>', 'file path (relative to --root)');
+      if (!hasAnchor) cmd.argument('<file>', 'file path (relative to --root)');
       break;
     case 'query':
       cmd.argument('<query>', 'search query string');
@@ -515,7 +522,7 @@ export function zodToCommander(
     const positional = cmdArgs.slice(0, -2).map(String);
 
     try {
-      const rawParams = marshalParams(pattern, positional, cmdOpts, flags);
+      const rawParams = marshalParams(pattern, positional, cmdOpts, flags, anchorFile);
 
       // Layer inputs over the positional base, lowest → highest precedence:
       //   positionals (marshalParams) → flags → --params.

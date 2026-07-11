@@ -15,28 +15,39 @@ advertised capabilities, so it works with any LSP server out of the box.
 - **Dry-run preview** — `--dry-run` prints diffs without writing; safe to inspect before committing
 - **Multi-platform config interop** — `lsproxy config import/export/diff/list` bridges `lsp.json` with Copilot CLI, Claude Code, and Codex; `--user` targets `~/.claude/lsp.json` for user-level scope
 - **Self-describing discovery** — bare `lsproxy` lists configured languages with live daemon status; `lsproxy --help <language> <namespace> <request>` shows parameter schema, flag list, and illustrative example input/output; add `--json` for machine-readable output for agents
+- **Server visibility** — `lsproxy status` groups every configured server by process, showing its resolved binary location, config source (lsp.json, Claude Code, Codex, Copilot CLI), live connection status/uptime, and which languages it serves
 
 ## Install
 
 ```bash
-npx @lsproxy/cli textDocument hover src/foo.ts 12:7   # zero-install
+npx @lsproxy/cli src/foo.ts textDocument hover 12:7   # zero-install
 pnpm add -g @lsproxy/cli                               # or install globally
 ```
+
+## Breaking changes (0.11 → 1.0)
+
+Argument parsing moved onto Commander and the CLI grammar changed. If you have
+scripts using the old `lsproxy <namespace> <command> <file> [args] [flags]`
+order (e.g. `lsproxy textDocument hover src/foo.ts 12:7`), they will now fail
+with a `"<namespace>" is not a configured language or a file with a
+recognized extension` error. Reorder to the new grammar instead: the file (or
+language id) comes first — `lsproxy src/foo.ts textDocument hover 12:7` — see
+[Usage](#usage) below.
 
 ## Quick Start
 
 ```bash
 # Preview a rename before writing (always do this first)
-lsproxy textDocument rename --dry-run src/auth/login.ts 42:15 "signIn"
+lsproxy src/auth/login.ts textDocument rename --dry-run 42:15 "signIn"
 
 # Find all references to a symbol
-lsproxy textDocument references src/auth/login.ts 42:15
+lsproxy src/auth/login.ts textDocument references 42:15
 
 # List available code actions at a range, then apply the chosen one
-lsproxy textDocument codeAction src/foo.ts 12:1-12:20
+lsproxy src/foo.ts textDocument codeAction 12:1-12:20
 
 # Send any LSP method directly (useful for probing capabilities)
-lsproxy call workspace/executeCommand --params '{"command":"typescript.reloadProjects"}'
+lsproxy typescript call workspace/executeCommand --params '{"command":"typescript.reloadProjects"}'
 ```
 
 Positions are **1-based** (`line:col`, editor-style).
@@ -45,23 +56,26 @@ Write-side commands apply changes to disk automatically — use `--dry-run` to p
 ## Usage
 
 ```
-lsproxy <namespace> <command> [args] [flags]
-lsproxy call <method> --params <json>
+lsproxy <language-or-file> <namespace> <request> [args] [flags]
+lsproxy <language-or-file> call <method> --params <json>
 ```
 
-Commands are built from the server's capabilities at startup. Available namespaces:
+The first positional argument is either a language id (e.g. `typescript`) or a
+file path — when it's a file, that file doubles as the request's target and
+needn't be repeated in the args that follow. Commands are built from the
+server's capabilities at startup. Available namespaces:
 `callHierarchy`, `codeAction`, `codeLens`, `completionItem`, `documentLink`,
 `inlayHint`, `textDocument`, `workspace`, `workspaceSymbol`.
 
 ```bash
-lsproxy textDocument hover           src/foo.ts 12:7
-lsproxy textDocument rename          src/foo.ts 12:7 newName
-lsproxy textDocument references      src/foo.ts 12:7
-lsproxy textDocument definition      src/foo.ts 12:7
-lsproxy textDocument formatting      src/foo.ts
-lsproxy textDocument rangeFormatting src/foo.ts 1:1-50:1
-lsproxy workspace   symbol           MyClass
-lsproxy call        textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
+lsproxy src/foo.ts textDocument hover           12:7
+lsproxy src/foo.ts textDocument rename          12:7 newName
+lsproxy src/foo.ts textDocument references      12:7
+lsproxy src/foo.ts textDocument definition      12:7
+lsproxy src/foo.ts textDocument formatting
+lsproxy src/foo.ts textDocument rangeFormatting 1:1-50:1
+lsproxy typescript workspace symbol MyClass
+lsproxy typescript call     textDocument/semanticTokens/full --params '{"textDocument":{"uri":"file:///…"}}'
 ```
 
 ### Code actions
@@ -71,13 +85,13 @@ When exactly one action carries an edit it is applied automatically; when zero o
 multiple carry edits the array is printed and no files are changed.
 
 ```bash
-lsproxy textDocument codeAction --dry-run src/foo.ts 12:1-12:20
+lsproxy src/foo.ts textDocument codeAction --dry-run 12:1-12:20
 
 # Filter by kind (comma-separated; valid: quickfix, refactor, refactor.extract, source, …)
-lsproxy textDocument codeAction --code-action-only quickfix,refactor src/foo.ts 12:1-12:20
+lsproxy src/foo.ts textDocument codeAction --code-action-only quickfix,refactor 12:1-12:20
 
 # Specify trigger kind: 1 = Invoked (user gesture), 2 = Automatic (on save / idle)
-lsproxy textDocument codeAction --code-action-trigger-kind 1 src/foo.ts 12:1-12:20
+lsproxy src/foo.ts textDocument codeAction --code-action-trigger-kind 1 12:1-12:20
 ```
 
 Run `lsproxy --help typescript textDocument codeAction` to see the full parameter schema
@@ -88,8 +102,8 @@ machine-readable response including `paramsSchema` and `resultSchema`.
 
 **Commands missing from `--help`** — lsproxy only registers commands for capabilities the
 server actually advertises. If `textDocument rename` doesn't appear, the server doesn't
-support `renameProvider`. Use `lsproxy call initialize --params '{}'` to inspect the
-server's capability response.
+support `renameProvider`. Use `lsproxy <language-or-file> call initialize --params '{}'`
+to inspect the server's capability response.
 
 **Wrong positions** — Positions must be 1-based (`line:col`). Most editors display
 1-based positions; LSP protocol is 0-based internally but lsproxy converts for you.
@@ -116,6 +130,10 @@ build/type-check, or re-run against a warmed proxy daemon so the project is full
 
 The CLI uses a dynamic discovery model — the help surface is built from live
 server capabilities and `lsp.json` config, not a static command list.
+
+The same tree is used for real dispatch: `lsproxy <language-or-file> <namespace> <request>`
+without enough args to actually run shows the same view as the equivalent
+`--help` invocation below.
 
 **Depth 0 — bare `lsproxy` (or `lsproxy --help`)**
 
@@ -175,11 +193,48 @@ sources.
       "args": ["<arg>", "…"],
       "fileExtensions": {
         ".<ext>": "<languageId>"
-      }
+      },
+      "initializationOptions": { "<key>": "<value>" }
     }
   }
 }
 ```
+
+`initializationOptions` is optional JSON merged into the `initialize` request's
+own `initializationOptions` object, on top of a `languageId` key lspeasy injects
+automatically — for server-specific extension flags the LSP spec itself has no
+standard slot for. An explicit `languageId` key here overrides what's sent in
+*that* object during `initialize`; it does not affect the separate `languageId`
+lspeasy sends with `textDocument/didOpen`, which always uses the language it
+resolved for the request.
+
+### Example — enabling a server-specific extension flag
+
+`typescript-language-server` only offers its deterministic "Move to file"
+refactor code action (as opposed to the default, which auto-generates a new
+filename each call) if the client sets a non-standard
+`supportsMoveToFileCodeAction` capability during `initialize`. There's no
+dedicated `lsproxy` flag for this — it's exactly what `initializationOptions`
+is for:
+
+```json
+{
+  "lspServers": {
+    "typescript": {
+      "command": "typescript-language-server",
+      "args": ["--stdio"],
+      "fileExtensions": { ".ts": "typescript" },
+      "initializationOptions": { "supportsMoveToFileCodeAction": true }
+    }
+  }
+}
+```
+
+With this set, `textDocument codeAction` on a movable symbol returns a
+`refactor.move.file` action (in addition to the always-present
+`refactor.move.newFile`) that can be driven deterministically via
+`workspace executeCommand` with an explicit
+`interactiveRefactorArguments.targetFile` in its `arguments`.
 
 ### Example — multi-language project
 
@@ -305,13 +360,13 @@ lsproxy daemon status --json   # machine-readable
 
 ```bash
 # First invocation — daemon spawns, performs the initialize handshake (~1-3s)
-lsproxy textDocument hover src/foo.ts 1:1
+lsproxy src/foo.ts textDocument hover 1:1
 
 # Subsequent invocations — reconnects via Unix socket (<100ms)
-lsproxy textDocument hover src/foo.ts 2:5
+lsproxy src/foo.ts textDocument hover 2:5
 
 # Bypass the daemon entirely
-lsproxy --no-proxy textDocument hover src/foo.ts 1:1
+lsproxy --no-proxy src/foo.ts textDocument hover 1:1
 ```
 
 Socket path: `~/.lsproxy/<hash(root)>.sock`
