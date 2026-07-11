@@ -308,6 +308,7 @@ export {
   discoverServerByLanguageId,
   discoverExtensionMap,
   discoverServers,
+  buildServerCommand,
   readLspJsonFile,
   writeLspJsonFile,
   mergeServers

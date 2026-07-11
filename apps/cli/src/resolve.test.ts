@@ -1,11 +1,17 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // lsp.json discovery returns nothing by default → exercises the platform fallback.
-vi.mock('@lspeasy/core', () => ({
-  discoverServer: vi.fn(() => null),
-  discoverServerByLanguageId: vi.fn(() => null),
-  discoverServers: vi.fn(() => [])
-}));
+// buildServerCommand is kept real (via importOriginal) so platform-sourced
+// entries are put through the actual tokenize-then-quote logic under test.
+vi.mock('@lspeasy/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@lspeasy/core')>();
+  return {
+    ...actual,
+    discoverServer: vi.fn(() => null),
+    discoverServerByLanguageId: vi.fn(() => null),
+    discoverServers: vi.fn(() => [])
+  };
+});
 
 vi.mock('./config/registry.js', () => ({
   getAdapters: () => [
@@ -27,6 +33,13 @@ vi.mock('./config/registry.js', () => ({
           args: [],
           fileExtensions: { '.go': 'go' },
           initializationOptions: { usePlaceholders: true }
+        },
+        // No separate `args` array — the whole launch command (binary + flags)
+        // is embedded in `command`, exactly the shape that used to collapse
+        // into one bogus token once buildServerCommand quoted it as a whole.
+        kotlin: {
+          command: 'kotlin-language-server --stdio',
+          fileExtensions: { '.kt': 'kotlin' }
         }
       })
     }
@@ -35,7 +48,12 @@ vi.mock('./config/registry.js', () => ({
 
 vi.mock('./config/commands.js', () => ({ homeForAdapter: () => '/home' }));
 
-import { discoverServers, discoverServerByLanguageId, discoverServer } from '@lspeasy/core';
+import {
+  discoverServers,
+  discoverServerByLanguageId,
+  discoverServer,
+  tokenizeCommand
+} from '@lspeasy/core';
 import {
   resolveByLanguageId,
   resolveByExtension,
@@ -70,6 +88,15 @@ describe('resolve — platform fallback (B)', () => {
 
   it('allConfiguredServers includes the platform server', () => {
     expect(allConfiguredServers('/p').some((s) => s.fileExtensions['.rs'] === 'rust')).toBe(true);
+  });
+
+  it('platformServers (via resolveByLanguageId) tokenizes an embedded-flags command into separate argv tokens', () => {
+    // kotlin's `command` embeds "--stdio" with no separate `args` array —
+    // proves the DRY consolidation (buildServerCommand from @lspeasy/core)
+    // actually wires through platformServers(), not just core's own discovery.
+    const r = resolveByLanguageId('/p', 'kotlin');
+    expect(r?.fromPlatform).toBe(true);
+    expect(tokenizeCommand(r!.serverCommand)).toEqual(['kotlin-language-server', '--stdio']);
   });
 
   it('allConfiguredServers dedups: lsp.json wins on language collision', () => {

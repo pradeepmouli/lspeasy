@@ -12,6 +12,7 @@ import {
   discoverServer,
   discoverServerByLanguageId,
   discoverServers,
+  buildServerCommand,
   type ConfiguredServer,
   type LspServerEntry,
   type ResolvedServer
@@ -20,13 +21,6 @@ import {
 import { getAdapters } from './config/registry.js';
 import { homeForAdapter } from './config/commands.js';
 import type { Scope } from './config/adapter.js';
-
-// Mirror @lspeasy/core's (unexported) buildServerCommand: quote every token so
-// spaces/backslashes survive tokenizeCommand uniformly.
-function buildCommand(entry: LspServerEntry): string {
-  const parts = [entry.command, ...(entry.args ?? [])].filter(Boolean);
-  return parts.map((t) => `"${t.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(' ');
-}
 
 export interface SourcedServer extends ConfiguredServer {
   /** Adapter id this server config came from: 'lsp.json' or a platform
@@ -57,7 +51,7 @@ function platformServers(root: string, scope: Scope): SourcedServer[] {
       if (!entry.command) continue;
       out.push({
         name,
-        command: buildCommand(entry),
+        command: buildServerCommand(entry),
         fileExtensions: entry.fileExtensions ?? {},
         source: adapter.id,
         ...(entry.initializationOptions

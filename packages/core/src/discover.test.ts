@@ -7,10 +7,12 @@ import {
   discoverServers,
   discoverServer,
   discoverServerByLanguageId,
+  buildServerCommand,
   readLspJsonFile,
   writeLspJsonFile,
   mergeServers
 } from './discover.js';
+import { tokenizeCommand } from './utils/tokenize-command.js';
 
 const tmpRoots: string[] = [];
 function rootWithConfig(config: unknown): string {
@@ -42,6 +44,61 @@ describe('discoverServers', () => {
     expect(ts.command).toBe('"typescript-language-server" "--stdio"');
     expect(ts.fileExtensions).toEqual({ '.ts': 'typescript', '.tsx': 'typescriptreact' });
     expect(servers.find((s) => s.name === 'rust')!.command).toBe('"rust-analyzer"');
+  });
+
+  it('the normal (already-split command/args) case is unchanged: identical quoting, no extra spaces', () => {
+    // Regression guard: would catch a subtle formatting change (extra space,
+    // different quoting) introduced by tokenizing `entry.command` first.
+    const root = rootWithConfig({
+      lspServers: {
+        typescript: {
+          command: 'typescript-language-server',
+          args: ['--stdio'],
+          fileExtensions: { '.ts': 'typescript' }
+        }
+      }
+    });
+    expect(discoverServers(root)[0]!.command).toBe('"typescript-language-server" "--stdio"');
+  });
+
+  it('tokenizes a command field with embedded flags and no args array into separate tokens', () => {
+    // The confirmed bug: a whole launch command (binary + flags) crammed into
+    // the single `command` string, with no separate `args` array.
+    const root = rootWithConfig({
+      lspServers: {
+        typescript: {
+          command: 'typescript-language-server --stdio',
+          fileExtensions: { '.ts': 'typescript' }
+        }
+      }
+    });
+    const resolved = discoverServer(root, '.ts')!;
+    // Round-trip through the real tokenizer, proving a caller doing
+    // `const [cmd, ...args] = tokenizeCommand(serverCommand)` gets a real
+    // binary name, not the whole string with a space in it.
+    expect(tokenizeCommand(resolved.serverCommand)).toEqual([
+      'typescript-language-server',
+      '--stdio'
+    ]);
+
+    const configured = discoverServers(root)[0]!;
+    expect(tokenizeCommand(configured.command)).toEqual(['typescript-language-server', '--stdio']);
+  });
+
+  it('buildServerCommand: bare command (no embedded spaces) tokenizes to a single unchanged token', () => {
+    expect(buildServerCommand({ command: 'rust-analyzer', fileExtensions: {} })).toBe(
+      '"rust-analyzer"'
+    );
+  });
+
+  it('buildServerCommand: embedded flags in command combine with explicit args, in order', () => {
+    expect(
+      buildServerCommand({
+        command: 'typescript-language-server --stdio',
+        args: ['--log-level', '4'],
+        fileExtensions: {}
+      })
+    ).toBe('"typescript-language-server" "--stdio" "--log-level" "4"');
   });
 
   it('returns an empty array when no lsp.json is found', () => {
