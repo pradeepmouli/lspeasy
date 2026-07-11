@@ -144,6 +144,27 @@ describe('buildCommandTree', () => {
     expect(discoveringIdx).toBeLessThan(globalIdx);
   });
 
+  it('does not insert a blank line BETWEEN consecutively-appended footers — appendHelpFooter already supplies the one separating newline each call needs', () => {
+    // Commander's own base helpInformation() ends with a trailing newline, so
+    // the FIRST footer after it legitimately gets one blank line (unrelated to
+    // this bug, and true even for the pre-existing Global-options-only case).
+    // The bug was footer text that ALSO started with its own leading '\n',
+    // which stacked on top of appendHelpFooter's own '\n' between CONSECUTIVE
+    // footers specifically — that's what this test guards against.
+    const program = new Command();
+    buildCommandTree(
+      program,
+      { executeCommandProvider: { commands: ['foo.bar'] } } as any,
+      fakeSession,
+      FLAGS
+    );
+    const ns = program.commands.find((c) => c.name() === 'workspace');
+    const executeCommand = ns?.commands.find((c) => c.name() === 'executeCommand');
+    const help = executeCommand?.helpInformation() ?? '';
+    expect(help).not.toContain('\n\nDiscovering commands:');
+    expect(help).not.toContain('\n\nGlobal options:');
+  });
+
   it('does not show a "Capability options:" footer when the capability is a plain boolean (no metadata)', () => {
     const program = new Command();
     buildCommandTree(program, { hoverProvider: true } as any, fakeSession, FLAGS);
