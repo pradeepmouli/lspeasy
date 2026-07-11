@@ -1,11 +1,11 @@
 ---
-description: "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and code actions Also: lsp, language-server-protocol, refactor, rename, codemod, cli."
+description: "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and code actions. Also: lsp, language-server-protocol, refactor, rename, codemod, cli."
 name: lsproxy-cli
 ---
 
 # lsproxy-cli
 
-Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and code actions
+Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and code actions.
 
 ## Features
 

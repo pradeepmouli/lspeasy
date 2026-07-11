@@ -32,11 +32,13 @@ sources.
 }
 ```
 
-`initializationOptions` is optional, arbitrary JSON passed verbatim into the
-server's `initialize` request — for server-specific extension flags the LSP
-spec itself has no standard slot for. lspeasy merges it on top of the
-`languageId` it computes automatically for `textDocument/didOpen`; an
-explicit `languageId` key here overrides that.
+`initializationOptions` is optional JSON merged into the `initialize` request's
+own `initializationOptions` object, on top of a `languageId` key lspeasy injects
+automatically — for server-specific extension flags the LSP spec itself has no
+standard slot for. An explicit `languageId` key here overrides what's sent in
+*that* object during `initialize`; it does not affect the separate `languageId`
+lspeasy sends with `textDocument/didOpen`, which always uses the language it
+resolved for the request.
 
 ### Example — enabling a server-specific extension flag
 
