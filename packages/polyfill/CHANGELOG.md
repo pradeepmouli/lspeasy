@@ -1,5 +1,19 @@
 # @lsproxy/polyfill
 
+## 0.4.0
+
+### Minor Changes
+
+- 093b1e6: Add an `organizeImports` polyfill that synthesizes a composite `source.organizeImports` code action from per-diagnostic import-related quickfixes, for LSP backends that support pull-diagnostics and quickfixes but never implement the dedicated batch action themselves. Uses a title-based heuristic (matching "import" in the backend's own quickfix titles) since there's no portable diagnostic code for "unused/missing import" across language servers.
+
+### Patch Changes
+
+- Updated dependencies [8df99f3]
+- Updated dependencies [681ce70]
+- Updated dependencies [944d94d]
+  - @lspeasy/core@2.7.0
+  - @lspeasy/client@3.1.7
+
 ## 0.3.0
 
 ### Minor Changes
