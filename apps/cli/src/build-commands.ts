@@ -54,7 +54,7 @@ function enrichCommandFromCapabilities(
       lines.push(`${key}: ${JSON.stringify(val)}`);
     }
   }
-  if (lines.length) cmd.addHelpText('after', `\nCapability options:\n  ${lines.join('\n  ')}`);
+  if (lines.length) appendHelpFooter(cmd, `Capability options:\n  ${lines.join('\n  ')}`);
 }
 
 // Some methods share a top-level capability path with sibling methods, so the
@@ -112,9 +112,9 @@ export function buildCommandTree(
     // protocol — the reliable way to get a valid {command, arguments} is to
     // replay one from a codeAction/codeLens result.
     if (method === 'workspace/executeCommand') {
-      subCmd.addHelpText(
-        'after',
-        '\nDiscovering commands: server command names (if advertised) appear above as\n' +
+      appendHelpFooter(
+        subCmd,
+        'Discovering commands: server command names (if advertised) appear above as\n' +
           'capability options. Argument shapes are server-specific — obtain a ready-to-run\n' +
           '{command, arguments} from a textDocument/codeAction or textDocument/codeLens result and replay it\n' +
           '(lsproxy auto-runs command-bearing code actions).'

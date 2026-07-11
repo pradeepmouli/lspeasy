@@ -89,4 +89,88 @@ describe('buildCommandTree', () => {
     expect(hover?.helpInformation()).toMatch(/Global options:/);
     expect(call?.helpInformation()).toMatch(/Global options:/);
   });
+
+  it('shows a "Capability options:" footer with the server-declared field values in direct helpInformation() output', () => {
+    const program = new Command();
+    buildCommandTree(
+      program,
+      { codeActionProvider: { codeActionKinds: ['quickfix', 'refactor'] } } as any,
+      fakeSession,
+      FLAGS
+    );
+    const ns = program.commands.find((c) => c.name() === 'textDocument');
+    const codeAction = ns?.commands.find((c) => c.name() === 'codeAction');
+    const help = codeAction?.helpInformation() ?? '';
+    expect(help).toMatch(/Capability options:/);
+    expect(help).toContain('codeActionKinds');
+    expect(help).toContain('"quickfix"');
+    expect(help).toContain('"refactor"');
+  });
+
+  it('shows a "Discovering commands:" footer on workspace/executeCommand in direct helpInformation() output', () => {
+    const program = new Command();
+    buildCommandTree(
+      program,
+      { executeCommandProvider: { commands: ['foo.bar'] } } as any,
+      fakeSession,
+      FLAGS
+    );
+    const ns = program.commands.find((c) => c.name() === 'workspace');
+    const executeCommand = ns?.commands.find((c) => c.name() === 'executeCommand');
+    const help = executeCommand?.helpInformation() ?? '';
+    expect(help).toMatch(/Discovering commands:/);
+  });
+
+  it('composes capability options, executeCommand note, and global options footers in the correct order', () => {
+    const program = new Command();
+    buildCommandTree(
+      program,
+      { executeCommandProvider: { commands: ['foo.bar'] } } as any,
+      fakeSession,
+      FLAGS
+    );
+    const ns = program.commands.find((c) => c.name() === 'workspace');
+    const executeCommand = ns?.commands.find((c) => c.name() === 'executeCommand');
+    const help = executeCommand?.helpInformation() ?? '';
+
+    const capabilityIdx = help.indexOf('Capability options:');
+    const discoveringIdx = help.indexOf('Discovering commands:');
+    const globalIdx = help.indexOf('Global options:');
+
+    expect(capabilityIdx).toBeGreaterThan(-1);
+    expect(discoveringIdx).toBeGreaterThan(-1);
+    expect(globalIdx).toBeGreaterThan(-1);
+    expect(capabilityIdx).toBeLessThan(discoveringIdx);
+    expect(discoveringIdx).toBeLessThan(globalIdx);
+  });
+
+  it('does not insert a blank line BETWEEN consecutively-appended footers — appendHelpFooter already supplies the one separating newline each call needs', () => {
+    // Commander's own base helpInformation() ends with a trailing newline, so
+    // the FIRST footer after it legitimately gets one blank line (unrelated to
+    // this bug, and true even for the pre-existing Global-options-only case).
+    // The bug was footer text that ALSO started with its own leading '\n',
+    // which stacked on top of appendHelpFooter's own '\n' between CONSECUTIVE
+    // footers specifically — that's what this test guards against.
+    const program = new Command();
+    buildCommandTree(
+      program,
+      { executeCommandProvider: { commands: ['foo.bar'] } } as any,
+      fakeSession,
+      FLAGS
+    );
+    const ns = program.commands.find((c) => c.name() === 'workspace');
+    const executeCommand = ns?.commands.find((c) => c.name() === 'executeCommand');
+    const help = executeCommand?.helpInformation() ?? '';
+    expect(help).not.toContain('\n\nDiscovering commands:');
+    expect(help).not.toContain('\n\nGlobal options:');
+  });
+
+  it('does not show a "Capability options:" footer when the capability is a plain boolean (no metadata)', () => {
+    const program = new Command();
+    buildCommandTree(program, { hoverProvider: true } as any, fakeSession, FLAGS);
+    const ns = program.commands.find((c) => c.name() === 'textDocument');
+    const hover = ns?.commands.find((c) => c.name() === 'hover');
+    const help = hover?.helpInformation() ?? '';
+    expect(help).not.toMatch(/Capability options:/);
+  });
 });
