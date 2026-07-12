@@ -7,7 +7,7 @@
     "@lspeasy/client": "workspace:*",
     "@lspeasy/core": "workspace:*",
     "@lspeasy/server": "workspace:*",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.8",
     "ws": "^8.20.1"
   }
