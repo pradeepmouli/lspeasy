@@ -63,7 +63,7 @@
   "devDependencies": {
     "@lspeasy/server": "workspace:*",
     "@skillit/cli": "^0.6.0",
-    "tsx": "^4.22.4",
+    "tsx": "^4.23.0",
     "typedoc-plugin-skillit": "^1.4.1",
     "typescript": "^6.0.3"
   },
