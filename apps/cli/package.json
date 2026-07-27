@@ -64,7 +64,7 @@
     "@lspeasy/server": "workspace:*",
     "@skillit/cli": "^1.1.0",
     "tsx": "^4.23.1",
-    "typedoc-plugin-skillit": "^1.4.1",
+    "typedoc-plugin-skillit": "^2.0.1",
     "typescript": "^7.0.2"
   },
   "engines": {
