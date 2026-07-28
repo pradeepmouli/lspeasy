@@ -46,10 +46,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsgo --build",
+    "build": "tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit",
+    "dev": "tsc --build --watch",
+    "type-check": "tsc --noEmit",
     "postinstall": "node ./skillit-postinstall.cjs"
   },
   "dependencies": {
@@ -61,8 +61,7 @@
   },
   "devDependencies": {
     "@skillit/cli": "^0.4.0",
-    "typedoc-plugin-skillit": "^1.4.1",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=22.12.0"

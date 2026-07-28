@@ -65,10 +65,10 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsgo --build",
+    "build": "tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "dev": "tsgo --build --watch",
-    "type-check": "tsgo --noEmit"
+    "dev": "tsc --build --watch",
+    "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
     "ws": "^8.20.1"
@@ -83,7 +83,7 @@
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=20.0.0"

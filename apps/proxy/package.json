@@ -1,7 +1,7 @@
 {
   "name": "@lsproxy/proxy",
   "version": "1.0.2",
-  "description": "Per-root LSP multiplexing daemon — holds warm language server connections for @lsproxy/cli",
+  "description": "Per-root LSP multiplexing daemon \u2014 holds warm language server connections for @lsproxy/cli",
   "private": false,
   "keywords": [
     "lsp",
@@ -41,16 +41,16 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsgo --build",
+    "build": "tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "type-check": "tsgo --noEmit"
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@lspeasy/client": "workspace:*",
     "@lspeasy/core": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=22.0.0"
