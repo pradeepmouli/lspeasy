@@ -32,11 +32,8 @@ handshake, and exposes capability-aware request namespaces.
 - `HeartbeatStatus`: Snapshot of the current heartbeat monitoring status.
 - `StateChangeEvent`: Payload emitted when the connection state changes.
 Subscribe via `LSPClient.onConnectionStateChange()`.
-- `Transport`: Pluggable communication layer for JSON-RPC message exchange.
-- `Logger`: Structured logging interface used throughout lspeasy.
-- `Disposable`: Represents a resource that can be explicitly released.
+- `Transport`
 - `ConnectionState`: Lifecycle state of an `LSPClient` connection.
-- `LogLevel`: Numeric severity levels for filtering log output.
 
 ## @lspeasy/core
 
@@ -411,10 +408,7 @@ methods, notification send methods, and server-to-client handler registr...
 
 - `MessageDispatcher`: Routes incoming JSON-RPC requests and notifications to their registered handlers.
 - `PartialResultSender`: Emits typed `$/progress` partial-result batches from server-side request handlers.
-- `ResponseError`: An `Error` subclass that maps to a JSON-RPC 2.0 error response.
-- `ConsoleLogger`: Logger implementation that writes to the process console with level filtering.
 - `LSPServer`: Constructs an LSPServer instance.
-- `JSONRPCErrorCode`: Numeric error codes defined by JSON-RPC 2.0 and the LSP specification.
 
 ## Optional
 
@@ -428,25 +422,4 @@ capability-aware namespaces, and pluggable middleware.
 - `NotebookDocumentHandlerNamespace`: Namespace for registering notebook-document lifecycle notification handlers.
 - `RequestContext`: Context provided to request handlers alongside params and the cancellation token.
 - `NotificationContext`: Context provided to notification handlers alongside params.
-- `Server`: Combined Server type with handlers and send methods
-- `AvailableRequests`: Mapped type of all available LSP request methods and their handler signatures
-- `AvailableNotifications`: Mapped type of all available LSP notification methods and their handler signatures
-- `CancellationToken`: Singleton token that is never cancelled
-- `CancellationToken`: Read-only handle for observing cancellation state.
-- `ServerCapabilities`
-- `ClientCapabilities`
-- `InitializeParams`
-- `InitializeResult`
-- `HoverParams`
-- `Hover`
-- `CompletionParams`
-- `CompletionList`
-- `CompletionItem`
-- `DefinitionParams`
-- `Definition`
-- `LSPRequestMethod`: Union type of all valid LSP request method names
-- `LSPNotificationMethod`: Union type of all valid LSP notification method names
-- `ParamsForRequest`: Infer request parameters from method name
-- `ResultForRequest`: Infer request result from method name
-- `ParamsForNotification`: Infer notification parameters from method name
 - `ServerState`: Lifecycle state of an `LSPServer` instance.

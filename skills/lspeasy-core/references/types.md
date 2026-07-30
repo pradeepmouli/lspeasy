@@ -329,28 +329,28 @@ Simplify<{ [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: Remov
 
 ### `ToRequestSignature`
 Converts an LSP request type definition into a callable method signature
-`(params: P) => Promise<R>`.
+`(params: P) =&gt; Promise&lt;R&gt;`.
 ```ts
 T extends { Method: string; Params: infer P; Result?: infer R } ? (params: P) => Promise<R> : never
 ```
 
 ### `ToNotificationSignature`
 Converts an LSP notification type definition into a fire-and-forget method
-signature `(params: P) => void`.
+signature `(params: P) =&gt; void`.
 ```ts
 T extends { Method: string; Params: infer P } ? (params: P) => void : never
 ```
 
 ### `ToRequestHandlerSignature`
 Converts an LSP request type definition into a handler registration signature
-`(handler: (params: P) => Promise<R> | R) => void`.
+`(handler: (params: P) =&gt; Promise&lt;R&gt; | R) =&gt; void`.
 ```ts
 T extends { Method: string; Params: infer P; Result?: infer R } ? (handler: (params: P) => Promise<R> | R) => void : never
 ```
 
 ### `ToNotificationHandlerSignature`
 Converts an LSP notification type definition into a handler registration
-signature `(handler: (params: P) => void) => void`.
+signature `(handler: (params: P) =&gt; void) =&gt; void`.
 ```ts
 T extends { Method: string; Params: infer P } ? (handler: (params: P) => void) => void : never
 ```
@@ -430,6 +430,5 @@ A parameter literal used to pass a partial result token.
 
 ### `DynamicRegistration`
 A single LSP dynamic capability registration entry.
-**Properties:**
 
 <!-- truncated -->

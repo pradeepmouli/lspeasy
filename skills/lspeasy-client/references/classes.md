@@ -6,26 +6,26 @@
 Validates outgoing client requests and notifications against the server's
 declared capabilities.
 ```ts
-constructor(capabilities: Partial<ServerCapabilities>, logger: Logger, strict: boolean): CapabilityGuard
+constructor(capabilities: ServerCapabilities, logger: Logger, strict: boolean): CapabilityGuard
 ```
 **Methods:**
 - `canSendRequest(method: string): boolean` — Returns `true` if the server capability for `method` is declared.
 - `canSendNotification(method: string): boolean` — Returns `true` if the server capability for `method` is declared.
-- `getServerCapabilities(): Partial<ServerCapabilities>` — Returns a defensive copy of the server capabilities this guard was built from.
+- `getServerCapabilities(): ServerCapabilities` — Returns a defensive copy of the server capabilities this guard was built from.
 
 ### `ClientCapabilityGuard`
 Validates that server-to-client handler registrations are backed by
 client capabilities declared in the `initialize` request.
 ```ts
-constructor(capabilities: Partial<ClientCapabilities>, logger: Logger, strict: boolean): ClientCapabilityGuard
+constructor(capabilities: ClientCapabilities, logger: Logger, strict: boolean): ClientCapabilityGuard
 ```
 **Methods:**
 - `canRegisterHandler(method: string): boolean` — Returns `true` if the client has declared the capability required to handle `method`.
-- `getClientCapabilities(): Partial<ClientCapabilities>` — Returns a defensive copy of the client capabilities this guard was built from.
+- `getClientCapabilities(): ClientCapabilities` — Returns a defensive copy of the client capabilities this guard was built from.
 
 ### `ConnectionHealthTracker`
 Tracks connection state transitions and message activity timestamps.
-*extends `DisposableEventEmitter<HealthEventMap>`*
+*extends `Transport<HealthEventMap>`*
 ```ts
 constructor(): ConnectionHealthTracker
 ```
@@ -37,10 +37,6 @@ constructor(): ConnectionHealthTracker
 - `setHeartbeat(status: HeartbeatStatus): void` — Updates the heartbeat subsection of the current health snapshot.
 - `onStateChange(handler: (event: StateChangeEvent) => void): () => void` — Subscribes to connection state transitions.
 - `onHealthChange(handler: (health: ConnectionHealth) => void): () => void` — Subscribes to health snapshot updates.
-- `on<K>(event: K, listener: Listener<HealthEventMap, K>): Disposable` — Register a listener and receive a disposable to unregister it.
-- `once<K>(event: K, listener: Listener<HealthEventMap, K>): Disposable` — Register a one-time listener that automatically unregisters after first emission.
-- `emit<K>(event: K, args: HealthEventMap[K]): void` — Emit an event to all registered listeners in registration order.
-- `dispose(): void` — Dispose all listeners and prevent further registrations.
 
 ### `HeartbeatMonitor`
 Runs interval-based heartbeat checks for active transports.

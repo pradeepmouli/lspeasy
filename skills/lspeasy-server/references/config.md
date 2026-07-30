@@ -25,13 +25,13 @@ Server version (sent in initialize response)
 
 Logger instance (defaults to ConsoleLogger)
 
-**Type:** `Logger`
+**Type:** `any`
 
 #### logLevel
 
 Log level (defaults to 'info')
 
-**Type:** `LogLevel`
+**Type:** `any`
 
 #### requestTimeout
 
@@ -43,7 +43,7 @@ Default request timeout in milliseconds for server-initiated requests
 
 Custom validation error handler
 
-**Type:** `(error: ZodError, message: RequestContext | NotificationContext) => void | ResponseError`
+**Type:** `(error: ZodError, message: RequestContext | NotificationContext) => any`
 
 #### validateParams
 
@@ -70,4 +70,4 @@ When false, logs warning and allows registration (default: false)
 
 Optional middleware chain for clientToServer/serverToClient messages.
 
-**Type:** `(Middleware | ScopedMiddleware)[]`
+**Type:** `any[]`
