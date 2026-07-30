@@ -1,0 +1,54 @@
+{
+  "name": "@lsproxy/polyfill",
+  "version": "0.4.1",
+  "description": "CodeAction capability polyfills for lsproxy backends that don't natively support them",
+  "private": false,
+  "keywords": [
+    "lsp",
+    "language-server-protocol",
+    "lsp-proxy",
+    "code-action"
+  ],
+  "homepage": "https://github.com/pradeepmouli/lspeasy#readme",
+  "bugs": {
+    "url": "https://github.com/pradeepmouli/lspeasy/issues"
+  },
+  "license": "MIT",
+  "author": "Pradeep Mouli <pmouli@mac.com> (https://github.com/pradeepmouli)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pradeepmouli/lspeasy.git",
+    "directory": "packages/polyfill"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lspeasy/client": "workspace:*",
+    "@lspeasy/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "@lsproxy/cli",
-  "version": "0.4.7",
-  "description": "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and move-symbol",
+  "version": "1.0.2",
+  "description": "Standalone refactor CLI driving any LSP server: project-wide rename, file-move with importer updates, and code actions.",
   "private": false,
   "keywords": [
     "lsp",
@@ -9,7 +9,6 @@
     "refactor",
     "rename",
     "codemod",
-    "move-symbol",
     "cli",
     "typescript"
   ],
@@ -50,17 +49,21 @@
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "dev": "tsc --build --watch",
     "type-check": "tsc --noEmit",
-    "postinstall": "node ./skillit-postinstall.cjs"
+    "postinstall": "node ./skillit-postinstall.cjs",
+    "skill:gen": "tsx scripts/gen-skill.ts"
   },
   "dependencies": {
     "@lspeasy/client": "workspace:*",
     "@lspeasy/core": "workspace:*",
     "@lsproxy/proxy": "workspace:*",
     "commander": "^15.0.0",
+    "smol-toml": "^1.7.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@lspeasy/server": "workspace:*",
     "@skillit/cli": "^1.1.2",
+    "tsx": "^4.23.1",
     "typescript": "^7.0.2"
   },
   "engines": {

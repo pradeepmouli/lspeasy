@@ -3,8 +3,7 @@
 ## protocol
 
 ### `serverSupportsNotification`
-Type-guarding predicate that narrows `capabilities` to include the specific
-server capability key required for the given client-to-server notification method.
+Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server notification method.
 ```ts
 serverSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```

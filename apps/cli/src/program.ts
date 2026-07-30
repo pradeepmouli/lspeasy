@@ -3,6 +3,10 @@ import type { ServerCapabilities } from '@lspeasy/core';
 import type { RefactorSession } from './session.js';
 import type { GlobalFlags } from './io.js';
 import { buildCommandTree } from './build-commands.js';
+import { buildConfigCommand } from './config-command.js';
+import { buildDaemonCommand } from './daemon-commands.js';
+import { buildStatusCommand } from './status-command.js';
+import { createFormatter } from './format.js';
 
 /**
  * Build the full Commander program with all LSP method subcommands populated.
@@ -52,6 +56,12 @@ export function buildProgram(): Command {
   };
 
   buildCommandTree(program, allCaps, null as unknown as RefactorSession, stubFlags);
+
+  // Registered via the same builders cli.ts uses for real dispatch, so this
+  // metadata-only tree can never drift from the actual command surface.
+  program.addCommand(buildConfigCommand(stubFlags));
+  program.addCommand(buildDaemonCommand(stubFlags, createFormatter(false)));
+  program.addCommand(buildStatusCommand(stubFlags));
 
   return program;
 }

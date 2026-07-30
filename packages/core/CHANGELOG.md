@@ -1,13 +1,71 @@
 # @lspeasy/core
 
-## 2.3.1
+## 2.7.1
 
 ### Patch Changes
 
-- d655fad: - chore: restore .claude-plugin (plugin marketplace manifest)
-  - chore: also drop .github/agents, prompts, skills, copilot from master
-  - chore: also drop specs/, .claude-plugin/ from master
-  - chore: drop AI tooling files from master
+- fc6e0e3: - chore: upgrade to TypeScript 7, pin docs app to TS6 for typedoc compat
+  - chore: bump typedoc-plugin-skillit to 2.0.3, remove unused @to-skills/vitepress
+  - chore: pnpm update --latest across the workspace
+
+## 2.7.0
+
+### Minor Changes
+
+- 681ce70: Wire `lsp.json`'s `initializationOptions` field through to the real LSP `initialize` request, across both the CLI's direct-connect path and the proxy daemon's connect path. Previously this field was parsed and preserved on round-trip but silently ignored at runtime. Now a user can declare `"typescript": {"command": "...", "initializationOptions": {"supportsMoveToFileCodeAction": true}}` in their `lsp.json` and have it actually reach the server — for example, unlocking `typescript-language-server`'s deterministic, target-file-aware "Move to file" refactor code action instead of only the interactive "Move to a new file" variant. This is purely additive and backward-compatible: omitting the field changes nothing.
+- 944d94d: Fix `lsp.json` entries whose `command` field embeds the whole launch command (binary + flags, e.g. `"typescript-language-server --stdio"`) with no separate `args` array. `buildServerCommand` previously quoted that entire string as one token, so `spawn()` failed with `ENOENT` because no binary has a name containing a space. `entry.command` is now tokenized (via the existing `tokenizeCommand` utility) before being combined with `args` and re-quoted, so embedded flags correctly split into separate argv tokens.
+
+  - `@lspeasy/core`: `buildServerCommand` is now exported from `discover.ts` and re-exported from the package's public barrel, since `apps/cli` needed it to eliminate a duplicated copy of the same (buggy) logic.
+  - `@lsproxy/cli`: `apps/cli/src/resolve.ts`'s local `buildCommand` (a private mirror of core's function, kept in sync by hand) is removed; `platformServers()` now calls the shared, fixed `buildServerCommand` from `@lspeasy/core` directly. This closes the same bug for platform-adapter-sourced servers (Claude Code/Codex/Copilot-CLI configs), not just `lsp.json`-sourced ones.
+
+### Patch Changes
+
+- 8df99f3: Fix backend spawn failures crashing the proxy daemon and fix `MessageReader`/`MessageWriter` wiping out other listeners on a shared stream, so a misconfigured `lsp.json` entry (e.g. a binary that isn't on PATH) now surfaces as a clear error to the CLI instead of crashing the entire daemon (taking down every other language's live backend) or leaving the request hanging/silently failing.
+
+  - `BackendPool.startBackend` now attaches an `error` handler to the spawned backend process and rejects `ensureBackend`'s promise with a clear message instead of letting Node's default "unhandled 'error' event" behavior crash the daemon process.
+  - `MessageReader.close()` / `MessageWriter.close()` now remove only their own listeners instead of calling `stream.removeAllListeners()`, which previously deleted other consumers' listeners on a shared socket (e.g. `SocketTransport`'s own `'close'` handler) before the stream's `'close'` event ever fired — silently preventing `LSPClient.handleClose()` from ever running when a peer connection died abruptly.
+
+## 2.6.1
+
+### Patch Changes
+
+- c44550e: Fix `WebSocketTransport` never marking a connection as established when the
+  underlying socket is already open at construction time (the case for every
+  server-accepted socket, e.g. from `ws`'s `WebSocketServer`). Previously this
+  caused `send()` to throw `"WebSocket is not connected"` on the first message
+  from a server-side transport.
+
+## 2.6.0
+
+### Minor Changes
+
+- bf94e80: `lsproxy` help now surfaces param + result JSON Schema (`--json`) and illustrative
+  example input/output payloads (text) per request, derived from the LSP Zod schemas
+  (new `getResultSchemaForMethod` + `exampleFromZod`). `zodToCommander` generates
+  deeper flags (enums, scalar arrays, nested scalars) so common methods like
+  `textDocument/codeAction` are invokable without raw `--params`. Drill-down help and
+  `lsproxy config` output are now colored (TTY only; `--json` stays ANSI-free).
+
+## 2.5.0
+
+### Minor Changes
+
+- 6d973ba: Multi-platform LSP config interop. `lsproxy config import|export|diff|list`
+  bridges lsproxy's lsp.json with Copilot CLI, Claude Code, and Codex
+  (read-only); VS Code is detected-but-unsupported. A local plugin resolver in
+  @lspeasy/core reads installed `.lsp.json` definitions to translate plugin
+  toggles to/from canonical servers. Richer `.lsp.json` fields are preserved
+  end-to-end. `--json` emits a stable contract at every command.
+
+## 2.4.0
+
+### Minor Changes
+
+- 36f42f6: Dynamic, capability-aware command discovery for `lsproxy`. Bare `lsproxy` lists
+  configured languages with live health/stats from a new `$/lsproxy.status` proxy
+  control message; `lsproxy --help <language> <namespace> <request>` drills down
+  through capability-filtered namespaces to parameter schemas. `--json` emits a
+  stable, ANSI-free status/command contract for agent invocation.
 
 ## 2.3.0
 

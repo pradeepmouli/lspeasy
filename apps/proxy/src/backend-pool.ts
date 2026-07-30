@@ -2,6 +2,7 @@
 import { spawn } from 'node:child_process';
 import { resolve, basename } from 'node:path';
 import type { Readable, Writable } from 'node:stream';
+import type { BackendRuntime } from './status.js';
 import { pathToFileURL } from 'node:url';
 import { LSPClient } from '@lspeasy/client';
 import {
@@ -45,6 +46,8 @@ interface BackendEntry {
   client: LSPClient;
   proc: ReturnType<typeof spawn>;
   idleTimer?: ReturnType<typeof setTimeout>;
+  startedAt: number;
+  requestCount: number;
 }
 
 export class BackendPool {
@@ -67,6 +70,23 @@ export class BackendPool {
 
   getBackend(languageId: string): LSPClient | undefined {
     return this.backends.get(languageId)?.client;
+  }
+
+  /** Increment the forwarded-request counter for a live backend; no-op if cold. */
+  recordRequest(languageId: string): void {
+    const entry = this.backends.get(languageId);
+    if (entry) entry.requestCount += 1;
+  }
+
+  /** Runtime snapshot of every live backend, for status reporting. */
+  listBackends(): BackendRuntime[] {
+    return [...this.backends.entries()].map(([languageId, entry]) => ({
+      languageId,
+      pid: entry.proc.pid ?? -1,
+      startedAt: entry.startedAt,
+      requestCount: entry.requestCount,
+      healthy: entry.proc.exitCode === null
+    }));
   }
 
   async ensureBackend(languageId: string): Promise<LSPClient> {
@@ -99,6 +119,21 @@ export class BackendPool {
     if (!cmd) throw new Error('Empty server command');
 
     const proc = spawn(cmd, args, { cwd: this.root, stdio: 'pipe' });
+
+    // Without this handler, an unhandled 'error' event (e.g. ENOENT for a
+    // misconfigured lsp.json command) throws synchronously and crashes the
+    // *entire* daemon process — taking down every other language's backend
+    // with it. Attaching a listener downgrades that to a normal rejection of
+    // this startBackend() call (surfaced to the caller below), matching the
+    // established pattern in apps/cli/src/session.ts's direct-spawn path.
+    const spawnError = new Promise<never>((_, reject) => {
+      proc.on('error', (err) => {
+        const message = `Failed to spawn backend for languageId "${languageId}" (command: ${discovered.serverCommand}): ${err.message}`;
+        process.stderr.write(`[lsproxy] ${message}\n`);
+        reject(new Error(message));
+      });
+    });
+
     const transport = new StdioTransport({
       input: proc.stdout as Readable,
       output: proc.stdin as Writable
@@ -111,12 +146,31 @@ export class BackendPool {
       version: '0.1.0',
       capabilities: CLIENT_CAPABILITIES as ClientCapabilities,
       rootUri,
-      workspaceFolders: [{ uri: rootUri, name: basename(rootDir) }]
+      workspaceFolders: [{ uri: rootUri, name: basename(rootDir) }],
+      ...(discovered.initializationOptions
+        ? { initializationOptions: discovered.initializationOptions }
+        : {})
     });
 
-    await client.connect(transport);
+    try {
+      // Race the handshake against the spawn-error signal so a broken
+      // command (ENOENT, EACCES, ...) rejects this call immediately instead
+      // of hanging forever waiting for a response from a process that never
+      // started.
+      await Promise.race([client.connect(transport), spawnError]);
+    } catch (err) {
+      // Best-effort cleanup — proc.kill() can itself throw (e.g. an already-
+      // dead process, permission error); that must never mask the original
+      // spawn/connect error being propagated below.
+      try {
+        proc.kill();
+      } catch {
+        // ignored — see comment above
+      }
+      throw err;
+    }
 
-    const entry: BackendEntry = { client, proc };
+    const entry: BackendEntry = { client, proc, startedAt: Date.now(), requestCount: 0 };
     this.backends.set(languageId, entry);
     this.resetIdleTimer(languageId, entry);
     return client;

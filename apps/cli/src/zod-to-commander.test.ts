@@ -1,14 +1,24 @@
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
-import { detectArgPattern, marshalParams } from './zod-to-commander.js';
+import {
+  detectArgPattern,
+  marshalParams,
+  zodToCommander,
+  extractFieldValue,
+  paramsResidualExample,
+  deepMergeInto
+} from './zod-to-commander.js';
 import {
   TextDocumentPositionParamsSchema,
   RenameParamsSchema,
   FoldingRangeParamsSchema,
   WorkspaceSymbolParamsSchema,
-  InlayHintParamsSchema
+  InlayHintParamsSchema,
+  getSchemaForMethod,
+  CodeActionContextSchema
 } from '@lspeasy/core';
 import type { GlobalFlags } from './io.js';
+import type { RefactorSession } from './session.js';
 
 const FLAGS: GlobalFlags = {
   server: '',
@@ -18,7 +28,8 @@ const FLAGS: GlobalFlags = {
   verbose: false,
   waitMs: 15000,
   allowOutsideRoot: true,
-  overwrite: false
+  overwrite: false,
+  noProxy: false
 };
 
 describe('detectArgPattern', () => {
@@ -93,15 +104,17 @@ describe('marshalParams', () => {
     });
   });
 
-  it('overrides with --params JSON when provided', () => {
-    const raw = { textDocument: { uri: 'file:///x.ts' }, position: { line: 0, character: 0 } };
+  it('non-raw: builds from positionals and IGNORES --params (merge happens at the command layer)', () => {
+    const raw = { textDocument: { uri: 'file:///x.ts' }, position: { line: 9, character: 9 } };
     const result = marshalParams(
       'file-position',
-      ['/project/src/ignored.ts', '1:1'],
+      ['/project/src/foo.ts', '1:1'],
       { params: JSON.stringify(raw) },
       FLAGS
-    );
-    expect(result).toEqual(raw);
+    ) as Record<string, unknown>;
+    // base comes from the positional, not the --params override
+    expect((result['textDocument'] as Record<string, string>)['uri']).toMatch(/foo\.ts$/);
+    expect(result['position']).toEqual({ line: 0, character: 0 });
   });
 
   it('builds query object for query pattern', () => {
@@ -109,7 +122,170 @@ describe('marshalParams', () => {
     expect(result).toEqual({ query: 'mySymbol' });
   });
 
+  it('raw: returns the --params JSON as the whole body', () => {
+    const raw = { command: 'x', arguments: [1] };
+    expect(marshalParams('raw', [], { params: JSON.stringify(raw) }, FLAGS)).toEqual(raw);
+  });
+
   it('throws for raw pattern without --params', () => {
     expect(() => marshalParams('raw', [], {}, FLAGS)).toThrow('--params');
+  });
+});
+
+describe('deepMergeInto', () => {
+  it('merges nested objects; arrays/scalars replace', () => {
+    const dst = { context: { only: ['quickfix'], triggerKind: 1 }, a: 1 };
+    deepMergeInto(dst, { context: { diagnostics: [{ x: 1 }] }, a: 2 });
+    expect(dst).toEqual({
+      context: { only: ['quickfix'], triggerKind: 1, diagnostics: [{ x: 1 }] },
+      a: 2
+    });
+  });
+});
+
+// Minimal stub — zodToCommander only invokes session inside the action handler,
+// which is never called during option-inspection tests.
+const STUB_SESSION = {} as RefactorSession;
+
+describe('zodToCommander deepened flags', () => {
+  it('codeAction surfaces --params fallback and an --*-only flag (enum array), not just raw JSON', () => {
+    const schema = getSchemaForMethod('textDocument/codeAction')!;
+    const cmd = zodToCommander('textDocument/codeAction', schema, STUB_SESSION, FLAGS);
+    const flags = cmd.options.map((o) => o.flags).join(' ');
+
+    // Fallback must always be present
+    expect(flags).toContain('--params');
+
+    // The `only` sub-field of CodeActionContext (an array of CodeActionKind enum values)
+    // must be surfaced as a dedicated flag — any prefix is acceptable.
+    expect(flags).toMatch(/--\S*only\b/);
+  });
+
+  it('codeAction trigger-kind flag has Commander choices (union of literals)', () => {
+    const schema = getSchemaForMethod('textDocument/codeAction')!;
+    const cmd = zodToCommander('textDocument/codeAction', schema, STUB_SESSION, FLAGS);
+    const triggerOpt = cmd.options.find((o) => /trigger-kind/.test(o.flags));
+    // triggerKind = z.union([z.literal(1), z.literal(2)]) → choices ['1','2']
+    expect(triggerOpt).toBeDefined();
+    expect(triggerOpt?.argChoices).toBeTruthy();
+    expect(triggerOpt?.argChoices?.length).toBeGreaterThan(0);
+  });
+});
+
+describe('extractFieldValue round-trip (deepened flags)', () => {
+  // The codeAction `context` field uses cliKey 'code-action' (fieldCliKey strips
+  // the '-context' suffix from 'code-action-context'). extractFieldValue expands
+  // one level deep so sub-fields map to: codeActionOnly / codeActionTriggerKind.
+
+  it('reconstructs context.only (scalar array) from comma-separated option value', () => {
+    const opts: Record<string, unknown> = {
+      codeActionOnly: 'quickfix,refactor'
+    };
+    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
+      string,
+      unknown
+    >;
+    expect(result).toBeDefined();
+    expect(result['only']).toEqual(['quickfix', 'refactor']);
+  });
+
+  it('reconstructs context.triggerKind (union-of-literals) as a number via JSON.parse', () => {
+    const opts: Record<string, unknown> = {
+      codeActionTriggerKind: '1'
+    };
+    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
+      string,
+      unknown
+    >;
+    expect(result).toBeDefined();
+    expect(result['triggerKind']).toBe(1);
+  });
+
+  it('reconstructs both context sub-fields together', () => {
+    const opts: Record<string, unknown> = {
+      codeActionOnly: 'quickfix,refactor',
+      codeActionTriggerKind: '1'
+    };
+    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
+      string,
+      unknown
+    >;
+    expect(result['only']).toEqual(['quickfix', 'refactor']);
+    expect(result['triggerKind']).toBe(1);
+  });
+});
+
+describe('anchorFile support', () => {
+  it('marshalParams prepends the anchor file for a file-position pattern', () => {
+    const params = marshalParams(
+      'file-position',
+      ['12:7'], // no file — anchor supplies it
+      {},
+      { root: '/project', json: false, allowOutsideRoot: true } as GlobalFlags,
+      '/project/src/foo.ts'
+    ) as { textDocument: { uri: string }; position: { line: number; character: number } };
+    expect(params.textDocument.uri).toContain('foo.ts');
+    expect(params.position).toEqual({ line: 11, character: 6 });
+  });
+
+  it('marshalParams ignores the anchor file for a query pattern', () => {
+    const params = marshalParams(
+      'query',
+      ['MyClass'],
+      {},
+      { root: '/project', json: false, allowOutsideRoot: true } as GlobalFlags,
+      '/project/src/foo.ts'
+    ) as { query: string };
+    expect(params.query).toBe('MyClass');
+  });
+
+  it('zodToCommander omits the <file> argument when an anchor file is provided', () => {
+    const cmd = zodToCommander(
+      'textDocument/hover',
+      getSchemaForMethod('textDocument/hover')!,
+      {} as any,
+      { root: '/project' } as GlobalFlags,
+      '/project/src/foo.ts'
+    );
+    expect(cmd.registeredArguments.map((a) => a.name())).toEqual(['line:col']);
+  });
+
+  it('zodToCommander keeps the <file> argument when no anchor is provided', () => {
+    const cmd = zodToCommander(
+      'textDocument/hover',
+      getSchemaForMethod('textDocument/hover')!,
+      {} as any,
+      { root: '/project' } as GlobalFlags
+    );
+    expect(cmd.registeredArguments.map((a) => a.name())).toEqual(['file', 'line:col']);
+  });
+});
+
+describe('paramsResidualExample — only fields not exposed as args/flags', () => {
+  it('codeAction: residual is just context.diagnostics (file/range/only/triggerKind are args/flags)', () => {
+    const schema = getSchemaForMethod('textDocument/codeAction');
+    expect(schema).toBeDefined();
+    const residual = paramsResidualExample(schema!) as Record<string, unknown>;
+    expect(residual).toBeDefined();
+    // positional / flag fields must be absent from the --params example
+    expect(residual['textDocument']).toBeUndefined();
+    expect(residual['range']).toBeUndefined();
+    const ctx = residual['context'] as Record<string, unknown> | undefined;
+    expect(ctx).toBeDefined();
+    expect(ctx!['diagnostics']).toBeDefined(); // array-of-objects → --params
+    expect(ctx!['only']).toBeUndefined(); // scalar array → flag
+    expect(ctx!['triggerKind']).toBeUndefined(); // enum → flag
+  });
+
+  it('hover: undefined — all inputs map to positional args', () => {
+    const schema = getSchemaForMethod('textDocument/hover');
+    expect(paramsResidualExample(schema!)).toBeUndefined();
+  });
+
+  it('raw method (executeCommand): full example — everything via --params', () => {
+    const schema = getSchemaForMethod('workspace/executeCommand');
+    const residual = paramsResidualExample(schema!) as Record<string, unknown>;
+    expect(residual).toBeDefined();
+    expect(residual['command']).toBeDefined();
   });
 });

@@ -3,7 +3,7 @@
  */
 
 import { PassThrough } from 'node:stream';
-import { StdioTransport } from '@lspeasy/core';
+import { StdioTransport } from '@lspeasy/core/node';
 
 export function createConnectedStdioTransports(): {
   serverTransport: StdioTransport;

@@ -6,7 +6,12 @@
     "rootDir": "./src",
     "declarationMap": true
   },
-  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/client" }],
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/client" },
+    { "path": "../../packages/server" },
+    { "path": "../../packages/polyfill" }
+  ],
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"]
 }

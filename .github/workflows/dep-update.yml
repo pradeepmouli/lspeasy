@@ -2,7 +2,7 @@ name: Dependency Update
 
 on:
   schedule:
-    - cron: '0 10 * * *'  # Daily 6am ET / 10am UTC
+    - cron: '0 10 * * *' # Daily 6am ET / 10am UTC
   workflow_dispatch:
 
 permissions:
@@ -19,7 +19,7 @@ jobs:
         with:
           version: 11.1.3
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: 'pnpm'

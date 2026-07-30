@@ -1,0 +1,14 @@
+{
+  "name": "e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@lspeasy/client": "workspace:*",
+    "@lspeasy/core": "workspace:*",
+    "@lspeasy/server": "workspace:*",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10",
+    "ws": "^8.20.1"
+  }
+}

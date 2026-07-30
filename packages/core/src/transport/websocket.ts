@@ -119,9 +119,7 @@ function getWsWebSocketCtor(): ((url: string) => WebSocketLike) | undefined {
 }
 
 /**
- * Creates a WebSocket client instance, preferring the native
- * `globalThis.WebSocket` (Node ≥ 22.4 / modern browsers) and falling back
- * to the optional `ws` peer dependency.
+ * Creates a WebSocket client instance, preferring the native WebSocket API (Node 22+ or modern browsers) and falling back to the optional `ws` peer dependency.
  *
  * @remarks
  * This is a low-level factory used internally by `WebSocketTransport` in
@@ -291,18 +289,27 @@ export class WebSocketTransport implements Transport {
       this.socket.on!('message', (data: Buffer | string) => this.handleMessageData(data));
       this.socket.on!('error', (error: Error) => this.notifyError(error));
       this.socket.on!('close', () => this.handleClose());
-      return;
+    } else {
+      this.socket.addEventListener?.('open', () => this.handleOpen());
+      this.socket.addEventListener?.('message', (event: MessageLikeEvent) => {
+        this.handleMessageData(event.data);
+      });
+      this.socket.addEventListener?.('error', (event: ErrorLikeEvent) => {
+        const error = event.error instanceof Error ? event.error : new Error('WebSocket error');
+        this.notifyError(error);
+      });
+      this.socket.addEventListener?.('close', () => this.handleClose());
     }
 
-    this.socket.addEventListener?.('open', () => this.handleOpen());
-    this.socket.addEventListener?.('message', (event: MessageLikeEvent) => {
-      this.handleMessageData(event.data);
-    });
-    this.socket.addEventListener?.('error', (event: ErrorLikeEvent) => {
-      const error = event.error instanceof Error ? event.error : new Error('WebSocket error');
-      this.notifyError(error);
-    });
-    this.socket.addEventListener?.('close', () => this.handleClose());
+    // A socket handed to us already open (server mode wraps an
+    // already-accepted connection, e.g. `ws`'s `completeUpgrade` sets
+    // `readyState = OPEN` and emits `'open'` synchronously *before* the
+    // `'connection'` handler — and therefore before we can attach a
+    // listener for it) will never emit `'open'` again. Without this check,
+    // `connected` would stay `false` forever and every `send()` would throw.
+    if (this.socket.readyState === READY_STATE_OPEN) {
+      this.handleOpen();
+    }
   }
 
   private handleOpen(): void {

@@ -34,7 +34,7 @@ describe('connection health (e2e)', () => {
   });
 
   it('tracks state transitions and last message timestamps', async () => {
-    server.setCapabilities({ hoverProvider: true });
+    server.registerCapabilities({ hoverProvider: true });
     server.onRequest('textDocument/hover', async () => ({
       contents: { kind: 'plaintext', value: 'healthy' }
     }));

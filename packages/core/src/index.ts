@@ -198,7 +198,9 @@ export {
   DidCloseTextDocumentParamsSchema,
   DidSaveTextDocumentParamsSchema,
   LSPSchemas,
-  getSchemaForMethod
+  getSchemaForMethod,
+  LSPResultSchemas,
+  getResultSchemaForMethod
 } from './protocol/schemas.js';
 
 // Advanced protocol features
@@ -297,15 +299,37 @@ export {
 export type { CheckMethodOptions } from './utils/capability-guard.js';
 
 // Discovery — lsp.json config reader (shared with proxy)
-export type { LspServerEntry, LspJson, ResolvedServer } from './discover.js';
+export type { LspServerEntry, LspJson, ResolvedServer, ConfiguredServer } from './discover.js';
 export {
   selectServer,
   selectServerByLanguageId,
   selectExtensionMap,
   discoverServer,
   discoverServerByLanguageId,
-  discoverExtensionMap
+  discoverExtensionMap,
+  discoverServers,
+  buildServerCommand,
+  readLspJsonFile,
+  writeLspJsonFile,
+  mergeServers
 } from './discover.js';
+
+// Language extensions — languageId to default extensions table
+export { DEFAULT_EXTENSIONS, extensionsForLanguage } from './language-extensions.js';
 
 // Command tokenizer
 export { tokenizeCommand } from './utils/tokenize-command.js';
+
+// Example payload generator — builds illustrative required-only samples from Zod schemas
+export { exampleFromZod } from './example-from-zod.js';
+
+// Zod introspection utilities — shared helpers for inspecting Zod 4 schemas
+export { unwrapZodType } from './zod-introspection.js';
+
+// Local plugin resolver — reads installed .lsp.json files under ~/.claude/plugins/marketplaces
+export {
+  defaultPluginsRoot,
+  listInstalledPluginServers,
+  resolvePlugin,
+  findPluginFor
+} from './plugin-resolver.js';

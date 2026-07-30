@@ -1,15 +1,65 @@
 # @lspeasy/server
 
+## 4.2.2
+
+### Patch Changes
+
+- fc6e0e3: - chore: upgrade to TypeScript 7, pin docs app to TS6 for typedoc compat
+  - chore: bump typedoc-plugin-skillit to 2.0.3, remove unused @to-skills/vitepress
+  - chore: pnpm update --latest across the workspace
+- Updated dependencies [fc6e0e3]
+  - @lspeasy/core@2.7.1
+
+## 4.2.1
+
+### Patch Changes
+
+- Updated dependencies [8df99f3]
+- Updated dependencies [681ce70]
+- Updated dependencies [944d94d]
+  - @lspeasy/core@2.7.0
+
+## 4.2.0
+
+### Minor Changes
+
+- e5a35f9: Add a `@lsproxy/polyfill` package that backfills `codeAction/resolve` and
+  synthesizes a composite `source.fixAll` code action for backend LSP servers
+  that don't natively support them, and wire it into `@lsproxy/proxy` via a new
+  `ProxySession` (replacing the previous hand-rolled `ClientSession`).
+
+  `@lspeasy/server`'s `ServerOptions` gained two extension points to support
+  this: `resolveCapabilities` for computing per-connection server capabilities
+  at `initialize` time, and `preInitializeMethods` for exempting specific
+  methods (e.g. status queries) from the pre-`initialize` rejection gate.
+
+## 4.1.6
+
+### Patch Changes
+
+- Updated dependencies [c44550e]
+  - @lspeasy/core@2.6.1
+
+## 4.1.5
+
+### Patch Changes
+
+- Updated dependencies [bf94e80]
+  - @lspeasy/core@2.6.0
+
+## 4.1.4
+
+### Patch Changes
+
+- Updated dependencies [6d973ba]
+  - @lspeasy/core@2.5.0
+
 ## 4.1.3
 
 ### Patch Changes
 
-- d655fad: - chore: restore .claude-plugin (plugin marketplace manifest)
-  - chore: also drop .github/agents, prompts, skills, copilot from master
-  - chore: also drop specs/, .claude-plugin/ from master
-  - chore: drop AI tooling files from master
-- Updated dependencies [d655fad]
-  - @lspeasy/core@2.3.1
+- Updated dependencies [36f42f6]
+  - @lspeasy/core@2.4.0
 
 ## 4.1.2
 

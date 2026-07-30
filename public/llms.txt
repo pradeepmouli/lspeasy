@@ -48,22 +48,14 @@ Subscribe via `LSPClient.onConnectionStateChange()`.
 - `getClientCapabilityForRequestMethod`: Get the client capability key for a given request method at runtime.
 - `getCapabilityForNotificationMethod`: Get the server capability key for a given notification method at runtime.
 - `getClientCapabilityForNotificationMethod`: Get the client capability key for a given notification method at runtime.
-- `getDefinitionForRequest`: Retrieves the full definition object for a given LSP request method by
-namespace and method key.
-- `getDefinitionForNotification`: Retrieves the full definition object for a given LSP notification method by
-namespace and method key.
-- `serverSupportsRequest`: Type-guarding predicate that narrows `capabilities` to include the specific
-server capability key required for the given client-to-server request m...
-- `serverSupportsNotification`: Type-guarding predicate that narrows `capabilities` to include the specific
-server capability key required for the given client-to-server notificat...
-- `clientSupportsRequest`: Type-guarding predicate that narrows `capabilities` to include the specific
-client capability key required for the given server-to-client request m...
-- `clientSupportsNotification`: Type-guarding predicate that narrows `capabilities` to include the specific
-client capability key required for the given server-to-client notificat...
-- `hasServerCapability`: Type-guarding predicate that narrows `capabilities` to confirm a specific server capability
-is enabled at a deep dot-notation path.
-- `hasClientCapability`: Type-guarding predicate that narrows `capabilities` to confirm a specific client capability
-is enabled at a deep dot-notation path.
+- `getDefinitionForRequest`: Retrieves the full definition object for a given LSP request method by namespace and method key.
+- `getDefinitionForNotification`: Retrieves the full definition object for a given LSP notification method by namespace and method key.
+- `serverSupportsRequest`: Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server request m...
+- `serverSupportsNotification`: Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server notificat...
+- `clientSupportsRequest`: Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client request m...
+- `clientSupportsNotification`: Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client notificat...
+- `hasServerCapability`: Type-guarding predicate that narrows `capabilities` to confirm a specific server capability is enabled at a deep dot-notation path.
+- `hasClientCapability`: Type-guarding predicate that narrows `capabilities` to confirm a specific client capability is enabled at a deep dot-notation path.
 - `supportsHover`: Returns `true` when `hoverProvider` is declared in the server capabilities.
 - `supportsCompletion`: Returns `true` when `completionProvider` is declared in the server capabilities.
 - `supportsDefinition`: Returns `true` when `definitionProvider` is declared in the server capabilities.
@@ -82,8 +74,7 @@ no `id`).
 - `parseMessage`: Parses a single framed JSON-RPC 2.0 message from a raw byte buffer.
 - `serializeMessage`: Serializes a JSON-RPC 2.0 message into a framed byte buffer with
 `Content-Length` and `Content-Type` headers.
-- `createWebSocketClient`: Creates a WebSocket client instance, preferring the native
-`globalThis.
+- `createWebSocketClient`: Creates a WebSocket client instance, preferring the native WebSocket API (Node 22+ or modern browsers) and falling back to the optional `ws` peer d...
 - `composeMiddleware`: Combines multiple middleware functions into a single middleware that runs
 them left-to-right, each delegating to the next via `next()`.
 - `executeMiddlewarePipeline`: Runs the registered middleware chain for a single JSON-RPC message, then
@@ -95,6 +86,7 @@ the message params and result.
 - `createIncrementalDidChangeParams`: Builds `DidChangeTextDocumentParams` for an incremental (range-based)
 document change notification.
 - `getSchemaForMethod`: Looks up the Zod validation schema for a given LSP method.
+- `getResultSchemaForMethod`: Looks up the result schema for a request method; returns `undefined` for notifications or unknown methods.
 - `createWorkspaceFolder`: Helper to create a WorkspaceFolder.
 - `createWorkspaceFoldersChangeEvent`: Helper to create a WorkspaceFoldersChangeEvent.
 - `createFileEvent`: Helper to create a FileEvent.
@@ -118,13 +110,23 @@ document change notification.
 - `selectServer`
 - `selectServerByLanguageId`
 - `selectExtensionMap`
-- `discoverServer`: Walk the directory tree from `root` to the filesystem root, checking
-`lsp.
-- `discoverServerByLanguageId`: Walk the directory tree from `root` looking for a `lsp.json` entry whose
-`fileExtensions` map maps any extension to `languageId`.
+- `discoverServer`: Resolve an LSP server for a file extension by walking up from `root` to the filesystem root then falling back to the global user config.
+- `discoverServerByLanguageId`: Resolve an LSP server for a language ID by walking up from `root` to the filesystem root then falling back to the global user config.
 - `discoverExtensionMap`
+- `discoverServers`: Enumerate every server configured in the discovered lsp.
+- `buildServerCommand`: Build the full spawn command string for an `lsp.
+- `readLspJsonFile`: Read a single lsp.json file's `lspServers` map. Returns {} when missing or unparseable.
+- `writeLspJsonFile`: Write an `lspServers` map to a file as pretty JSON, creating parent dirs.
+- `mergeServers`: Merge incoming servers over base; report which keys were added vs updated.
+- `extensionsForLanguage`: Extensions for a languageId, or [] when unknown.
 - `tokenizeCommand`: Split a server launch command into argv tokens, honoring single- and
 double-quoted spans so an argument containing spaces survives intact (e.
+- `exampleFromZod`: Build an illustrative, required-only example value from a Zod schema.
+- `unwrapZodType`: Peel Zod 4 Optional/Nullable/Default wrappers to the underlying type (recursively).
+- `defaultPluginsRoot`: Default install root for plugin marketplaces.
+- `listInstalledPluginServers`: Map every installed plugin's servers, keyed by `<plugin>@<marketplace>`.
+- `resolvePlugin`: Canonical servers for one `<plugin>@<marketplace>` id, keyed by server name, or {} when not installed.
+- `findPluginFor`: Find the plugin id a canonical entry maps to: prefer stamped provenance, else match by command.
 - `DedicatedWorkerTransport`: JSON-RPC transport backed by a Dedicated Worker instance.
 - `SharedWorkerTransport`: JSON-RPC transport for Shared Worker environments with per-client envelope routing.
 - `WebSocketTransport`: WebSocket-based transport for LSP communication.
@@ -242,6 +244,7 @@ Uses discriminated union based on presence of 'method' and 'id'
 - `DidCloseTextDocumentParamsSchema`
 - `DidSaveTextDocumentParamsSchema`
 - `LSPSchemas`: Schema registry for method-based lookup
+- `LSPResultSchemas`: Result schema registry — maps a request method to its result schema.
 - `WorkspaceFileChangeTypes`: File change types enum for convenience
 - `WatchKinds`: Watch kinds for file system watchers
 - `dynamicRegistrationSchema`: Zod schema for validating a single dynamic-registration entry.
@@ -252,6 +255,7 @@ Uses discriminated union based on presence of 'method' and 'id'
 Used by `CapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
 - `CLIENT_METHODS`: Pre-built method sets indexed by client capability.
 Used by `ClientCapabilityGuard` in `@lspeasy/client` and `@lspeasy/server`.
+- `DEFAULT_EXTENSIONS`: Default file extensions per LSP languageId.
 
 ## Optional
 
@@ -401,6 +405,7 @@ methods, notification send methods, and server-to-client handler registr...
 - `LspServerEntry`
 - `LspJson`
 - `ResolvedServer`
+- `ConfiguredServer`
 - `LogLevel`: Numeric severity levels for filtering log output.
 
 ## @lspeasy/server

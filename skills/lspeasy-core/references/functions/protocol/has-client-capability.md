@@ -3,8 +3,7 @@
 ## protocol
 
 ### `hasClientCapability`
-Type-guarding predicate that narrows `capabilities` to confirm a specific client capability
-is enabled at a deep dot-notation path.
+Type-guarding predicate that narrows `capabilities` to confirm a specific client capability is enabled at a deep dot-notation path.
 ```ts
 hasClientCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
 ```

@@ -127,6 +127,41 @@ describe('Initialize Handshake Integration', () => {
     });
   });
 
+  it('uses resolveCapabilities to determine advertised capabilities per connection', async () => {
+    const dynamicServer = new LSPServer({
+      name: 'dynamic-server',
+      version: '1.0.0',
+      logLevel: LogLevel.Error,
+      resolveCapabilities: async (params) => {
+        expect(params.rootUri).toBe('file:///dynamic-root');
+        return { hoverProvider: true, definitionProvider: true };
+      }
+    });
+    const dynamicTransport = new TestTransport();
+    await dynamicServer.listen(dynamicTransport);
+
+    dynamicTransport.simulateMessage({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        processId: null,
+        rootUri: 'file:///dynamic-root',
+        capabilities: {}
+      }
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const response = dynamicTransport.sentMessages[0];
+    expect(response.result.capabilities).toEqual({
+      hoverProvider: true,
+      definitionProvider: true
+    });
+
+    await dynamicServer.close();
+  });
+
   it('should handle initialized notification', async () => {
     // First initialize
     transport.simulateMessage({
@@ -189,6 +224,75 @@ describe('Initialize Handshake Integration', () => {
     });
 
     await newServer.close();
+  });
+
+  it('allows a method in preInitializeMethods to be answered before initialize', async () => {
+    const preInitServer = new LSPServer({
+      logLevel: LogLevel.Error,
+      preInitializeMethods: ['$/ping']
+    });
+    preInitServer.onRequest('$/ping', async () => 'pong');
+    const preInitTransport = new TestTransport();
+    await preInitServer.listen(preInitTransport);
+
+    preInitTransport.simulateMessage({ jsonrpc: '2.0', id: 1, method: '$/ping', params: {} });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(preInitTransport.sentMessages[0]).toMatchObject({ id: 1, result: 'pong' });
+
+    await preInitServer.close();
+  });
+
+  it('still rejects a method NOT in preInitializeMethods before initialize', async () => {
+    const preInitServer = new LSPServer({
+      logLevel: LogLevel.Error,
+      preInitializeMethods: ['$/ping']
+    });
+    const preInitTransport = new TestTransport();
+    await preInitServer.listen(preInitTransport);
+
+    preInitTransport.simulateMessage({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'textDocument/hover',
+      params: { textDocument: { uri: 'file:///test.txt' }, position: { line: 0, character: 0 } }
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(preInitTransport.sentMessages[0]).toMatchObject({ id: 1, error: { code: -32002 } });
+
+    await preInitServer.close();
+  });
+
+  it('rejects a preInitializeMethods method once the server has shut down', async () => {
+    const preInitServer = new LSPServer({
+      logLevel: LogLevel.Error,
+      preInitializeMethods: ['$/ping']
+    });
+    preInitServer.onRequest('$/ping', async () => 'pong');
+    const preInitTransport = new TestTransport();
+    await preInitServer.listen(preInitTransport);
+
+    preInitTransport.simulateMessage({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: { processId: null, rootUri: null, capabilities: {} }
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    preInitTransport.simulateMessage({ jsonrpc: '2.0', id: 2, method: 'shutdown', params: null });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    preInitTransport.simulateMessage({ jsonrpc: '2.0', id: 3, method: '$/ping', params: {} });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(preInitTransport.sentMessages.find((msg) => msg.id === 3)).toMatchObject({
+      id: 3,
+      error: { code: -32002 }
+    });
+
+    await preInitServer.close();
   });
 
   it('should reject double initialization', async () => {

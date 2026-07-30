@@ -60,7 +60,7 @@ describe('middleware integration (e2e)', () => {
       middleware: [mwA, mwB]
     });
 
-    server.setCapabilities({ hoverProvider: true });
+    server.registerCapabilities({ hoverProvider: true });
     server.onRequest('textDocument/hover', async () => ({
       contents: { kind: 'plaintext', value: 'ok' }
     }));

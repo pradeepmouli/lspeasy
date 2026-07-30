@@ -3,10 +3,12 @@ import { LSPSchemas, getSchemaForMethod, getCapabilityForRequestMethod } from '@
 import type { ServerCapabilities } from '@lspeasy/core';
 
 import { zodToCommander, printAppliedChanges } from './zod-to-commander.js';
+import { assessResultQuality } from './result-quality.js';
 import { applyWorkspaceEdit, planWorkspaceEdit } from './apply.js';
 import type { BoundaryGuard } from './apply.js';
 import type { RefactorSession } from './session.js';
 import type { GlobalFlags } from './io.js';
+import { globalOptionsHelpText } from './global-options.js';
 
 function getNestedValue(obj: unknown, path: string): unknown {
   return path
@@ -52,7 +54,7 @@ function enrichCommandFromCapabilities(
       lines.push(`${key}: ${JSON.stringify(val)}`);
     }
   }
-  if (lines.length) cmd.addHelpText('after', `\nCapability options:\n  ${lines.join('\n  ')}`);
+  if (lines.length) appendHelpFooter(cmd, `Capability options:\n  ${lines.join('\n  ')}`);
 }
 
 // Some methods share a top-level capability path with sibling methods, so the
@@ -64,11 +66,25 @@ const CAPABILITY_REFINEMENTS: Readonly<Partial<Record<string, string>>> = {
   'textDocument/semanticTokens/full': 'semanticTokensProvider.full'
 };
 
+// Commander's `addHelpText('after', ...)` only surfaces its text through
+// `outputHelp()`'s emitted 'afterHelp' event — never through `helpInformation()`
+// called directly (see help.ts's `renderDrillDownText`, this CLI's actual
+// leaf-command help renderer, and note the CLI intercepts --help in cli.ts
+// before Commander ever parses, so `outputHelp()` itself is unreachable in
+// practice). Appending the footer here instead makes it part of the string
+// `helpInformation()` returns, so it reaches real users and is testable
+// directly without depending on Commander's event system.
+function appendHelpFooter(cmd: Command, footer: string): void {
+  const base = cmd.helpInformation.bind(cmd);
+  cmd.helpInformation = (context) => `${base(context)}\n${footer}`;
+}
+
 export function buildCommandTree(
   program: Command,
   capabilities: ServerCapabilities,
   session: RefactorSession,
-  flags: GlobalFlags
+  flags: GlobalFlags,
+  anchorFile?: string
 ): void {
   for (const method of Object.keys(LSPSchemas) as Array<keyof typeof LSPSchemas>) {
     const schema = getSchemaForMethod(method as string);
@@ -90,12 +106,25 @@ export function buildCommandTree(
       program.addCommand(nsCmd);
     }
 
-    const subCmd = zodToCommander(method as string, schema, session, flags);
+    const subCmd = zodToCommander(method as string, schema, session, flags, anchorFile);
     enrichCommandFromCapabilities(method as string, subCmd, capabilities);
+    // executeCommand args are server-defined (opaque LSPAny) and not in the
+    // protocol — the reliable way to get a valid {command, arguments} is to
+    // replay one from a codeAction/codeLens result.
+    if (method === 'workspace/executeCommand') {
+      appendHelpFooter(
+        subCmd,
+        'Discovering commands: server command names (if advertised) appear above as\n' +
+          'capability options. Argument shapes are server-specific — obtain a ready-to-run\n' +
+          '{command, arguments} from a textDocument/codeAction or textDocument/codeLens result and replay it\n' +
+          '(lsproxy auto-runs command-bearing code actions).'
+      );
+    }
+    appendHelpFooter(subCmd, globalOptionsHelpText());
     nsCmd.addCommand(subCmd);
   }
 
-  program
+  const callCmd = program
     .command('call <method>')
     .description('Send any LSP request by method name with raw JSON params')
     .option('--params <json>', 'LSP params as JSON')
@@ -115,10 +144,23 @@ export function buildCommandTree(
             flags.dryRun ? planWorkspaceEdit(edit, guard) : applyWorkspaceEdit(edit, guard)
           );
           printAppliedChanges(allChanges, method, flags.dryRun, flags.json);
-        } else if (flags.json) {
-          process.stdout.write(JSON.stringify({ ok: true, method, result }) + '\n');
         } else {
-          process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+          const quality = assessResultQuality(method, params, result);
+          if (flags.json) {
+            process.stdout.write(
+              JSON.stringify({
+                ok: true,
+                method,
+                result,
+                ...(quality.partial ? { partial: true, warning: quality.warning } : {})
+              }) + '\n'
+            );
+          } else {
+            process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+          }
+          if (quality.partial && quality.warning) {
+            process.stderr.write(`warning: ${quality.warning}\n`);
+          }
         }
       } catch (err) {
         if (flags.json) {
@@ -129,4 +171,5 @@ export function buildCommandTree(
         process.exit(1);
       }
     });
+  appendHelpFooter(callCmd, globalOptionsHelpText());
 }

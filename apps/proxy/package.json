@@ -1,7 +1,7 @@
 {
   "name": "@lsproxy/proxy",
-  "version": "1.0.2",
-  "description": "Per-root LSP multiplexing daemon \u2014 holds warm language server connections for @lsproxy/cli",
+  "version": "1.3.2",
+  "description": "Per-root LSP multiplexing daemon — holds warm language server connections for @lsproxy/cli",
   "private": false,
   "keywords": [
     "lsp",
@@ -29,7 +29,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./dist/main.js": "./dist/main.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -47,7 +48,9 @@
   },
   "dependencies": {
     "@lspeasy/client": "workspace:*",
-    "@lspeasy/core": "workspace:*"
+    "@lspeasy/core": "workspace:*",
+    "@lspeasy/server": "workspace:*",
+    "@lsproxy/polyfill": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^7.0.2"

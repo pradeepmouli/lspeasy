@@ -12,8 +12,10 @@ vi.mock('@lspeasy/core', async (importActual) => {
   };
 });
 
+const { lspClientCtor } = vi.hoisted(() => ({ lspClientCtor: vi.fn() }));
 vi.mock('@lspeasy/client', () => ({
-  LSPClient: vi.fn().mockImplementation(function () {
+  LSPClient: vi.fn().mockImplementation(function (this: unknown, opts: unknown) {
+    lspClientCtor(opts);
     return {
       connect: vi.fn().mockResolvedValue(undefined),
       disconnect: vi.fn().mockResolvedValue(undefined),
@@ -26,6 +28,8 @@ vi.mock('@lspeasy/client', () => ({
 
 vi.mock('node:child_process', () => ({
   spawn: vi.fn().mockReturnValue({
+    pid: 4242,
+    exitCode: null,
     stdout: { on: vi.fn() },
     stdin: { on: vi.fn() },
     on: vi.fn(),
@@ -97,5 +101,61 @@ describe('BackendPool', () => {
     vi.advanceTimersByTime(400); // now 1000ms after last call — fires
     await vi.runAllTimersAsync();
     expect(client.disconnect).toHaveBeenCalled();
+  });
+
+  it('listBackends reports a live backend with pid, healthy, and zero requests', async () => {
+    const pool = new BackendPool('/project');
+    await pool.ensureBackend('typescript');
+    const list = pool.listBackends();
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({
+      languageId: 'typescript',
+      pid: 4242,
+      requestCount: 0,
+      healthy: true
+    });
+    expect(typeof list[0]!.startedAt).toBe('number');
+  });
+
+  it('recordRequest increments the per-backend counter', async () => {
+    const pool = new BackendPool('/project');
+    await pool.ensureBackend('typescript');
+    pool.recordRequest('typescript');
+    pool.recordRequest('typescript');
+    expect(pool.listBackends()[0]!.requestCount).toBe(2);
+  });
+
+  it('recordRequest is a no-op for an unknown languageId', () => {
+    const pool = new BackendPool('/project');
+    expect(() => pool.recordRequest('python')).not.toThrow();
+    expect(pool.listBackends()).toEqual([]);
+  });
+
+  it('passes the discovered initializationOptions to the real LSPClient constructor', async () => {
+    (discoverServerByLanguageId as ReturnType<typeof vi.fn>).mockReturnValue({
+      serverCommand: '"typescript-language-server" "--stdio"',
+      languageId: 'typescript',
+      initializationOptions: { supportsMoveToFileCodeAction: true }
+    });
+    lspClientCtor.mockClear();
+    const pool = new BackendPool('/project');
+    await pool.ensureBackend('typescript');
+    expect(lspClientCtor).toHaveBeenCalledTimes(1);
+    expect(lspClientCtor.mock.calls[0]?.[0]).toMatchObject({
+      initializationOptions: { supportsMoveToFileCodeAction: true }
+    });
+  });
+
+  it('omits initializationOptions from the LSPClient constructor when none were discovered', async () => {
+    (discoverServerByLanguageId as ReturnType<typeof vi.fn>).mockReturnValue({
+      serverCommand: '"typescript-language-server" "--stdio"',
+      languageId: 'typescript'
+    });
+    lspClientCtor.mockClear();
+    const pool = new BackendPool('/project');
+    await pool.ensureBackend('typescript');
+    expect(lspClientCtor).toHaveBeenCalledTimes(1);
+    const ctorOpts = lspClientCtor.mock.calls[0]![0] as object;
+    expect('initializationOptions' in ctorOpts).toBe(false);
   });
 });

@@ -3,11 +3,19 @@
  * replaced a naive `split(/\s+/)`, which shredded any launch command with a
  * quoted argument containing spaces.
  */
+import { readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
 
 import { tokenizeCommand } from '@lspeasy/core';
-import { CapturedEdits } from './session.js';
+import { CapturedEdits, RefactorSession, CLI_VERSION } from './session.js';
 import type { WorkspaceEdit } from './apply.js';
+
+const INIT_OPTIONS_FIXTURE = fileURLToPath(
+  new URL('./test-fixtures/init-options-fixture-server.mjs', import.meta.url)
+);
 
 describe('tokenizeCommand', () => {
   it('splits a plain command on whitespace', () => {
@@ -96,5 +104,98 @@ describe('CapturedEdits', () => {
     q.push(edit('x.ts'));
     q.drain();
     expect(q.drain()).toEqual([]);
+  });
+});
+
+describe('RefactorSession.requestWithRetry — readiness retry (fix B)', () => {
+  // Constructor does not spawn a server (start() does), so a bare session with a
+  // short indexWaitMs is safe to exercise requestWithRetry in isolation.
+  const makeSession = (indexWaitMs: number) => new RefactorSession({ root: '/tmp', indexWaitMs });
+
+  it('returns a complete result on the first try (no extra latency)', async () => {
+    const session = makeSession(2000);
+    let calls = 0;
+    const run = async () => {
+      calls++;
+      return ['decl', 'ref1', 'ref2'];
+    };
+    const res = await session.requestWithRetry(run, (r) => (r as unknown[]).length <= 1);
+    expect(calls).toBe(1);
+    expect(res).toEqual(['decl', 'ref1', 'ref2']);
+  });
+
+  it('retries while incomplete, then returns the first complete result', async () => {
+    const session = makeSession(5000);
+    let calls = 0;
+    const run = async () => {
+      calls++;
+      return calls < 3 ? ['decl-only'] : ['decl', 'ref1', 'ref2'];
+    };
+    const res = await session.requestWithRetry(run, (r) => (r as unknown[]).length <= 1);
+    expect(calls).toBe(3);
+    expect(res).toEqual(['decl', 'ref1', 'ref2']);
+  });
+
+  it('returns the best-effort (incomplete) result on timeout — not null', async () => {
+    const session = makeSession(80); // tiny budget → times out quickly
+    const run = async () => ['decl-only'];
+    const res = await session.requestWithRetry(run, (r) => (r as unknown[]).length <= 1);
+    expect(res).toEqual(['decl-only']);
+  });
+
+  it('without a predicate, keeps the original null-retry contract', async () => {
+    const session = makeSession(80);
+    const run = async () => null;
+    const res = await session.requestWithRetry(run);
+    expect(res).toBeNull();
+  });
+});
+
+describe('RefactorSession.start — initializationOptions merge (real fixture server)', () => {
+  it('merges configured initializationOptions on top of languageId in the real initialize request', async () => {
+    const session = new RefactorSession({
+      serverCommand: `"${process.execPath}" "${INIT_OPTIONS_FIXTURE}"`,
+      root: tmpdir(),
+      languageId: 'typescript',
+      indexWaitMs: 0,
+      initializationOptions: { supportsMoveToFileCodeAction: true }
+    });
+    try {
+      await session.start();
+      const captured = await session.lsp.sendRequest('$/test.getInitOptions', {});
+      expect(captured).toEqual({
+        languageId: 'typescript',
+        supportsMoveToFileCodeAction: true
+      });
+    } finally {
+      await session.stop();
+    }
+  });
+
+  it('sends just the computed languageId when no initializationOptions are configured', async () => {
+    const session = new RefactorSession({
+      serverCommand: `"${process.execPath}" "${INIT_OPTIONS_FIXTURE}"`,
+      root: tmpdir(),
+      languageId: 'rust',
+      indexWaitMs: 0
+    });
+    try {
+      await session.start();
+      const captured = await session.lsp.sendRequest('$/test.getInitOptions', {});
+      expect(captured).toEqual({ languageId: 'rust' });
+    } finally {
+      await session.stop();
+    }
+  });
+});
+
+describe('CLI_VERSION (--version source)', () => {
+  it('reflects apps/cli/package.json (not the 0.0.0 fallback)', () => {
+    const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+      version: string;
+    };
+    expect(CLI_VERSION).toBe(pkg.version);
+    expect(CLI_VERSION).toMatch(/^\d+\.\d+\.\d+/);
+    expect(CLI_VERSION).not.toBe('0.0.0');
   });
 });

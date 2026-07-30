@@ -16,15 +16,24 @@ export class MessageWriter extends EventEmitter {
   private writing: boolean;
   private queue: Buffer[];
 
+  // Bound references to *this instance's own* listeners — see the matching
+  // comment in MessageReader for why `close()` must remove exactly these
+  // instead of every listener on the stream.
+  private readonly onErrorBound: (error: Error) => void;
+  private readonly onCloseBound: () => void;
+
   constructor(private readonly stream: Writable) {
     super();
     this.closed = false;
     this.writing = false;
     this.queue = [];
 
+    this.onErrorBound = this.onError.bind(this);
+    this.onCloseBound = this.onClose.bind(this);
+
     // Set up stream event handlers
-    this.stream.on('error', this.onError.bind(this));
-    this.stream.on('close', this.onClose.bind(this));
+    this.stream.on('error', this.onErrorBound);
+    this.stream.on('close', this.onCloseBound);
   }
 
   /**
@@ -111,8 +120,10 @@ export class MessageWriter extends EventEmitter {
     this.closed = true;
     this.queue = [];
 
-    // Remove stream listeners
-    this.stream.removeAllListeners();
+    // Remove only the listeners *this* writer attached (see MessageReader's
+    // close() for why removeAllListeners() would be wrong here).
+    this.stream.removeListener('error', this.onErrorBound);
+    this.stream.removeListener('close', this.onCloseBound);
 
     // Emit close event
     this.emit('close');

@@ -9,6 +9,14 @@ updates:
       day: 'monday'
       time: '03:00'
     open-pull-requests-limit: 5
+    # Let a new release age before opening a bump PR. Dependabot PRs run with
+    # CI gated (`action_required`) yet still auto-merge, so without this an
+    # immature version (< the supply-chain minimumReleaseAge policy, ~24h) can
+    # merge un-verified and break the release install — exactly what #162
+    # (@skillit/cli 0.6.0) did. The cooldown comfortably clears that window.
+    cooldown:
+      default-days: 5
+      semver-major-days: 7
     groups:
       # Group TypeScript and related packages
       typescript:
@@ -62,6 +70,8 @@ updates:
       day: 'monday'
       time: '03:00'
     open-pull-requests-limit: 3
+    cooldown:
+      default-days: 5
     labels:
       - 'dependencies'
       - 'github-actions'

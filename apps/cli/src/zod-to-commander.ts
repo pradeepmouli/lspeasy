@@ -1,11 +1,18 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { z } from 'zod';
 import { pathToFileURL } from 'node:url';
 
 import { parseLineCol, toLspPosition, resolvePathArg } from './io.js';
 import type { GlobalFlags } from './io.js';
+import { assessResultQuality } from './result-quality.js';
 import type { RefactorSession } from './session.js';
-import { WorkspaceEditSchema, TextEditSchema, CodeActionSchema } from '@lspeasy/core';
+import {
+  WorkspaceEditSchema,
+  TextEditSchema,
+  CodeActionSchema,
+  unwrapZodType,
+  exampleFromZod
+} from '@lspeasy/core';
 import {
   applyWorkspaceEdit,
   planWorkspaceEdit,
@@ -31,20 +38,80 @@ const PATTERN_FIELDS: Readonly<Record<ArgPattern, ReadonlySet<string>>> = {
   raw: new Set()
 };
 
-function isZodObjectLike(schema: z.ZodType<unknown>): schema is z.ZodObject<z.ZodRawShape> {
+function isZodObjectLike(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
+  return schema instanceof z.ZodObject;
+}
+
+// Delegate to the shared core helper — peels Optional/Nullable/Default wrappers recursively.
+function unwrapOptional(schema: z.ZodType): z.ZodType {
+  return unwrapZodType(schema);
+}
+
+/**
+ * Return true when a ZodType represents a single-value or open-ended scalar,
+ * i.e. ZodString / ZodNumber / ZodBoolean / ZodLiteral / ZodEnum.
+ * Used to decide whether a union member is "scalar enough" to surface as a flag.
+ */
+function isScalarMember(schema: z.ZodType): boolean {
   return (
-    schema != null &&
-    typeof schema === 'object' &&
-    'shape' in schema &&
-    schema.shape != null &&
-    typeof schema.shape === 'object'
+    schema instanceof z.ZodString ||
+    schema instanceof z.ZodNumber ||
+    schema instanceof z.ZodBoolean ||
+    schema instanceof z.ZodLiteral ||
+    schema instanceof z.ZodEnum
   );
 }
 
-function unwrapOptional(schema: z.ZodType<unknown>): z.ZodType<unknown> {
-  const def = (schema as { _def?: { typeName?: string; innerType?: z.ZodType<unknown> } })._def;
-  if (def?.typeName === 'ZodOptional' && def.innerType) return unwrapOptional(def.innerType);
-  return schema;
+/**
+ * Return Commander choices (as strings) when the schema is an enum, a literal,
+ * or a union whose members are ALL literals (i.e. every value is known).
+ * Mixed unions that include open-ended scalars (ZodString etc.) return null —
+ * the open-ended member means any string is valid, so we can't enumerate choices.
+ */
+function getChoices(schema: z.ZodType): string[] | null {
+  if (schema instanceof z.ZodEnum) {
+    // ZodEnum.options is Array<T[keyof T]> — always strings for string enums.
+    return (schema.options as unknown[]).map(String);
+  }
+  if (schema instanceof z.ZodLiteral) {
+    // ZodLiteral.values is Set<T> in Zod 4 (replaces legacy .value).
+    return [...schema.values].map(String);
+  }
+  if (schema instanceof z.ZodUnion) {
+    const opts = schema.options as z.ZodType[];
+    // Only attach Commander choices when ALL members are literals — if the union
+    // also includes an open-ended type (e.g. z.string()) any string is valid,
+    // so we can't enumerate a finite choices list.
+    if (opts.every((o) => o instanceof z.ZodLiteral)) {
+      return opts.flatMap((o) =>
+        [...(o as z.ZodLiteral<string | number | boolean>).values].map(String)
+      );
+    }
+  }
+  return null;
+}
+
+/**
+ * If the schema is a ZodArray whose element type is a scalar / enum / scalar-union,
+ * return the (unwrapped) element schema.  Returns null for arrays of objects or
+ * unions that contain non-scalar members (objects, nested arrays, etc.).
+ *
+ * Note: CodeActionKindSchema is z.union([z.literal('quickfix'), ..., z.string()])
+ * — the open-ended z.string() tail is still scalar, so we accept mixed
+ * literal+string unions here; Commander choices for the description are derived
+ * separately via getChoices() which only enumerates pure-literal unions.
+ */
+function getScalarArrayElement(schema: z.ZodType): z.ZodType | null {
+  if (!(schema instanceof z.ZodArray)) return null;
+  const elem = schema.element as z.ZodType;
+  const inner = unwrapOptional(elem);
+  if (isScalarMember(inner)) return inner;
+  if (inner instanceof z.ZodUnion) {
+    const opts = inner.options as z.ZodType[];
+    // Accept any union whose members are all scalars (literals, strings, numbers, booleans).
+    if (opts.every(isScalarMember)) return inner;
+  }
+  return null;
 }
 
 function toKebabCase(str: string): string {
@@ -80,23 +147,47 @@ function fieldCliKey(subcommand: string, fieldName: string, isObject: boolean): 
  * Register Commander options for a schema field not covered by the positional
  * pattern. `cliKey` is the pre-computed kebab-case prefix (see `fieldCliKey`).
  * Object-typed fields are expanded one level deep: sub-fields become
- * `--<cliKey>-<sub-field>`. Primitive fields become `--<cliKey> <value>`.
+ * `--<cliKey>-<sub-field>`. Leaf fields are emitted as:
+ *   - ZodEnum / union-of-literals → `--<key> <value>` with `.choices([...])`
+ *   - ZodArray of scalars/enums  → `--<key> <items>` (comma-separated, in description)
+ *   - Other scalars              → `--<key> <value>`
+ * Arrays of objects, non-literal unions, and nested objects beyond depth 1 are
+ * silently skipped — users must supply them via `--params`.
  */
-function addFieldOptions(
-  cmd: Command,
-  cliKey: string,
-  schema: z.ZodType<unknown>,
-  depth = 0
-): void {
+function addFieldOptions(cmd: Command, cliKey: string, schema: z.ZodType, depth = 0): void {
   const inner = unwrapOptional(schema);
   if (depth < 1 && isZodObjectLike(inner)) {
-    for (const [sub, subSchema] of Object.entries(
-      inner.shape as Record<string, z.ZodType<unknown>>
-    )) {
-      addFieldOptions(cmd, `${cliKey}-${toKebabCase(sub)}`, subSchema, depth + 1);
+    for (const [sub, subSchema] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
+      addFieldOptions(cmd, `${cliKey}-${toKebabCase(sub)}`, subSchema as z.ZodType, depth + 1);
     }
     return;
   }
+
+  // Arrays of objects or unions with non-scalar members → leave to --params fallback.
+  if (inner instanceof z.ZodObject) return;
+  if (inner instanceof z.ZodArray && getScalarArrayElement(inner) === null) return;
+  if (inner instanceof z.ZodUnion) {
+    const opts = inner.options as z.ZodType[];
+    if (!opts.every(isScalarMember)) return;
+  }
+
+  const scalarElem = getScalarArrayElement(inner);
+  if (scalarElem !== null) {
+    // Scalar / enum array → expose as comma-separated string; list valid values in description.
+    const elemChoices = getChoices(scalarElem);
+    const desc = elemChoices
+      ? `${cliKey} — comma-separated (${elemChoices.join('|')})`
+      : `${cliKey} (comma-separated)`;
+    cmd.addOption(new Option(`--${cliKey} <items>`, desc));
+    return;
+  }
+
+  const choices = getChoices(inner);
+  if (choices !== null) {
+    cmd.addOption(new Option(`--${cliKey} <value>`, cliKey).choices(choices));
+    return;
+  }
+
   cmd.option(`--${cliKey} <value>`, cliKey);
 }
 
@@ -104,21 +195,25 @@ function addFieldOptions(
  * Read back all field options registered by `addFieldOptions` and reconstruct
  * the original nested value. Returns `undefined` when none of the sub-options
  * were provided.
+ * Scalar arrays are stored as comma-separated strings and split here.
  */
-function extractFieldValue(
+export function extractFieldValue(
   opts: Record<string, unknown>,
   cliKey: string,
-  schema: z.ZodType<unknown>,
+  schema: z.ZodType,
   depth = 0
 ): unknown {
   const inner = unwrapOptional(schema);
   if (depth < 1 && isZodObjectLike(inner)) {
     const result: Record<string, unknown> = {};
     let hasAny = false;
-    for (const [sub, subSchema] of Object.entries(
-      inner.shape as Record<string, z.ZodType<unknown>>
-    )) {
-      const val = extractFieldValue(opts, `${cliKey}-${toKebabCase(sub)}`, subSchema, depth + 1);
+    for (const [sub, subSchema] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
+      const val = extractFieldValue(
+        opts,
+        `${cliKey}-${toKebabCase(sub)}`,
+        subSchema as z.ZodType,
+        depth + 1
+      );
       if (val !== undefined) {
         result[sub] = val;
         hasAny = true;
@@ -128,6 +223,21 @@ function extractFieldValue(
   }
   const raw = opts[toCamelCase(cliKey)];
   if (raw === undefined) return undefined;
+  // Scalar array: comma-separated → split and parse each item.
+  const scalarElem = getScalarArrayElement(inner);
+  if (scalarElem !== null && typeof raw === 'string') {
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((item) => {
+        try {
+          return JSON.parse(item);
+        } catch {
+          return item;
+        }
+      });
+  }
   if (typeof raw === 'string') {
     try {
       return JSON.parse(raw);
@@ -138,9 +248,9 @@ function extractFieldValue(
   return raw;
 }
 
-export function detectArgPattern(schema: z.ZodType<unknown>): ArgPattern {
+export function detectArgPattern(schema: z.ZodType): ArgPattern {
   if (!isZodObjectLike(schema)) return 'raw';
-  const shape = schema.shape as Record<string, z.ZodType<unknown>>;
+  const shape = schema.shape as Record<string, z.ZodType>;
   if ('textDocument' in shape && 'position' in shape && 'newName' in shape)
     return 'file-position-newname';
   if ('textDocument' in shape && 'position' in shape) return 'file-position';
@@ -150,35 +260,117 @@ export function detectArgPattern(schema: z.ZodType<unknown>): ArgPattern {
   return 'raw';
 }
 
+/**
+ * A leaf field is exposed as a CLI flag (vs requiring `--params`) when it is a
+ * scalar, an enum/literal-union, or an array of scalars/enums — mirroring
+ * `addFieldOptions`. Objects and arrays-of-objects fall through to `--params`.
+ */
+function isFlagLeaf(inner: z.ZodType): boolean {
+  if (isZodObjectLike(inner)) return false;
+  if (inner instanceof z.ZodArray) return getScalarArrayElement(inner) !== null;
+  if (inner instanceof z.ZodUnion) return (inner.options as z.ZodType[]).every(isScalarMember);
+  return true;
+}
+
+/**
+ * Illustrative example of ONLY the fields configurable via `--params` — i.e.
+ * the params minus everything zodToCommander already exposes as a positional arg
+ * or a flag. `--params` deep-merges over that base, so this is the residual a
+ * caller adds (not a full override). Returns `undefined` when every input maps
+ * to an arg/flag. For `raw`-pattern methods (no args/flags) the full example is
+ * returned, since everything goes through `--params`.
+ */
+export function paramsResidualExample(schema: z.ZodType): unknown | undefined {
+  const pattern = detectArgPattern(schema);
+  if (pattern === 'raw' || !isZodObjectLike(schema)) return exampleFromZod(schema);
+
+  const covered = PATTERN_FIELDS[pattern];
+  const shape = schema.shape as Record<string, z.ZodType>;
+  const residual: Record<string, unknown> = {};
+
+  for (const [field, fieldSchema] of Object.entries(shape)) {
+    if (covered.has(field)) continue; // positional arg
+    const inner = unwrapOptional(fieldSchema);
+    if (isZodObjectLike(inner)) {
+      // Object fields are expanded one level: scalar sub-fields become flags;
+      // the rest (nested objects, arrays-of-objects) still need --params.
+      const sub: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
+        if (isFlagLeaf(unwrapOptional(v))) continue;
+        const ex = exampleFromZod(v);
+        if (ex !== undefined) sub[k] = ex;
+      }
+      if (Object.keys(sub).length > 0) residual[field] = sub;
+      continue;
+    }
+    if (isFlagLeaf(inner)) continue; // exposed as a flag
+    const ex = exampleFromZod(fieldSchema);
+    if (ex !== undefined) residual[field] = ex;
+  }
+
+  return Object.keys(residual).length > 0 ? residual : undefined;
+}
+
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+
+/**
+ * Deep-merge `src` into `dst`: nested objects merge recursively; arrays and
+ * scalars replace. Used to layer `--params` over the positional/flag-derived
+ * base so a caller can pass only the residual JSON (e.g. codeAction's
+ * `context.diagnostics`) without clobbering `textDocument`/`range`/flag fields.
+ */
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+export function deepMergeInto(
+  dst: Record<string, unknown>,
+  src: Record<string, unknown>
+): Record<string, unknown> {
+  for (const [k, v] of Object.entries(src)) {
+    if (UNSAFE_KEYS.has(k)) continue;
+    const cur = dst[k];
+    if (isPlainObject(cur) && isPlainObject(v)) deepMergeInto(cur, v);
+    else dst[k] = v;
+  }
+  return dst;
+}
+
 export function marshalParams(
   pattern: ArgPattern,
   positional: string[],
   opts: Record<string, unknown>,
-  flags: GlobalFlags
+  flags: GlobalFlags,
+  anchorFile?: string
 ): unknown {
-  if (typeof opts['params'] === 'string') return JSON.parse(opts['params']);
+  const effective =
+    anchorFile !== undefined && pattern !== 'query' && pattern !== 'raw'
+      ? [anchorFile, ...positional]
+      : positional;
+  const override =
+    typeof opts['params'] === 'string' ? (JSON.parse(opts['params']) as unknown) : undefined;
 
   switch (pattern) {
     case 'file-position-newname': {
-      const file = resolvePathArg(positional[0]!, flags);
-      const pos = parseLineCol(positional[1]!);
+      const file = resolvePathArg(effective[0]!, flags);
+      const pos = parseLineCol(effective[1]!);
       return {
         textDocument: { uri: pathToFileURL(file).href },
         position: toLspPosition(pos),
-        newName: positional[2]
+        newName: effective[2]
       };
     }
     case 'file-position': {
-      const file = resolvePathArg(positional[0]!, flags);
-      const pos = parseLineCol(positional[1]!);
+      const file = resolvePathArg(effective[0]!, flags);
+      const pos = parseLineCol(effective[1]!);
       return {
         textDocument: { uri: pathToFileURL(file).href },
         position: toLspPosition(pos)
       };
     }
     case 'file-range': {
-      const file = resolvePathArg(positional[0]!, flags);
-      const [startStr, endStr] = (positional[1] ?? '').split('-');
+      const file = resolvePathArg(effective[0]!, flags);
+      const [startStr, endStr] = (effective[1] ?? '').split('-');
       const start = parseLineCol(startStr ?? '1:1');
       const end = parseLineCol(endStr ?? startStr ?? '1:1');
       return {
@@ -187,13 +379,15 @@ export function marshalParams(
       };
     }
     case 'file': {
-      const file = resolvePathArg(positional[0]!, flags);
+      const file = resolvePathArg(effective[0]!, flags);
       return { textDocument: { uri: pathToFileURL(file).href } };
     }
     case 'query':
       return { query: positional[0] ?? '' };
     case 'raw':
-      throw new Error('This method requires --params <json>');
+      // No positional/flag surface — `--params` is the entire request body.
+      if (override === undefined) throw new Error('This method requires --params <json>');
+      return override;
   }
 }
 
@@ -267,30 +461,32 @@ function injectRequiredDefaults(method: string, params: unknown): unknown {
 
 export function zodToCommander(
   method: string,
-  schema: z.ZodType<unknown>,
+  schema: z.ZodType,
   session: RefactorSession,
-  flags: GlobalFlags
+  flags: GlobalFlags,
+  anchorFile?: string
 ): Command {
   const subcommand = method.split('/').slice(1).join('-') || method;
   const cmd = new Command(subcommand);
   const pattern = detectArgPattern(schema);
+  const hasAnchor = anchorFile !== undefined;
 
   switch (pattern) {
     case 'file-position-newname':
-      cmd.argument('<file>', 'file path (relative to --root)');
+      if (!hasAnchor) cmd.argument('<file>', 'file path (relative to --root)');
       cmd.argument('<line:col>', '1-based position, e.g. 12:7');
       cmd.argument('<newName>', 'new symbol name');
       break;
     case 'file-position':
-      cmd.argument('<file>', 'file path (relative to --root)');
+      if (!hasAnchor) cmd.argument('<file>', 'file path (relative to --root)');
       cmd.argument('<line:col>', '1-based position, e.g. 12:7');
       break;
     case 'file-range':
-      cmd.argument('<file>', 'file path (relative to --root)');
+      if (!hasAnchor) cmd.argument('<file>', 'file path (relative to --root)');
       cmd.argument('<range>', 'range as startLine:col-endLine:col, e.g. 2:1-4:5');
       break;
     case 'file':
-      cmd.argument('<file>', 'file path (relative to --root)');
+      if (!hasAnchor) cmd.argument('<file>', 'file path (relative to --root)');
       break;
     case 'query':
       cmd.argument('<query>', 'search query string');
@@ -299,15 +495,16 @@ export function zodToCommander(
       break;
   }
 
-  cmd.option('--params <json>', 'raw LSP params as JSON, overrides positional args');
+  cmd.option(
+    '--params <json>',
+    'extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)'
+  );
 
   // Add Commander options for schema fields not covered by the positional pattern.
   // Object-typed fields are expanded one level deep via hyphenation.
   if (pattern !== 'raw' && isZodObjectLike(schema)) {
     const covered = PATTERN_FIELDS[pattern];
-    for (const [field, fieldSchema] of Object.entries(
-      schema.shape as Record<string, z.ZodType<unknown>>
-    )) {
+    for (const [field, fieldSchema] of Object.entries(schema.shape as Record<string, z.ZodType>)) {
       if (!covered.has(field)) {
         const inner = unwrapOptional(fieldSchema);
         const cliKey = fieldCliKey(subcommand, field, isZodObjectLike(inner));
@@ -328,33 +525,53 @@ export function zodToCommander(
     const positional = cmdArgs.slice(0, -2).map(String);
 
     try {
-      const rawParams = marshalParams(pattern, positional, cmdOpts, flags);
+      const rawParams = marshalParams(pattern, positional, cmdOpts, flags, anchorFile);
 
-      // Overlay extra field options onto the pattern-derived base params.
+      // Layer inputs over the positional base, lowest → highest precedence:
+      //   positionals (marshalParams) → flags → --params.
+      // Object fields deep-merge so e.g. context.{only,triggerKind} (flags) and
+      // context.diagnostics (--params) combine instead of clobbering.
       if (
         pattern !== 'raw' &&
         isZodObjectLike(schema) &&
         typeof rawParams === 'object' &&
         rawParams !== null
       ) {
+        const base = rawParams as Record<string, unknown>;
         const covered = PATTERN_FIELDS[pattern];
         for (const [field, fieldSchema] of Object.entries(
-          schema.shape as Record<string, z.ZodType<unknown>>
+          schema.shape as Record<string, z.ZodType>
         )) {
           if (covered.has(field)) continue;
           const inner = unwrapOptional(fieldSchema);
           const cliKey = fieldCliKey(subcommand, field, isZodObjectLike(inner));
           const val = extractFieldValue(cmdOpts, cliKey, fieldSchema);
-          if (val !== undefined) (rawParams as Record<string, unknown>)[field] = val;
+          if (val === undefined) continue;
+          if (isPlainObject(base[field]) && isPlainObject(val)) deepMergeInto(base[field], val);
+          else base[field] = val;
+        }
+        // --params is a residual, deep-merged LAST over positionals + flags
+        // (not a full override) so callers pass only the fields not surfaced as
+        // args/flags. The option help and the drill-down example say so.
+        if (typeof cmdOpts['params'] === 'string') {
+          const override = JSON.parse(cmdOpts['params']) as unknown;
+          if (isPlainObject(override)) deepMergeInto(base, override);
         }
       }
 
       const params = injectRequiredDefaults(method, rawParams);
-      const result = await session.requestWithRetry(() =>
-        (session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>)(
-          method,
-          params
-        )
+      // Retry while the result is null OR looks incomplete (e.g. a
+      // declaration-only `references` answer before the project finished
+      // loading). assessResultQuality only flags references, so other methods
+      // are unaffected; on timeout we keep the best-effort result and the
+      // post-hoc warning below still fires.
+      const result = await session.requestWithRetry(
+        () =>
+          (session.lsp.sendRequest as (method: string, params: unknown) => Promise<unknown>)(
+            method,
+            params
+          ),
+        (r) => assessResultQuality(method, params, r).partial
       );
 
       // Collect workspace edits from up to four sources:
@@ -416,10 +633,21 @@ export function zodToCommander(
         }
         printAppliedChanges(allChanges, method, flags.dryRun, flags.json);
       } else {
+        const quality = assessResultQuality(method, params, result);
         if (flags.json) {
-          process.stdout.write(JSON.stringify({ ok: true, method, result }) + '\n');
+          process.stdout.write(
+            JSON.stringify({
+              ok: true,
+              method,
+              result,
+              ...(quality.partial ? { partial: true, warning: quality.warning } : {})
+            }) + '\n'
+          );
         } else {
           process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+        }
+        if (quality.partial && quality.warning) {
+          process.stderr.write(`warning: ${quality.warning}\n`);
         }
       }
     } catch (err) {
