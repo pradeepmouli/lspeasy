@@ -58,13 +58,9 @@ handlers for capabilities the server never advertised.
 ## When to Use
 
 **Use this skill when:**
-- The client sets `partialResultToken` in the request params and you want to stream intermediate results (e.g. symbols found so far) rather than waiting for the complete set. → use `PartialResultSender`
-- A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails). → use `ResponseError`
+- The client sets `partialResultToken` in the request params and you want to stream intermediate results (e.g. symbols found so far) rather than waiting for the complete set.
 
-**Do NOT use when:**
-- You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead.
-
-API surface: 4 classes, 27 types, 1 enums, 2 constants
+API surface: 2 classes, 6 types, 1 enums, 1 constants
 
 ## NEVER
 
@@ -72,8 +68,6 @@ API surface: 4 classes, 27 types, 1 enums, 2 constants
 - NEVER call `dispatch` before calling `setClientCapabilities` if your handler reads `context.clientCapabilities` — the value will be `undefined` until the `initialize` request is processed.
 - NEVER call `send` after the handler has already returned a response — the `$/progress` notification will arrive after the client has closed the partial-result channel, and the client will silently discard or error on it.
 - NEVER send partial results without a `partialResultToken` — the client has no way to correlate the `$/progress` notification to the pending request.
-- NEVER throw `ResponseError` with a code outside the defined ranges without documenting it. Undocumented codes are opaque to clients and tools.
-- NEVER use `ConsoleLogger` in a stdio LSP server (`StdioTransport`) — the LSP base protocol uses stdout as the message channel. Any `console.log` / `console.info` / `console.debug` output will corrupt the stdio stream. Use `NullLogger` or a file-based logger instead, and send diagnostic messages via `window/logMessage` notifications.
 
 ## Configuration
 
@@ -81,9 +75,11 @@ API surface: 4 classes, 27 types, 1 enums, 2 constants
 
 ## Quick Reference
 
-**Key classes:** `MessageDispatcher` (Routes incoming JSON-RPC requests and notifications to their registered handlers), `PartialResultSender` (Emits typed `$/progress` partial-result batches from server-side request handlers), `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `ConsoleLogger` (Logger implementation that writes to the process console with level filtering)
-
-*34 exports total — see references/ for full API.*
+**Server:** `MessageDispatcher` (Routes incoming JSON-RPC requests and notifications to their registered handlers), `PartialResultSender` (Emits typed `$/progress` partial-result batches from server-side request handlers), `LSPServer` (Full-featured LSP server with automatic lifecycle management, typed handlers,
+capability-aware namespaces, and pluggable middleware), `LSPServer` (Constructs an LSPServer instance)
+**Handler:** `RequestHandler` (Signature for LSP request handlers registered via `LSPServer), `NotificationHandler` (Signature for LSP notification handlers registered via
+`LSPServer), `NotebookDocumentHandlerNamespace` (Namespace for registering notebook-document lifecycle notification handlers), `RequestContext` (Context provided to request handlers alongside params and the cancellation token), `NotificationContext` (Context provided to notification handlers alongside params)
+**Lifecycle:** `ServerState` (Lifecycle state of an `LSPServer` instance)
 
 ## References
 

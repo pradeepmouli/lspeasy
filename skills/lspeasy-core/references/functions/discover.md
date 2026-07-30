@@ -67,6 +67,27 @@ discoverServers(root: string): ConfiguredServer[]
 - `root: string`
 **Returns:** `ConfiguredServer[]`
 
+### `buildServerCommand`
+Build the full spawn command string for an `lsp.json` entry: `entry.command`
+is itself tokenized (via tokenizeCommand) before being combined with
+`entry.args`, so a `command` field that embeds flags (e.g.
+`"typescript-language-server --stdio"` with no separate `args` array) still
+splits into separate argv tokens instead of collapsing into one bogus binary
+name once re-quoted below. The common case — a bare executable name/path
+with no embedded spaces — tokenizes to a single token, unchanged from before.
+
+Caveat: because `entry.command` is tokenized on whitespace, a legitimately
+space-containing executable path (not embedded flags) must itself be quoted
+in `lsp.json` (e.g. `"\"/path with spaces/my-server\""`) or it will be
+split into multiple bogus tokens — the same requirement a real shell would
+impose.
+```ts
+buildServerCommand(entry: LspServerEntry): string
+```
+**Parameters:**
+- `entry: LspServerEntry`
+**Returns:** `string`
+
 ### `readLspJsonFile`
 Read a single lsp.json file's `lspServers` map. Returns {} when missing or unparseable.
 ```ts

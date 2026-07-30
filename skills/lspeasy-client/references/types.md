@@ -6,7 +6,7 @@
 Typed LSP client that connects to a language server, manages the LSP
 handshake, and exposes capability-aware request namespaces.
 ```ts
-BaseLSPClient<ClientCaps> & Client<ClientCaps, ServerCapabilities>
+BaseLSPClient<ClientCaps> & Transport<ClientCaps, Transport>
 ```
 
 ### `InitializeResult`
@@ -64,28 +64,12 @@ Lifecycle state of an `LSPClient` connection.
 ### `PartialRequestResult`
 Result returned by partial-result enabled requests.
 ```ts
-PartialRequestOutcome<TPartial, TResult>
+Transport<TPartial, TResult>
 ```
 
-## Transport
+## client/src
 
 ### `Transport`
-Pluggable communication layer for JSON-RPC message exchange.
-
-## Logging
-
-### `Logger`
-Structured logging interface used throughout lspeasy.
-
-### `LogLevel`
-Numeric severity levels for filtering log output.
-- `Error` = `0`
-- `Warn` = `1`
-- `Info` = `2`
-- `Debug` = `3`
-- `Trace` = `4`
-
-## Lifecycle
-
-### `Disposable`
-Represents a resource that can be explicitly released.
+```ts
+any
+```

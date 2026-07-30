@@ -59,7 +59,7 @@ structured JSON-RPC errors, DocumentVersionTracker for document sync.
 - You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. (`WebSocketTransport`)
 - You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. (`ResponseError`)
 
-API surface: 74 functions, 11 classes, 123 types, 1 enums, 108 constants
+API surface: 75 functions, 11 classes, 123 types, 1 enums, 108 constants
 
 ## NEVER
 
@@ -86,7 +86,7 @@ document change notification), `createProgressBegin` (Creates a `WorkDoneProgres
 (not gated by a capability) for a given capability key), `discoverServer` (Resolve an LSP server for a file extension by walking up from `root` to the filesystem root then falling back to the global user config), `discoverServerByLanguageId` (Resolve an LSP server for a language ID by walking up from `root` to the filesystem root then falling back to the global user config), `exampleFromZod` (Build an illustrative, required-only example value from a Zod schema), `unwrapZodType` (Peel Zod 4 Optional/Nullable/Default wrappers to the underlying type (recursively))
 **Key classes:** `WebSocketTransport` (WebSocket-based transport for LSP communication), `DisposableStore` (Collects multiple `Disposable` instances and releases them together), `CancellationTokenSource` (Controller that creates and manages a `CancellationToken`), `ConsoleLogger` (Logger implementation that writes to the process console with level filtering), `NullLogger` (No-op logger that silently discards all messages), `ResponseError` (An `Error` subclass that maps to a JSON-RPC 2), `DocumentVersionTracker` (Tracks monotonically increasing version numbers for open text documents)
 
-*317 exports total — see references/ for full API.*
+*318 exports total — see references/ for full API.*
 
 ## References
 

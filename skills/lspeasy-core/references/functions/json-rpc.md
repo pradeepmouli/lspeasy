@@ -56,7 +56,7 @@ This is the low-level framing parser used internally by Node.js transports
 `null` is returned when more bytes are needed.
 
 The framing format is the LSP base protocol:
-`Content-Length: <n>\r\n\r\n<json-body>`.
+`Content-Length: &lt;n&gt;\r\n\r\n&lt;json-body&gt;`.
 ```ts
 parseMessage(buffer: Buffer): { message: Message; bytesRead: number } | null
 ```
@@ -72,7 +72,7 @@ Serializes a JSON-RPC 2.0 message into a framed byte buffer with
 
 Counterpart of `parseMessage`. Used internally by Node.js transports.
 The output format is:
-`Content-Length: <n>\r\nContent-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n<json>`.
+`Content-Length: &lt;n&gt;\r\nContent-Type: application/vscode-jsonrpc; charset=utf-8\r\n\r\n&lt;json&gt;`.
 ```ts
 serializeMessage(message: Message): Buffer
 ```
