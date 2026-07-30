@@ -1,1 +1,0 @@
-../../.agents/skills/ts-monorepo-dev.md
