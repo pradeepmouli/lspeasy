@@ -53,8 +53,9 @@ connect to in order to get diagnostics, completions, hover, go-to-definition,
 and other language intelligence features.
 
 - The client sets `partialResultToken` in the request params and you want to stream intermediate results (e.g. symbols found so far) rather than waiting for the complete set.
+- A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails).
 
-Key APIs: `MessageDispatcher`, `PartialResultSender`
+Key APIs: `MessageDispatcher`, `PartialResultSender`, `ResponseError`
 
 ## Critical Patterns
 
@@ -69,6 +70,7 @@ Top pitfall per package:
 |---------|---------|
 | "I'll just use client for everything" | client is for lsp client package for connecting to language servers.. The transport already provides its own keep-alive mechanism (e.g. WebSocket ping frames) — adding a heartbeat on top creates redundant round-trips and may interfere with the transport's own timeout logic. |
 | "I'll just use core for everything" | core is for core types, transports, and utilities shared by all lspeasy packages.. You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. |
+| "I'll just use server for everything" | server is for lsp server package for hosting language server protocol (lsp) servers.. You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. |
 
 ## Example Invocations
 

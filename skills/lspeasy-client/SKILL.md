@@ -63,7 +63,7 @@ updating the typed namespaces at runtime.
 - The transport already provides its own keep-alive mechanism (e.g. WebSocket ping frames) — adding a heartbeat on top creates redundant round-trips and may interfere with the transport's own timeout logic. (`HeartbeatMonitor`)
 - You need to listen for ongoing notifications (not a one-shot wait) — use `LSPClient.onNotification` for persistent subscriptions instead. (`NotificationWaiter`)
 
-API surface: 5 classes, 9 types, 1 enums, 1 constants
+API surface: 5 classes, 11 types, 2 enums, 1 constants
 
 ## NEVER
 
@@ -88,7 +88,9 @@ client capabilities declared in the `initialize` request), `ConnectionHealthTrac
 handshake, and exposes capability-aware request namespaces), `InitializeResult` (Initialize result from server), `CancellableRequest` (Return value of `LSPClient), `NotebookDocumentNamespace` (Namespace for sending notebook-document lifecycle notifications to a server), `ConnectionHealth` (Aggregated connection health snapshot returned by
 `LSPClient), `HeartbeatStatus` (Snapshot of the current heartbeat monitoring status), `StateChangeEvent` (Payload emitted when the connection state changes), `ConnectionState` (Lifecycle state of an `LSPClient` connection), `LSPClient` (Constructs an LSPClient instance)
 **types:** `PartialRequestResult` (Result returned by partial-result enabled requests)
-**client/src:** `Transport`
+**Transport:** `Transport` (Pluggable communication layer for JSON-RPC message exchange)
+**Logging:** `Logger` (Structured logging interface used throughout lspeasy), `LogLevel` (Numeric severity levels for filtering log output)
+**Lifecycle:** `Disposable` (Represents a resource that can be explicitly released)
 
 ## References
 
