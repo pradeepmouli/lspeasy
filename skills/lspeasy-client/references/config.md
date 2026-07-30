@@ -51,13 +51,13 @@ relies on `workspaceFolders`.
 
 Logger instance for client logging
 
-**Type:** `any`
+**Type:** `Logger`
 
 #### logLevel
 
 Log level for built-in console logger
 
-**Type:** `any`
+**Type:** `LogLevel`
 
 #### requestTimeout
 
@@ -77,7 +77,7 @@ When false, logs warning and allows registration/sending (default: false)
 
 Optional middleware chain for clientToServer/serverToClient messages.
 
-**Type:** `any[]`
+**Type:** `(Middleware | ScopedMiddleware)[]`
 
 #### heartbeat
 
@@ -89,7 +89,7 @@ Optional heartbeat configuration (disabled by default).
 
 Behavior controls for server-driven dynamic registration.
 
-**Type:** `any`
+**Type:** `DynamicRegistrationBehavior`
 
 #### onValidationError
 

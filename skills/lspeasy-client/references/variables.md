@@ -5,5 +5,5 @@
 ### `LSPClient`
 Constructs an LSPClient instance.
 ```ts
-let LSPClient: (options?: ClientOptions<ClientCaps>) => any
+let LSPClient: (options?: ClientOptions<ClientCaps>) => LSPClient<ClientCaps>
 ```
