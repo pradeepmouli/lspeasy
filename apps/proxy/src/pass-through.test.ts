@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { LSPServer, LogLevel } from '@lspeasy/server';
-import {
-  ClientRequestMethodToCapabilityMap,
-  ClientNotificationMethodToCapabilityMap
-} from '@lspeasy/core';
+import { ClientRequestMethodToCapabilityMap } from '@lspeasy/core';
 import type { Transport, Message } from '@lspeasy/core';
 import { registerPassThrough } from './pass-through.js';
 

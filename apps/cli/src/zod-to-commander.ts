@@ -321,11 +321,14 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
  * base so a caller can pass only the residual JSON (e.g. codeAction's
  * `context.diagnostics`) without clobbering `textDocument`/`range`/flag fields.
  */
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 export function deepMergeInto(
   dst: Record<string, unknown>,
   src: Record<string, unknown>
 ): Record<string, unknown> {
   for (const [k, v] of Object.entries(src)) {
+    if (UNSAFE_KEYS.has(k)) continue;
     const cur = dst[k];
     if (isPlainObject(cur) && isPlainObject(v)) deepMergeInto(cur, v);
     else dst[k] = v;

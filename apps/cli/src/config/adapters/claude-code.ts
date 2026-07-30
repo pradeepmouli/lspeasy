@@ -19,7 +19,6 @@ interface Settings {
 
 function readSettings(home: string): Settings {
   const p = settingsPath(home);
-  if (!existsSync(p)) return {};
   try {
     return JSON.parse(readFileSync(p, 'utf8')) as Settings;
   } catch {
@@ -58,7 +57,11 @@ export const claudeCodeAdapter: PlatformAdapter = {
       written.push(name);
     }
     if (written.length > 0) {
-      if (existsSync(p)) copyFileSync(p, p + '.bak');
+      try {
+        copyFileSync(p, p + '.bak');
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+      }
       settings.enabledPlugins = enabled;
       writeFileSync(p, JSON.stringify(settings, null, 2) + '\n', 'utf8');
     }
