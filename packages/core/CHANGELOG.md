@@ -1,5 +1,13 @@
 # @lspeasy/core
 
+## 2.7.1
+
+### Patch Changes
+
+- fc6e0e3: - chore: upgrade to TypeScript 7, pin docs app to TS6 for typedoc compat
+  - chore: bump typedoc-plugin-skillit to 2.0.3, remove unused @to-skills/vitepress
+  - chore: pnpm update --latest across the workspace
+
 ## 2.7.0
 
 ### Minor Changes

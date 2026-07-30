@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/server",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "Build LSP language servers with a simple, fully-typed API",
   "private": false,
   "keywords": [

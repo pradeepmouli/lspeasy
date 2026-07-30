@@ -1,6 +1,6 @@
 {
   "name": "@lsproxy/polyfill",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "CodeAction capability polyfills for lsproxy backends that don't natively support them",
   "private": false,
   "keywords": [
