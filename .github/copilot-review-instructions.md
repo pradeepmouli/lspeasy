@@ -41,4 +41,3 @@ Output contract (must include all):
 Definition of done for each review:
 - At least one explicit pass/fail statement for bug risk, type safety, and test coverage.
 - A final one-line summary that can be used as the session summary.
-
