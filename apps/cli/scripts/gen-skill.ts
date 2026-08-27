@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { extractCliSkill, writeCliSkill } from '@skillit/cli';
+import { extractCliSkill, writeCliSkill, applyNpxMode } from '@skillit/cli';
 import { buildProgram } from '../dist/program.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -32,6 +32,8 @@ interface Pkg {
   repository?: { url: string };
   author?: string;
   license?: string;
+  bin?: Record<string, string>;
+  private?: boolean;
 }
 const pkg = JSON.parse(readFileSync(resolve(cliDir, 'package.json'), 'utf-8')) as Pkg;
 
@@ -173,11 +175,23 @@ const flatSurfaces = flattenSurfaces(skill.configSurfaces ?? []);
 const enrichedSkill = {
   ...skill,
   configSurfaces: flatSurfaces,
-  ...(features !== undefined ? { readmeFeatures: features } : {}),
-  ...(troubleshooting !== undefined ? { readmeTroubleshooting: troubleshooting } : {}),
-  ...(quickStart !== undefined ? { examples: [quickStart] } : {}),
   ...(documents.length > 0 ? { documents } : {})
 };
+
+// `@lsproxy/cli` is a public package with a `bin` entry, so applyNpxMode sets
+// invocation mode to 'npx' and rewrites every bare `lsproxy …` occurrence in
+// the README-derived prose (features/troubleshooting/quickStart) to
+// `npx @lsproxy/cli …`. Without this, the generated skill instructs agents to
+// run a bare `lsproxy` binary that may not exist on PATH — `npx lsproxy`
+// (guessed from the bin name, which is what every example otherwise shows)
+// 404s, since no unscoped `lsproxy` package is published; only the scoped
+// `@lsproxy/cli` name resolves.
+applyNpxMode(enrichedSkill, {
+  fullPackageName: pkg.name,
+  bin: pkg.bin,
+  isPrivate: pkg.private ?? false,
+  readme: { features, troubleshooting, quickStart }
+});
 
 // ---------------------------------------------------------------------------
 // Write generated skill files

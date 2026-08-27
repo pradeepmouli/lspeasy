@@ -5,13 +5,13 @@
 callHierarchy operations
 
 ```
-[options] [command]
+npx @lsproxy/cli callHierarchy [options] [command]
 ```
 
 ## callHierarchy incomingCalls
 
 ```
-[options]
+npx @lsproxy/cli callHierarchy incomingCalls [options]
 ```
 
 ### Options
@@ -25,7 +25,7 @@ extra LSP params as JSON, deep-merged over positional args + flags (for raw meth
 ## callHierarchy outgoingCalls
 
 ```
-[options]
+npx @lsproxy/cli callHierarchy outgoingCalls [options]
 ```
 
 ### Options
@@ -41,13 +41,13 @@ extra LSP params as JSON, deep-merged over positional args + flags (for raw meth
 codeAction operations
 
 ```
-[options] [command]
+npx @lsproxy/cli codeAction [options] [command]
 ```
 
 ## codeAction resolve
 
 ```
-[options]
+npx @lsproxy/cli codeAction resolve [options]
 ```
 
 ### Options
@@ -63,13 +63,13 @@ extra LSP params as JSON, deep-merged over positional args + flags (for raw meth
 codeLens operations
 
 ```
-[options] [command]
+npx @lsproxy/cli codeLens [options] [command]
 ```
 
 ## codeLens resolve
 
 ```
-[options]
+npx @lsproxy/cli codeLens resolve [options]
 ```
 
 ### Options
@@ -85,13 +85,13 @@ extra LSP params as JSON, deep-merged over positional args + flags (for raw meth
 completionItem operations
 
 ```
-[options] [command]
+npx @lsproxy/cli completionItem [options] [command]
 ```
 
 ## completionItem resolve
 
 ```
-[options]
+npx @lsproxy/cli completionItem resolve [options]
 ```
 
 ### Options
@@ -107,13 +107,13 @@ extra LSP params as JSON, deep-merged over positional args + flags (for raw meth
 documentLink operations
 
 ```
-[options] [command]
+npx @lsproxy/cli documentLink [options] [command]
 ```
 
 ## documentLink resolve
 
 ```
-[options]
+npx @lsproxy/cli documentLink resolve [options]
 ```
 
 ### Options
@@ -129,13 +129,13 @@ extra LSP params as JSON, deep-merged over positional args + flags (for raw meth
 inlayHint operations
 
 ```
-[options] [command]
+npx @lsproxy/cli inlayHint [options] [command]
 ```
 
 ## inlayHint resolve
 
 ```
-[options]
+npx @lsproxy/cli inlayHint resolve [options]
 ```
 
 ### Options
@@ -151,13 +151,13 @@ extra LSP params as JSON, deep-merged over positional args + flags (for raw meth
 textDocument operations
 
 ```
-[options] [command]
+npx @lsproxy/cli textDocument [options] [command]
 ```
 
 ## textDocument codeAction
 
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument codeAction [options] <file> <range>
 ```
 
 ### Options
@@ -209,7 +209,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 ## textDocument codeLens
 
 ```
-[options] <file>
+npx @lsproxy/cli textDocument codeLens [options] <file>
 ```
 
 ### Options
@@ -243,7 +243,7 @@ file path (relative to --root)
 ## textDocument colorPresentation
 
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument colorPresentation [options] <file> <range>
 ```
 
 ### Options
@@ -307,7 +307,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 ## textDocument completion
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument completion [options] <file> <line:col>
 ```
 
 ### Options
@@ -359,7 +359,7 @@ file path (relative to --root)
 ## textDocument declaration
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument declaration [options] <file> <line:col>
 ```
 
 ### Options
@@ -399,7 +399,7 @@ file path (relative to --root)
 ## textDocument definition
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument definition [options] <file> <line:col>
 ```
 
 ### Options
@@ -439,7 +439,7 @@ file path (relative to --root)
 ## textDocument diagnostic
 
 ```
-[options] <file>
+npx @lsproxy/cli textDocument diagnostic [options] <file>
 ```
 
 ### Options
@@ -485,7 +485,7 @@ file path (relative to --root)
 ## textDocument documentColor
 
 ```
-[options] <file>
+npx @lsproxy/cli textDocument documentColor [options] <file>
 ```
 
 ### Options
@@ -519,7 +519,7 @@ file path (relative to --root)
 ## textDocument documentHighlight
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument documentHighlight [options] <file> <line:col>
 ```
 
 ### Options
@@ -559,7 +559,7 @@ file path (relative to --root)
 ## textDocument documentLink
 
 ```
-[options] <file>
+npx @lsproxy/cli textDocument documentLink [options] <file>
 ```
 
 ### Options
@@ -593,7 +593,7 @@ file path (relative to --root)
 ## textDocument documentSymbol
 
 ```
-[options] <file>
+npx @lsproxy/cli textDocument documentSymbol [options] <file>
 ```
 
 ### Options
@@ -627,7 +627,7 @@ file path (relative to --root)
 ## textDocument foldingRange
 
 ```
-[options] <file>
+npx @lsproxy/cli textDocument foldingRange [options] <file>
 ```
 
 ### Options
@@ -661,7 +661,7 @@ file path (relative to --root)
 ## textDocument formatting
 
 ```
-[options] <file>
+npx @lsproxy/cli textDocument formatting [options] <file>
 ```
 
 ### Options
@@ -719,7 +719,7 @@ file path (relative to --root)
 ## textDocument hover
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument hover [options] <file> <line:col>
 ```
 
 ### Options
@@ -753,7 +753,7 @@ file path (relative to --root)
 ## textDocument implementation
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument implementation [options] <file> <line:col>
 ```
 
 ### Options
@@ -793,7 +793,7 @@ file path (relative to --root)
 ## textDocument inlayHint
 
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument inlayHint [options] <file> <range>
 ```
 
 ### Options
@@ -827,7 +827,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 ## textDocument inlineCompletion
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument inlineCompletion [options] <file> <line:col>
 ```
 
 ### Options
@@ -867,7 +867,7 @@ file path (relative to --root)
 ## textDocument inlineValue
 
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument inlineValue [options] <file> <range>
 ```
 
 ### Options
@@ -907,7 +907,7 @@ range as startLine:col-endLine:col, e.g. 2:1-4:5
 ## textDocument linkedEditingRange
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument linkedEditingRange [options] <file> <line:col>
 ```
 
 ### Options
@@ -941,7 +941,7 @@ file path (relative to --root)
 ## textDocument moniker
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument moniker [options] <file> <line:col>
 ```
 
 ### Options
@@ -981,7 +981,7 @@ file path (relative to --root)
 ## textDocument onTypeFormatting
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument onTypeFormatting [options] <file> <line:col>
 ```
 
 ### Options
@@ -1045,7 +1045,7 @@ file path (relative to --root)
 ## textDocument prepareCallHierarchy
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument prepareCallHierarchy [options] <file> <line:col>
 ```
 
 ### Options
@@ -1079,7 +1079,7 @@ file path (relative to --root)
 ## textDocument prepareRename
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument prepareRename [options] <file> <line:col>
 ```
 
 ### Options
@@ -1113,7 +1113,7 @@ file path (relative to --root)
 ## textDocument prepareTypeHierarchy
 
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument prepareTypeHierarchy [options] <file> <line:col>
 ```
 
 ### Options
@@ -1145,107 +1145,5 @@ file path (relative to --root)
 **Required:** yes
 
 ## textDocument rangeFormatting
-
-```
-[options] <file> <range>
-```
-
-### Options
-
-#### --params
-
-extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
-
-**Type:** `string`
-
-#### --work-done-token
-
-work-done-token
-
-**Type:** `string`
-
-#### --range-formatting-tab-size
-
-range-formatting-tab-size
-
-**Type:** `string`
-
-#### --range-formatting-insert-spaces
-
-range-formatting-insert-spaces
-
-**Type:** `string`
-
-#### --range-formatting-trim-trailing-whitespace
-
-range-formatting-trim-trailing-whitespace
-
-**Type:** `string`
-
-#### --range-formatting-insert-final-newline
-
-range-formatting-insert-final-newline
-
-**Type:** `string`
-
-#### --range-formatting-trim-final-newlines
-
-range-formatting-trim-final-newlines
-
-**Type:** `string`
-
-### Arguments
-
-#### `file`
-
-file path (relative to --root)
-
-**Required:** yes
-
-#### `range`
-
-range as startLine:col-endLine:col, e.g. 2:1-4:5
-
-**Required:** yes
-
-## textDocument rangesFormatting
-
-```
-[options] <file>
-```
-
-### Options
-
-#### --params
-
-extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)
-
-**Type:** `string`
-
-#### --work-done-token
-
-work-done-token
-
-**Type:** `string`
-
-#### --ranges-formatting-tab-size
-
-ranges-formatting-tab-size
-
-**Type:** `string`
-
-#### --ranges-formatting-insert-spaces
-
-ranges-formatting-insert-spaces
-
-**Type:** `string`
-
-#### --ranges-formatting-trim-trailing-whitespace
-
-ranges-formatting-trim-trailing-whitespace
-
-**Type:** `string`
-
-#### --ranges-formatting-insert-final-newline
 
 <!-- truncated -->
