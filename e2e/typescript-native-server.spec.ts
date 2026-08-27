@@ -12,11 +12,23 @@
  */
 
 import { execFileSync, spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { LSPClient } from '@lspeasy/client';
+import type { WorkspaceEdit } from '@lspeasy/core';
 import { StdioTransport } from '@lspeasy/core/node';
+
+/** Collects target URIs from both `changes` and `documentChanges` — servers
+ * may return either shape, and `tsc --lsp`'s choice isn't a stable contract
+ * to assert on. */
+function editedUris(edit: WorkspaceEdit): string[] {
+  const fromChanges = Object.keys(edit.changes ?? {});
+  const fromDocumentChanges = (edit.documentChanges ?? [])
+    .map((dc) => ('textDocument' in dc ? dc.textDocument.uri : undefined))
+    .filter((uri): uri is string => uri !== undefined);
+  return [...fromChanges, ...fromDocumentChanges];
+}
 
 const FIXTURE_ROOT = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'typescript-native');
 
@@ -56,8 +68,8 @@ describe.skipIf(!tscSupportsLsp())('TypeScript native compiler LSP (tsc --lsp --
           }
         }
       },
-      rootUri: `file://${FIXTURE_ROOT}`,
-      workspaceFolders: [{ uri: `file://${FIXTURE_ROOT}`, name: 'typescript-native' }]
+      rootUri: pathToFileURL(FIXTURE_ROOT).href,
+      workspaceFolders: [{ uri: pathToFileURL(FIXTURE_ROOT).href, name: 'typescript-native' }]
     });
 
     await client.connect(transport);
@@ -66,7 +78,7 @@ describe.skipIf(!tscSupportsLsp())('TypeScript native compiler LSP (tsc --lsp --
       const { readFileSync } = await import('node:fs');
       await client.sendNotification('textDocument/didOpen', {
         textDocument: {
-          uri: `file://${join(FIXTURE_ROOT, file)}`,
+          uri: pathToFileURL(join(FIXTURE_ROOT, file)).href,
           languageId: 'typescript',
           version: 1,
           text: readFileSync(join(FIXTURE_ROOT, file), 'utf8')
@@ -94,7 +106,7 @@ describe.skipIf(!tscSupportsLsp())('TypeScript native compiler LSP (tsc --lsp --
 
   it('hovers the exported function with its computed signature', async () => {
     const result = await client.textDocument.hover({
-      textDocument: { uri: `file://${join(FIXTURE_ROOT, 'greet.ts')}` },
+      textDocument: { uri: pathToFileURL(join(FIXTURE_ROOT, 'greet.ts')).href },
       position: { line: 0, character: 17 } // `greet` in `export function greet(...)`
     });
 
@@ -108,7 +120,7 @@ describe.skipIf(!tscSupportsLsp())('TypeScript native compiler LSP (tsc --lsp --
 
   it('finds the cross-file reference from main.ts', async () => {
     const result = await client.textDocument.references({
-      textDocument: { uri: `file://${join(FIXTURE_ROOT, 'greet.ts')}` },
+      textDocument: { uri: pathToFileURL(join(FIXTURE_ROOT, 'greet.ts')).href },
       position: { line: 0, character: 17 },
       context: { includeDeclaration: true }
     });
@@ -121,13 +133,13 @@ describe.skipIf(!tscSupportsLsp())('TypeScript native compiler LSP (tsc --lsp --
 
   it('produces a cross-file WorkspaceEdit on rename', async () => {
     const edit = await client.textDocument.rename({
-      textDocument: { uri: `file://${join(FIXTURE_ROOT, 'greet.ts')}` },
+      textDocument: { uri: pathToFileURL(join(FIXTURE_ROOT, 'greet.ts')).href },
       position: { line: 0, character: 17 },
       newName: 'sayHello'
     });
 
     expect(edit).not.toBeNull();
-    const changedUris = Object.keys(edit?.changes ?? {});
+    const changedUris = editedUris(edit as WorkspaceEdit);
     expect(changedUris.some((uri) => uri.endsWith('greet.ts'))).toBe(true);
     expect(changedUris.some((uri) => uri.endsWith('main.ts'))).toBe(true);
   });
