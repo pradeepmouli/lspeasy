@@ -42,14 +42,21 @@ function copyDir(src, dest) {
   }
 }
 
-rewrite(skillsDir);
-
 const userSkillsDir = path.join(os.homedir(), '.claude', 'skills');
 try {
   fs.mkdirSync(userSkillsDir, { recursive: true });
   for (const entry of fs.readdirSync(skillsDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
-    copyDir(path.join(skillsDir, entry.name), path.join(userSkillsDir, entry.name));
+    const destDir = path.join(userSkillsDir, entry.name);
+    copyDir(path.join(skillsDir, entry.name), destDir);
+    // Rewrite only the installed copy: this package is now really on the
+    // user's PATH as `binName`, so the npx-prefixed form (needed by anyone
+    // reading `skillsDir` — the package's own checked-in/shipped source,
+    // which shouldn't assume a prior install) is unnecessary noise there.
+    // Never rewrite `skillsDir` itself — in this monorepo's dev layout
+    // `__dirname` IS the source tree, so mutating it in place was silently
+    // clobbering the checked-in skill docs on every `pnpm install`.
+    rewrite(destDir);
   }
   console.log('[skillit] Skills installed to ' + userSkillsDir);
 } catch (err) {
