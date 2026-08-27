@@ -197,7 +197,12 @@ applyNpxMode(enrichedSkill, {
 // Write generated skill files
 // ---------------------------------------------------------------------------
 const outDir = resolve(cliDir, 'skills');
-const results = writeCliSkill(enrichedSkill, { outDir });
+// `maxTokens` only bounds references/*.md (commands.md, config.md, docs/*,
+// etc.) — files an agent opens on demand, never loaded as part of SKILL.md
+// itself. The default (4000) silently truncated references/commands.md mid-
+// document (this CLI has ~60 subcommands); since these files cost nothing
+// until read, there's no reason to cap them at all.
+const results = writeCliSkill(enrichedSkill, { outDir, maxTokens: Number.MAX_SAFE_INTEGER });
 
 console.log('Generated skill files:');
 for (const result of results) {
