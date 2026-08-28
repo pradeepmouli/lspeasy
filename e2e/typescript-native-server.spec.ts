@@ -100,8 +100,19 @@ describe.skipIf(!tscSupportsLsp())('TypeScript native compiler LSP (tsc --lsp --
         }
       });
     }
-    // Let the server finish loading the (tiny) project before the first request.
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Poll hover instead of a fixed sleep: it's the cheapest request that
+    // only succeeds once the project has actually finished loading.
+    const greetUri = pathToFileURL(join(FIXTURE_ROOT, 'greet.ts')).href;
+    const deadline = Date.now() + 15000;
+    while (Date.now() < deadline) {
+      const result = await client.textDocument.hover({
+        textDocument: { uri: greetUri },
+        position: { line: 0, character: 17 }
+      });
+      if (result) break;
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
   }, 20000);
 
   afterAll(async () => {
