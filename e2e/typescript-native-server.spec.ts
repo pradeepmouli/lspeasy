@@ -16,8 +16,18 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { LSPClient } from '@lspeasy/client';
-import type { WorkspaceEdit } from '@lspeasy/core';
+import type { Hover, WorkspaceEdit } from '@lspeasy/core';
 import { StdioTransport } from '@lspeasy/core/node';
+
+/** `Hover.contents` is `MarkupContent | MarkedString | MarkedString[]` — a
+ * plain string, a `{ value }` object (`MarkupContent` or the deprecated
+ * `MarkedStringWithLanguage`), or an array of either. Normalize to plain
+ * text so the assertion holds for any spec-compliant server response. */
+function hoverText(contents: Hover['contents']): string {
+  if (typeof contents === 'string') return contents;
+  if (Array.isArray(contents)) return contents.map(hoverText).join('\n');
+  return contents.value;
+}
 
 /** Collects target URIs from both `changes` and `documentChanges` — servers
  * may return either shape, and `tsc --lsp`'s choice isn't a stable contract
@@ -115,10 +125,7 @@ describe.skipIf(!tscSupportsLsp())('TypeScript native compiler LSP (tsc --lsp --
       position: { line: 0, character: 17 } // `greet` in `export function greet(...)`
     });
 
-    const value =
-      typeof result?.contents === 'object' && 'value' in result.contents
-        ? result.contents.value
-        : '';
+    const value = result ? hoverText(result.contents) : '';
     expect(value).toContain('greet');
     expect(value).toContain('string');
   });
