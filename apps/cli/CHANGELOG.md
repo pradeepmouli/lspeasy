@@ -1,5 +1,13 @@
 # @lspeasy/cli
 
+## 1.0.3
+
+### Patch Changes
+
+- 1d9b972: - chore(deps): update dependencies (pnpm update -r --latest)
+  - fix(cli): wire up npx invocation mode in generated skill
+  - test(e2e): add coverage for TypeScript's native tsc --lsp server
+
 ## 1.0.2
 
 ### Patch Changes
