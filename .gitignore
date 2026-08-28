@@ -27,6 +27,9 @@ Thumbs.db
 .cache/
 docs/html/
 
+# Infigraph local index/tool state (regenerated per-machine; not source)
+.infigraph/
+
 # Generated API docs (typedoc)
 docs/api/
 docs/classes/
