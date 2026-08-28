@@ -15,24 +15,24 @@ Standalone refactor CLI driving any LSP server: project-wide rename, file-move w
 - **Any LSP server** — TypeScript, Rust, Python, Go, or any LSP-compliant server via `lsp.json`
 - **Proxy daemon** — warm server connections for sub-100ms subsequent invocations
 - **Dry-run preview** — `--dry-run` prints diffs without writing; safe to inspect before committing
-- **Multi-platform config interop** — `lsproxy config import/export/diff/list` bridges `lsp.json` with Copilot CLI, Claude Code, and Codex; `--user` targets `~/.claude/lsp.json` for user-level scope
-- **Self-describing discovery** — bare `lsproxy` lists configured languages with live daemon status; `lsproxy --help <language> <namespace> <request>` shows parameter schema, flag list, and illustrative example input/output; add `--json` for machine-readable output for agents
-- **Server visibility** — `lsproxy status` groups every configured server by process, showing its resolved binary location, config source (lsp.json, Claude Code, Codex, Copilot CLI), live connection status/uptime, and which languages it serves
+- **Multi-platform config interop** — `npx @lsproxy/cli config import/export/diff/list` bridges `lsp.json` with Copilot CLI, Claude Code, and Codex; `--user` targets `~/.claude/lsp.json` for user-level scope
+- **Self-describing discovery** — bare `npx @lsproxy/cli` lists configured languages with live daemon status; `npx @lsproxy/cli --help <language> <namespace> <request>` shows parameter schema, flag list, and illustrative example input/output; add `--json` for machine-readable output for agents
+- **Server visibility** — `npx @lsproxy/cli status` groups every configured server by process, showing its resolved binary location, config source (lsp.json, Claude Code, Codex, Copilot CLI), live connection status/uptime, and which languages it serves
 
 ## Quick Start
 
 ```bash
 # Preview a rename before writing (always do this first)
-lsproxy src/auth/login.ts textDocument rename --dry-run 42:15 "signIn"
+npx @lsproxy/cli src/auth/login.ts textDocument rename --dry-run 42:15 "signIn"
 
 # Find all references to a symbol
-lsproxy src/auth/login.ts textDocument references 42:15
+npx @lsproxy/cli src/auth/login.ts textDocument references 42:15
 
 # List available code actions at a range, then apply the chosen one
-lsproxy src/foo.ts textDocument codeAction 12:1-12:20
+npx @lsproxy/cli src/foo.ts textDocument codeAction 12:1-12:20
 
 # Send any LSP method directly (useful for probing capabilities)
-lsproxy typescript call workspace/executeCommand --params '{"command":"typescript.reloadProjects"}'
+npx @lsproxy/cli typescript call workspace/executeCommand --params '{"command":"typescript.reloadProjects"}'
 ```
 
 Positions are **1-based** (`line:col`, editor-style).
@@ -40,16 +40,16 @@ Write-side commands apply changes to disk automatically — use `--dry-run` to p
 
 ## Troubleshooting
 
-**Commands missing from `--help`** — lsproxy only registers commands for capabilities the
+**Commands missing from `--help`** — npx @lsproxy/cli only registers commands for capabilities the
 server actually advertises. If `textDocument rename` doesn't appear, the server doesn't
-support `renameProvider`. Use `lsproxy <language-or-file> call initialize --params '{}'`
+support `renameProvider`. Use `npx @lsproxy/cli <language-or-file> call initialize --params '{}'`
 to inspect the server's capability response.
 
 **Wrong positions** — Positions must be 1-based (`line:col`). Most editors display
-1-based positions; LSP protocol is 0-based internally but lsproxy converts for you.
+1-based positions; LSP protocol is 0-based internally but npx @lsproxy/cli converts for you.
 Passing 0-based values shifts edits by one line/column.
 
-**Server not found** — Without `--server`, lsproxy walks up from `--root` looking for
+**Server not found** — Without `--server`, npx @lsproxy/cli walks up from `--root` looking for
 `lsp.json`. If it can't find one it will time out. Either add `lsp.json` to the project
 root or pass `--server <cmd>` explicitly.
 
@@ -61,7 +61,7 @@ unfamiliar codebase.
 monorepo (especially with a solution-style root `tsconfig.json` that has `references` but no
 `include`), `textDocument references` can come back with only the symbol's own declaration —
 or an empty result — even when cross-file callers exist. This happens when the language
-server has not loaded the full workspace project. lsproxy flags this case as `partial:true`
+server has not loaded the full workspace project. npx @lsproxy/cli flags this case as `partial:true`
 with a `warning` (and a stderr note) instead of a bare `ok:true`. Do not treat a
 partial/empty result as "no callers" for a deletion or a file move; verify with a
 build/type-check, or re-run against a warmed proxy daemon so the project is fully indexed.
@@ -74,14 +74,14 @@ callHierarchy operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli callHierarchy [options] [command]
 ```
 
 ### callHierarchy incomingCalls
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli callHierarchy incomingCalls [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -92,7 +92,7 @@ callHierarchy operations
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli callHierarchy outgoingCalls [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -105,14 +105,14 @@ codeAction operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli codeAction [options] [command]
 ```
 
 ### codeAction resolve
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli codeAction resolve [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -125,14 +125,14 @@ codeLens operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli codeLens [options] [command]
 ```
 
 ### codeLens resolve
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli codeLens resolve [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -145,14 +145,14 @@ completionItem operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli completionItem [options] [command]
 ```
 
 ### completionItem resolve
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli completionItem resolve [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -165,14 +165,14 @@ documentLink operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli documentLink [options] [command]
 ```
 
 ### documentLink resolve
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli documentLink resolve [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -185,14 +185,14 @@ inlayHint operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli inlayHint [options] [command]
 ```
 
 ### inlayHint resolve
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli inlayHint resolve [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -205,14 +205,14 @@ textDocument operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli textDocument [options] [command]
 ```
 
 ### textDocument codeAction
 
 **Usage:**
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument codeAction [options] <file> <range>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -231,7 +231,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument codeLens [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -247,7 +247,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument colorPresentation [options] <file> <range>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -268,7 +268,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument completion [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -287,7 +287,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument declaration [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -304,7 +304,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument definition [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -321,7 +321,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument diagnostic [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -339,7 +339,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument documentColor [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -355,7 +355,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument documentHighlight [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -372,7 +372,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument documentLink [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -388,7 +388,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument documentSymbol [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -404,7 +404,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument foldingRange [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -420,7 +420,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument formatting [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -440,7 +440,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument hover [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -456,7 +456,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument implementation [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -473,7 +473,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument inlayHint [options] <file> <range>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -489,7 +489,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument inlineCompletion [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -506,7 +506,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument inlineValue [options] <file> <range>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -523,7 +523,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument linkedEditingRange [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -539,7 +539,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument moniker [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -556,7 +556,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument onTypeFormatting [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -577,7 +577,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument prepareCallHierarchy [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -593,7 +593,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument prepareRename [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -609,7 +609,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument prepareTypeHierarchy [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -625,7 +625,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument rangeFormatting [options] <file> <range>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -646,7 +646,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument rangesFormatting [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -666,7 +666,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument references [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -684,7 +684,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col> <newName>
+npx @lsproxy/cli textDocument rename [options] <file> <line:col> <newName>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -701,7 +701,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument selectionRange [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -717,7 +717,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument semanticTokens-full [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -733,7 +733,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument semanticTokens-full-delta [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -750,7 +750,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <range>
+npx @lsproxy/cli textDocument semanticTokens-range [options] <file> <range>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -767,7 +767,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument signatureHelp [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -786,7 +786,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file> <line:col>
+npx @lsproxy/cli textDocument typeDefinition [options] <file> <line:col>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -803,7 +803,7 @@ textDocument operations
 
 **Usage:**
 ```
-[options] <file>
+npx @lsproxy/cli textDocument willSaveWaitUntil [options] <file>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -820,14 +820,14 @@ workspace operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli workspace [options] [command]
 ```
 
 ### workspace diagnostic
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli workspace diagnostic [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -838,7 +838,7 @@ workspace operations
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli workspace executeCommand [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -849,7 +849,7 @@ workspace operations
 
 **Usage:**
 ```
-[options] <query>
+npx @lsproxy/cli workspace symbol [options] <query>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -865,7 +865,7 @@ workspace operations
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli workspace textDocumentContent [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -876,7 +876,7 @@ workspace operations
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli workspace willCreateFiles [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -887,7 +887,7 @@ workspace operations
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli workspace willDeleteFiles [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -898,7 +898,7 @@ workspace operations
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli workspace willRenameFiles [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -911,14 +911,14 @@ workspaceSymbol operations
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli workspaceSymbol [options] [command]
 ```
 
 ### workspaceSymbol resolve
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli workspaceSymbol resolve [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -931,7 +931,7 @@ Send any LSP request by method name with raw JSON params
 
 **Usage:**
 ```
-[options] <method>
+npx @lsproxy/cli call [options] <method>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -947,7 +947,7 @@ Read/write LSP server config across platforms (lsp.json, Copilot CLI, Claude Cod
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli config [options] [command]
 ```
 
 ### config list
@@ -956,7 +956,7 @@ List detected platforms and their configured servers
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli config list [options]
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -969,7 +969,7 @@ Import a platform's LSP servers into lsp.json
 
 **Usage:**
 ```
-[options] <platform>
+npx @lsproxy/cli config import [options] <platform>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -985,7 +985,7 @@ Export lsp.json servers to a platform's native config
 
 **Usage:**
 ```
-[options] <platform>
+npx @lsproxy/cli config export [options] <platform>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -1001,7 +1001,7 @@ Diff lsp.json against a platform's config
 
 **Usage:**
 ```
-[options] <platform>
+npx @lsproxy/cli config diff [options] <platform>
 ```
 
 | Flag | Type | Required | Default | Env | Description |
@@ -1017,7 +1017,7 @@ Manage the per-root proxy daemon (otherwise starts lazily on first request)
 
 **Usage:**
 ```
-[options] [command]
+npx @lsproxy/cli daemon [options] [command]
 ```
 
 ### daemon start
@@ -1026,7 +1026,7 @@ Start the proxy daemon for --root (no-op if already running)
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli daemon start [options]
 ```
 
 ### daemon stop
@@ -1035,7 +1035,7 @@ Stop the proxy daemon for --root
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli daemon stop [options]
 ```
 
 ### daemon status
@@ -1044,7 +1044,7 @@ Show daemon status for --root
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli daemon status [options]
 ```
 
 ### status
@@ -1053,7 +1053,7 @@ Show configured language servers grouped by process, with location and config so
 
 **Usage:**
 ```
-[options]
+npx @lsproxy/cli status [options]
 ```
 
 ## Documentation

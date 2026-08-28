@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { extractCliSkill, writeCliSkill } from '@skillit/cli';
+import { extractCliSkill, writeCliSkill, applyNpxMode } from '@skillit/cli';
 import { buildProgram } from '../dist/program.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -32,6 +32,8 @@ interface Pkg {
   repository?: { url: string };
   author?: string;
   license?: string;
+  bin?: Record<string, string>;
+  private?: boolean;
 }
 const pkg = JSON.parse(readFileSync(resolve(cliDir, 'package.json'), 'utf-8')) as Pkg;
 
@@ -173,17 +175,29 @@ const flatSurfaces = flattenSurfaces(skill.configSurfaces ?? []);
 const enrichedSkill = {
   ...skill,
   configSurfaces: flatSurfaces,
-  ...(features !== undefined ? { readmeFeatures: features } : {}),
-  ...(troubleshooting !== undefined ? { readmeTroubleshooting: troubleshooting } : {}),
-  ...(quickStart !== undefined ? { examples: [quickStart] } : {}),
   ...(documents.length > 0 ? { documents } : {})
 };
+
+// `@lsproxy/cli` is a public package with a `bin` entry, so applyNpxMode sets
+// invocation mode to 'npx' and rewrites every bare `lsproxy …` occurrence in
+// the README-derived prose (features/troubleshooting/quickStart) to
+// `npx @lsproxy/cli …` — the actual publishable command, since only the
+// scoped package name resolves on npm.
+applyNpxMode(enrichedSkill, {
+  fullPackageName: pkg.name,
+  bin: pkg.bin,
+  isPrivate: pkg.private ?? false,
+  readme: { features, troubleshooting, quickStart }
+});
 
 // ---------------------------------------------------------------------------
 // Write generated skill files
 // ---------------------------------------------------------------------------
 const outDir = resolve(cliDir, 'skills');
-const results = writeCliSkill(enrichedSkill, { outDir });
+// `maxTokens` only bounds references/*.md (commands.md, config.md, docs/*,
+// etc.) — files an agent opens on demand, never loaded as part of SKILL.md
+// itself — so there's no reason to cap them.
+const results = writeCliSkill(enrichedSkill, { outDir, maxTokens: Number.MAX_SAFE_INTEGER });
 
 console.log('Generated skill files:');
 for (const result of results) {
