@@ -21,12 +21,17 @@ import { StdioTransport } from '@lspeasy/core/node';
 
 /** Collects target URIs from both `changes` and `documentChanges` — servers
  * may return either shape, and `tsc --lsp`'s choice isn't a stable contract
- * to assert on. */
+ * to assert on. `documentChanges` entries are themselves a union: a plain
+ * text edit carries its URI under `textDocument`, `create`/`delete` carry a
+ * single `uri`, and `rename` carries both `oldUri` and `newUri` — collect
+ * every case rather than just the first. */
 function editedUris(edit: WorkspaceEdit): string[] {
   const fromChanges = Object.keys(edit.changes ?? {});
-  const fromDocumentChanges = (edit.documentChanges ?? [])
-    .map((dc) => ('textDocument' in dc ? dc.textDocument.uri : undefined))
-    .filter((uri): uri is string => uri !== undefined);
+  const fromDocumentChanges = (edit.documentChanges ?? []).flatMap((dc) => {
+    if ('textDocument' in dc) return [dc.textDocument.uri];
+    if (dc.kind === 'rename') return [dc.oldUri, dc.newUri];
+    return [dc.uri]; // CreateFile | DeleteFile
+  });
   return [...fromChanges, ...fromDocumentChanges];
 }
 
