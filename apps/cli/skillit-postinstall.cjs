@@ -50,12 +50,9 @@ try {
     const destDir = path.join(userSkillsDir, entry.name);
     copyDir(path.join(skillsDir, entry.name), destDir);
     // Rewrite only the installed copy: this package is now really on the
-    // user's PATH as `binName`, so the npx-prefixed form (needed by anyone
-    // reading `skillsDir` — the package's own checked-in/shipped source,
-    // which shouldn't assume a prior install) is unnecessary noise there.
-    // Never rewrite `skillsDir` itself — in this monorepo's dev layout
-    // `__dirname` IS the source tree, so mutating it in place was silently
-    // clobbering the checked-in skill docs on every `pnpm install`.
+    // user's PATH as `binName`, so the npx-prefixed form in `skillsDir` —
+    // the package's own shipped source, which can't assume a prior install —
+    // is unnecessary there. Never rewrite `skillsDir` itself.
     rewrite(destDir);
   }
   console.log('[skillit] Skills installed to ' + userSkillsDir);

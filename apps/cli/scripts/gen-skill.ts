@@ -181,11 +181,8 @@ const enrichedSkill = {
 // `@lsproxy/cli` is a public package with a `bin` entry, so applyNpxMode sets
 // invocation mode to 'npx' and rewrites every bare `lsproxy …` occurrence in
 // the README-derived prose (features/troubleshooting/quickStart) to
-// `npx @lsproxy/cli …`. Without this, the generated skill instructs agents to
-// run a bare `lsproxy` binary that may not exist on PATH — `npx lsproxy`
-// (guessed from the bin name, which is what every example otherwise shows)
-// 404s, since no unscoped `lsproxy` package is published; only the scoped
-// `@lsproxy/cli` name resolves.
+// `npx @lsproxy/cli …` — the actual publishable command, since only the
+// scoped package name resolves on npm.
 applyNpxMode(enrichedSkill, {
   fullPackageName: pkg.name,
   bin: pkg.bin,
@@ -199,9 +196,7 @@ applyNpxMode(enrichedSkill, {
 const outDir = resolve(cliDir, 'skills');
 // `maxTokens` only bounds references/*.md (commands.md, config.md, docs/*,
 // etc.) — files an agent opens on demand, never loaded as part of SKILL.md
-// itself. The default (4000) silently truncated references/commands.md mid-
-// document (this CLI has ~60 subcommands); since these files cost nothing
-// until read, there's no reason to cap them at all.
+// itself — so there's no reason to cap them.
 const results = writeCliSkill(enrichedSkill, { outDir, maxTokens: Number.MAX_SAFE_INTEGER });
 
 console.log('Generated skill files:');

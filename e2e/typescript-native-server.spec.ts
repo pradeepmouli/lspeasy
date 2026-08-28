@@ -144,7 +144,7 @@ describe.skipIf(!tscSupportsLsp())('TypeScript native compiler LSP (tsc --lsp --
     });
 
     expect(edit).not.toBeNull();
-    const changedUris = editedUris(edit as WorkspaceEdit);
+    const changedUris = editedUris(edit!);
     expect(changedUris.some((uri) => uri.endsWith('greet.ts'))).toBe(true);
     expect(changedUris.some((uri) => uri.endsWith('main.ts'))).toBe(true);
   });
