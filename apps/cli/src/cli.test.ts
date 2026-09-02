@@ -286,12 +286,9 @@ describe('runDispatch — incomplete real call falls back to the drill-down view
     // survives verbatim through main()'s two passes. Calling runDispatch
     // directly (bypassing main()) needs argv stubbed to match, or the
     // language token is never found and the test-runner's own argv gets fed
-    // to Commander instead. cli.ts imports `argv` as a named binding from
-    // `node:process` (`import { argv } from 'node:process'`), which captures
-    // the array *reference* rather than re-reading `process.argv` on each
-    // access — reassigning `process.argv = [...]` (a new array) would NOT be
-    // visible through that binding, so the stub must mutate the existing
-    // array in place.
+    // to Commander instead. Mutating in place (rather than reassigning
+    // `process.argv`) keeps the stub correct regardless of when cli.ts reads
+    // it.
     const originalArgv = [...process.argv];
     process.argv.splice(2, process.argv.length - 2, 'typescript', 'textDocument', 'hover');
     try {

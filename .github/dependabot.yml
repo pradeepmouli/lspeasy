@@ -54,6 +54,28 @@ updates:
         update-types:
           - 'minor'
           - 'patch'
+    ignore:
+      # apps/docs is deliberately held at typescript 6.x. typedoc 0.28.20
+      # declares a `typescript` peer of 5.0.x-6.0.x and reads the compiler's
+      # internal AST surface directly; against typescript 7 (the Go-ported
+      # native compiler) it dies at load with
+      #   TypeError: Cannot read properties of undefined
+      #   (reading 'PropertyDeclaration')   [ts4.SyntaxKind.PropertyDeclaration]
+      # taking `pnpm run build` down with it. The rest of the workspace stays
+      # on 7.x; only the docs app is pinned.
+      #
+      # Without this rule dependabot re-proposes the major every cycle and
+      # auto-merge takes it, silently reverting the pin — that happened twice
+      # (#252 undid the fix from #249, and the merge commit had no CI run at
+      # all, so it went unnoticed for days).
+      #
+      # Lift this once typedoc ships a release whose peer range admits
+      # typescript 7. Note: aliasing typedoc's own typescript via
+      # pnpm-workspace.yaml `packageExtensions` was tried and never took
+      # effect — re-pin, don't re-litigate that route.
+      - dependency-name: 'typescript'
+        update-types:
+          - 'version-update:semver-major'
     labels:
       - 'dependencies'
       - 'automated'
