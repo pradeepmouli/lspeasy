@@ -1,8 +1,18 @@
 import { describe, it, expect } from 'vitest';
 import { LSPSchemas, getSchemaForMethod } from '@lspeasy/core/schemas';
 
+import { z } from 'zod';
+import { exampleFromZod, getResultSchemaForMethod } from '@lspeasy/core/schemas';
+
 import { COMMAND_DESCRIPTORS } from './generated/command-descriptors.js';
-import { detectArgPattern, legacyFlagSurface, zodToCommander } from './zod-to-commander.js';
+import { EXAMPLES } from './generated/examples.js';
+import { JSON_SCHEMAS } from './generated/json-schemas.js';
+import {
+  detectArgPattern,
+  legacyFlagSurface,
+  paramsResidualExample,
+  zodToCommander
+} from './zod-to-commander.js';
 import type { GlobalFlags } from './io.js';
 import type { RefactorSession } from './session.js';
 
@@ -121,5 +131,47 @@ describe('generated descriptors match the runtime walker', () => {
       expect(opt?.argChoices, `${method} ${field.cliKey}`).toEqual(legacyOpt?.argChoices);
       expect(opt?.description, `${method} ${field.cliKey}`).toBe(legacyOpt?.description);
     }
+  });
+});
+
+/**
+ * Task 6 ported `paramsResidualExample` into the generator, the same way Task 2
+ * ported the flag walker. The runtime copy survives until Task 7, so pin the
+ * generated help data against it while both exist.
+ */
+describe('generated help data matches the runtime computation', () => {
+  it.each(METHODS)('residual example matches for %s', (method) => {
+    const schema = getSchemaForMethod(method);
+    if (!schema) return;
+
+    let expected: unknown;
+    let threw = false;
+    try {
+      expected = paramsResidualExample(schema);
+    } catch {
+      threw = true;
+    }
+
+    const entry = EXAMPLES[method];
+    expect(entry, method).toBeDefined();
+    expect(entry!.residualOk, method).toBe(!threw);
+    if (!threw) expect(entry!.residual, method).toEqual(expected);
+  });
+
+  it.each(METHODS)('result example matches for %s', (method) => {
+    if (!getSchemaForMethod(method)) return;
+    const resultSchema = getResultSchemaForMethod(method);
+    const expected = resultSchema ? exampleFromZod(resultSchema) : undefined;
+    expect(EXAMPLES[method]?.result, method).toEqual(expected);
+  });
+
+  it.each(METHODS)('json schemas match for %s', (method) => {
+    const schema = getSchemaForMethod(method);
+    if (!schema) return;
+    const resultSchema = getResultSchemaForMethod(method);
+    expect(JSON_SCHEMAS[method]?.params, method).toEqual(z.toJSONSchema(schema));
+    expect(JSON_SCHEMAS[method]?.result, method).toEqual(
+      resultSchema ? z.toJSONSchema(resultSchema) : undefined
+    );
   });
 });

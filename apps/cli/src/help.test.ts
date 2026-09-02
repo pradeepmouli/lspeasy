@@ -220,8 +220,8 @@ describe('drill-down navigation', () => {
     expect(text).toContain('textDocument');
   });
 
-  it('drillDownJson returns structured namespaces for a language', () => {
-    const json = drillDownJson(buildProgram(), 'typescript', []) as {
+  it('drillDownJson returns structured namespaces for a language', async () => {
+    const json = (await drillDownJson(buildProgram(), 'typescript', [])) as {
       languageId: string;
       namespaces: Array<{ name: string }>;
     };
@@ -229,8 +229,8 @@ describe('drill-down navigation', () => {
     expect(json.namespaces.map((n) => n.name)).toContain('textDocument');
   });
 
-  it('drillDownJson returns request options at depth 2', () => {
-    const json = drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover']) as {
+  it('drillDownJson returns request options at depth 2', async () => {
+    const json = (await drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover'])) as {
       request: string;
       options: Array<{ flags: string }>;
     };
@@ -238,8 +238,8 @@ describe('drill-down navigation', () => {
     expect(Array.isArray(json.options)).toBe(true);
   });
 
-  it('drillDownJson includes positional arguments at depth 2', () => {
-    const json = drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover']) as {
+  it('drillDownJson includes positional arguments at depth 2', async () => {
+    const json = (await drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover'])) as {
       arguments: Array<{ name: string; required: boolean; variadic: boolean }>;
     };
     expect(Array.isArray(json.arguments)).toBe(true);
@@ -247,8 +247,8 @@ describe('drill-down navigation', () => {
     expect(json.arguments.map((a) => a.name)).toContain('file');
   });
 
-  it('drillDownJson depth-2 includes params and result JSON Schema', () => {
-    const json = drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover']) as {
+  it('drillDownJson depth-2 includes params and result JSON Schema', async () => {
+    const json = (await drillDownJson(buildProgram(), 'typescript', ['textDocument', 'hover'])) as {
       paramsSchema?: unknown;
       resultSchema?: unknown;
     };
