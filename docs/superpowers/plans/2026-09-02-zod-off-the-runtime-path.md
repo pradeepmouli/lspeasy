@@ -188,20 +188,43 @@ In `packages/core/src/index.ts`, delete these three export blocks:
 
 Keep every `export type` — `z.infer`-derived types erase at compile time and cost nothing.
 
-- [ ] **Step 7: Run the test to verify it passes**
+- [ ] **Step 7: Repoint the CLI's imports at the new subpath**
+
+Removing those exports breaks four files in `apps/cli` that import them
+from the barrel. Repoint them now — a mechanical specifier change, no
+logic touched — so the workspace stays buildable at every task boundary.
+Tasks 4-6 delete these imports entirely; this step only keeps the tree
+green in between.
+
+- `apps/cli/src/help.ts:4` — `exampleFromZod, getResultSchemaForMethod, getSchemaForMethod`
+- `apps/cli/src/anchor.ts:3` — `getSchemaForMethod`
+- `apps/cli/src/build-commands.ts:2` — `LSPSchemas, getSchemaForMethod` (leave `getCapabilityForRequestMethod` on `@lspeasy/core`; it is not a schema and stays in the barrel)
+- `apps/cli/src/zod-to-commander.ts` — `WorkspaceEditSchema, TextEditSchema, CodeActionSchema, unwrapZodType, exampleFromZod`
+
+In each, change the specifier from `'@lspeasy/core'` to
+`'@lspeasy/core/schemas'`, splitting the import statement where a file
+needs both (`build-commands.ts` does).
+
+- [ ] **Step 8: Run the test and the full build to verify**
 
 ```bash
 pnpm --filter @lspeasy/core run build
 pnpm vitest run packages/core/src/barrel-purity.test.ts
+pnpm run build
+pnpm vitest run apps/cli
 ```
-Expected: both assertions PASS.
+Expected: both purity assertions PASS, the workspace builds, and
+**222/222** CLI tests still pass. The startup win is not visible yet —
+`apps/cli` still imports schemas, just via a different specifier. That is
+intentional; Tasks 4-6 remove the imports and Task 7 proves the win.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add packages/core/src/schemas.ts packages/core/src/__graph-hook.mjs \
         packages/core/src/barrel-purity.test.ts packages/core/package.json \
-        packages/core/src/index.ts
+        packages/core/src/index.ts apps/cli/src/help.ts apps/cli/src/anchor.ts \
+        apps/cli/src/build-commands.ts apps/cli/src/zod-to-commander.ts
 git commit -m "feat(core)!: move zod-importing exports behind @lspeasy/core/schemas"
 ```
 
