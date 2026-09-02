@@ -2,6 +2,7 @@
 '@lspeasy/core': major
 '@lsproxy/cli': minor
 '@lspeasy/client': patch
+'@lsproxy/proxy': patch
 ---
 
 **Breaking (`@lspeasy/core`): runtime validation moved to `@lspeasy/core/schemas`.**
@@ -43,3 +44,7 @@ schemas on every invocation; the schemas that validate a language server's
 `@lspeasy/client` makes its two dynamic-capability guards load on demand, so
 importing the client no longer pulls zod onto a consumer's startup path. No API
 change.
+
+`@lsproxy/proxy` imports `StdioTransport` from the narrow
+`@lspeasy/core/transport/stdio` subpath instead of the `@lspeasy/core/node`
+aggregate, so spawning a backend no longer loads zod. No API change.
