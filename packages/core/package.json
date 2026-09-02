@@ -54,9 +54,37 @@
       "types": "./dist/transport/index.d.ts",
       "import": "./dist/transport/index.js"
     },
-    "./transport/*": {
-      "types": "./dist/transport/*.d.ts",
-      "import": "./dist/transport/*.js"
+    "./transport/websocket": {
+      "types": "./dist/transport/websocket.d.ts",
+      "import": "./dist/transport/websocket.js"
+    },
+    "./transport/dedicated-worker": {
+      "types": "./dist/transport/dedicated-worker.d.ts",
+      "import": "./dist/transport/dedicated-worker.js"
+    },
+    "./transport/shared-worker": {
+      "types": "./dist/transport/shared-worker.d.ts",
+      "import": "./dist/transport/shared-worker.js"
+    },
+    "./transport/events": {
+      "types": "./dist/transport/events.d.ts",
+      "import": "./dist/transport/events.js"
+    },
+    "./transport/stdio": {
+      "types": "./dist/transport/stdio.d.ts",
+      "import": "./dist/transport/stdio.js"
+    },
+    "./transport/tcp": {
+      "types": "./dist/transport/tcp.d.ts",
+      "import": "./dist/transport/tcp.js"
+    },
+    "./transport/ipc": {
+      "types": "./dist/transport/ipc.d.ts",
+      "import": "./dist/transport/ipc.js"
+    },
+    "./transport/socket": {
+      "types": "./dist/transport/socket.d.ts",
+      "import": "./dist/transport/socket.js"
     },
     "./middleware": {
       "types": "./dist/middleware/index.d.ts",

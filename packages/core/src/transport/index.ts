@@ -5,21 +5,31 @@
  * points at never existed — importing '@lspeasy/core/transport' simply failed.
  * This makes it real.
  *
- * **Prefer a per-transport subpath.** Every transport is also individually
- * importable, and that is the better default because each one carries
- * different baggage:
+ * **Prefer a per-transport subpath.** Each transport has its own entry point,
+ * and that is the better default because they carry different baggage:
  *
- * ```ts
- * import { WebSocketTransport } from '@lspeasy/core/transport/websocket';
- * import { SharedWorkerTransport } from '@lspeasy/core/transport/shared-worker';
- * import { StdioTransport } from '@lspeasy/core/transport/stdio';
- * ```
+ * | Subpath | Environment | Pulls |
+ * |---|---|---|
+ * | `@lspeasy/core/transport/websocket` | browser + Node | — |
+ * | `@lspeasy/core/transport/dedicated-worker` | browser | — |
+ * | `@lspeasy/core/transport/events` | any | — |
+ * | `@lspeasy/core/transport/shared-worker` | browser | zod |
+ * | `@lspeasy/core/transport/stdio` | Node | `node:` builtins |
+ * | `@lspeasy/core/transport/ipc` | Node | `node:` builtins |
+ * | `@lspeasy/core/transport/tcp` | Node | `node:` builtins, zod |
+ * | `@lspeasy/core/transport/socket` | Node | `node:` builtins, zod |
  *
- * Only `shared-worker` validates with `messageSchema`, so it is the only
- * browser transport that pulls zod — importing this barrel pulls it for all of
- * them, while importing `transport/websocket` directly does not. Likewise the
- * Node transports (`stdio`, `tcp`, `ipc`, `socket`) import `node:` builtins;
- * they are excluded here and aggregated by '@lspeasy/core/node'.
+ * `shared-worker`, `tcp` and `socket` validate incoming data with
+ * `messageSchema`, which is why only those three pull zod — they read from a
+ * pipe or a port that anything can write to. `stdio` and `ipc` do not, so the
+ * transport `lsproxy` actually uses costs nothing.
+ *
+ * Importing THIS barrel pulls zod for every browser transport, and
+ * '@lspeasy/core/node' pulls it for every Node one, because each aggregates a
+ * validating transport. Importing a single subpath does not.
+ *
+ * Node transports are excluded from this barrel so browser bundles never see
+ * `node:` builtins. They remain aggregated by '@lspeasy/core/node'.
  */
 export type { Transport } from './transport.js';
 
