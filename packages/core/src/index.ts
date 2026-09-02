@@ -9,14 +9,20 @@
  * ### Key areas
  *
  * **JSON-RPC 2.0** — Message types ({@link RequestMessage}, {@link NotificationMessage},
- * {@link ResponseMessage}), framing ({@link parseMessage}, {@link serializeMessage}),
- * and Zod schemas for validation.
+ * {@link ResponseMessage}) and framing ({@link parseMessage},
+ * {@link serializeMessage}). Zod schemas for validating them live in
+ * `@lspeasy/core/schemas`.
  *
- * **Transports** — The {@link Transport} interface plus browser-compatible
- * implementations: {@link WebSocketTransport}, {@link DedicatedWorkerTransport},
- * {@link SharedWorkerTransport}.
- * Node.js transports (`StdioTransport`, `TcpTransport`, `IpcTransport`) are
- * in `@lspeasy/core/node` to avoid importing Node.js builtins in browsers.
+ * **Transports** — The {@link Transport} interface is exported here; the
+ * implementations are not. Browser transports (`WebSocketTransport`,
+ * `DedicatedWorkerTransport`, `SharedWorkerTransport`) are in
+ * `@lspeasy/core/transport`; Node.js transports (`StdioTransport`,
+ * `TcpTransport`, `IpcTransport`, `SocketTransport`) are in
+ * `@lspeasy/core/node`, so browser bundles never pull `node:` builtins.
+ *
+ * This barrel deliberately contains no runtime zod. See
+ * `barrel-purity.test.ts` and the design note in
+ * docs/superpowers/specs/2026-09-02-zod-off-the-runtime-path-design.md.
  *
  * ### Transport Selection Guide
  *
@@ -69,29 +75,25 @@ export {
 
 export { parseMessage, serializeMessage } from './jsonrpc/framing.js';
 
-export {
-  requestMessageSchema,
-  notificationMessageSchema,
-  responseErrorSchema,
-  successResponseMessageSchema,
-  errorResponseMessageSchema,
-  responseMessageSchema,
-  messageSchema
-} from './jsonrpc/schemas.js';
+// The JSON-RPC message schemas are exported from '@lspeasy/core/schemas', not
+// here — they import zod, and this barrel must stay zod-free (see schemas.ts).
 
-// Transport interface and implementations
-// Note: Node.js-specific transports (StdioTransport, TcpTransport, IpcTransport)
-// and stream-based utilities (MessageReader, MessageWriter) are exported from
-// '@lspeasy/core/node' to avoid importing Node.js modules in browser environments.
+// Transport implementations are NOT exported from this barrel. One rule:
+//
+//   types            → '@lspeasy/core'
+//   browser transports → '@lspeasy/core/transport'   (Worker, SharedWorker, WebSocket)
+//   Node transports    → '@lspeasy/core/node'        (Stdio, Tcp, Ipc, Socket)
+//   runtime validation → '@lspeasy/core/schemas'
+//
+// Keeping them out is what lets this barrel stay zod-free: SharedWorkerTransport
+// validates incoming postMessage data with `messageSchema`, so re-exporting it
+// here would pull zod into every consumer's graph (see barrel-purity.test.ts).
+// The `Transport` interface and the per-transport options types stay — types
+// erase at compile time and cost nothing at runtime.
 export type { Transport } from './transport/transport.js';
-export { DedicatedWorkerTransport } from './transport/dedicated-worker.js';
 export type { DedicatedWorkerTransportOptions } from './transport/dedicated-worker.js';
-export { SharedWorkerTransport } from './transport/shared-worker.js';
 export type { SharedWorkerTransportOptions } from './transport/shared-worker.js';
-export { WebSocketTransport } from './transport/websocket.js';
 export type { WebSocketTransportOptions } from './transport/websocket.js';
-export { createWebSocketClient } from './transport/websocket.js';
-export { TransportEventEmitter } from './transport/events.js';
 
 // Middleware
 export type {
@@ -152,56 +154,10 @@ export * from './protocol/capability-methods.js';
 export type { Client, Server } from './protocol/capability-methods.js';
 
 // LSP protocol schemas
-export {
-  PositionSchema,
-  RangeSchema,
-  TextDocumentIdentifierSchema,
-  VersionedTextDocumentIdentifierSchema,
-  TextDocumentPositionParamsSchema,
-  LocationSchema,
-  TextEditSchema,
-  WorkspaceEditSchema,
-  DiagnosticSeveritySchema,
-  DiagnosticSchema,
-  HoverParamsSchema,
-  MarkupContentSchema,
-  HoverSchema,
-  CompletionParamsSchema,
-  CompletionItemKindSchema,
-  CompletionItemSchema,
-  CompletionListSchema,
-  DefinitionParamsSchema,
-  ReferenceParamsSchema,
-  RenameParamsSchema,
-  DocumentSymbolParamsSchema,
-  DocumentSymbolSchema,
-  CodeActionContextSchema,
-  CodeActionParamsSchema,
-  CodeActionSchema,
-  FormattingOptionsSchema,
-  DocumentFormattingParamsSchema,
-  DocumentRangeFormattingParamsSchema,
-  WorkspaceSymbolParamsSchema,
-  FoldingRangeParamsSchema,
-  InlayHintParamsSchema,
-  CodeLensParamsSchema,
-  SignatureHelpParamsSchema,
-  TypeDefinitionParamsSchema,
-  ImplementationParamsSchema,
-  DeclarationParamsSchema,
-  DocumentHighlightParamsSchema,
-  SymbolKindSchema,
-  TextDocumentContentChangeEventSchema,
-  InitializeParamsSchema,
-  DidOpenTextDocumentParamsSchema,
-  DidChangeTextDocumentParamsSchema,
-  DidCloseTextDocumentParamsSchema,
-  DidSaveTextDocumentParamsSchema,
-  LSPSchemas,
-  getSchemaForMethod,
-  LSPResultSchemas,
-  getResultSchemaForMethod
-} from './protocol/schemas.js';
+// The protocol schemas (Position, Range, TextEdit, WorkspaceEdit, CodeAction,
+// LSPSchemas, getSchemaForMethod, …) are exported from '@lspeasy/core/schemas'.
+// They are zod values; this barrel stays zod-free. Their TYPES remain exported
+// below — `z.infer` types erase at compile time and cost nothing at runtime.
 
 // Advanced protocol features
 export type {
@@ -264,14 +220,9 @@ export type {
   UnregisterCapability,
   UnregisterCapabilityParams
 } from './protocol/dynamic-registration.js';
-export {
-  dynamicRegistrationSchema,
-  registerCapabilityParamsSchema,
-  unregisterCapabilitySchema,
-  unregisterCapabilityParamsSchema,
-  isRegisterCapabilityParams,
-  isUnregisterCapabilityParams
-} from './protocol/dynamic-registration.js';
+// The dynamic-registration schemas and their zod-backed type guards
+// (isRegisterCapabilityParams / isUnregisterCapabilityParams) are exported from
+// '@lspeasy/core/schemas'. The types above stay here.
 export type {
   CancelledPartialResult,
   CompletedPartialResult,
@@ -320,11 +271,9 @@ export { DEFAULT_EXTENSIONS, extensionsForLanguage } from './language-extensions
 // Command tokenizer
 export { tokenizeCommand } from './utils/tokenize-command.js';
 
-// Example payload generator — builds illustrative required-only samples from Zod schemas
-export { exampleFromZod } from './example-from-zod.js';
-
-// Zod introspection utilities — shared helpers for inspecting Zod 4 schemas
-export { unwrapZodType } from './zod-introspection.js';
+// `exampleFromZod` (illustrative required-only samples) and `unwrapZodType`
+// (Zod 4 wrapper peeling) are exported from '@lspeasy/core/schemas' — both take
+// zod values, so they cannot live in this zod-free barrel.
 
 // Local plugin resolver — reads installed .lsp.json files under ~/.claude/plugins/marketplaces
 export {

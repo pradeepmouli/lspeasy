@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { LSPSchemas, getSchemaForMethod, getCapabilityForRequestMethod } from '@lspeasy/core';
+import { getCapabilityForRequestMethod } from '@lspeasy/core';
+import { LSPSchemas, getSchemaForMethod } from '@lspeasy/core/schemas';
 import type { ServerCapabilities } from '@lspeasy/core';
 
 import { zodToCommander, printAppliedChanges } from './zod-to-commander.js';

@@ -1,7 +1,11 @@
 import type { LanguageStatus, StatusReport } from '@lsproxy/proxy';
 import type { Command } from 'commander';
 import { z } from 'zod';
-import { exampleFromZod, getResultSchemaForMethod, getSchemaForMethod } from '@lspeasy/core';
+import {
+  exampleFromZod,
+  getResultSchemaForMethod,
+  getSchemaForMethod
+} from '@lspeasy/core/schemas';
 import { SYMBOLS, type Formatter } from './format.js';
 import { globalOptionsHelpText } from './global-options.js';
 import type { ServerGroupStatus } from './server-groups.js';

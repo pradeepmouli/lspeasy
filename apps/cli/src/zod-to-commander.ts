@@ -12,7 +12,7 @@ import {
   CodeActionSchema,
   unwrapZodType,
   exampleFromZod
-} from '@lspeasy/core';
+} from '@lspeasy/core/schemas';
 import {
   applyWorkspaceEdit,
   planWorkspaceEdit,

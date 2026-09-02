@@ -32,10 +32,12 @@ import {
   CancellationTokenSource,
   ConsoleLogger,
   executeMiddlewarePipeline,
-  isRegisterCapabilityParams,
-  isUnregisterCapabilityParams,
   LogLevel
 } from '@lspeasy/core';
+// Zod-backed guards for server-pushed client/registerCapability payloads —
+// untrusted input, so they validate rather than merely narrow. They live in
+// '@lspeasy/core/schemas' to keep zod out of the main barrel.
+import { isRegisterCapabilityParams, isUnregisterCapabilityParams } from '@lspeasy/core/schemas';
 import { DisposableEventEmitter, HandlerRegistry } from '@lspeasy/core/utils';
 import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
 import type {

@@ -16,7 +16,7 @@ import {
   InlayHintParamsSchema,
   getSchemaForMethod,
   CodeActionContextSchema
-} from '@lspeasy/core';
+} from '@lspeasy/core/schemas';
 import type { GlobalFlags } from './io.js';
 import type { RefactorSession } from './session.js';
 

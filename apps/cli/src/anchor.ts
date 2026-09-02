@@ -1,6 +1,6 @@
 import { extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getSchemaForMethod } from '@lspeasy/core';
+import { getSchemaForMethod } from '@lspeasy/core/schemas';
 import { detectArgPattern } from './zod-to-commander.js';
 
 function isFileLike(p: string): boolean {
