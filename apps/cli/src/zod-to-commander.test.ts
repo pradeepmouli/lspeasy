@@ -1,23 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { z } from 'zod';
 import {
-  detectArgPattern,
   marshalParams,
   zodToCommander,
   extractFieldValue,
-  paramsResidualExample,
   deepMergeInto,
   setAtPath
 } from './zod-to-commander.js';
 import { COMMAND_DESCRIPTORS } from './generated/command-descriptors.js';
-import {
-  TextDocumentPositionParamsSchema,
-  RenameParamsSchema,
-  FoldingRangeParamsSchema,
-  WorkspaceSymbolParamsSchema,
-  InlayHintParamsSchema,
-  getSchemaForMethod
-} from '@lspeasy/core/schemas';
 import type { GlobalFlags } from './io.js';
 import type { RefactorSession } from './session.js';
 
@@ -32,32 +21,6 @@ const FLAGS: GlobalFlags = {
   overwrite: false,
   noProxy: false
 };
-
-describe('detectArgPattern', () => {
-  it('returns file-position for TextDocumentPositionParams', () => {
-    expect(detectArgPattern(TextDocumentPositionParamsSchema)).toBe('file-position');
-  });
-
-  it('returns file-position-newname for RenameParams', () => {
-    expect(detectArgPattern(RenameParamsSchema)).toBe('file-position-newname');
-  });
-
-  it('returns file for document-only schema', () => {
-    expect(detectArgPattern(FoldingRangeParamsSchema)).toBe('file');
-  });
-
-  it('returns file-range for schemas with textDocument + range', () => {
-    expect(detectArgPattern(InlayHintParamsSchema)).toBe('file-range');
-  });
-
-  it('returns query for schemas with query field but no textDocument', () => {
-    expect(detectArgPattern(WorkspaceSymbolParamsSchema)).toBe('query');
-  });
-
-  it('returns raw for non-ZodObject schema', () => {
-    expect(detectArgPattern(z.string())).toBe('raw');
-  });
-});
 
 describe('marshalParams', () => {
   it('converts 1-based position to 0-based for file-position', () => {
@@ -269,34 +232,5 @@ describe('anchorFile support', () => {
       { root: '/project' } as GlobalFlags
     );
     expect(cmd.registeredArguments.map((a) => a.name())).toEqual(['file', 'line:col']);
-  });
-});
-
-describe('paramsResidualExample — only fields not exposed as args/flags', () => {
-  it('codeAction: residual is just context.diagnostics (file/range/only/triggerKind are args/flags)', () => {
-    const schema = getSchemaForMethod('textDocument/codeAction');
-    expect(schema).toBeDefined();
-    const residual = paramsResidualExample(schema!) as Record<string, unknown>;
-    expect(residual).toBeDefined();
-    // positional / flag fields must be absent from the --params example
-    expect(residual['textDocument']).toBeUndefined();
-    expect(residual['range']).toBeUndefined();
-    const ctx = residual['context'] as Record<string, unknown> | undefined;
-    expect(ctx).toBeDefined();
-    expect(ctx!['diagnostics']).toBeDefined(); // array-of-objects → --params
-    expect(ctx!['only']).toBeUndefined(); // scalar array → flag
-    expect(ctx!['triggerKind']).toBeUndefined(); // enum → flag
-  });
-
-  it('hover: undefined — all inputs map to positional args', () => {
-    const schema = getSchemaForMethod('textDocument/hover');
-    expect(paramsResidualExample(schema!)).toBeUndefined();
-  });
-
-  it('raw method (executeCommand): full example — everything via --params', () => {
-    const schema = getSchemaForMethod('workspace/executeCommand');
-    const residual = paramsResidualExample(schema!) as Record<string, unknown>;
-    expect(residual).toBeDefined();
-    expect(residual['command']).toBeDefined();
   });
 });

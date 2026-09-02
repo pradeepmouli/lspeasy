@@ -4,7 +4,10 @@ import { existsSync, mkdirSync, openSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { createConnection } from 'node:net';
 import { fileURLToPath } from 'node:url';
-import { SocketTransport } from '@lspeasy/core/node';
+// NOT a static import: SocketTransport validates frames read off a socket
+// anything can write to, so it pulls zod. It is only ever needed once we are
+// actually talking to the daemon, which is async anyway — see
+// apps/cli/src/startup-purity.test.ts.
 import type { Message } from '@lspeasy/core';
 import { socketPath } from '@lsproxy/proxy';
 import type { StatusReport } from '@lsproxy/proxy';
@@ -82,6 +85,7 @@ export async function fetchDaemonStatus(root: string): Promise<StatusReport | nu
   const sockPath = socketPath(root);
   if (!existsSync(sockPath) || !(await tryConnect(sockPath))) return null;
 
+  const { SocketTransport } = await import('@lspeasy/core/transport/socket');
   const transport = new SocketTransport({ path: sockPath });
   try {
     // A deadline that resolves (not rejects) to null bounds the whole operation
@@ -199,6 +203,7 @@ export async function connectViaProxy(opts: ConnectOptions): Promise<RefactorSes
 
   if (opts.verbose) process.stderr.write(`[lsproxy] connecting via proxy ${sockPath}\n`);
 
+  const { SocketTransport } = await import('@lspeasy/core/transport/socket');
   const transport = new SocketTransport({ path: sockPath });
   await transport.waitForConnect();
 

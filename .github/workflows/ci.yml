@@ -35,6 +35,15 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      # The committed files under packages/core/src/protocol and
+      # apps/cli/src/generated are the CLI's entire schema surface at runtime.
+      # If they drift from the generator, the CLI silently ships stale flags,
+      # help and examples — nothing else would fail.
+      - name: Verify generated files are current
+        run: |
+          pnpm run generate:protocol
+          git diff --exit-code -- packages/core/src/protocol apps/cli/src/generated
+
       - name: Type check
         run: pnpm run type-check
 
