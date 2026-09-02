@@ -17,17 +17,42 @@ schemas, `exampleFromZod`, `unwrapZodType`) moved to the `./schemas` subpath.
 + import { getSchemaForMethod, LSPSchemas } from '@lspeasy/core/schemas';
 ```
 
-Types and transports are unchanged:
+Types are unchanged:
 
 ```ts
-import type { WorkspaceEdit } from '@lspeasy/core';
+import type { WorkspaceEdit, Transport } from '@lspeasy/core';
 ```
 
-Transports also gained per-transport subpaths (`@lspeasy/core/transport/stdio`,
-`/tcp`, `/socket`, `/ipc`, …). Prefer them over the `@lspeasy/core/node`
-aggregate when you need only one: `node` re-exports every Node transport, and
-`Tcp`/`Socket` import zod to validate frames read off a socket anything can
-write to, so importing the aggregate for `StdioTransport` alone costs you zod.
+**Also breaking: the browser transport implementations left the main barrel.**
+`SharedWorkerTransport` pulls zod (it validates envelopes arriving over a port
+anything can post to), so keeping any of them on the barrel kept zod on it.
+Five values moved:
+
+```diff
+- import { WebSocketTransport, createWebSocketClient } from '@lspeasy/core';
++ import { WebSocketTransport, createWebSocketClient } from '@lspeasy/core/transport/websocket';
+
+- import { DedicatedWorkerTransport } from '@lspeasy/core';
++ import { DedicatedWorkerTransport } from '@lspeasy/core/transport/dedicated-worker';
+
+- import { SharedWorkerTransport } from '@lspeasy/core';
++ import { SharedWorkerTransport } from '@lspeasy/core/transport/shared-worker';
+
+- import { TransportEventEmitter } from '@lspeasy/core';
++ import { TransportEventEmitter } from '@lspeasy/core/transport/events';
+```
+
+Their option types (`WebSocketTransportOptions`, …), the `Transport` interface,
+`isMessage` and `isWorkerTransportEnvelope` all stay on the barrel. Node
+transports were already only on `@lspeasy/core/node` and are unaffected.
+
+Every transport now also has a per-transport subpath (`@lspeasy/core/transport/stdio`,
+`/tcp`, `/socket`, `/ipc`, …). Prefer them over both aggregates when you need
+only one: `@lspeasy/core/node` re-exports every Node transport and
+`@lspeasy/core/transport` every portable one, and `Tcp`/`Socket`/`SharedWorker`
+import zod to validate frames read off a channel anything can write to — so
+importing an aggregate for `StdioTransport` alone costs you zod.
+`packages/core/src/transport/index.ts` documents which transports pull what.
 
 Two composed schemas are newly exported from `@lspeasy/core/schemas`:
 `TextEditArraySchema` and `NonEmptyWorkspaceEditSchema`.

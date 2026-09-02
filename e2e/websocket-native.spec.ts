@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { WebSocketServer } from 'ws';
-import { WebSocketTransport } from '@lspeasy/core/transport';
+import { WebSocketTransport } from '@lspeasy/core/transport/websocket';
 
 describe('native WebSocket transport (e2e)', () => {
   const activeServers: WebSocketServer[] = [];
