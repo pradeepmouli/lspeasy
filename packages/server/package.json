@@ -51,7 +51,7 @@
   },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "vscode-languageserver-protocol": "^3.18.2"
+    "vscode-languageserver-protocol": "^3.18.3"
   },
   "engines": {
     "node": ">=20.0.0"

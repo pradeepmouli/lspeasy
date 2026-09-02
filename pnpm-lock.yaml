@@ -177,8 +177,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vscode-languageserver-protocol:
-        specifier: ^3.18.2
-        version: 3.18.2
+        specifier: ^3.18.3
+        version: 3.18.3
     optionalDependencies:
       zod:
         specifier: ^4.4.3
@@ -240,8 +240,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
       vscode-languageserver-protocol:
-        specifier: ^3.18.2
-        version: 3.18.2
+        specifier: ^3.18.3
+        version: 3.18.3
     optionalDependencies:
       zod:
         specifier: ^4.4.3
@@ -2030,15 +2030,15 @@ packages:
       jsdom:
         optional: true
 
-  vscode-jsonrpc@9.0.1:
-    resolution: {integrity: sha512-rfuA6T75H6m5EkbhtEPzre9pT0HPcDI2MMy4+nPFIBks5J8JBAUHD4tRYSgaBOijIEC7SRkC1kKyXTLqbmh9jw==}
+  vscode-jsonrpc@9.0.2:
+    resolution: {integrity: sha512-SbQSV9yRemARxeXw6LU5sS6Zq0e9/DgCCX5yelH263ZQWukbTk8EF8fjTrr1dziasf4GwlJbvTwFnTrnQFWZXQ==}
     engines: {node: '>=14.0.0'}
 
-  vscode-languageserver-protocol@3.18.2:
-    resolution: {integrity: sha512-XRyDbT0Pp3sSNti3JmxVEUMySWCSi1hhM+/KUlCy1hV1zmrqpM1OwO12EAki8blhmLuIMpaJrYbo0OzGVfK2Qg==}
+  vscode-languageserver-protocol@3.18.3:
+    resolution: {integrity: sha512-DF49+WeV5py4zO5hhobp60jjsDSK0lAqA0OuKBLBvp423HPWQcCbhZz3JgyfIewsEz2f8U+X75xNIFHdiXZm2w==}
 
-  vscode-languageserver-types@3.18.0:
-    resolution: {integrity: sha512-8TsGPNMIMiiBdkORgRSvLjuiEIiAFtO+KssmYWxQ+uSVvlf7RjK8YKCOjPzZ+YA04jXEV7+7LvkSmHkhpNS99g==}
+  vscode-languageserver-types@3.18.3:
+    resolution: {integrity: sha512-XIlzJ7Qp/jzSI1ds7/FwPAWrPeTZA7pAtlW4hdJ1J6xXWJL6dR9QYnDhJOdLzdKhUQ5Mm6mvUMw+3DcOQQasPw==}
 
   vue@3.5.42:
     resolution: {integrity: sha512-4RyHQTbQvOPs3MfvUO1Sg0YRrKNnA0mAVtvpd12Tg1fKDN7OHBUl1IqSn8zGJjK9nI3NkNp8cgTpVrSZC5TTcA==}
@@ -3626,14 +3626,14 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  vscode-jsonrpc@9.0.1: {}
+  vscode-jsonrpc@9.0.2: {}
 
-  vscode-languageserver-protocol@3.18.2:
+  vscode-languageserver-protocol@3.18.3:
     dependencies:
-      vscode-jsonrpc: 9.0.1
-      vscode-languageserver-types: 3.18.0
+      vscode-jsonrpc: 9.0.2
+      vscode-languageserver-types: 3.18.3
 
-  vscode-languageserver-types@3.18.0: {}
+  vscode-languageserver-types@3.18.3: {}
 
   vue@3.5.42(typescript@6.0.3):
     dependencies:
