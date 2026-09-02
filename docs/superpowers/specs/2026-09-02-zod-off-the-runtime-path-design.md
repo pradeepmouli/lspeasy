@@ -35,7 +35,50 @@ actual usage shows how badly that trade is priced:
 | `example-from-zod.ts`, `zod-introspection.ts` | yes | `apps/cli` help and example rendering |
 
 So the 2,672-line protocol schema graph has exactly one consumer in the
-repo, and that consumer only walks it.
+repo, and that consumer *mostly* walks it.
+
+### The exception: result classification is real validation
+
+"Mostly", because `zod-to-commander.ts` uses zod two different ways and
+only one of them is introspection.
+
+Everything that *builds* the command tree — `detectArgPattern`,
+`getChoices`, `getScalarArrayElement`, `addFieldOptions`,
+`paramsResidualExample` (lines 41–312) — is pure structural walking, and
+is precomputable.
+
+But the Commander **action handler** (lines 584–608) parses the language
+server's response:
+
+```ts
+const weResult = NonEmptyWorkspaceEditSchema.safeParse(result);
+const teResult = TextEditArraySchema.safeParse(result);
+const codeActionItems = Array.isArray(result)
+  ? result.flatMap((item) => {
+      const parsed = CodeActionSchema.safeParse(item);
+      return parsed.success ? [parsed.data] : [];
+    })
+  : [];
+```
+
+These three drive the whole result cascade: apply a `WorkspaceEdit`, wrap
+a `TextEdit[]` into one, auto-apply a lone edit-bearing `CodeAction`, or
+fall through to printing JSON. (`CodeActionSchema` is applied per item on
+purpose — LSP allows `(Command | CodeAction)[]`, so a whole-array parse
+would fail on `Command` entries.)
+
+That is **not** introspection. It is validation of untrusted input: the
+response comes from an external process (`tsc`, `rust-analyzer`, …), not
+from us. "We own both ends" is true of the CLI's own argv and false here.
+So zod cannot simply leave the CLI's runtime path.
+
+### A second, smaller correction
+
+`extractFieldValue` (lines 200–249) walks the schema at **read-back**
+time, reconstructing nested values from flat Commander opts on every real
+dispatch — not only when the tree is built. Descriptors must therefore
+serve both directions, and `MethodDescriptor` must carry the
+`ArgPattern`, since `marshalParams` consumes it at runtime.
 
 A secondary finding: `packages/client/src/validation.ts` exports
 `validateResponse` and `ResponseValidationError`, and nothing outside that
@@ -57,11 +100,13 @@ invocation on Node today.
 
 ## Approach
 
-Move the schema introspection from runtime to build time, and stop
-re-exporting zod-importing modules from the `@lspeasy/core` barrel.
+Move the schema introspection from runtime to build time, stop
+re-exporting zod-importing modules from the `@lspeasy/core` barrel, and
+defer the one legitimate zod use until after it can no longer cost
+anything.
 
-Two changes, which are separable but land together because the second is
-what makes the first pay off fully:
+Three changes, which land together because each is needed for the win to
+be real:
 
 1. **Generate static descriptors.** Extend the existing protocol generator
    to emit the derived data — command descriptors, JSON Schemas, example
@@ -71,12 +116,47 @@ what makes the first pay off fully:
 2. **Split the barrel.** Move every zod-importing module behind a
    `@lspeasy/core/schemas` subpath so the main barrel is zod-free.
 
-### Why both
+3. **Defer result-classification schemas to a dynamic import**, taken
+   inside the action handler *after* the LSP request resolves:
+
+   ```ts
+   const { NonEmptyWorkspaceEditSchema, TextEditArraySchema, CodeActionSchema } =
+     await import('@lspeasy/core/schemas');
+   ```
+
+### Why defer rather than delete
+
+Replacing those three `safeParse` calls with hand-written shape predicates
+would remove zod outright, but it trades real validation of untrusted
+input for approximations — on the exact path that decides whether to
+**write to the user's files**. Not a good trade for ~40ms.
+
+Deferring keeps the validation exactly as it is and still collects the
+full win, because of *when* the cost lands:
+
+- **`--help` and every drill-down view never issue a request**, so they
+  never reach the import. They pay nothing at all.
+- **A real dispatch already waits on an LSP round-trip** — process spawn
+  plus `initialize` plus the request itself, tens of milliseconds at
+  best. The import happens after that, against a warm module cache, and
+  overlaps work the user is already waiting on.
+
+So the ~41ms leaves the startup path in both cases. This is a better
+outcome than the static-only version, which would still pay zod's module
+load eagerly on every invocation.
+
+### Why all three
 
 If only (1) lands, `apps/cli` stops walking schemas but still imports
 `@lspeasy/core`, whose barrel still re-exports `messageSchema` and
 `exampleFromZod` — both of which import zod. zod's module load (~15-30ms)
 is paid anyway and only ~17ms of the ~41ms is recovered.
+
+If (1) and (2) land without (3), the three result-classification schemas
+are still imported at module scope in `zod-to-commander.ts`, which pulls
+zod eagerly regardless of how clean the barrel is — and that file is
+loaded to build the command tree on every invocation, `--help` included.
+The win would be roughly zero.
 
 The controlling invariant is therefore:
 
@@ -88,9 +168,10 @@ why the guard in §5 tests the module graph rather than a list of names.
 
 ### Why not alternatives
 
-**Lazy/conditional import of zod.** Defers the cost rather than removing
-it. The CLI needs the schema data on the dispatch path, not just under
-`--help` — `build-commands.ts` reads `LSPSchemas` to build the command tree
+**Lazy-importing zod for the command tree** (as opposed to for result
+classification, which change (3) does do). Defers the cost rather than
+removing it. The CLI needs the schema data on the dispatch path, not just
+under `--help` — `build-commands.ts` reads `LSPSchemas` to build the tree
 for real invocations — so the import fires on essentially every run. It
 also leaves the barrel unchanged, so library consumers keep paying.
 
@@ -102,6 +183,14 @@ win for the CLI.
 **Hand-write the descriptors.** They would drift from `schemas.ts` on the
 first protocol update. The schemas are already generated; the descriptors
 must be generated from the same source in the same step.
+
+**Hand-written predicates for result classification.** Removes zod
+entirely, but swaps validated parsing for approximate shape checks on the
+path that decides whether to write to the user's files. The deferred
+import gets the same startup win without that trade.
+
+**Precompute result classification too.** Not possible in kind: the input
+is a server response at runtime, not a schema known at build time.
 
 ## Design
 
@@ -179,6 +268,10 @@ export interface FieldDescriptor {
 
 export interface MethodDescriptor {
   readonly method: string;
+  /** `detectArgPattern`'s result, precomputed. `marshalParams` consumes
+   *  this at runtime to decide the positional grammar, so it must travel
+   *  with the descriptor rather than being re-derived. */
+  readonly pattern: ArgPattern;
   readonly fields: readonly FieldDescriptor[];
   /** Fields the schema requires that are not expressible as flags, which
    *  the residual-JSON path handles. */
@@ -187,6 +280,13 @@ export interface MethodDescriptor {
 
 export const COMMAND_DESCRIPTORS: Readonly<Record<string, MethodDescriptor>>;
 ```
+
+`fields` must serve **both** directions. `addFieldOptions` reads it to
+register Commander options; `extractFieldValue` reads it to rebuild the
+nested params object from flat opts on every dispatch. `cliKey` and
+`paramsPath` together carry that mapping, so neither direction needs the
+schema. `isArray` preserves the comma-separated-scalar handling and
+`kind` preserves the per-item `JSON.parse` fallback.
 
 **`json-schemas.ts`** — the `z.toJSONSchema()` output that `help.ts`
 computes at runtime for `--json`, keyed by method, for both params and
@@ -201,6 +301,23 @@ building a Commander command from method metadata. Only its *input*
 changes: it reads a `MethodDescriptor` instead of walking a `z.ZodType`.
 The option-registration, kebab-casing, and residual-JSON logic is
 unchanged.
+
+Its action handler keeps the three `safeParse` calls verbatim; only the
+binding moves, from a module-level import to a dynamic one taken after
+`session.requestWithRetry` resolves:
+
+```ts
+const result = await session.requestWithRetry(/* … */);
+
+const { NonEmptyWorkspaceEditSchema, TextEditArraySchema, CodeActionSchema } =
+  await import('@lspeasy/core/schemas');
+```
+
+`NonEmptyWorkspaceEditSchema` is currently constructed at module scope in
+`zod-to-commander.ts` (`WorkspaceEditSchema.refine(...)`) and
+`TextEditArraySchema` likewise (`z.array(TextEditSchema)`). Both move
+into `@lspeasy/core/schemas` as named exports so the dynamic import is a
+single call and no zod expression remains in `apps/cli` source.
 
 `help.ts` reads `json-schemas.ts` and `examples.ts` instead of calling
 `z.toJSONSchema` / `exampleFromZod`.
@@ -258,6 +375,23 @@ directly. Without it, a future export re-introduces zod to the barrel and
 silently returns the ~41ms, with no failing test and no obvious symptom —
 which is precisely how the current situation arose.
 
+**CLI startup purity.** The barrel test alone is not sufficient: zod could
+return via `apps/cli`'s own imports rather than through core. Add a test
+that loads the CLI entry module and asserts zod is absent from the graph
+*at startup*. It must be written so a deferred import cannot produce a
+false pass — check the graph after module load but before any command has
+executed, so the assertion is about the startup path specifically and not
+about zod never loading at all. This is the test that actually protects
+the measured win; the barrel test protects downstream consumers.
+
+**Deferred-import correctness.** The result-classification cascade is
+where a mistake silently changes whether files get written, so the
+existing coverage for it must keep passing unchanged against the
+dynamically-imported schemas: a `WorkspaceEdit` result, a `TextEdit[]`
+result, a single edit-bearing `CodeAction`, multiple edit-bearing code
+actions (must *not* auto-apply), and a `(Command | CodeAction)[]` mixed
+array (must not fail the whole parse).
+
 **Generated freshness.** CI regenerates and runs `git diff --exit-code`,
 matching the existing protocol-generation check, so descriptors cannot
 drift from `schemas.ts`.
@@ -307,6 +441,11 @@ The changeset and `packages/core/README.md` should state the rule plainly:
   `socket`/`tcp`/`shared-worker` parse untrusted wire data and keep
   validating it. The premise "we own both ends" is true for the CLI's own
   I/O and false for a network transport.
+- **Weakening result classification.** The three `safeParse` calls in the
+  action handler are kept exactly as they are. They validate a response
+  from an external process on the path that decides whether to write to
+  the user's files; this design defers *when* they load, never *whether*
+  they run.
 - **Making `lsproxy` compile with scriptc.** Blocked upstream on child
   stdin; not a goal here.
 - **Changing the discovery model.** The CLI still derives its grammar from
