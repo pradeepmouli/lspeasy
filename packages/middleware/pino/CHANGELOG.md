@@ -1,5 +1,12 @@
 # @lspeasy/middleware-pino
 
+## 10.0.1
+
+### Patch Changes
+
+- Updated dependencies [027e839]
+  - @lspeasy/core@3.0.0
+
 ## 10.0.0
 
 ### Patch Changes
