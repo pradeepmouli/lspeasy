@@ -1,5 +1,3 @@
-import { exit } from 'node:process';
-
 import { Command } from 'commander';
 
 import { startDaemon, stopDaemon, fetchDaemonStatus } from './connect.js';
@@ -27,7 +25,7 @@ export async function runDaemon(
   const fail = (msg: string): void => {
     if (flags.json) emit({ ok: false, error: msg });
     else process.stderr.write(`error: ${msg}\n`);
-    exit(1);
+    process.exit(1);
   };
 
   if (sub !== 'start' && sub !== 'stop' && sub !== 'status') {
