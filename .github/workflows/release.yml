@@ -52,8 +52,14 @@ jobs:
           publish-script: pnpm changeset:publish
           commit-message: 'chore: version packages'
           pr-title: 'chore: version packages'
+          # The token goes here, NOT in env: the action now errors when a
+          # GITHUB_TOKEN env var is set to anything other than this input.
+          # Nothing else in the release needs it in the environment — the
+          # changelog generator is @changesets/cli/changelog (the default, no
+          # GitHub API calls) per .changeset/config.json, and changeset publish
+          # authenticates to npm, not GitHub.
+          github-token: ${{ secrets.RELEASE_TOKEN }}
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
 
       - name: Enable auto-merge on version PR
