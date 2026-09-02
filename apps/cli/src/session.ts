@@ -36,7 +36,11 @@ import {
   type ServerCapabilities,
   type Transport
 } from '@lspeasy/core';
-import { StdioTransport } from '@lspeasy/core/node';
+// Narrow subpath, not '@lspeasy/core/node': that barrel aggregates every Node
+// transport, and Tcp/Socket import zod to validate bytes off a socket anyone
+// can write to. Importing it for StdioTransport alone would put zod on the
+// startup path -- see apps/cli/src/startup-purity.test.ts.
+import { StdioTransport } from '@lspeasy/core/transport/stdio';
 
 import type { WorkspaceEdit } from './apply.js';
 

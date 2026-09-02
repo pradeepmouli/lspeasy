@@ -54,7 +54,7 @@
     "changeset:version": "changeset version",
     "changeset:publish": "pnpm run build && changeset publish",
     "fetch:metamodel": "tsx scripts/fetch-metamodel.ts --force",
-    "generate:protocol": "tsx scripts/generate-protocol-types.ts && oxfmt packages/core/src/protocol/*.ts",
+    "generate:protocol": "tsx scripts/generate-protocol-types.ts && oxfmt packages/core/src/protocol/*.ts && pnpm --filter @lspeasy/core run build && tsx scripts/generate-cli-descriptors.ts && oxfmt apps/cli/src/generated/*.ts",
     "update:protocol": "pnpm run fetch:metamodel && pnpm run generate:protocol",
     "prepare": "simple-git-hooks",
     "docs:dev": "pnpm --filter @lspeasy/docs dev",
@@ -63,6 +63,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.0",
     "@changesets/cli": "^3.0.1",
+    "@lspeasy/core": "workspace:*",
     "@types/node": "^26.4.0",
     "@vitest/coverage-v8": "^4.1.11",
     "@vitest/ui": "^4.1.11",
@@ -77,7 +78,8 @@
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
     "vitest": "^4.1.11",
-    "x-to-zod": "^0.10.5"
+    "x-to-zod": "^0.10.5",
+    "zod": "^4.4.3"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged",

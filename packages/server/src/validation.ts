@@ -7,8 +7,10 @@ import { ResponseError } from '@lspeasy/core';
 import type { RequestContext, NotificationContext } from './types.js';
 
 /**
- * Zod schemas imported from @lspeasy/core
- * These are comprehensive LSP protocol schemas
+ * Comprehensive LSP protocol schemas, imported from '@lspeasy/core/schemas'
+ * rather than the main barrel — they are zod values, and the barrel is kept
+ * zod-free so consumers that only want types and transports don't pay for it.
+ * A server validating untrusted client requests genuinely needs them.
  */
 import {
   HoverParamsSchema as hoverParamsSchema,
@@ -20,7 +22,7 @@ import {
   DidOpenTextDocumentParamsSchema as didOpenTextDocumentParamsSchema,
   DidChangeTextDocumentParamsSchema as didChangeTextDocumentParamsSchema,
   DidCloseTextDocumentParamsSchema as didCloseTextDocumentParamsSchema
-} from '@lspeasy/core';
+} from '@lspeasy/core/schemas';
 
 /**
  * Schema registry for LSP methods

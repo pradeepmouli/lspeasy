@@ -1,6 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { Disposable, Message, Transport } from '@lspeasy/core';
 import { LSPClient } from '../../src/client.js';
+
+// The register/unregister handlers load their param guards with a dynamic
+// import, so that importing this package does not drag zod onto a consumer's
+// startup path (see apps/cli/src/startup-purity.test.ts). On the very first
+// call that import resolves a module from disk, which outlasts the single
+// macrotask each test below flushes with. Warming the module cache once makes
+// the import settle in a microtask, so those flushes are deterministic again.
+beforeAll(async () => {
+  await import('@lspeasy/core/schemas');
+});
 
 class MockTransport implements Transport {
   private readonly messageHandlers = new Set<(message: Message) => void>();

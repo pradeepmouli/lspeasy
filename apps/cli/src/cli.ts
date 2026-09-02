@@ -245,7 +245,9 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
     buildCommandTree(program, session.capabilities, session, flags, entry.anchorFile);
     const drillPath = drillPathFor(drillPathRaw);
     if (flags.json) {
-      const jsonResult = drillDownJson(program, entry.languageId, drillPath) as { ok?: boolean };
+      const jsonResult = (await drillDownJson(program, entry.languageId, drillPath)) as {
+        ok?: boolean;
+      };
       process.stdout.write(JSON.stringify(jsonResult) + '\n');
       if (jsonResult.ok === false) {
         await session.stop();
@@ -342,7 +344,7 @@ export async function runDispatch(positionals: string[], flags: GlobalFlags): Pr
         const drillPath = drillPathFor([namespace, request]);
         if (flags.json) {
           process.stdout.write(
-            JSON.stringify(drillDownJson(program, entry.languageId, drillPath)) + '\n'
+            JSON.stringify(await drillDownJson(program, entry.languageId, drillPath)) + '\n'
           );
         } else {
           const color = process.stdout.isTTY === true && !process.env['NO_COLOR'];

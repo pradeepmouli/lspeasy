@@ -8,6 +8,7 @@ export default defineConfig({
       'packages/**/test/**/*.test.ts',
       'packages/**/src/**/*.test.ts',
       'apps/**/src/**/*.test.ts',
+      'scripts/**/*.test.ts',
       'e2e/**/*.spec.ts'
     ],
     exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],

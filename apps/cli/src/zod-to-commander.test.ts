@@ -1,22 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { z } from 'zod';
 import {
-  detectArgPattern,
   marshalParams,
   zodToCommander,
   extractFieldValue,
-  paramsResidualExample,
-  deepMergeInto
+  deepMergeInto,
+  setAtPath
 } from './zod-to-commander.js';
-import {
-  TextDocumentPositionParamsSchema,
-  RenameParamsSchema,
-  FoldingRangeParamsSchema,
-  WorkspaceSymbolParamsSchema,
-  InlayHintParamsSchema,
-  getSchemaForMethod,
-  CodeActionContextSchema
-} from '@lspeasy/core';
+import { COMMAND_DESCRIPTORS } from './generated/command-descriptors.js';
 import type { GlobalFlags } from './io.js';
 import type { RefactorSession } from './session.js';
 
@@ -31,32 +21,6 @@ const FLAGS: GlobalFlags = {
   overwrite: false,
   noProxy: false
 };
-
-describe('detectArgPattern', () => {
-  it('returns file-position for TextDocumentPositionParams', () => {
-    expect(detectArgPattern(TextDocumentPositionParamsSchema)).toBe('file-position');
-  });
-
-  it('returns file-position-newname for RenameParams', () => {
-    expect(detectArgPattern(RenameParamsSchema)).toBe('file-position-newname');
-  });
-
-  it('returns file for document-only schema', () => {
-    expect(detectArgPattern(FoldingRangeParamsSchema)).toBe('file');
-  });
-
-  it('returns file-range for schemas with textDocument + range', () => {
-    expect(detectArgPattern(InlayHintParamsSchema)).toBe('file-range');
-  });
-
-  it('returns query for schemas with query field but no textDocument', () => {
-    expect(detectArgPattern(WorkspaceSymbolParamsSchema)).toBe('query');
-  });
-
-  it('returns raw for non-ZodObject schema', () => {
-    expect(detectArgPattern(z.string())).toBe('raw');
-  });
-});
 
 describe('marshalParams', () => {
   it('converts 1-based position to 0-based for file-position', () => {
@@ -147,10 +111,11 @@ describe('deepMergeInto', () => {
 // which is never called during option-inspection tests.
 const STUB_SESSION = {} as RefactorSession;
 
+const CODE_ACTION = COMMAND_DESCRIPTORS['textDocument/codeAction']!;
+
 describe('zodToCommander deepened flags', () => {
   it('codeAction surfaces --params fallback and an --*-only flag (enum array), not just raw JSON', () => {
-    const schema = getSchemaForMethod('textDocument/codeAction')!;
-    const cmd = zodToCommander('textDocument/codeAction', schema, STUB_SESSION, FLAGS);
+    const cmd = zodToCommander('textDocument/codeAction', CODE_ACTION, STUB_SESSION, FLAGS);
     const flags = cmd.options.map((o) => o.flags).join(' ');
 
     // Fallback must always be present
@@ -162,8 +127,7 @@ describe('zodToCommander deepened flags', () => {
   });
 
   it('codeAction trigger-kind flag has Commander choices (union of literals)', () => {
-    const schema = getSchemaForMethod('textDocument/codeAction')!;
-    const cmd = zodToCommander('textDocument/codeAction', schema, STUB_SESSION, FLAGS);
+    const cmd = zodToCommander('textDocument/codeAction', CODE_ACTION, STUB_SESSION, FLAGS);
     const triggerOpt = cmd.options.find((o) => /trigger-kind/.test(o.flags));
     // triggerKind = z.union([z.literal(1), z.literal(2)]) → choices ['1','2']
     expect(triggerOpt).toBeDefined();
@@ -173,45 +137,55 @@ describe('zodToCommander deepened flags', () => {
 });
 
 describe('extractFieldValue round-trip (deepened flags)', () => {
-  // The codeAction `context` field uses cliKey 'code-action' (fieldCliKey strips
-  // the '-context' suffix from 'code-action-context'). extractFieldValue expands
-  // one level deep so sub-fields map to: codeActionOnly / codeActionTriggerKind.
+  // codeAction's `context` field is flattened by the generator into the leaf
+  // descriptors code-action-only (context.only) and code-action-trigger-kind
+  // (context.triggerKind); Commander stores those under the camelCased keys.
+  const field = (cliKey: string) => CODE_ACTION.fields.find((f) => f.cliKey === cliKey)!;
 
-  it('reconstructs context.only (scalar array) from comma-separated option value', () => {
-    const opts: Record<string, unknown> = {
-      codeActionOnly: 'quickfix,refactor'
-    };
-    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
-      string,
-      unknown
-    >;
-    expect(result).toBeDefined();
-    expect(result['only']).toEqual(['quickfix', 'refactor']);
+  it('reads context.only (scalar array) from a comma-separated option value', () => {
+    const result = extractFieldValue(
+      { codeActionOnly: 'quickfix,refactor' },
+      field('code-action-only')
+    );
+    expect(result).toEqual(['quickfix', 'refactor']);
   });
 
-  it('reconstructs context.triggerKind (union-of-literals) as a number via JSON.parse', () => {
-    const opts: Record<string, unknown> = {
-      codeActionTriggerKind: '1'
-    };
-    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
-      string,
-      unknown
-    >;
-    expect(result).toBeDefined();
-    expect(result['triggerKind']).toBe(1);
+  it('reads context.triggerKind (union-of-literals) as a number via JSON.parse', () => {
+    const result = extractFieldValue(
+      { codeActionTriggerKind: '1' },
+      field('code-action-trigger-kind')
+    );
+    expect(result).toBe(1);
   });
 
-  it('reconstructs both context sub-fields together', () => {
-    const opts: Record<string, unknown> = {
-      codeActionOnly: 'quickfix,refactor',
-      codeActionTriggerKind: '1'
-    };
-    const result = extractFieldValue(opts, 'code-action', CodeActionContextSchema) as Record<
-      string,
-      unknown
-    >;
-    expect(result['only']).toEqual(['quickfix', 'refactor']);
-    expect(result['triggerKind']).toBe(1);
+  it('returns undefined when the flag was not supplied', () => {
+    expect(extractFieldValue({}, field('code-action-only'))).toBeUndefined();
+  });
+});
+
+describe('setAtPath — rebuilds the nesting the flattened cliKeys lost', () => {
+  it('writes a leaf at a dotted path, creating intermediate objects', () => {
+    const target: Record<string, unknown> = {};
+    setAtPath(target, 'context.only', ['quickfix']);
+    expect(target).toEqual({ context: { only: ['quickfix'] } });
+  });
+
+  it('adds a sibling without clobbering what is already at the parent', () => {
+    const target: Record<string, unknown> = { context: { diagnostics: [{ x: 1 }] } };
+    setAtPath(target, 'context.only', ['quickfix']);
+    setAtPath(target, 'context.triggerKind', 1);
+    expect(target).toEqual({
+      context: { diagnostics: [{ x: 1 }], only: ['quickfix'], triggerKind: 1 }
+    });
+  });
+
+  it('refuses prototype-polluting segments at every level', () => {
+    const target: Record<string, unknown> = {};
+    setAtPath(target, '__proto__.polluted', true);
+    setAtPath(target, 'context.__proto__', true);
+    setAtPath(target, 'constructor.prototype.polluted', true);
+    expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
+    expect(Object.getPrototypeOf(target)).toBe(Object.prototype);
   });
 });
 
@@ -242,7 +216,7 @@ describe('anchorFile support', () => {
   it('zodToCommander omits the <file> argument when an anchor file is provided', () => {
     const cmd = zodToCommander(
       'textDocument/hover',
-      getSchemaForMethod('textDocument/hover')!,
+      COMMAND_DESCRIPTORS['textDocument/hover']!,
       {} as any,
       { root: '/project' } as GlobalFlags,
       '/project/src/foo.ts'
@@ -253,39 +227,10 @@ describe('anchorFile support', () => {
   it('zodToCommander keeps the <file> argument when no anchor is provided', () => {
     const cmd = zodToCommander(
       'textDocument/hover',
-      getSchemaForMethod('textDocument/hover')!,
+      COMMAND_DESCRIPTORS['textDocument/hover']!,
       {} as any,
       { root: '/project' } as GlobalFlags
     );
     expect(cmd.registeredArguments.map((a) => a.name())).toEqual(['file', 'line:col']);
-  });
-});
-
-describe('paramsResidualExample — only fields not exposed as args/flags', () => {
-  it('codeAction: residual is just context.diagnostics (file/range/only/triggerKind are args/flags)', () => {
-    const schema = getSchemaForMethod('textDocument/codeAction');
-    expect(schema).toBeDefined();
-    const residual = paramsResidualExample(schema!) as Record<string, unknown>;
-    expect(residual).toBeDefined();
-    // positional / flag fields must be absent from the --params example
-    expect(residual['textDocument']).toBeUndefined();
-    expect(residual['range']).toBeUndefined();
-    const ctx = residual['context'] as Record<string, unknown> | undefined;
-    expect(ctx).toBeDefined();
-    expect(ctx!['diagnostics']).toBeDefined(); // array-of-objects → --params
-    expect(ctx!['only']).toBeUndefined(); // scalar array → flag
-    expect(ctx!['triggerKind']).toBeUndefined(); // enum → flag
-  });
-
-  it('hover: undefined — all inputs map to positional args', () => {
-    const schema = getSchemaForMethod('textDocument/hover');
-    expect(paramsResidualExample(schema!)).toBeUndefined();
-  });
-
-  it('raw method (executeCommand): full example — everything via --params', () => {
-    const schema = getSchemaForMethod('workspace/executeCommand');
-    const residual = paramsResidualExample(schema!) as Record<string, unknown>;
-    expect(residual).toBeDefined();
-    expect(residual['command']).toBeDefined();
   });
 });

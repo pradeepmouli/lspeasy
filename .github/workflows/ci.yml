@@ -35,6 +35,26 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      # apps/cli/src/generated is the CLI's entire schema surface at runtime; if
+      # it drifts from packages/core/src/protocol the CLI silently ships stale
+      # flags, help and examples and nothing else fails.
+      #
+      # Deliberately NOT `pnpm run generate:protocol`: that chains
+      # generate-protocol-types.ts, which calls fetchMetaModel() and downloads
+      # the LSP metaModel (the cache lives in the gitignored .cache/, so CI
+      # always fetches). That would make this step assert "the committed files
+      # match upstream LSP today" — network-dependent, and red whenever the
+      # spec changes, for reasons unrelated to the PR under test. Refreshing
+      # from upstream stays a deliberate manual `pnpm run update:protocol`.
+      #
+      # The descriptor generator reads the built core, which the Build step
+      # above produced from committed sources, so this is hermetic.
+      - name: Verify generated files are current
+        run: |
+          pnpm tsx scripts/generate-cli-descriptors.ts
+          pnpm oxfmt apps/cli/src/generated/*.ts
+          git diff --exit-code -- apps/cli/src/generated
+
       - name: Type check
         run: pnpm run type-check
 
