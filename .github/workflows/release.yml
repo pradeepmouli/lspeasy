@@ -43,11 +43,16 @@ jobs:
 
       - name: Create Release Pull Request or Publish
         id: changesets
-        uses: changesets/action@v2
+        # Pinned to a commit, not `@v2`: v2 is a BRANCH in changesets/action, so
+        # it moves. It moved twice under us and broke releases twice — first by
+        # renaming these inputs, then by rejecting a GITHUB_TOKEN env var that
+        # differs from the github-token input. Neither showed up until a release
+        # was attempted, because this workflow only runs on push to master.
+        # This SHA is exactly what `v2` pointed at for the 3.0.0 release, so the
+        # pin changes nothing today. Dependabot updates it via the version
+        # comment.
+        uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
         with:
-          # changesets/action renamed these inputs; the old names are now a hard
-          # error, not a warning. @v2 is a mutable tag, so this broke with no
-          # change on our side and stayed broken until a release was attempted.
           version-script: pnpm changeset:version
           publish-script: pnpm changeset:publish
           commit-message: 'chore: version packages'
