@@ -20,14 +20,13 @@ import {
   type AppliedChange,
   type BoundaryGuard
 } from './apply.js';
+import type {
+  ArgPattern,
+  FieldDescriptor,
+  MethodDescriptor
+} from './generated/command-descriptors.js';
 
-export type ArgPattern =
-  | 'file-position-newname'
-  | 'file-position'
-  | 'file-range'
-  | 'file'
-  | 'query'
-  | 'raw';
+export type { ArgPattern, FieldDescriptor, MethodDescriptor };
 
 const PATTERN_FIELDS: Readonly<Record<ArgPattern, ReadonlySet<string>>> = {
   'file-position-newname': new Set(['textDocument', 'position', 'newName']),
@@ -153,12 +152,22 @@ function fieldCliKey(subcommand: string, fieldName: string, isObject: boolean): 
  *   - Other scalars              → `--<key> <value>`
  * Arrays of objects, non-literal unions, and nested objects beyond depth 1 are
  * silently skipped — users must supply them via `--params`.
+ *
+ * RETAINED FOR THE EQUIVALENCE GATE. `zodToCommander` no longer calls this —
+ * it renders `COMMAND_DESCRIPTORS` instead. It stays alive so
+ * `descriptor-equivalence.test.ts` can keep proving the descriptor-driven
+ * surface matches the schema-walked one; both go away together in Task 7.
  */
-function addFieldOptions(cmd: Command, cliKey: string, schema: z.ZodType, depth = 0): void {
+function addSchemaFieldOptions(cmd: Command, cliKey: string, schema: z.ZodType, depth = 0): void {
   const inner = unwrapOptional(schema);
   if (depth < 1 && isZodObjectLike(inner)) {
     for (const [sub, subSchema] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
-      addFieldOptions(cmd, `${cliKey}-${toKebabCase(sub)}`, subSchema as z.ZodType, depth + 1);
+      addSchemaFieldOptions(
+        cmd,
+        `${cliKey}-${toKebabCase(sub)}`,
+        subSchema as z.ZodType,
+        depth + 1
+      );
     }
     return;
   }
@@ -192,40 +201,43 @@ function addFieldOptions(cmd: Command, cliKey: string, schema: z.ZodType, depth 
 }
 
 /**
- * Read back all field options registered by `addFieldOptions` and reconstruct
- * the original nested value. Returns `undefined` when none of the sub-options
- * were provided.
- * Scalar arrays are stored as comma-separated strings and split here.
+ * Register the Commander option for one generated field descriptor. The
+ * emitted shape mirrors `addSchemaFieldOptions` exactly — the descriptors were
+ * generated from the same walk, and `descriptor-equivalence.test.ts` pins the
+ * two surfaces together.
+ *
+ * Note the asymmetry around choices: a scalar ARRAY lists its valid values in
+ * the description rather than via Commander `.choices()`, because the value
+ * arrives comma-joined (`--code-action-only quickfix,refactor`) and would fail
+ * choice validation as a whole string.
  */
-export function extractFieldValue(
-  opts: Record<string, unknown>,
-  cliKey: string,
-  schema: z.ZodType,
-  depth = 0
-): unknown {
-  const inner = unwrapOptional(schema);
-  if (depth < 1 && isZodObjectLike(inner)) {
-    const result: Record<string, unknown> = {};
-    let hasAny = false;
-    for (const [sub, subSchema] of Object.entries(inner.shape as Record<string, z.ZodType>)) {
-      const val = extractFieldValue(
-        opts,
-        `${cliKey}-${toKebabCase(sub)}`,
-        subSchema as z.ZodType,
-        depth + 1
-      );
-      if (val !== undefined) {
-        result[sub] = val;
-        hasAny = true;
-      }
-    }
-    return hasAny ? result : undefined;
+function addFieldOptions(cmd: Command, field: FieldDescriptor): void {
+  if (field.isArray) {
+    const desc = field.choices
+      ? `${field.cliKey} — comma-separated (${field.choices.join('|')})`
+      : `${field.cliKey} (comma-separated)`;
+    cmd.addOption(new Option(`--${field.cliKey} <items>`, desc));
+    return;
   }
-  const raw = opts[toCamelCase(cliKey)];
+  if (field.choices) {
+    cmd.addOption(
+      new Option(`--${field.cliKey} <value>`, field.cliKey).choices([...field.choices])
+    );
+    return;
+  }
+  cmd.option(`--${field.cliKey} <value>`, field.cliKey);
+}
+
+/**
+ * Read back the option registered for one field descriptor. Returns `undefined`
+ * when the flag was not supplied. Scalar arrays arrive comma-separated and are
+ * split here; every item is JSON-parsed opportunistically so numeric and
+ * boolean values survive as themselves.
+ */
+export function extractFieldValue(opts: Record<string, unknown>, field: FieldDescriptor): unknown {
+  const raw = opts[toCamelCase(field.cliKey)];
   if (raw === undefined) return undefined;
-  // Scalar array: comma-separated → split and parse each item.
-  const scalarElem = getScalarArrayElement(inner);
-  if (scalarElem !== null && typeof raw === 'string') {
+  if (field.isArray && typeof raw === 'string') {
     return raw
       .split(',')
       .map((s) => s.trim())
@@ -334,6 +346,32 @@ export function deepMergeInto(
     else dst[k] = v;
   }
   return dst;
+}
+
+/**
+ * Write `value` at `dottedPath` in `target`, creating intermediate objects.
+ * Mirrors the nesting the old recursive `extractFieldValue` rebuilt implicitly:
+ * a descriptor's `paramsPath` of `context.only` lands at `params.context.only`
+ * without disturbing a sibling `context.diagnostics` supplied via `--params`.
+ * Prototype-polluting segments are refused at every level, matching
+ * `deepMergeInto`.
+ */
+export function setAtPath(
+  target: Record<string, unknown>,
+  dottedPath: string,
+  value: unknown
+): void {
+  const parts = dottedPath.split('.');
+  let cur = target;
+  for (const part of parts.slice(0, -1)) {
+    if (UNSAFE_KEYS.has(part)) return;
+    if (!isPlainObject(cur[part])) cur[part] = {};
+    cur = cur[part] as Record<string, unknown>;
+  }
+  const last = parts.at(-1)!;
+  if (UNSAFE_KEYS.has(last)) return;
+  if (isPlainObject(cur[last]) && isPlainObject(value)) deepMergeInto(cur[last], value);
+  else cur[last] = value;
 }
 
 export function marshalParams(
@@ -459,16 +497,45 @@ function injectRequiredDefaults(method: string, params: unknown): unknown {
   return params;
 }
 
+/**
+ * Build ONLY the flag surface the way `zodToCommander` did before it switched
+ * to generated descriptors — by walking `schema` at runtime.
+ *
+ * RETAINED FOR THE EQUIVALENCE GATE, and not used in production. Task 3 proved
+ * the generated descriptors match this walk; this keeps that proof running
+ * end-to-end (descriptor-rendered command vs schema-walked command) while
+ * Tasks 5-6 remove the remaining zod consumers. Task 7 deletes this together
+ * with `addSchemaFieldOptions` and the rest of the walker.
+ */
+export function legacyFlagSurface(method: string, schema: z.ZodType): Command {
+  const subcommand = method.split('/').slice(1).join('-') || method;
+  const cmd = new Command(subcommand);
+  const pattern = detectArgPattern(schema);
+  if (pattern !== 'raw' && isZodObjectLike(schema)) {
+    const covered = PATTERN_FIELDS[pattern];
+    for (const [field, fieldSchema] of Object.entries(schema.shape as Record<string, z.ZodType>)) {
+      if (covered.has(field)) continue;
+      const inner = unwrapOptional(fieldSchema);
+      addSchemaFieldOptions(
+        cmd,
+        fieldCliKey(subcommand, field, isZodObjectLike(inner)),
+        fieldSchema
+      );
+    }
+  }
+  return cmd;
+}
+
 export function zodToCommander(
   method: string,
-  schema: z.ZodType,
+  descriptor: MethodDescriptor,
   session: RefactorSession,
   flags: GlobalFlags,
   anchorFile?: string
 ): Command {
   const subcommand = method.split('/').slice(1).join('-') || method;
   const cmd = new Command(subcommand);
-  const pattern = detectArgPattern(schema);
+  const pattern = descriptor.pattern;
   const hasAnchor = anchorFile !== undefined;
 
   switch (pattern) {
@@ -500,18 +567,10 @@ export function zodToCommander(
     'extra LSP params as JSON, deep-merged over positional args + flags (for raw methods, the full params)'
   );
 
-  // Add Commander options for schema fields not covered by the positional pattern.
-  // Object-typed fields are expanded one level deep via hyphenation.
-  if (pattern !== 'raw' && isZodObjectLike(schema)) {
-    const covered = PATTERN_FIELDS[pattern];
-    for (const [field, fieldSchema] of Object.entries(schema.shape as Record<string, z.ZodType>)) {
-      if (!covered.has(field)) {
-        const inner = unwrapOptional(fieldSchema);
-        const cliKey = fieldCliKey(subcommand, field, isZodObjectLike(inner));
-        addFieldOptions(cmd, cliKey, fieldSchema);
-      }
-    }
-  }
+  // Options for fields not covered by the positional pattern, precomputed at
+  // build time by scripts/generate-cli-descriptors.ts. Nested objects were
+  // already flattened into hyphenated cliKeys there.
+  for (const field of descriptor.fields) addFieldOptions(cmd, field);
 
   cmd.action(async (...cmdArgs) => {
     // Commander passes (...declaredArgs, options, command): the Command instance
@@ -531,24 +590,12 @@ export function zodToCommander(
       //   positionals (marshalParams) → flags → --params.
       // Object fields deep-merge so e.g. context.{only,triggerKind} (flags) and
       // context.diagnostics (--params) combine instead of clobbering.
-      if (
-        pattern !== 'raw' &&
-        isZodObjectLike(schema) &&
-        typeof rawParams === 'object' &&
-        rawParams !== null
-      ) {
+      if (pattern !== 'raw' && typeof rawParams === 'object' && rawParams !== null) {
         const base = rawParams as Record<string, unknown>;
-        const covered = PATTERN_FIELDS[pattern];
-        for (const [field, fieldSchema] of Object.entries(
-          schema.shape as Record<string, z.ZodType>
-        )) {
-          if (covered.has(field)) continue;
-          const inner = unwrapOptional(fieldSchema);
-          const cliKey = fieldCliKey(subcommand, field, isZodObjectLike(inner));
-          const val = extractFieldValue(cmdOpts, cliKey, fieldSchema);
+        for (const field of descriptor.fields) {
+          const val = extractFieldValue(cmdOpts, field);
           if (val === undefined) continue;
-          if (isPlainObject(base[field]) && isPlainObject(val)) deepMergeInto(base[field], val);
-          else base[field] = val;
+          setAtPath(base, field.paramsPath, val);
         }
         // --params is a residual, deep-merged LAST over positionals + flags
         // (not a full override) so callers pass only the fields not surfaced as

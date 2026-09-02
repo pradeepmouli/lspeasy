@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { getCapabilityForRequestMethod } from '@lspeasy/core';
-import { LSPSchemas, getSchemaForMethod } from '@lspeasy/core/schemas';
 import type { ServerCapabilities } from '@lspeasy/core';
 
+import { COMMAND_DESCRIPTORS } from './generated/command-descriptors.js';
 import { zodToCommander, printAppliedChanges } from './zod-to-commander.js';
 import { assessResultQuality } from './result-quality.js';
 import { applyWorkspaceEdit, planWorkspaceEdit } from './apply.js';
@@ -87,17 +87,17 @@ export function buildCommandTree(
   flags: GlobalFlags,
   anchorFile?: string
 ): void {
-  for (const method of Object.keys(LSPSchemas) as Array<keyof typeof LSPSchemas>) {
-    const schema = getSchemaForMethod(method as string);
-    if (!schema) continue;
+  for (const method of Object.keys(COMMAND_DESCRIPTORS)) {
+    const descriptor = COMMAND_DESCRIPTORS[method];
+    if (!descriptor) continue;
 
     const capPath = getCapabilityForRequestMethod(method as any);
     if (capPath === 'alwaysOn') continue;
     if (!getNestedValue(capabilities, capPath as string)) continue;
-    const refinedCapPath = CAPABILITY_REFINEMENTS[method as string];
+    const refinedCapPath = CAPABILITY_REFINEMENTS[method];
     if (refinedCapPath && !getNestedValue(capabilities, refinedCapPath)) continue;
 
-    const parts = (method as string).split('/');
+    const parts = method.split('/');
     if (parts.length < 2) continue;
     const [namespace] = parts as [string, ...string[]];
 
@@ -107,8 +107,8 @@ export function buildCommandTree(
       program.addCommand(nsCmd);
     }
 
-    const subCmd = zodToCommander(method as string, schema, session, flags, anchorFile);
-    enrichCommandFromCapabilities(method as string, subCmd, capabilities);
+    const subCmd = zodToCommander(method, descriptor, session, flags, anchorFile);
+    enrichCommandFromCapabilities(method, subCmd, capabilities);
     // executeCommand args are server-defined (opaque LSPAny) and not in the
     // protocol — the reliable way to get a valid {command, arguments} is to
     // replay one from a codeAction/codeLens result.
