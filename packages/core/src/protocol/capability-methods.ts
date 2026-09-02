@@ -28,7 +28,7 @@ type IsServerCapabilityEnabled<Caps, A = Record<string, any>> = A extends {
   ? Cap extends Paths<Caps>
     ? true
     : false
-  : true /* No capability required */;
+  : true; /* No capability required */
 
 type IsClientCapabilityEnabled<Caps, A = Record<string, any>> = A extends {
   ClientCapability: infer Cap;
@@ -36,7 +36,7 @@ type IsClientCapabilityEnabled<Caps, A = Record<string, any>> = A extends {
   ? Cap extends Paths<Caps>
     ? true
     : false
-  : true /* No capability required */;
+  : true; /* No capability required */
 
 type StripNamespaceSuffix<
   Namespace extends string,
@@ -127,13 +127,12 @@ type RemoveNeverFromNamespace<T> = Simplify<{
 export type ClientNotifications<ServerCaps extends Partial<ServerCapabilities>> = Simplify<
   RemoveNever<{
     [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
-      [Method in ConditionalKeys<
-        LSPRequest[Namespace],
-        { Direction: 'clientToServer' | 'both' }
-      > as CamelCase<Method>]: TransformToClientSendMethod<
-        LSPRequest[Namespace][Method],
-        ServerCaps
-      >;
+      [
+        Method in ConditionalKeys<
+          LSPRequest[Namespace],
+          { Direction: 'clientToServer' | 'both' }
+        > as CamelCase<Method>
+      ]: TransformToClientSendMethod<LSPRequest[Namespace][Method], ServerCaps>;
     }>;
   }>
 >;
@@ -147,13 +146,12 @@ export type ClientNotifications<ServerCaps extends Partial<ServerCapabilities>> 
 export type ClientRequests<ServerCaps extends Partial<ServerCapabilities>> = Simplify<
   RemoveNever<{
     [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
-      [Method in ConditionalKeys<
-        LSPRequest[Namespace],
-        { Direction: 'clientToServer' | 'both' }
-      > as CamelCase<Method>]: TransformToClientSendMethod<
-        LSPRequest[Namespace][Method],
-        ServerCaps
-      >;
+      [
+        Method in ConditionalKeys<
+          LSPRequest[Namespace],
+          { Direction: 'clientToServer' | 'both' }
+        > as CamelCase<Method>
+      ]: TransformToClientSendMethod<LSPRequest[Namespace][Method], ServerCaps>;
     }>;
   }>
 >;
@@ -198,10 +196,12 @@ export type ServerHandlers<ServerCaps extends Partial<ServerCapabilities>> = Sim
  */
 export type ClientRequestHandlers<_ClientCaps extends Partial<ClientCapabilities>> = RemoveNever<{
   [Namespace in keyof LSPRequest as CamelCase<Namespace>]: {
-    [Method in keyof ConditionalPick<
-      LSPRequest[Namespace],
-      { Direction: 'serverToClient' | 'both' }
-    > as `on${Method & string}Request`]: TransformToClientHandler<
+    [
+      Method in keyof ConditionalPick<
+        LSPRequest[Namespace],
+        { Direction: 'serverToClient' | 'both' }
+      > as `on${Method & string}Request`
+    ]: TransformToClientHandler<
       LSPRequest[Namespace][Method & keyof LSPRequest[Namespace]],
       _ClientCaps
     >;
@@ -217,10 +217,12 @@ export type ClientRequestHandlers<_ClientCaps extends Partial<ClientCapabilities
 export type ClientNotificationHandlers<_ClientCaps extends Partial<ClientCapabilities>> =
   RemoveNever<{
     [Namespace in keyof LSPNotification as CamelCase<Namespace>]: {
-      [Method in keyof ConditionalPick<
-        LSPNotification[Namespace],
-        { Direction: 'serverToClient' | 'both' }
-      > as `on${Method & string}Notification`]: TransformToClientHandler<
+      [
+        Method in keyof ConditionalPick<
+          LSPNotification[Namespace],
+          { Direction: 'serverToClient' | 'both' }
+        > as `on${Method & string}Notification`
+      ]: TransformToClientHandler<
         LSPNotification[Namespace][Method & keyof LSPNotification[Namespace]],
         _ClientCaps
       >;
@@ -237,9 +239,9 @@ export type ServerSendMethods<
   _ClientCaps extends Partial<ClientCapabilities> = ClientCapabilities
 > = Simplify<{
   [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNever<{
-    [Method in keyof LSPRequest[Namespace] as CamelCase<
-      Method & string
-    >]: TransformToServerSendMethod<LSPRequest[Namespace][Method], _ClientCaps>;
+    [
+      Method in keyof LSPRequest[Namespace] as CamelCase<Method & string>
+    ]: TransformToServerSendMethod<LSPRequest[Namespace][Method], _ClientCaps>;
   }>;
 }>;
 
@@ -297,9 +299,9 @@ export namespace Client {
   > = Simplify<
     RemoveNever<{
       [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
-        [Method in keyof Requests[Namespace] as CamelCase<
-          Method & string
-        >]: IsClientCapabilityEnabled<ClientCaps, Requests[Namespace][Method]> extends true
+        [
+          Method in keyof Requests[Namespace] as CamelCase<Method & string>
+        ]: IsClientCapabilityEnabled<ClientCaps, Requests[Namespace][Method]> extends true
           ? Requests[Namespace][Method]
           : never;
       }>;
@@ -312,10 +314,14 @@ export namespace Client {
     Notifications extends Partial<LSPNotification> = LSPNotification
   > = Simplify<
     RemoveNever<{
-      [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
-        [Method in keyof Notifications[Namespace] as CamelCase<
-          StripNamespaceSuffix<Namespace & string, Method & string>
-        >]: IsClientCapabilityEnabled<ClientCaps, Notifications[Namespace][Method]> extends true
+      [
+        Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>
+      ]: RemoveNeverFromNamespace<{
+        [
+          Method in keyof Notifications[Namespace] as CamelCase<
+            StripNamespaceSuffix<Namespace & string, Method & string>
+          >
+        ]: IsClientCapabilityEnabled<ClientCaps, Notifications[Namespace][Method]> extends true
           ? Notifications[Namespace][Method]
           : never;
       }>;
@@ -331,9 +337,9 @@ export namespace Server {
   > = Simplify<
     RemoveNever<{
       [Namespace in KeyAsString<LSPRequest> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
-        [Method in keyof Requests[Namespace] as CamelCase<
-          Method & string
-        >]: IsServerCapabilityEnabled<ServerCaps, Requests[Namespace][Method]> extends true
+        [
+          Method in keyof Requests[Namespace] as CamelCase<Method & string>
+        ]: IsServerCapabilityEnabled<ServerCaps, Requests[Namespace][Method]> extends true
           ? Requests[Namespace][Method]
           : never;
       }>;
@@ -346,10 +352,14 @@ export namespace Server {
     Notifications extends Partial<LSPNotification> = LSPNotification
   > = Simplify<
     RemoveNever<{
-      [Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>]: RemoveNeverFromNamespace<{
-        [Method in keyof Notifications[Namespace] as CamelCase<
-          StripNamespaceSuffix<Namespace & string, Method & string>
-        >]: IsServerCapabilityEnabled<ServerCaps, Notifications[Namespace][Method]> extends true
+      [
+        Namespace in KeyAsString<LSPNotification> as CamelCase<Namespace>
+      ]: RemoveNeverFromNamespace<{
+        [
+          Method in keyof Notifications[Namespace] as CamelCase<
+            StripNamespaceSuffix<Namespace & string, Method & string>
+          >
+        ]: IsServerCapabilityEnabled<ServerCaps, Notifications[Namespace][Method]> extends true
           ? Notifications[Namespace][Method]
           : never;
       }>;
@@ -427,43 +437,43 @@ export type Client<
 > = SimplifyDeep<
   {
     [K in keyof AvailableMethods<ClientCaps, ServerCaps>['client']['requests']]: {
-      [Q in keyof AvailableMethods<
-        ClientCaps,
-        ServerCaps
-      >['client']['requests'][K]]: ToRequestSignature<
-        AvailableMethods<ClientCaps, ServerCaps>['client']['requests'][K][Q]
-      >;
+      [
+        Q in keyof AvailableMethods<ClientCaps, ServerCaps>['client']['requests'][K]
+      ]: ToRequestSignature<AvailableMethods<ClientCaps, ServerCaps>['client']['requests'][K][Q]>;
     };
   } & {
     [K in keyof AvailableMethods<ClientCaps, ServerCaps>['client']['notifications']]: {
-      [Q in keyof AvailableMethods<
-        ClientCaps,
-        ServerCaps
-      >['client']['notifications'][K]]: ToNotificationSignature<
+      [
+        Q in keyof AvailableMethods<ClientCaps, ServerCaps>['client']['notifications'][K]
+      ]: ToNotificationSignature<
         AvailableMethods<ClientCaps, ServerCaps>['client']['notifications'][K][Q]
       >;
     };
   } & {
     [K in keyof AvailableMethods<ClientCaps, ServerCaps>['client']['requestHandlers']]: {
-      [Q in keyof AvailableMethods<
-        ClientCaps,
-        ServerCaps
-      >['client']['requestHandlers'][K] as `on${PascalCase<
-        string & Q,
-        { preserveConsecutiveUppercase: true }
-      >}`]: ToRequestHandlerSignature<
+      [
+        Q in keyof AvailableMethods<
+          ClientCaps,
+          ServerCaps
+        >['client']['requestHandlers'][K] as `on${PascalCase<
+          string & Q,
+          { preserveConsecutiveUppercase: true }
+        >}`
+      ]: ToRequestHandlerSignature<
         AvailableMethods<ClientCaps, ServerCaps>['client']['requestHandlers'][K][Q]
       >;
     };
   } & {
     [K in keyof AvailableMethods<ClientCaps, ServerCaps>['client']['notificationHandlers']]: {
-      [Q in keyof AvailableMethods<
-        ClientCaps,
-        ServerCaps
-      >['client']['notificationHandlers'][K] as `on${PascalCase<
-        string & Q,
-        { preserveConsecutiveUppercase: true }
-      >}`]: ToNotificationHandlerSignature<
+      [
+        Q in keyof AvailableMethods<
+          ClientCaps,
+          ServerCaps
+        >['client']['notificationHandlers'][K] as `on${PascalCase<
+          string & Q,
+          { preserveConsecutiveUppercase: true }
+        >}`
+      ]: ToNotificationHandlerSignature<
         AvailableMethods<ClientCaps, ServerCaps>['client']['notificationHandlers'][K][Q]
       >;
     };
@@ -485,43 +495,43 @@ export type Server<
 > = SimplifyDeep<
   {
     [K in keyof AvailableMethods<ClientCaps, ServerCaps>['server']['requests']]: {
-      [Q in keyof AvailableMethods<
-        ClientCaps,
-        ServerCaps
-      >['server']['requests'][K]]: ToRequestSignature<
-        AvailableMethods<ClientCaps, ServerCaps>['server']['requests'][K][Q]
-      >;
+      [
+        Q in keyof AvailableMethods<ClientCaps, ServerCaps>['server']['requests'][K]
+      ]: ToRequestSignature<AvailableMethods<ClientCaps, ServerCaps>['server']['requests'][K][Q]>;
     };
   } & {
     [K in keyof AvailableMethods<ClientCaps, ServerCaps>['server']['notifications']]: {
-      [Q in keyof AvailableMethods<
-        ClientCaps,
-        ServerCaps
-      >['server']['notifications'][K]]: ToNotificationSignature<
+      [
+        Q in keyof AvailableMethods<ClientCaps, ServerCaps>['server']['notifications'][K]
+      ]: ToNotificationSignature<
         AvailableMethods<ClientCaps, ServerCaps>['server']['notifications'][K][Q]
       >;
     };
   } & {
     [K in keyof AvailableMethods<ClientCaps, ServerCaps>['server']['requestHandlers']]: {
-      [Q in keyof AvailableMethods<
-        ClientCaps,
-        ServerCaps
-      >['server']['requestHandlers'][K] as `on${PascalCase<
-        string & Q,
-        { preserveConsecutiveUppercase: true }
-      >}`]: ToRequestHandlerSignature<
+      [
+        Q in keyof AvailableMethods<
+          ClientCaps,
+          ServerCaps
+        >['server']['requestHandlers'][K] as `on${PascalCase<
+          string & Q,
+          { preserveConsecutiveUppercase: true }
+        >}`
+      ]: ToRequestHandlerSignature<
         AvailableMethods<ClientCaps, ServerCaps>['server']['requestHandlers'][K][Q]
       >;
     };
   } & {
     [K in keyof AvailableMethods<ClientCaps, ServerCaps>['server']['notificationHandlers']]: {
-      [Q in keyof AvailableMethods<
-        ClientCaps,
-        ServerCaps
-      >['server']['notificationHandlers'][K] as `on${PascalCase<
-        string & Q,
-        { preserveConsecutiveUppercase: true }
-      >}`]: ToNotificationHandlerSignature<
+      [
+        Q in keyof AvailableMethods<
+          ClientCaps,
+          ServerCaps
+        >['server']['notificationHandlers'][K] as `on${PascalCase<
+          string & Q,
+          { preserveConsecutiveUppercase: true }
+        >}`
+      ]: ToNotificationHandlerSignature<
         AvailableMethods<ClientCaps, ServerCaps>['server']['notificationHandlers'][K][Q]
       >;
     };

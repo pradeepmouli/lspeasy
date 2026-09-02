@@ -1,7 +1,6 @@
 import { extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getSchemaForMethod } from '@lspeasy/core';
-import { detectArgPattern } from './zod-to-commander.js';
+import { COMMAND_DESCRIPTORS } from './generated/command-descriptors.js';
 
 function isFileLike(p: string): boolean {
   return extname(p) !== '' && !p.startsWith('{') && !p.startsWith('[') && !p.startsWith('"');
@@ -18,7 +17,7 @@ const FILE_LEADING_PATTERNS = new Set([
  * Best-effort file to open before sending a request, so the language server
  * has a document loaded (e.g. TS project resolution depends on it). Checks,
  * in order:
- *   1. the method's own first remaining arg, when its schema-derived pattern
+ *   1. the method's own first remaining arg, when its generated pattern
  *      leads with a file (skipped generically for query-style methods like
  *      workspace/symbol, since their pattern isn't file-leading);
  *   2. any `--params`-style JSON blob among the remaining args:
@@ -33,13 +32,15 @@ export function findAnchorFile(
   args: readonly string[]
 ): string | undefined {
   if (method) {
-    const schema = getSchemaForMethod(method);
-    if (schema) {
-      const pattern = detectArgPattern(schema);
-      const first = args[0];
-      if (FILE_LEADING_PATTERNS.has(pattern) && first !== undefined && isFileLike(first)) {
-        return first;
-      }
+    const pattern = COMMAND_DESCRIPTORS[method]?.pattern;
+    const first = args[0];
+    if (
+      pattern !== undefined &&
+      FILE_LEADING_PATTERNS.has(pattern) &&
+      first !== undefined &&
+      isFileLike(first)
+    ) {
+      return first;
     }
   }
 

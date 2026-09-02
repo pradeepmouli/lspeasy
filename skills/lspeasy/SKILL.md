@@ -39,11 +39,11 @@ Key APIs: `CapabilityGuard`, `ClientCapabilityGuard`, `ConnectionHealthTracker`
 everything needed to build custom LSP integrations, and re-exports the
 most-used pieces from `@lspeasy/client` and `@lspeasy/server`.
 
-- You are building a browser-based LSP client, a WebSocket-backed language server, or any LSP integration that must run over HTTP/HTTPS infrastructure.
 - You register multiple handlers (hover, completion, definition) that share the same lifetime — collect them all into one store and dispose the store on shutdown or feature toggle.
 - A request handler needs to reject with a machine-readable error code that the client can act on (e.g. respond with `MethodNotFound` when a capability was not declared, or `InvalidParams` when schema validation fails).
+- You are building an LSP client that sends `textDocument/didChange` notifications and need to track per-document version counters.
 
-Key APIs: `DedicatedWorkerTransport`, `SharedWorkerTransport`, `WebSocketTransport`, `getCapabilityForRequestMethod`, `getClientCapabilityForRequestMethod`
+Key APIs: `DisposableStore`, `DisposableEventEmitter`, `CancellationTokenSource`, `getCapabilityForRequestMethod`, `getClientCapabilityForRequestMethod`
 
 ### server → `lspeasy-server`
 
@@ -69,7 +69,7 @@ Top pitfall per package:
 | Thought | Reality |
 |---------|---------|
 | "I'll just use client for everything" | client is for lsp client package for connecting to language servers.. The transport already provides its own keep-alive mechanism (e.g. WebSocket ping frames) — adding a heartbeat on top creates redundant round-trips and may interfere with the transport's own timeout logic. |
-| "I'll just use core for everything" | core is for core types, transports, and utilities shared by all lspeasy packages.. You are building a CLI language server — `StdioTransport` (from `@lspeasy/core/node`) is the conventional choice and avoids the overhead of a network stack. For same-process workers prefer `DedicatedWorkerTransport` or `SharedWorkerTransport`. |
+| "I'll just use core for everything" | core is for core types, transports, and utilities shared by all lspeasy packages.. You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. |
 | "I'll just use server for everything" | server is for lsp server package for hosting language server protocol (lsp) servers.. You want to log a server-side error without sending an error to the client — throw a plain `Error` and handle it via `server.onError()` instead. |
 
 ## Example Invocations

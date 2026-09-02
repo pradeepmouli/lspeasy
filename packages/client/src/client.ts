@@ -32,10 +32,17 @@ import {
   CancellationTokenSource,
   ConsoleLogger,
   executeMiddlewarePipeline,
-  isRegisterCapabilityParams,
-  isUnregisterCapabilityParams,
   LogLevel
 } from '@lspeasy/core';
+// Zod-backed guards for server-pushed client/registerCapability payloads —
+// untrusted input, so they validate rather than merely narrow. They live in
+// '@lspeasy/core/schemas' to keep zod out of the main barrel.
+// NOT a static import: '@lspeasy/core/schemas' pulls in zod (~15-30ms load plus
+// ~17ms of schema construction), and these two guards only run if a server
+// sends client/(un)registerCapability — well after connect, and never at all
+// for servers that do not register dynamically. A static import here would put
+// zod on the startup path of every consumer of this package, including the
+// lsproxy CLI. See apps/cli/src/startup-purity.test.ts, which enforces that.
 import { DisposableEventEmitter, HandlerRegistry } from '@lspeasy/core/utils';
 import { PendingRequestTracker, TransportAttachment } from '@lspeasy/core/utils/internal';
 import type {
@@ -1140,6 +1147,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 
   private async handleDynamicRegister(id: string | number, params: unknown): Promise<void> {
+    const { isRegisterCapabilityParams } = await import('@lspeasy/core/schemas');
     if (!isRegisterCapabilityParams(params)) {
       await this.sendResponseMessage({
         jsonrpc: '2.0',
@@ -1184,6 +1192,7 @@ class BaseLSPClient<ClientCaps extends Partial<ClientCapabilities> = ClientCapab
   }
 
   private async handleDynamicUnregister(id: string | number, params: unknown): Promise<void> {
+    const { isUnregisterCapabilityParams } = await import('@lspeasy/core/schemas');
     if (!isUnregisterCapabilityParams(params)) {
       await this.sendResponseMessage({
         jsonrpc: '2.0',

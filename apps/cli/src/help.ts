@@ -1,39 +1,19 @@
 import type { LanguageStatus, StatusReport } from '@lsproxy/proxy';
 import type { Command } from 'commander';
-import { z } from 'zod';
-import { exampleFromZod, getResultSchemaForMethod, getSchemaForMethod } from '@lspeasy/core';
 import { SYMBOLS, type Formatter } from './format.js';
+import { EXAMPLES } from './generated/examples.js';
 import { globalOptionsHelpText } from './global-options.js';
 import type { ServerGroupStatus } from './server-groups.js';
-import { paramsResidualExample } from './zod-to-commander.js';
 
-function safeResidual(schema: z.ZodType): { ok: boolean; value: unknown } {
-  try {
-    return { ok: true, value: paramsResidualExample(schema) };
-  } catch {
-    return { ok: false, value: undefined };
-  }
-}
+// EXAMPLES is small (~24KB) and every text help path needs it, so it is
+// imported statically. JSON_SCHEMAS is ~1MB and only `--help --json` reads it;
+// it is loaded via a dynamic import in `drillDownJson` so it never reaches the
+// CLI's startup graph. Both are precomputed by
+// scripts/generate-cli-descriptors.ts, which is why this module no longer
+// imports zod at all.
 
 function methodForPath(path: string[]): string | undefined {
   return path.length >= 2 ? `${path[0]}/${path[1]}` : undefined;
-}
-
-function safeJsonSchema(schema: z.ZodType | undefined): unknown {
-  if (!schema) return undefined;
-  try {
-    return z.toJSONSchema(schema);
-  } catch {
-    return undefined;
-  }
-}
-
-function safeExample(schema: z.ZodType): unknown | undefined {
-  try {
-    return exampleFromZod(schema);
-  } catch {
-    return undefined;
-  }
 }
 
 function languageLine(lang: LanguageStatus, fmt: Formatter): string {
@@ -296,23 +276,15 @@ export function renderDrillDownText(
   }
   let text = navResult.command.helpInformation();
   if (path.length >= 2) {
-    const method = methodForPath(path)!;
-    const paramsSchema = getSchemaForMethod(method);
-    const resultSchema = getResultSchemaForMethod(method);
-    if (paramsSchema) {
-      const { ok, value } = safeResidual(paramsSchema);
-      if (ok) {
-        text +=
-          value !== undefined
-            ? `\n${label('Example --params (fields not exposed as args/flags):')}\n${JSON.stringify(value, null, 2)}\n`
-            : `\n${label('All inputs map to positional args/flags — no --params needed.')}\n`;
-      }
+    const example = EXAMPLES[methodForPath(path)!];
+    if (example?.residualOk) {
+      text +=
+        example.residual !== undefined
+          ? `\n${label('Example --params (fields not exposed as args/flags):')}\n${JSON.stringify(example.residual, null, 2)}\n`
+          : `\n${label('All inputs map to positional args/flags — no --params needed.')}\n`;
     }
-    if (resultSchema) {
-      const ex = safeExample(resultSchema);
-      if (ex !== undefined) {
-        text += `\n${label('Example output (illustrative):')}\n${JSON.stringify(ex, null, 2)}\n`;
-      }
+    if (example?.result !== undefined) {
+      text += `\n${label('Example output (illustrative):')}\n${JSON.stringify(example.result, null, 2)}\n`;
     }
   }
   return { ok: true, text };
@@ -352,7 +324,11 @@ function argumentInfos(command: Command): ArgInfo[] {
 }
 
 /** Structured drill-down for `--json`: namespaces, requests, or request options. */
-export function drillDownJson(program: Command, languageId: string, path: string[]): unknown {
+export async function drillDownJson(
+  program: Command,
+  languageId: string,
+  path: string[]
+): Promise<unknown> {
   const result = navigateTree(program, path);
   if ('error' in result) {
     return { ok: false, languageId, error: result.error, available: result.available };
@@ -377,11 +353,16 @@ export function drillDownJson(program: Command, languageId: string, path: string
     };
   }
   const method = methodForPath(path)!;
-  const zParams = getSchemaForMethod(method);
-  const paramsSchema = safeJsonSchema(zParams);
-  const resultSchema = safeJsonSchema(getResultSchemaForMethod(method));
+  // Loaded here, and only here: the generated JSON Schemas are ~1MB, so a
+  // static import would put them on every startup — exactly the cost this
+  // generated data was introduced to remove.
+  const { JSON_SCHEMAS } = await import('./generated/json-schemas.js');
+  const schemas = JSON_SCHEMAS[method];
+  const paramsSchema = schemas?.params;
+  const resultSchema = schemas?.result;
   // Residual = only the fields that still need --params (not exposed as args/flags).
-  const paramsExample = zParams ? safeResidual(zParams).value : undefined;
+  const example = EXAMPLES[method];
+  const paramsExample = example?.residualOk === true ? example.residual : undefined;
   return {
     ok: true,
     languageId,

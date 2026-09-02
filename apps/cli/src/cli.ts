@@ -11,7 +11,6 @@
  * incomplete real call falls back to the same drill-down view --help shows.
  */
 
-import { argv, exit } from 'node:process';
 import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { Command, CommanderError } from 'commander';
@@ -92,11 +91,11 @@ export function scanArgs(rawArgv: string[]): {
 }
 
 async function main(): Promise<void> {
-  const { positionals, rawOpts, scanOpts } = scanArgs(argv.slice(2));
+  const { positionals, rawOpts, scanOpts } = scanArgs(process.argv.slice(2));
 
   if (rawOpts.version === true || positionals[0] === 'version') {
     process.stdout.write(`${CLI_VERSION}\n`);
-    exit(0);
+    process.exit(0);
   }
 
   const flags = buildFlags(scanOpts);
@@ -108,13 +107,13 @@ async function main(): Promise<void> {
     program.addCommand(buildConfigCommand(flags));
     program.addCommand(buildDaemonCommand(flags, createFormatter(color)));
     program.addCommand(buildStatusCommand(flags));
-    await program.parseAsync(argv);
-    exit(0);
+    await program.parseAsync(process.argv);
+    process.exit(0);
   }
 
   if (rawOpts.help === true || positionals.length === 0) {
     await runHelp(positionals, flags);
-    exit(0);
+    process.exit(0);
   }
 
   await runDispatch(positionals, flags);
@@ -246,11 +245,13 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
     buildCommandTree(program, session.capabilities, session, flags, entry.anchorFile);
     const drillPath = drillPathFor(drillPathRaw);
     if (flags.json) {
-      const jsonResult = drillDownJson(program, entry.languageId, drillPath) as { ok?: boolean };
+      const jsonResult = (await drillDownJson(program, entry.languageId, drillPath)) as {
+        ok?: boolean;
+      };
       process.stdout.write(JSON.stringify(jsonResult) + '\n');
       if (jsonResult.ok === false) {
         await session.stop();
-        exit(1);
+        process.exit(1);
       }
     } else {
       const color = process.stdout.isTTY === true && !process.env['NO_COLOR'];
@@ -258,7 +259,7 @@ export async function runHelp(positionals: string[], flags: GlobalFlags): Promis
       process.stdout.write(text.endsWith('\n') ? text : text + '\n');
       if (!ok) {
         await session.stop();
-        exit(1);
+        process.exit(1);
       }
     }
   } finally {
@@ -329,7 +330,7 @@ export async function runDispatch(positionals: string[], flags: GlobalFlags): Pr
     // throwing the CommanderError this function needs to catch below.
     applyExitOverride(program);
 
-    const rawArgs = argv.slice(2);
+    const rawArgs = process.argv.slice(2);
     // Find the language/file positional itself, not a preceding global
     // option's VALUE that happens to equal `token` (see findPositionalIndex).
     const tokenIdx = findPositionalIndex(rawArgs, token);
@@ -343,7 +344,7 @@ export async function runDispatch(positionals: string[], flags: GlobalFlags): Pr
         const drillPath = drillPathFor([namespace, request]);
         if (flags.json) {
           process.stdout.write(
-            JSON.stringify(drillDownJson(program, entry.languageId, drillPath)) + '\n'
+            JSON.stringify(await drillDownJson(program, entry.languageId, drillPath)) + '\n'
           );
         } else {
           const color = process.stdout.isTTY === true && !process.env['NO_COLOR'];
@@ -362,14 +363,14 @@ export async function runDispatch(positionals: string[], flags: GlobalFlags): Pr
 /**
  * True when this module is the process entry point (vs. imported by a test).
  *
- * Compares resolved real paths of import.meta.url and argv[1]. The bin
- * (lsproxy) is installed as a symlink to dist/cli.js, so argv[1] is the
+ * Compares resolved real paths of import.meta.url and process.argv[1]. The bin
+ * (lsproxy) is installed as a symlink to dist/cli.js, so process.argv[1] is the
  * symlink path while import.meta.url is Node's realpath — a plain compare
  * would mismatch and never run main(). realpathSync on both sides makes the
  * symlinked-bin and direct-invocation cases agree.
  */
 function isEntryPoint(): boolean {
-  const entry = argv[1];
+  const entry = process.argv[1];
   if (!entry) return false;
   try {
     return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(entry);
@@ -381,6 +382,6 @@ function isEntryPoint(): boolean {
 if (isEntryPoint()) {
   main().catch((err) => {
     process.stderr.write(`fatal: ${err instanceof Error ? err.message : String(err)}\n`);
-    exit(1);
+    process.exit(1);
   });
 }

@@ -23,8 +23,6 @@
 | [supportsNotebookDocumentSync](supports-notebook-document-sync.md) | Helper to check if notebook document sync is supported by the server. |
 | [supportsFileWatching](supports-file-watching.md) | Returns `true` when the client supports dynamic file watching registration. |
 | [supportsWorkDoneProgress](supports-work-done-progress.md) | Returns `true` when the client supports work done progress notifications. |
-| [getSchemaForMethod](get-schema-for-method.md) | Looks up the Zod validation schema for a given LSP method. |
-| [getResultSchemaForMethod](get-result-schema-for-method.md) | Looks up the result schema for a request method; returns `undefined` for notifications or unknown methods. |
 | [createWorkspaceFolder](create-workspace-folder.md) | Helper to create a WorkspaceFolder. |
 | [createWorkspaceFoldersChangeEvent](create-workspace-folders-change-event.md) | Helper to create a WorkspaceFoldersChangeEvent. |
 | [createFileEvent](create-file-event.md) | Helper to create a FileEvent. |
@@ -38,5 +36,3 @@
 | [createPartialResultParams](create-partial-result-params.md) | Creates `PartialResultParams` with the given partial result token. |
 | [hasPartialResultToken](has-partial-result-token.md) | Type guard to check if params support partial results. |
 | [getPartialResultToken](get-partial-result-token.md) | Extracts the partial result token from params. |
-| [isRegisterCapabilityParams](is-register-capability-params.md) | Runtime guard for register-capability params. |
-| [isUnregisterCapabilityParams](is-unregister-capability-params.md) | Runtime guard for unregister-capability params. |

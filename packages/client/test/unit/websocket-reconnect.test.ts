@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { WebSocketTransport } from '@lspeasy/core';
+import { WebSocketTransport } from '@lspeasy/core/transport/websocket';
 
 class FakeNativeWebSocket {
   static instances: FakeNativeWebSocket[] = [];

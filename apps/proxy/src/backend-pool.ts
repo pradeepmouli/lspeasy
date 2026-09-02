@@ -11,7 +11,11 @@ import {
   discoverExtensionMap,
   type ClientCapabilities
 } from '@lspeasy/core';
-import { StdioTransport } from '@lspeasy/core/node';
+// Narrow subpath, not '@lspeasy/core/node': that barrel aggregates every Node
+// transport, and Tcp/Socket import zod to validate bytes off a socket anyone
+// can write to. Importing it for StdioTransport alone would put zod on the
+// startup path -- see apps/cli/src/startup-purity.test.ts.
+import { StdioTransport } from '@lspeasy/core/transport/stdio';
 
 // Advertise full capabilities so backends expose their complete ServerCapabilities.
 const CLIENT_CAPABILITIES = {
