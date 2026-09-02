@@ -6,17 +6,15 @@ import { parseLineCol, toLspPosition, resolvePathArg } from './io.js';
 import type { GlobalFlags } from './io.js';
 import { assessResultQuality } from './result-quality.js';
 import type { RefactorSession } from './session.js';
-import {
-  WorkspaceEditSchema,
-  TextEditSchema,
-  CodeActionSchema,
-  unwrapZodType,
-  exampleFromZod
-} from '@lspeasy/core/schemas';
+// NOTE: still static because the retained schema walker below needs them.
+// Task 7 deletes the walker and with it this import and `zod` itself; the
+// result-classification schemas are already deferred (see the action handler).
+import { unwrapZodType, exampleFromZod } from '@lspeasy/core/schemas';
 import {
   applyWorkspaceEdit,
   planWorkspaceEdit,
   type WorkspaceEdit,
+  type LspTextEdit,
   type AppliedChange,
   type BoundaryGuard
 } from './apply.js';
@@ -429,27 +427,12 @@ export function marshalParams(
   }
 }
 
-const TextEditArraySchema = z.array(TextEditSchema);
-
-// WorkspaceEdit has all optional fields, so safeParse succeeds on any plain
-// object. Require at least one edit-bearing key so hover/completion results
-// don't get misclassified as empty workspace edits.
-const NonEmptyWorkspaceEditSchema = WorkspaceEditSchema.refine(
-  (e) =>
-    (e.changes != null && Object.keys(e.changes).length > 0) ||
-    (e.documentChanges != null && e.documentChanges.length > 0),
-  'not a workspace edit'
-);
-
 /**
  * Wrap a TextEdit[] result as a single-file WorkspaceEdit using the
  * `textDocument.uri` already present in the marshaled params. Returns null
  * when the params don't carry a recognizable URI (raw-pattern calls).
  */
-function textEditsToWorkspaceEdit(
-  edits: z.infer<typeof TextEditArraySchema>,
-  params: unknown
-): WorkspaceEdit | null {
+function textEditsToWorkspaceEdit(edits: LspTextEdit[], params: unknown): WorkspaceEdit | null {
   if (typeof params !== 'object' || params === null) return null;
   const td = (params as Record<string, unknown>)['textDocument'];
   const uri = typeof td === 'object' && td !== null ? (td as Record<string, unknown>)['uri'] : null;
@@ -620,6 +603,15 @@ export function zodToCommander(
           ),
         (r) => assessResultQuality(method, params, r).partial
       );
+
+      // Deferred deliberately: these validate the SERVER's response, so they
+      // are only needed once a request has already completed. Importing them
+      // here keeps zod (~15-30ms load + ~17ms schema construction) off the
+      // startup path entirely — `--help` never issues a request and so never
+      // pays it, and on a real dispatch the cost overlaps an LSP round-trip
+      // the caller is already waiting on.
+      const { NonEmptyWorkspaceEditSchema, TextEditArraySchema, CodeActionSchema } =
+        await import('@lspeasy/core/schemas');
 
       // Collect workspace edits from up to four sources:
       // 1. Direct WorkspaceEdit result (e.g. textDocument/rename)

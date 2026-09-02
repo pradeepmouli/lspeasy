@@ -23,6 +23,11 @@ export {
 export * from './protocol/schemas.js';
 
 export {
+  TextEditArraySchema,
+  NonEmptyWorkspaceEditSchema
+} from './protocol/result-classification.js';
+
+export {
   dynamicRegistrationSchema,
   registerCapabilityParamsSchema,
   unregisterCapabilitySchema,
