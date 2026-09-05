@@ -79,7 +79,7 @@
     "vite": "^8.2.2",
     "vitest": "^4.1.11",
     "x-to-zod": "^0.10.5",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged",
