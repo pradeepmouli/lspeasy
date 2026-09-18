@@ -12716,14 +12716,7 @@ export const JSON_SCHEMAS: Readonly<Record<string, MethodJsonSchema>> = {
                       type: 'boolean'
                     },
                     changeNotifications: {
-                      anyOf: [
-                        {
-                          type: 'string'
-                        },
-                        {
-                          type: 'boolean'
-                        }
-                      ]
+                      type: ['string', 'boolean']
                     }
                   },
                   additionalProperties: false
@@ -25077,7 +25070,10 @@ export const JSON_SCHEMAS: Readonly<Record<string, MethodJsonSchema>> = {
                                       minimum: 0,
                                       maximum: 9007199254740991
                                     }
-                                  ]
+                                  ],
+                                  items: false,
+                                  minItems: 2,
+                                  maxItems: 2
                                 }
                               ]
                             },
@@ -25229,7 +25225,10 @@ export const JSON_SCHEMAS: Readonly<Record<string, MethodJsonSchema>> = {
                                   minimum: 0,
                                   maximum: 9007199254740991
                                 }
-                              ]
+                              ],
+                              items: false,
+                              minItems: 2,
+                              maxItems: 2
                             }
                           ]
                         },
