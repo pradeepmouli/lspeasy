@@ -47,11 +47,11 @@
     "camelcase": "^9.0.0"
   },
   "optionalDependencies": {
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "vscode-languageserver-protocol": "^3.18.2"
+    "vscode-languageserver-protocol": "^3.18.3"
   },
   "engines": {
     "node": ">=20.0.0"
