@@ -1,5 +1,11 @@
 # @lspeasy/cli
 
+## 1.1.1
+
+### Patch Changes
+
+- d73582b: - chore: regenerate CLI JSON schemas for zod 4.5
+
 ## 1.1.0
 
 ### Minor Changes
