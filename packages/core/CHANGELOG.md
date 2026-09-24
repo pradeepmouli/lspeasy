@@ -1,5 +1,11 @@
 # @lspeasy/core
 
+## 3.0.1
+
+### Patch Changes
+
+- - chore(deps): update runtime dependencies
+
 ## 3.0.0
 
 ### Major Changes

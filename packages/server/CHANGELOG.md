@@ -1,5 +1,13 @@
 # @lspeasy/server
 
+## 4.2.4
+
+### Patch Changes
+
+- - chore(deps): update runtime dependencies
+- Updated dependencies
+  - @lspeasy/core@3.0.1
+
 ## 4.2.3
 
 ### Patch Changes

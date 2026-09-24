@@ -1,5 +1,15 @@
 # @lspeasy/cli
 
+## 1.1.2
+
+### Patch Changes
+
+- - chore(deps): update runtime dependencies
+- Updated dependencies
+  - @lspeasy/client@3.1.10
+  - @lspeasy/core@3.0.1
+  - @lsproxy/proxy@1.3.4
+
 ## 1.1.1
 
 ### Patch Changes
