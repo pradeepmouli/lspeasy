@@ -115,7 +115,7 @@
     }
   },
   "optionalDependencies": {
-    "zod": "^4.5.4"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
