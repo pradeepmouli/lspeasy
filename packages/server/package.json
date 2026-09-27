@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/server",
-  "version": "4.2.3",
+  "version": "4.2.4",
   "description": "Build LSP language servers with a simple, fully-typed API",
   "private": false,
   "keywords": [
@@ -47,11 +47,11 @@
     "camelcase": "^9.0.0"
   },
   "optionalDependencies": {
-    "zod": "^4.5.4"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "vscode-languageserver-protocol": "^3.18.3"
+    "vscode-languageserver-protocol": "^3.18.4"
   },
   "engines": {
     "node": ">=20.0.0"

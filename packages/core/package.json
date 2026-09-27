@@ -1,6 +1,6 @@
 {
   "name": "@lspeasy/core",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Core types, transports, and utilities for LSP SDK",
   "private": false,
   "keywords": [
@@ -115,7 +115,7 @@
     }
   },
   "optionalDependencies": {
-    "zod": "^4.5.4"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
