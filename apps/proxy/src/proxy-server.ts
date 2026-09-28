@@ -4,11 +4,13 @@ import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { discoverServers, type ConfiguredServer } from '@lspeasy/core';
 import { socketToTransport } from '@lspeasy/core/transport/socket';
+import type { Transport } from '@lspeasy/core/transport';
 import { BackendPool, type BackendPoolOptions } from './backend-pool.js';
 import { DocumentStateManager } from './document-state.js';
 import { ProxySession } from './proxy-session.js';
 import { socketPath, pidPath } from './socket-path.js';
 import { buildStatusReport, type StatusReport } from './status.js';
+import { StdioMuxBridge } from './stdio-mux-bridge.js';
 
 export interface ProxyServerOptions extends BackendPoolOptions {
   root: string;
@@ -31,6 +33,7 @@ export class ProxyServer {
   private sessionCounter = 0;
   private readonly startedAt = Date.now();
   private readonly configured: ConfiguredServer[];
+  private bridgeMode = false;
 
   constructor(opts: ProxyServerOptions) {
     this.root = opts.root;
@@ -71,19 +74,7 @@ export class ProxyServer {
     const srv = createServer((socket) => {
       this.activeSockets.add(socket);
       socket.on('close', () => this.activeSockets.delete(socket));
-      const sessionId = `s${++this.sessionCounter}`;
-      const transport = socketToTransport(socket);
-      const session = new ProxySession({
-        sessionId,
-        transport,
-        pool: this.pool,
-        docState: this.docState,
-        root: this.root,
-        onEnd: (id) => this.onSessionEnd(id),
-        onStatus: () => this.getStatus()
-      });
-      this.sessions.set(sessionId, session);
-      this.resetIdleTimer();
+      this.attachTransport(socketToTransport(socket));
     });
 
     this.server = srv;
@@ -112,6 +103,36 @@ export class ProxyServer {
     this.resetIdleTimer();
   }
 
+  /** Experimental stdio channel; the Rust bridge owns the public socket. */
+  startBridge(): void {
+    this.bridgeMode = true;
+    new StdioMuxBridge(
+      process.stdin,
+      process.stdout,
+      (transport) => this.attachTransport(transport),
+      () => {
+        void this.stop().then(() => process.exit(0));
+      }
+    );
+    process.on('SIGTERM', () => this.stop());
+    this.resetIdleTimer();
+  }
+
+  private attachTransport(transport: Transport): void {
+    const sessionId = `s${++this.sessionCounter}`;
+    const session = new ProxySession({
+      sessionId,
+      transport,
+      pool: this.pool,
+      docState: this.docState,
+      root: this.root,
+      onEnd: (id) => this.onSessionEnd(id),
+      onStatus: () => this.getStatus()
+    });
+    this.sessions.set(sessionId, session);
+    this.resetIdleTimer();
+  }
+
   async stop(): Promise<void> {
     if (this.idleTimer) {
       clearTimeout(this.idleTimer);
@@ -126,8 +147,10 @@ export class ProxyServer {
       }
       this.server.close(() => resolve());
     });
-    if (existsSync(this.sockPath)) unlinkSync(this.sockPath);
-    if (existsSync(this.pidFilePath)) unlinkSync(this.pidFilePath);
+    if (!this.bridgeMode) {
+      if (existsSync(this.sockPath)) unlinkSync(this.sockPath);
+      if (existsSync(this.pidFilePath)) unlinkSync(this.pidFilePath);
+    }
   }
 
   private onSessionEnd(sessionId: string): void {

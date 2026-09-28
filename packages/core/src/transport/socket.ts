@@ -1,4 +1,5 @@
 import { connect as connectNet, type Socket } from 'node:net';
+import type { Duplex } from 'node:stream';
 import type { Message } from '../jsonrpc/messages.js';
 import { MessageReader } from '../jsonrpc/reader.js';
 import { MessageWriter } from '../jsonrpc/writer.js';
@@ -214,8 +215,13 @@ export class SocketTransport implements Transport {
  * as a `Transport`. Useful for the proxy server's incoming CLI connections.
  */
 export function socketToTransport(socket: Socket): Transport {
-  const reader = new MessageReader(socket);
-  const writer = new MessageWriter(socket);
+  return duplexToTransport(socket);
+}
+
+/** Wrap an incoming byte stream with the same JSON-RPC validation as a socket. */
+export function duplexToTransport(stream: Duplex): Transport {
+  const reader = new MessageReader(stream);
+  const writer = new MessageWriter(stream);
 
   const messageHandlers = new Set<(message: Message) => void>();
   const errorHandlers = new Set<(error: Error) => void>();
@@ -238,7 +244,7 @@ export function socketToTransport(socket: Socket): Transport {
   reader.on('message', (message) => {
     const validated = messageSchema.safeParse(message);
     if (!validated.success) {
-      emitError(new Error('Invalid JSON-RPC message received on socket transport'));
+      emitError(new Error('Invalid JSON-RPC message received on stream transport'));
       return;
     }
     for (const handler of messageHandlers) {
@@ -249,7 +255,7 @@ export function socketToTransport(socket: Socket): Transport {
   reader.on('error', (error) => emitError(error as Error));
   writer.on('error', (error) => emitError(error as Error));
 
-  socket.on('close', () => {
+  stream.on('close', () => {
     if (closed) return;
     closed = true;
     reader.close();
@@ -257,11 +263,11 @@ export function socketToTransport(socket: Socket): Transport {
     emitClose();
   });
 
-  socket.on('error', (error) => emitError(error));
+  stream.on('error', (error) => emitError(error));
 
   return {
     async send(message: Message): Promise<void> {
-      if (closed || socket.destroyed) {
+      if (closed || stream.destroyed) {
         throw new Error('Transport is not connected');
       }
       await writer.write(message);
@@ -287,12 +293,12 @@ export function socketToTransport(socket: Socket): Transport {
       closed = true;
       reader.close();
       writer.close();
-      socket.destroy();
+      stream.destroy();
       emitClose();
     },
 
     isConnected(): boolean {
-      return !closed && !socket.destroyed;
+      return !closed && !stream.destroyed;
     }
   };
 }
