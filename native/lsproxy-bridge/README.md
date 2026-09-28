@@ -15,6 +15,12 @@ native/lsproxy-bridge/target/release/lsproxy-bridge server /tmp/lsproxy-bridge.s
   -- node apps/proxy/dist/bridge-main.js --root "$PWD"
 ```
 
+To opt the CLI into the native relay for a project, set
+`LSPROXY_BRIDGE_BIN` to the built binary's absolute path and use ordinary
+`lsproxy` commands. The CLI starts the Rust server with the daemon and spawns
+a short-lived Rust client for each connection. The client ends with its CLI
+connection; the server exits when its daemon exits and removes the socket.
+
 In another terminal, an LSP-speaking client can use
 `native/lsproxy-bridge/target/release/lsproxy-bridge client /tmp/lsproxy-bridge.sock`
 as its stdio peer. Keep its stdin open while requests are outstanding, then close

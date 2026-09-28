@@ -55,8 +55,10 @@ fn client_forwards_binary_bytes_after_stdin_eof() {
     let mut client = Command::new(binary())
         .arg("client")
         .arg(dir.socket())
+        .arg("--ready")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()
         .unwrap();
     let bytes = b"Content-Length: 5\r\n\r\n\0\xff\r\n";
@@ -65,6 +67,74 @@ fn client_forwards_binary_bytes_after_stdin_eof() {
     server.join().unwrap();
     assert!(output.status.success());
     assert_eq!(output.stdout, bytes);
+    assert_eq!(output.stderr, b"LSPROXY_BRIDGE_READY\n");
+}
+
+#[test]
+fn probe_reports_socket_connectivity() {
+    let dir = TestDir::new();
+    let missing = Command::new(binary())
+        .arg("probe")
+        .arg(dir.socket())
+        .status()
+        .unwrap();
+    assert!(!missing.success());
+    let listener = UnixListener::bind(dir.socket()).unwrap();
+    let available = Command::new(binary())
+        .arg("probe")
+        .arg(dir.socket())
+        .status()
+        .unwrap();
+    assert!(available.success());
+    listener.accept().unwrap();
+}
+
+#[test]
+fn short_lived_probe_does_not_stop_server() {
+    let dir = TestDir::new();
+    let mut server = Command::new(binary())
+        .arg("server")
+        .arg(dir.socket())
+        .args(["--", "/bin/cat"])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let socket = dir.socket();
+    for _ in 0..100 {
+        if socket.exists() {
+            break;
+        }
+        thread::sleep(Duration::from_millis(10));
+    }
+    assert!(socket.exists());
+    for _ in 0..3 {
+        assert!(
+            Command::new(binary())
+                .arg("probe")
+                .arg(&socket)
+                .status()
+                .unwrap()
+                .success()
+        );
+    }
+    thread::sleep(Duration::from_millis(100));
+    assert!(
+        server.try_wait().unwrap().is_none(),
+        "probe stopped the server"
+    );
+
+    let mut client = UnixStream::connect(&socket).unwrap();
+    client
+        .set_read_timeout(Some(Duration::from_secs(2)))
+        .unwrap();
+    client.write_all(b"still alive").unwrap();
+    let mut reply = [0_u8; 11];
+    client.read_exact(&mut reply).unwrap();
+    assert_eq!(&reply, b"still alive");
+    server.kill().unwrap();
+    server.wait().unwrap();
 }
 
 #[test]
