@@ -9,25 +9,54 @@ const CLOSE = 3;
 const INPUT_CLOSED = 4;
 const HEADER_SIZE = 9;
 const MAX_FRAME_SIZE = 16 * 1024 * 1024;
+const OUTPUT_CHUNK_SIZE = 16 * 1024;
+const ABANDON_TIMEOUT_MS = 60_000;
+
+interface SessionState {
+  stream: Duplex;
+  pending: Set<string>;
+  inputClosed: boolean;
+  abandonTimer?: ReturnType<typeof setTimeout>;
+}
+
+function messageId(message: object): string | null {
+  if (!('id' in message)) return null;
+  const id = message.id;
+  return typeof id === 'string' || typeof id === 'number' ? `${typeof id}:${id}` : null;
+}
 
 export class StdioMuxBridge {
   private buffer = Buffer.alloc(0);
-  private readonly sessions = new Map<number, Duplex>();
+  private readonly sessions = new Map<number, SessionState>();
   private inputEnded = false;
+  private readonly onInputData = (chunk: Buffer) => this.accept(chunk);
+  private readonly onInputEnd = () => {
+    this.close();
+    this.onEnd();
+  };
 
   constructor(
-    input: Readable,
+    private readonly input: Readable,
     private readonly output: Writable,
     private readonly onSession: (transport: Transport) => void,
-    private readonly onEnd: () => void = () => {}
+    private readonly onEnd: () => void = () => {},
+    private readonly abandonTimeoutMs = ABANDON_TIMEOUT_MS
   ) {
-    input.on('data', (chunk: Buffer) => this.accept(chunk));
-    input.on('end', () => {
-      this.inputEnded = true;
-      for (const stream of this.sessions.values()) stream.destroy();
-      this.sessions.clear();
-      this.onEnd();
-    });
+    input.on('data', this.onInputData);
+    input.on('end', this.onInputEnd);
+  }
+
+  close(): void {
+    if (this.inputEnded) return;
+    this.inputEnded = true;
+    this.input.off('data', this.onInputData);
+    this.input.off('end', this.onInputEnd);
+    this.input.destroy();
+    for (const state of this.sessions.values()) {
+      if (state.abandonTimer) clearTimeout(state.abandonTimer);
+      state.stream.destroy();
+    }
+    this.sessions.clear();
   }
 
   private writeFrame(
@@ -77,7 +106,7 @@ export class StdioMuxBridge {
               callback();
               return;
             }
-            const part = bytes.subarray(offset, offset + MAX_FRAME_SIZE);
+            const part = bytes.subarray(offset, offset + OUTPUT_CHUNK_SIZE);
             this.writeFrame(DATA, session, part, (error) => {
               if (error) callback(error);
               else writeChunks(offset + part.length);
@@ -86,22 +115,61 @@ export class StdioMuxBridge {
           writeChunks(0);
         }
       });
+      const state: SessionState = { stream, pending: new Set(), inputClosed: false };
       stream.on('close', () => {
-        if (this.sessions.delete(session) && !this.inputEnded) {
+        if (state.abandonTimer) clearTimeout(state.abandonTimer);
+        const owned = this.sessions.get(session) === state;
+        if (owned) this.sessions.delete(session);
+        if (owned && !this.inputEnded) {
           this.writeFrame(CLOSE, session, Buffer.alloc(0));
         }
       });
-      this.sessions.set(session, stream);
-      this.onSession(duplexToTransport(stream));
+      this.sessions.set(session, state);
+      const transport = duplexToTransport(stream);
+      transport.onMessage((message) => {
+        if ('method' in message) {
+          const id = messageId(message);
+          if (id !== null) state.pending.add(id);
+        }
+      });
+      this.onSession({
+        send: async (message) => {
+          await transport.send(message);
+          if (!('method' in message)) {
+            const id = messageId(message);
+            if (id !== null) state.pending.delete(id);
+            if (state.inputClosed && state.pending.size === 0) stream.destroy();
+          }
+        },
+        onMessage: (handler) => transport.onMessage(handler),
+        onError: (handler) => transport.onError(handler),
+        onClose: (handler) => transport.onClose(handler),
+        close: () => transport.close(),
+        isConnected: () => transport.isConnected()
+      });
       return;
     }
-    const stream = this.sessions.get(session);
-    if (!stream) throw new Error('unknown bridge session');
-    if (kind === DATA) stream.push(payload);
-    else if (kind === INPUT_CLOSED) stream.push(null);
-    else if (kind === CLOSE) {
+    const state = this.sessions.get(session);
+    if (!state) {
+      if (kind === CLOSE || kind === INPUT_CLOSED) return;
+      throw new Error('unknown bridge session');
+    }
+    if (kind === DATA) {
+      if (state.inputClosed) throw new Error('data after input closed');
+      state.stream.push(payload);
+    } else if (kind === INPUT_CLOSED) {
+      if (state.inputClosed) return;
+      state.inputClosed = true;
+      // push() delivers data to MessageReader on a later turn. Let it record any
+      // request in the final DATA frame before deciding whether the session is idle.
+      setImmediate(() => {
+        if (this.sessions.get(session) !== state || state.stream.destroyed) return;
+        if (state.pending.size === 0) state.stream.destroy();
+        else state.abandonTimer = setTimeout(() => state.stream.destroy(), this.abandonTimeoutMs);
+      });
+    } else if (kind === CLOSE) {
       this.sessions.delete(session);
-      stream.destroy();
+      state.stream.destroy();
     } else throw new Error('unknown bridge frame kind');
   }
 }

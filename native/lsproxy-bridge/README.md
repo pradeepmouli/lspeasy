@@ -25,7 +25,10 @@ The daemon-side channel uses 9-byte headers: one kind byte (`DATA=1`, `OPEN=2`,
 `u32` payload length. Only `DATA` carries bytes, with a 16 MiB frame limit.
 `INPUT_CLOSED` is directional so a response can still travel toward a client
 after its sending side closes. The daemon's stdout is reserved for these frames;
-diagnostics go to stderr. The bridge socket is created with mode `0600`.
+diagnostics go to stderr. Output uses 16 KiB chunks and a bounded 64-frame
+queue per session, so a stalled client cannot block another session's replies.
+An input-closed session waits up to 60 seconds for outstanding responses before
+being reaped. The bridge socket is created with mode `0600`.
 
 This proves the transport topology with the current Node daemon. It does not
 claim that the daemon or CLI are statically compiled by ScriptC: their remaining

@@ -114,6 +114,39 @@ fn server_routes_concurrent_sessions_without_mixing_bytes() {
 }
 
 #[test]
+fn server_drains_data_before_closing_session() {
+    let dir = TestDir::new();
+    // Consume OPEN, then emit one DATA frame followed immediately by CLOSE.
+    let daemon = "dd bs=9 count=1 of=/dev/null 2>/dev/null; printf '\\001\\000\\000\\000\\001\\000\\000\\000\\005hello\\003\\000\\000\\000\\001\\000\\000\\000\\000'";
+    let mut server = Command::new(binary())
+        .arg("server")
+        .arg(dir.socket())
+        .args(["--", "/bin/sh", "-c", daemon])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let socket = dir.socket();
+    let mut client = (0..100)
+        .find_map(|_| {
+            let connected = UnixStream::connect(&socket).ok();
+            if connected.is_none() {
+                thread::sleep(Duration::from_millis(10));
+            }
+            connected
+        })
+        .expect("bridge server did not start");
+    client
+        .set_read_timeout(Some(Duration::from_secs(2)))
+        .unwrap();
+    let mut reply = Vec::new();
+    client.read_to_end(&mut reply).unwrap();
+    assert_eq!(reply, b"hello");
+    assert!(server.wait().unwrap().success());
+}
+
+#[test]
 fn server_refuses_to_replace_regular_file() {
     let dir = TestDir::new();
     fs::write(dir.socket(), b"keep me").unwrap();
@@ -126,4 +159,29 @@ fn server_refuses_to_replace_regular_file() {
         .unwrap();
     assert!(!status.success());
     assert_eq!(fs::read(dir.socket()).unwrap(), b"keep me");
+}
+
+#[test]
+fn server_reports_daemon_failure() {
+    let dir = TestDir::new();
+    let output = Command::new(binary())
+        .arg("server")
+        .arg(dir.socket())
+        .args(["--", "/bin/sh", "-c", "exit 7"])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("daemon exited with"));
+}
+
+#[test]
+fn server_reports_malformed_daemon_output() {
+    let dir = TestDir::new();
+    let output = Command::new(binary())
+        .arg("server")
+        .arg(dir.socket())
+        .args(["--", "/bin/sh", "-c", "printf invalid-frame"])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
 }

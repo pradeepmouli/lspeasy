@@ -34,6 +34,8 @@ export class ProxyServer {
   private readonly startedAt = Date.now();
   private readonly configured: ConfiguredServer[];
   private bridgeMode = false;
+  private bridge?: StdioMuxBridge;
+  private stopping?: Promise<void>;
 
   constructor(opts: ProxyServerOptions) {
     this.root = opts.root;
@@ -106,15 +108,22 @@ export class ProxyServer {
   /** Experimental stdio channel; the Rust bridge owns the public socket. */
   startBridge(): void {
     this.bridgeMode = true;
-    new StdioMuxBridge(
+    const exitAfterStop = () => {
+      void this.stop().then(
+        () => process.exit(0),
+        (error: Error) => {
+          process.stderr.write(`[lsproxy] bridge shutdown failed: ${error.message}\n`);
+          process.exit(1);
+        }
+      );
+    };
+    this.bridge = new StdioMuxBridge(
       process.stdin,
       process.stdout,
       (transport) => this.attachTransport(transport),
-      () => {
-        void this.stop().then(() => process.exit(0));
-      }
+      exitAfterStop
     );
-    process.on('SIGTERM', () => this.stop());
+    process.on('SIGTERM', exitAfterStop);
     this.resetIdleTimer();
   }
 
@@ -134,23 +143,28 @@ export class ProxyServer {
   }
 
   async stop(): Promise<void> {
-    if (this.idleTimer) {
-      clearTimeout(this.idleTimer);
-      this.idleTimer = undefined;
-    }
-    await this.pool.stopAll();
-    for (const sock of this.activeSockets) sock.destroy();
-    await new Promise<void>((resolve) => {
-      if (!this.server) {
-        resolve();
-        return;
+    if (this.stopping) return this.stopping;
+    this.stopping = (async () => {
+      if (this.idleTimer) {
+        clearTimeout(this.idleTimer);
+        this.idleTimer = undefined;
       }
-      this.server.close(() => resolve());
-    });
-    if (!this.bridgeMode) {
-      if (existsSync(this.sockPath)) unlinkSync(this.sockPath);
-      if (existsSync(this.pidFilePath)) unlinkSync(this.pidFilePath);
-    }
+      this.bridge?.close();
+      await this.pool.stopAll();
+      for (const sock of this.activeSockets) sock.destroy();
+      await new Promise<void>((resolve) => {
+        if (!this.server) {
+          resolve();
+          return;
+        }
+        this.server.close(() => resolve());
+      });
+      if (!this.bridgeMode) {
+        if (existsSync(this.sockPath)) unlinkSync(this.sockPath);
+        if (existsSync(this.pidFilePath)) unlinkSync(this.pidFilePath);
+      }
+    })();
+    return this.stopping;
   }
 
   private onSessionEnd(sessionId: string): void {
