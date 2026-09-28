@@ -25,6 +25,7 @@ Thumbs.db
 
 # MetaModel cache
 .cache/
+native/lsproxy-bridge/target/
 docs/html/
 
 # Infigraph local index/tool state (regenerated per-machine; not source)
@@ -45,4 +46,3 @@ docs/hierarchy.html
 docs/index.html
 docs/modules.html
 docs/.nojekyll
-

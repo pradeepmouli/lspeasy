@@ -1,0 +1,13 @@
+[package]
+name = "lsproxy-bridge"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[features]
+experimental-native-bridge = []
+
+[[bin]]
+name = "lsproxy-bridge"
+path = "src/main.rs"
+required-features = ["experimental-native-bridge"]
