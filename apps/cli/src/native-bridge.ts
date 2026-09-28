@@ -1,6 +1,7 @@
 /** Opt-in CLI transport through the short-lived Rust Unix-socket relay. */
 import { spawn } from 'node:child_process';
 import type { Transport } from '@lspeasy/core/transport';
+import { StdioTransport } from '@lspeasy/core/transport/stdio';
 
 const READY = 'LSPROXY_BRIDGE_READY\n';
 const READY_TIMEOUT_MS = 2000;
@@ -60,14 +61,13 @@ export async function connectNativeBridge(binary: string, socketPath: string): P
     throw error;
   }
 
-  let StdioTransport: typeof import('@lspeasy/core/transport/stdio').StdioTransport;
+  let transport: StdioTransport;
   try {
-    ({ StdioTransport } = await import('@lspeasy/core/transport/stdio'));
+    transport = new StdioTransport({ input: child.stdout, output: child.stdin });
   } catch (error) {
     child.kill();
     throw error;
   }
-  const transport = new StdioTransport({ input: child.stdout, output: child.stdin });
   const stopChild = () => child.kill();
   process.once('exit', stopChild);
   child.once('exit', () => {

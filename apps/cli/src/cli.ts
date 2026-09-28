@@ -168,9 +168,12 @@ function applyExitOverride(cmd: Command): void {
  * contains `<...>` iff it takes a value (e.g. `'--server <cmd>'`); boolean
  * flags (e.g. `'--dry-run'`) don't. None of these entries have a short-flag
  * alias, so splitting on the first space is enough to get the long name. */
-const VALUE_TAKING_FLAGS = new Set(
-  GLOBAL_OPTIONS.filter((o) => o.flags.includes('<')).map((o) => o.flags.split(' ')[0])
-);
+const VALUE_TAKING_FLAGS = new Set<string>();
+for (const option of GLOBAL_OPTIONS) {
+  if (!option.flags.includes('<')) continue;
+  const flag = option.flags.split(' ')[0];
+  if (flag !== undefined) VALUE_TAKING_FLAGS.add(flag);
+}
 
 /**
  * Find the index of `token` in `args` that is the actual positional, not the
