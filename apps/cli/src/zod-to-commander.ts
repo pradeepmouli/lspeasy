@@ -291,7 +291,7 @@ export function zodToCommander(
   // already flattened into hyphenated cliKeys there.
   for (const field of descriptor.fields) addFieldOptions(cmd, field);
 
-  cmd.action(async (...cmdArgs) => {
+  cmd.action(async (...cmdArgs: unknown[]) => {
     // Commander passes (...declaredArgs, options, command): the Command instance
     // is LAST and the parsed options object is second-to-last. This previously
     // read `at(-1)` as the options — but that's the Command, so `--params` (and
