@@ -9,9 +9,11 @@ import { fileURLToPath } from 'node:url';
 // actually talking to the daemon, which is async anyway — see
 // apps/cli/src/startup-purity.test.ts.
 import type { Message } from '@lspeasy/core';
+import type { Transport } from '@lspeasy/core/transport';
 import { socketPath } from '@lsproxy/proxy';
 import type { StatusReport } from '@lsproxy/proxy';
 import { RefactorSession, type SessionOptions } from './session.js';
+import { connectNativeBridge, nativeBridgeBinary, probeNativeBridge } from './native-bridge.js';
 
 // Resolve @lsproxy/proxy's CLI entry point via real module resolution instead
 // of a hardcoded relative path. A hardcoded '../../proxy/dist/main.js' assumes
@@ -27,6 +29,8 @@ const POLL_INTERVAL_MS = 100;
 const POLL_TIMEOUT_MS = 5000;
 
 async function tryConnect(sockPath: string): Promise<boolean> {
+  const bridge = nativeBridgeBinary();
+  if (bridge) return probeNativeBridge(bridge, sockPath);
   return new Promise((resolve) => {
     const socket = createConnection({ path: sockPath });
     socket.once('connect', () => {
@@ -63,7 +67,20 @@ function spawnDaemon(root: string, sockPath: string): string {
   // startup crash is diagnosable rather than surfacing only as a poll timeout.
   const logPath = join(dir, `daemon-${basename(sockPath, '.sock')}.log`);
   const log = openSync(logPath, 'a');
-  const child = spawn(process.execPath, [PROXY_BIN, '--root', root, '--socket', sockPath], {
+  const bridge = nativeBridgeBinary();
+  const program = bridge ?? process.execPath;
+  const args = bridge
+    ? [
+        'server',
+        sockPath,
+        '--',
+        process.env['LSPROXY_NODE_BIN'] || 'node',
+        join(dirname(PROXY_BIN), 'bridge-main.js'),
+        '--root',
+        root
+      ]
+    : [PROXY_BIN, '--root', root, '--socket', sockPath];
+  const child = spawn(program, args, {
     detached: true,
     stdio: ['ignore', log, log]
   });
@@ -72,6 +89,31 @@ function spawnDaemon(root: string, sockPath: string): string {
 }
 
 const STATUS_TIMEOUT_MS = 2000;
+
+async function openProxyTransport(sockPath: string): Promise<Transport> {
+  const bridge = nativeBridgeBinary();
+  if (bridge) return connectNativeBridge(bridge, sockPath);
+  const { SocketTransport } = await import('@lspeasy/core/transport/socket');
+  const transport = new SocketTransport({ path: sockPath });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      transport.waitForConnect(),
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(
+          () => reject(new Error('Proxy connection timed out')),
+          STATUS_TIMEOUT_MS
+        );
+      })
+    ]);
+  } catch (error) {
+    await transport.close();
+    throw error;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+  return transport;
+}
 
 /**
  * Ask a running proxy daemon for its status. Returns null when no daemon is
@@ -85,11 +127,15 @@ export async function fetchDaemonStatus(root: string): Promise<StatusReport | nu
   const sockPath = socketPath(root);
   if (!existsSync(sockPath) || !(await tryConnect(sockPath))) return null;
 
-  const { SocketTransport } = await import('@lspeasy/core/transport/socket');
-  const transport = new SocketTransport({ path: sockPath });
+  let transport: Transport;
   try {
-    // A deadline that resolves (not rejects) to null bounds the whole operation
-    // including waitForConnect(), so a wedged daemon cannot hang bare `lsproxy`.
+    transport = await openProxyTransport(sockPath);
+  } catch {
+    return null;
+  }
+  try {
+    // Connection setup has its own timeout. Bound the status request as well
+    // so a wedged daemon cannot hang bare `lsproxy`.
     const deadline = new Promise<null>((resolve) =>
       setTimeout(() => resolve(null), STATUS_TIMEOUT_MS)
     );
@@ -97,7 +143,6 @@ export async function fetchDaemonStatus(root: string): Promise<StatusReport | nu
     const request = new Promise<StatusReport | null>((resolve) => {
       void (async () => {
         try {
-          await transport.waitForConnect();
           const sub = transport.onMessage((m: Message) => {
             const msg = m as { id?: unknown; result?: StatusReport };
             if (msg.id === 1) {
@@ -203,9 +248,7 @@ export async function connectViaProxy(opts: ConnectOptions): Promise<RefactorSes
 
   if (opts.verbose) process.stderr.write(`[lsproxy] connecting via proxy ${sockPath}\n`);
 
-  const { SocketTransport } = await import('@lspeasy/core/transport/socket');
-  const transport = new SocketTransport({ path: sockPath });
-  await transport.waitForConnect();
+  const transport = await openProxyTransport(sockPath);
 
   const sessionOpts: SessionOptions = {
     root: opts.root,

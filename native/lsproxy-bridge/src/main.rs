@@ -78,8 +78,11 @@ fn read_frame(reader: &mut impl Read) -> io::Result<Option<Frame>> {
     }))
 }
 
-fn client(path: &Path) -> io::Result<()> {
+fn client(path: &Path, report_ready: bool) -> io::Result<()> {
     let mut socket = UnixStream::connect(path)?;
+    if report_ready {
+        eprintln!("LSPROXY_BRIDGE_READY");
+    }
     let mut upload = socket.try_clone()?;
     thread::spawn(move || {
         let _ = io::copy(&mut io::stdin().lock(), &mut upload);
@@ -226,12 +229,26 @@ fn serve(path: &Path, program: &OsString, arguments: &[OsString]) -> io::Result<
             Ok((mut socket, _)) => {
                 let accepted = (|| -> io::Result<()> {
                     let session = next_session;
-                    socket.set_nonblocking(false)?;
+                    socket.set_nonblocking(false).map_err(|error| {
+                        io::Error::new(error.kind(), format!("configure accepted socket: {error}"))
+                    })?;
                     next_session = next_session
                         .checked_add(1)
                         .ok_or_else(|| io::Error::other("bridge session IDs exhausted"))?;
-                    socket.set_write_timeout(Some(Duration::from_secs(10)))?;
-                    let writable = Arc::new(socket.try_clone()?);
+                    if let Err(error) = socket.set_write_timeout(Some(Duration::from_secs(10))) {
+                        // A health probe can disconnect between accept() and this
+                        // setsockopt. macOS reports EINVAL for that dead socket.
+                        if error.raw_os_error() == Some(22) {
+                            return Ok(());
+                        }
+                        return Err(io::Error::new(
+                            error.kind(),
+                            format!("configure socket write timeout: {error}"),
+                        ));
+                    }
+                    let writable = Arc::new(socket.try_clone().map_err(|error| {
+                        io::Error::new(error.kind(), format!("clone accepted socket: {error}"))
+                    })?);
                     let (sender, receiver) = mpsc::sync_channel::<Vec<u8>>(OUTPUT_QUEUE_FRAMES);
                     sessions
                         .lock()
@@ -243,7 +260,9 @@ fn serve(path: &Path, program: &OsString, arguments: &[OsString]) -> io::Result<
                                 socket: Arc::clone(&writable),
                             },
                         );
-                    send(&input, OPEN, session, &[])?;
+                    send(&input, OPEN, session, &[]).map_err(|error| {
+                        io::Error::new(error.kind(), format!("open daemon session: {error}"))
+                    })?;
                     let writer_input = Arc::clone(&input);
                     let writer_sessions = Arc::clone(&sessions);
                     writers.retain(|writer: &thread::JoinHandle<()>| !writer.is_finished());
@@ -332,9 +351,10 @@ fn serve(path: &Path, program: &OsString, arguments: &[OsString]) -> io::Result<
             .map_err(|_| io::Error::other("session writer panicked"))?;
     }
     if let Some(error) = serve_error {
-        return Err(error);
+        return Err(io::Error::new(error.kind(), format!("serve loop: {error}")));
     }
-    output_result?;
+    output_result
+        .map_err(|error| io::Error::new(error.kind(), format!("daemon output: {error}")))?;
     if stopped_early {
         return Err(io::Error::other("daemon stdout closed before process exit"));
     }
@@ -354,7 +374,20 @@ fn run() -> io::Result<()> {
             .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "expected socket path"))?,
     );
     match mode.to_str() {
-        Some("client") if args.next().is_none() => client(&path),
+        Some("client") => {
+            let report_ready = match args.next() {
+                None => false,
+                Some(flag) if flag == "--ready" && args.next().is_none() => true,
+                _ => {
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        "usage: lsproxy-bridge client <socket> [--ready]",
+                    ));
+                }
+            };
+            client(&path, report_ready)
+        }
+        Some("probe") if args.next().is_none() => UnixStream::connect(path).map(|_| ()),
         Some("server") => {
             if args.next().as_deref() != Some(std::ffi::OsStr::new("--")) {
                 return Err(io::Error::new(
@@ -369,7 +402,7 @@ fn run() -> io::Result<()> {
         }
         _ => Err(io::Error::new(
             io::ErrorKind::InvalidInput,
-            "usage: lsproxy-bridge client <socket> | server <socket> -- <daemon> [args...]",
+            "usage: lsproxy-bridge client <socket> [--ready] | probe <socket> | server <socket> -- <daemon> [args...]",
         )),
     }
 }

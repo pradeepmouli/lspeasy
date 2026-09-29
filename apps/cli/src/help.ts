@@ -265,13 +265,13 @@ export function renderDrillDownText(
     const subcommandColor = path.length === 0 ? fmt.cyan : fmt.blue;
     navResult.command.configureOutput({ getOutHasColors: () => true });
     navResult.command.configureHelp({
-      styleTitle: (s) => fmt.bold(s),
-      styleUsage: (s) => fmt.cyan(s),
-      styleCommandText: (s) => fmt.cyan(s),
-      styleSubcommandTerm: (s) => subcommandColor(s),
-      styleOptionTerm: (s) => fmt.magenta(s),
-      styleArgumentTerm: (s) => fmt.teal(s),
-      styleDescriptionText: (s) => fmt.dim(s)
+      styleTitle: (s: string) => fmt.bold(s),
+      styleUsage: (s: string) => fmt.cyan(s),
+      styleCommandText: (s: string) => fmt.cyan(s),
+      styleSubcommandTerm: (s: string) => subcommandColor(s),
+      styleOptionTerm: (s: string) => fmt.magenta(s),
+      styleArgumentTerm: (s: string) => fmt.teal(s),
+      styleDescriptionText: (s: string) => fmt.dim(s)
     });
   }
   let text = navResult.command.helpInformation();
