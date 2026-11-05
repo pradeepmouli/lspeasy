@@ -5,6 +5,12 @@
 
 import type { Message } from './messages.js';
 
+// Keep arbitrary protocol payloads at a dynamic JSON boundary. The separate
+// function parameter lets static compilers serialize nested `unknown` values.
+function stringifyMessageBody(value: unknown): string {
+  return JSON.stringify(value);
+}
+
 /**
  * Header constants
  */
@@ -127,7 +133,7 @@ export function parseMessage(buffer: Buffer): { message: Message; bytesRead: num
  */
 export function serializeMessage(message: Message): Buffer {
   // Serialize JSON body
-  const bodyStr = JSON.stringify(message);
+  const bodyStr = stringifyMessageBody(message);
   const bodyBuffer = Buffer.from(bodyStr, 'utf8');
 
   // Build headers
