@@ -1,5 +1,16 @@
 # @lsproxy/proxy
 
+## 1.3.5
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [75fb8a2]
+  - @lspeasy/client@3.1.11
+  - @lspeasy/core@3.0.2
+  - @lspeasy/server@4.2.5
+  - @lsproxy/polyfill@0.4.4
+
 ## 1.3.4
 
 ### Patch Changes

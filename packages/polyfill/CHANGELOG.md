@@ -1,5 +1,14 @@
 # @lsproxy/polyfill
 
+## 0.4.4
+
+### Patch Changes
+
+- Updated dependencies
+- Updated dependencies [75fb8a2]
+  - @lspeasy/client@3.1.11
+  - @lspeasy/core@3.0.2
+
 ## 0.4.3
 
 ### Patch Changes
