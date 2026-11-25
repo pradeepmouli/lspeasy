@@ -56,7 +56,7 @@
     "@lspeasy/client": "workspace:*",
     "@lspeasy/core": "workspace:*",
     "@lsproxy/proxy": "workspace:*",
-    "commander": "^15.0.0",
+    "commander": "^15.1.0",
     "smol-toml": "^1.9.1",
     "zod": "^4.6.7"
   },
