@@ -1,5 +1,17 @@
 # @lspeasy/cli
 
+## 1.1.3
+
+### Patch Changes
+
+- - chore(deps): update runtime dependencies
+- 75fb8a2: Update Zod to 4.6.7 across the client, core, server, and CLI. Update camelcase to 10 in the client and server, and update Commander to 15.1 and smol-toml to 1.9.1 in the CLI.
+- Updated dependencies
+- Updated dependencies [75fb8a2]
+  - @lspeasy/client@3.1.11
+  - @lspeasy/core@3.0.2
+  - @lsproxy/proxy@1.3.5
+
 ## 1.1.2
 
 ### Patch Changes
