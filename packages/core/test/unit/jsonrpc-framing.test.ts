@@ -191,6 +191,26 @@ describe('JSON-RPC Message Framing', () => {
       expect(text).toContain(`${CONTENT_LENGTH_HEADER}: ${bodyLength}`);
     });
 
+    it('should frame dynamic payloads using UTF-8 byte length', () => {
+      const message: Message = {
+        jsonrpc: '2.0',
+        id: 1,
+        result: { text: '𝄞🙂', vendor: null, list: [null, 2], ignored: undefined }
+      };
+
+      const frame = serializeMessage(message);
+      const separator = frame.indexOf(Buffer.from('\r\n\r\n'));
+      const header = frame.subarray(0, separator).toString('ascii');
+      const body = frame.subarray(separator + 4);
+
+      expect(header).toContain(`${CONTENT_LENGTH_HEADER}: ${body.length}`);
+      expect(JSON.parse(body.toString('utf8'))).toEqual({
+        jsonrpc: '2.0',
+        id: 1,
+        result: { text: '𝄞🙂', vendor: null, list: [null, 2] }
+      });
+    });
+
     it('should serialize request message correctly', () => {
       const message: Message = {
         jsonrpc: '2.0',

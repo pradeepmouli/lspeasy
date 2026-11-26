@@ -3,7 +3,7 @@ import { createServer, createConnection, type Server, type Socket } from 'node:n
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { discoverServers, type ConfiguredServer } from '@lspeasy/core';
-import { socketToTransport } from '@lspeasy/core/node';
+import { socketToTransport } from '@lspeasy/core/transport/socket';
 import { BackendPool, type BackendPoolOptions } from './backend-pool.js';
 import { DocumentStateManager } from './document-state.js';
 import { ProxySession } from './proxy-session.js';

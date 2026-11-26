@@ -14,7 +14,7 @@ export class MessageReader extends EventEmitter {
   private buffer: Buffer;
   private closed: boolean;
 
-  // Bound references to *this instance's own* listeners, so `close()` can
+  // Stable references to *this instance's own* listeners, so `close()` can
   // remove exactly these (see below) instead of nuking every listener on the
   // stream — a shared socket (e.g. SocketTransport/TcpTransport, where the
   // same socket backs both the MessageReader and the MessageWriter, plus the
@@ -30,10 +30,10 @@ export class MessageReader extends EventEmitter {
     this.buffer = Buffer.alloc(0);
     this.closed = false;
 
-    this.onDataBound = this.onData.bind(this);
-    this.onErrorBound = this.onError.bind(this);
-    this.onEndBound = this.onEnd.bind(this);
-    this.onCloseBound = this.onClose.bind(this);
+    this.onDataBound = (chunk) => this.onData(chunk);
+    this.onErrorBound = (error) => this.onError(error);
+    this.onEndBound = () => this.onEnd();
+    this.onCloseBound = () => this.onClose();
 
     // Set up stream event handlers
     this.stream.on('data', this.onDataBound);
