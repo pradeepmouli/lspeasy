@@ -176,56 +176,56 @@ Core types, transports, and utilities shared by all lspeasy packages.
 Get the server capability key for a given request method at runtime.
 
 ```ts
-getCapabilityForRequestMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
+getCapabilityForRequestMethod<M, D>(method: M, _direction: D): InternalPaths<ServerCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never> | "alwaysOn"
 ```
 
 **Parameters:**
 - `method: M` — The LSP request method string to look up.
 - `_direction: D` — Optional direction filter (currently unused).
 
-**Returns:** `InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
+**Returns:** `InternalPaths<ServerCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never> | "alwaysOn"`
 
 ### getClientCapabilityForRequestMethod
 
 Get the client capability key for a given request method at runtime.
 
 ```ts
-getClientCapabilityForRequestMethod<M, D>(method: M, _direction: D): "alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>
+getClientCapabilityForRequestMethod<M, D>(method: M, _direction: D): "alwaysOn" | InternalPaths<ClientCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never>
 ```
 
 **Parameters:**
 - `method: M` — The LSP request method string to look up.
 - `_direction: D` — Optional direction filter (currently unused).
 
-**Returns:** `"alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>`
+**Returns:** `"alwaysOn" | InternalPaths<ClientCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never>`
 
 ### getCapabilityForNotificationMethod
 
 Get the server capability key for a given notification method at runtime.
 
 ```ts
-getCapabilityForNotificationMethod<M, D>(method: M, _direction: D): InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"
+getCapabilityForNotificationMethod<M, D>(method: M, _direction: D): InternalPaths<ServerCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never> | "alwaysOn"
 ```
 
 **Parameters:**
 - `method: M` — The LSP notification method string to look up.
 - `_direction: D` — Optional direction filter (currently unused).
 
-**Returns:** `InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0> | "alwaysOn"`
+**Returns:** `InternalPaths<ServerCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never> | "alwaysOn"`
 
 ### getClientCapabilityForNotificationMethod
 
 Get the client capability key for a given notification method at runtime.
 
 ```ts
-getClientCapabilityForNotificationMethod<M, D>(method: M, _direction: D): "alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>
+getClientCapabilityForNotificationMethod<M, D>(method: M, _direction: D): "alwaysOn" | InternalPaths<ClientCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never>
 ```
 
 **Parameters:**
 - `method: M` — The LSP notification method string to look up.
 - `_direction: D` — Optional direction filter (currently unused).
 
-**Returns:** `"alwaysOn" | InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>`
+**Returns:** `"alwaysOn" | InternalPaths<ClientCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never>`
 
 ### getDefinitionForRequest
 
@@ -260,84 +260,84 @@ getDefinitionForNotification<N, M>(namespace: N, methodKey: M): { General: { Can
 Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server request method.
 
 ```ts
-serverSupportsRequest<M>(method: M, capabilities: ServerCapabilities): capabilities is ServerCapabilities & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "callHierarchyProvider" | "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "inlineCompletionProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentRangeFormattingProvider.rangesSupport" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspace.textDocumentContent" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+serverSupportsRequest<M>(method: M, capabilities: ServerCapabilities): capabilities is ServerCapabilities & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in "callHierarchyProvider" | "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "inlineCompletionProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentRangeFormattingProvider.rangesSupport" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspace.textDocumentContent" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: PickDeepObjectKey<ServerCapabilities, FirstKey<Path>, UnwrapPathBrand<ServerCapabilityForRequest<M>>> }[UnwrapPathBrand<ServerCapabilityForRequest<M>>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `method: M` — The LSP request method string (e.g. `'textDocument/hover'`).
 - `capabilities: ServerCapabilities` — The `ServerCapabilities` object to test.
 
-**Returns:** `capabilities is ServerCapabilities & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "callHierarchyProvider" | "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "inlineCompletionProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentRangeFormattingProvider.rangesSupport" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspace.textDocumentContent" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is ServerCapabilities & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in "callHierarchyProvider" | "codeActionProvider.resolveProvider" | "codeLensProvider.resolveProvider" | "completionProvider.resolveProvider" | "documentLinkProvider.resolveProvider" | "inlayHintProvider.resolveProvider" | "codeActionProvider" | "codeLensProvider" | "documentLinkProvider" | "inlayHintProvider" | "implementationProvider" | "typeDefinitionProvider" | "colorProvider" | "foldingRangeProvider" | "declarationProvider" | "selectionRangeProvider" | "semanticTokensProvider" | "semanticTokensProvider.full.delta" | "semanticTokensProvider.range" | "linkedEditingRangeProvider" | "monikerProvider" | "typeHierarchyProvider" | "inlineValueProvider" | "diagnosticProvider" | "inlineCompletionProvider" | "textDocumentSync.willSaveWaitUntil" | "completionProvider" | "hoverProvider" | "signatureHelpProvider" | "definitionProvider" | "referencesProvider" | "documentHighlightProvider" | "documentSymbolProvider" | "documentFormattingProvider" | "documentRangeFormattingProvider" | "documentRangeFormattingProvider.rangesSupport" | "documentOnTypeFormattingProvider" | "renameProvider" | "renameProvider.prepareProvider" | "workspace.fileOperations.willCreate" | "workspace.fileOperations.willRename" | "workspace.fileOperations.willDelete" | "diagnosticProvider.workspaceDiagnostics" | "workspace.textDocumentContent" | "workspaceSymbolProvider" | "executeCommandProvider" | "workspaceSymbolProvider.resolveProvider"]: PickDeepObjectKey<ServerCapabilities, FirstKey<Path>, UnwrapPathBrand<ServerCapabilityForRequest<M>>> }[UnwrapPathBrand<ServerCapabilityForRequest<M>>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>`
 
 ### serverSupportsNotification
 
 Type-guarding predicate that narrows `capabilities` to include the specific server capability key required for the given client-to-server notification method.
 
 ```ts
-serverSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+serverSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: PickDeepObjectKey<ServerCapabilities, FirstKey<Path>, UnwrapPathBrand<ServerCapabilityForNotification<M>>> }[UnwrapPathBrand<ServerCapabilityForNotification<M>>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `method: M` — The LSP notification method string (e.g. `'textDocument/didOpen'`).
 - `capabilities: T` — The `ServerCapabilities` object to test.
 
-**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[ServerCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in "textDocumentSync" | "textDocumentSync.openClose" | "textDocumentSync.willSave" | "textDocumentSync.save" | "workspace.workspaceFolders.changeNotifications" | "workspace.fileOperations.didCreate" | "workspace.fileOperations.didRename" | "workspace.fileOperations.didDelete"]: PickDeepObjectKey<ServerCapabilities, FirstKey<Path>, UnwrapPathBrand<ServerCapabilityForNotification<M>>> }[UnwrapPathBrand<ServerCapabilityForNotification<M>>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>`
 
 ### clientSupportsRequest
 
 Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client request method.
 
 ```ts
-clientSupportsRequest<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "workspace.workspaceFolders" | "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.configuration" | "workspace.foldingRange.refreshSupport" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+clientSupportsRequest<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in "workspace.workspaceFolders" | "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.configuration" | "workspace.foldingRange.refreshSupport" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: PickDeepObjectKey<ClientCapabilities, FirstKey<Path>, UnwrapPathBrand<ClientCapabilityForRequest<M>>> }[UnwrapPathBrand<ClientCapabilityForRequest<M>>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `method: M` — The LSP request method string (e.g. `'client/registerCapability'`).
 - `capabilities: T` — The `ClientCapabilities` object to test.
 
-**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "workspace.workspaceFolders" | "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.configuration" | "workspace.foldingRange.refreshSupport" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForRequest<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in "workspace.workspaceFolders" | "window.workDoneProgress" | "window.showDocument.support" | "window.showMessage" | "workspace.configuration" | "workspace.foldingRange.refreshSupport" | "workspace.semanticTokens.refreshSupport" | "workspace.inlineValue.refreshSupport" | "workspace.inlayHint.refreshSupport" | "workspace.diagnostics.refreshSupport" | "workspace.codeLens" | "workspace.applyEdit"]: PickDeepObjectKey<ClientCapabilities, FirstKey<Path>, UnwrapPathBrand<ClientCapabilityForRequest<M>>> }[UnwrapPathBrand<ClientCapabilityForRequest<M>>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>`
 
 ### clientSupportsNotification
 
 Type-guarding predicate that narrows `capabilities` to include the specific client capability key required for the given server-to-client notification method.
 
 ```ts
-clientSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "window.showMessage" | "textDocument.publishDiagnostics"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+clientSupportsNotification<M, T>(method: M, capabilities: T): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in "window.showMessage" | "textDocument.publishDiagnostics"]: PickDeepObjectKey<ClientCapabilities, FirstKey<Path>, UnwrapPathBrand<ClientCapabilityForNotification<M>>> }[UnwrapPathBrand<ClientCapabilityForNotification<M>>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `method: M` — The LSP notification method string (e.g. `'window/logMessage'`).
 - `capabilities: T` — The `ClientCapabilities` object to test.
 
-**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in "window.showMessage" | "textDocument.publishDiagnostics"]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[ClientCapabilityForNotification<M>]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in "window.showMessage" | "textDocument.publishDiagnostics"]: PickDeepObjectKey<ClientCapabilities, FirstKey<Path>, UnwrapPathBrand<ClientCapabilityForNotification<M>>> }[UnwrapPathBrand<ClientCapabilityForNotification<M>>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>`
 
 ### hasServerCapability
 
 Type-guarding predicate that narrows `capabilities` to confirm a specific server capability is enabled at a deep dot-notation path.
 
 ```ts
-hasServerCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+hasServerCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in InternalPaths<ServerCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never>]: PickDeepObjectKey<ServerCapabilities, FirstKey<Path>, UnwrapPathBrand<K>> }[UnwrapPathBrand<K>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `capabilities: T` — The server capabilities to check.
 - `capability: K` — Dot-notation path of the capability (e.g. `'hoverProvider'`).
 
-**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ServerCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ServerCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in InternalPaths<ServerCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never>]: PickDeepObjectKey<ServerCapabilities, FirstKey<Path>, UnwrapPathBrand<K>> }[UnwrapPathBrand<K>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>`
 
 ### hasClientCapability
 
 Type-guarding predicate that narrows `capabilities` to confirm a specific client capability is enabled at a deep dot-notation path.
 
 ```ts
-hasClientCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>
+hasClientCapability<K, T>(capabilities: T, capability: K): capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in InternalPaths<ClientCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never>]: PickDeepObjectKey<ClientCapabilities, FirstKey<Path>, UnwrapPathBrand<K>> }[UnwrapPathBrand<K>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>
 ```
 
 **Parameters:**
 - `capabilities: T` — The client capabilities to check.
 - `capability: K` — Dot-notation path of the capability (e.g. `'window.workDoneProgress'`).
 
-**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [P in InternalPaths<Required<ClientCapabilities>, { maxRecursionDepth: 5; bracketNotation: false; leavesOnly: false; depth: number }, 0>]: { [KeyType in string | number | symbol]: PickDeepObject<ClientCapabilities, P>[KeyType] } }[K]>, NonRecursiveType | ReadonlyMap<unknown, unknown> | WeakMap<WeakKey, unknown> | ReadonlySet<unknown> | WeakSet<WeakKey>, object>`
+**Returns:** `capabilities is T & ConditionalSimplifyDeep<UnionToIntersection<{ [Path in InternalPaths<ClientCapabilities, { maxRecursionDepth: 5; maxCircularDepth: number; bracketNotation: false; leavesOnly: false; depth: number; recurseIntoArrays: true; requiredOnly: false; valueType: unknown }, 0, [], never>]: PickDeepObjectKey<ClientCapabilities, FirstKey<Path>, UnwrapPathBrand<K>> }[UnwrapPathBrand<K>]>, NonRecursiveType | UnknownMap | UnknownSet | WeakMap<WeakKey, unknown> | WeakSet<WeakKey>, object>`
 
 ### supportsHover
 
