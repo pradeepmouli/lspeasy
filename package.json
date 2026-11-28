@@ -61,14 +61,14 @@
     "docs:build": "pnpm --filter @lspeasy/docs build"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^1.0.1",
-    "@changesets/cli": "^3.0.3",
+    "@changesets/changelog-github": "^2.0.0",
+    "@changesets/cli": "^3.1.0",
     "@lspeasy/core": "workspace:*",
     "@types/node": "^26.6.11",
     "@vitest/coverage-v8": "^5.1.2",
     "@vitest/ui": "^5.1.2",
     "camelcase": "^10.0.0",
-    "lint-staged": "^17.6.2",
+    "lint-staged": "^17.6.3",
     "oxfmt": "^0.80.0",
     "oxlint": "^1.95.0",
     "simple-git-hooks": "^2.14.0",
@@ -76,9 +76,9 @@
     "tsx": "^4.23.15",
     "type-fest": "^6.0.3",
     "typescript": "^7.0.2",
-    "vite": "^8.3.8",
+    "vite": "^8.4.0",
     "vitest": "^5.1.2",
-    "x-to-zod": "^0.10.10",
+    "x-to-zod": "^0.10.11",
     "zod": "^4.6.7"
   },
   "simple-git-hooks": {
